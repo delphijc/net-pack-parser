@@ -84,8 +84,14 @@ const ParserForm: React.FC = () => {
   const handleCaptureToggle = async () => {
     try {
       if (capturing) {
-        await stopNetworkCapture();
+        // Stop the capture and load captured data into the parser content viewer
+        const packets = stopNetworkCapture();
         setCapturing(false);
+        
+        // Merge any new packets with existing captured data
+        if (packets.length > 0) {
+          setInputData(JSON.stringify(packets[0].rawData, null, 2));
+        }
       } else {
         setErrorMessage('');
         setCapturedData([]);

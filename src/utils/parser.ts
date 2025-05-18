@@ -17,11 +17,15 @@ const isValidUrl = (urlString: string): boolean => {
 
 // Store the observer reference so we can disconnect it later
 let networkObserver: PerformanceObserver | null = null;
+let capturedPackets: ParsedPacket[] = [];
 
 /**
  * Starts network traffic capture
  */
 export const startNetworkCapture = async (callback: (packet: ParsedPacket) => void): Promise<void> => {
+  // Reset captured packets array when starting a new capture
+  capturedPackets = [];
+  
   // For browser environments, we'll use the Performance API to capture network requests
   const observer = new PerformanceObserver((list) => {
     list.getEntries().forEach((entry) => {
@@ -29,6 +33,11 @@ export const startNetworkCapture = async (callback: (packet: ParsedPacket) => vo
         // Parse the network request data
         const data = JSON.stringify(entry);
         const packet = parseNetworkData(data);
+        
+        // Store the packet in our captured packets array
+        capturedPackets.push(packet);
+        
+        // Call the callback with the packet
         callback(packet);
       }
     });
@@ -43,12 +52,20 @@ export const startNetworkCapture = async (callback: (packet: ParsedPacket) => vo
 /**
  * Stops network traffic capture
  */
-export const stopNetworkCapture = (): void => {
+export const stopNetworkCapture = (): ParsedPacket[] => {
   // Disconnect the specific observer instance instead of the constructor
   if (networkObserver) {
     networkObserver.disconnect();
     networkObserver = null;
   }
+  
+  // Return all captured packets so they can be loaded into the parser content viewer
+  const packetsToReturn = [...capturedPackets];
+  
+  // Optionally clear the captured packets array after returning them
+  capturedPackets = [];
+  
+  return packetsToReturn;
 };
 
 /**
