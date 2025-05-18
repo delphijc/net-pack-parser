@@ -15,20 +15,27 @@ const isValidUrl = (urlString: string): boolean => {
   }
 };
 
+// Store the observer reference so we can disconnect it later
+let networkObserver: PerformanceObserver | null = null;
+
 /**
  * Starts network traffic capture
  */
-export const startNetworkCapture = async (): Promise<void> => {
+export const startNetworkCapture = async (callback: (packet: ParsedPacket) => void): Promise<void> => {
   // For browser environments, we'll use the Performance API to capture network requests
   const observer = new PerformanceObserver((list) => {
     list.getEntries().forEach((entry) => {
       if (entry.entryType === 'resource') {
         // Parse the network request data
         const data = JSON.stringify(entry);
-        parseNetworkData(data);
+        const packet = parseNetworkData(data);
+        callback(packet);
       }
     });
   });
+
+  // Store the observer instance
+  networkObserver = observer;
 
   observer.observe({ entryTypes: ['resource'] });
 };
@@ -37,8 +44,11 @@ export const startNetworkCapture = async (): Promise<void> => {
  * Stops network traffic capture
  */
 export const stopNetworkCapture = (): void => {
-  // Stop all performance observers
-  PerformanceObserver.disconnect();
+  // Disconnect the specific observer instance instead of the constructor
+  if (networkObserver) {
+    networkObserver.disconnect();
+    networkObserver = null;
+  }
 };
 
 /**
