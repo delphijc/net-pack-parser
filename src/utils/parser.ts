@@ -26,27 +26,127 @@ export const startNetworkCapture = async (callback: (packet: ParsedPacket) => vo
   // Reset captured packets array when starting a new capture
   capturedPackets = [];
   
-  // For browser environments, we'll use the Performance API to capture network requests
-  const observer = new PerformanceObserver((list) => {
-    list.getEntries().forEach((entry) => {
-      if (entry.entryType === 'resource') {
-        // Parse the network request data
-        const data = JSON.stringify(entry);
-        const packet = parseNetworkData(data);
-        
-        // Store the packet in our captured packets array
-        capturedPackets.push(packet);
-        
-        // Call the callback with the packet
-        callback(packet);
+  try {
+    // For browser environments, we'll use the Performance API to capture network requests
+    const observer = new PerformanceObserver((list) => {
+      const entries = list.getEntries();
+      
+      for (const entry of entries) {
+        if (entry.entryType === 'resource') {
+          // Extract useful information from the entry
+          const url = entry.name;
+          const initiatorType = entry.initiatorType;
+          const startTime = entry.startTime;
+          const duration = entry.duration;
+          const size = (entry as any).transferSize || 0;
+          
+          // Format the raw data as a structured object
+          const rawData = {
+            url,
+            initiatorType,
+            startTime,
+            duration,
+            size,
+            timestamp: new Date().toISOString()
+          };
+          
+          // Parse the network request data into a packet
+          const packet = createPacketFromPerformanceEntry(entry, rawData);
+          
+          // Store the packet in our captured packets array
+          capturedPackets.push(packet);
+          
+          // Call the callback with the packet
+          callback(packet);
+        }
       }
     });
+
+    // Store the observer instance
+    networkObserver = observer;
+
+    // Observe navigation and resource timing
+    observer.observe({ entryTypes: ['resource', 'navigation'] });
+    
+    // Force a small network request to ensure we get some data
+    fetch('https://jsonplaceholder.typicode.com/posts/1')
+      .then(response => response.json())
+      .catch(err => console.error("Error making test request:", err));
+      
+  } catch (error) {
+    console.error("Error setting up network capture:", error);
+    throw error;
+  }
+};
+
+/**
+ * Creates a packet from a PerformanceEntry
+ */
+const createPacketFromPerformanceEntry = (entry: PerformanceEntry, rawData: any): ParsedPacket => {
+  const packetId = uuidv4();
+  const tokens: Token[] = [];
+  const sections: ParsedSection[] = [];
+  const fileReferences: FileReference[] = [];
+  let index = 0;
+  
+  // Add the URL as a token
+  tokens.push({
+    id: uuidv4(),
+    value: entry.name,
+    type: 'string',
+    index: index++
   });
-
-  // Store the observer instance
-  networkObserver = observer;
-
-  observer.observe({ entryTypes: ['resource'] });
+  
+  // Determine the protocol based on URL
+  const url = new URL(entry.name);
+  const protocol = url.protocol.replace(':', '').toUpperCase();
+  
+  // Extract domain parts for source/destination
+  const hostParts = url.hostname.split('.');
+  const domain = hostParts.length >= 2 ? 
+    `${hostParts[hostParts.length - 2]}.${hostParts[hostParts.length - 1]}` : 
+    url.hostname;
+  
+  // Add header section
+  sections.push({
+    id: uuidv4(),
+    type: 'header',
+    startIndex: 0,
+    endIndex: 1,
+    content: `Request to ${url.origin}${url.pathname}`
+  });
+  
+  // Check if URL points to a file
+  const pathname = url.pathname;
+  const fileExtensionMatch = pathname.match(/\.([a-zA-Z0-9]+)(?:[?#]|$)/);
+  
+  if (fileExtensionMatch) {
+    const extension = fileExtensionMatch[1].toLowerCase();
+    const fileTypes = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'csv', 'json', 'xml', 'html', 'css', 'js'];
+    
+    if (fileTypes.includes(extension)) {
+      const fileName = pathname.split('/').pop() || 'unknown';
+      fileReferences.push({
+        id: uuidv4(),
+        uri: entry.name,
+        fileName,
+        hash: SHA256(entry.name).toString(),
+        downloadStatus: 'pending'
+      });
+    }
+  }
+  
+  return {
+    id: packetId,
+    timestamp: new Date().toISOString(),
+    source: window.location.hostname,
+    destination: domain,
+    protocol,
+    tokens,
+    sections,
+    fileReferences,
+    rawData: JSON.stringify(rawData, null, 2)
+  };
 };
 
 /**

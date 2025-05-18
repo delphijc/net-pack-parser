@@ -88,16 +88,32 @@ const ParserForm: React.FC = () => {
         const packets = stopNetworkCapture();
         setCapturing(false);
         
-        // Merge any new packets with existing captured data
+        // Update captured data in the UI
         if (packets.length > 0) {
-          setInputData(JSON.stringify(packets[0].rawData, null, 2));
+          setCapturedData(packets);
+          
+          // Load the first packet's rawData into the input field
+          if (packets[0].rawData) {
+            setInputData(packets[0].rawData);
+          }
+        } else {
+          setErrorMessage('No network traffic was captured. Try visiting different websites while capturing.');
         }
       } else {
         setErrorMessage('');
         setCapturedData([]);
+        
+        // Start network capture with a callback that updates the UI in real-time
         await startNetworkCapture((packet) => {
-          setCapturedData(prev => [...prev, packet]);
+          setCapturedData(prev => {
+            // Only add the packet if it's not already in the array
+            if (!prev.some(p => p.id === packet.id)) {
+              return [...prev, packet];
+            }
+            return prev;
+          });
         });
+        
         setCapturing(true);
       }
     } catch (error) {
@@ -133,6 +149,11 @@ const ParserForm: React.FC = () => {
   
   const loadSampleData = (index: number) => {
     setInputData(sampleData[index]);
+  };
+  
+  const handleViewPacket = (packet: ParsedPacket) => {
+    // Load the raw data into the input field
+    setInputData(packet.rawData);
   };
   
   return (
@@ -191,26 +212,47 @@ const ParserForm: React.FC = () => {
                   <h3 className="text-sm font-medium text-gray-300">
                     Captured Packets ({capturedData.length})
                   </h3>
-                  <button
-                    onClick={handleParseCapture}
-                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm flex items-center"
-                  >
-                    <Play size={14} className="mr-1.5" />
-                    Parse Capture
-                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={handleParseCapture}
+                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm flex items-center"
+                    >
+                      <Play size={14} className="mr-1.5" />
+                      Parse All
+                    </button>
+                    {capturing && (
+                      <div className="flex items-center text-xs text-green-400">
+                        <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+                        Capturing...
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="text-sm text-gray-400">
+                <div className="max-h-48 overflow-y-auto">
                   {capturedData.map((packet, index) => (
-                    <div key={packet.id} className="mb-1 truncate">
-                      {index + 1}. {packet.protocol} request to {packet.destination}
+                    <div 
+                      key={packet.id} 
+                      className="mb-1 py-1 px-2 hover:bg-gray-800 rounded cursor-pointer flex justify-between items-center"
+                      onClick={() => handleViewPacket(packet)}
+                    >
+                      <div className="text-sm truncate">
+                        {index + 1}. {packet.protocol} - {packet.destination}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(packet.timestamp).toLocaleTimeString()}
+                      </div>
                     </div>
-                  )).slice(-5)}
-                  {capturedData.length > 5 && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      ...and {capturedData.length - 5} more packets
-                    </div>
-                  )}
+                  ))}
                 </div>
+              </div>
+            )}
+            
+            {capturing && capturedData.length === 0 && (
+              <div className="mb-4 bg-blue-900/30 border border-blue-800 rounded-md p-3 flex items-center">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
+                <p className="text-sm text-blue-300">
+                  Waiting for network traffic... Open websites or perform network operations to capture traffic.
+                </p>
               </div>
             )}
             
