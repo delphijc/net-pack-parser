@@ -197,7 +197,7 @@ const PerformanceDashboard: React.FC = () => {
           </div>
           <div className="flex items-center text-xs">
             {metrics.lcpTime <= 2500 ? (
-              <CheckCircle className="text-green-400 mr-1" size={12} />
+              <CheckCircle className="text-green-400 mr-1\" size={12} />
             ) : (
               <AlertTriangle className="text-red-400 mr-1" size={12} />
             )}
@@ -215,7 +215,7 @@ const PerformanceDashboard: React.FC = () => {
           </div>
           <div className="flex items-center text-xs">
             {metrics.fcpTime <= 1800 ? (
-              <CheckCircle className="text-green-400 mr-1" size={12} />
+              <CheckCircle className="text-green-400 mr-1\" size={12} />
             ) : (
               <AlertTriangle className="text-red-400 mr-1" size={12} />
             )}
@@ -233,7 +233,7 @@ const PerformanceDashboard: React.FC = () => {
           </div>
           <div className="flex items-center text-xs">
             {metrics.pageLoadTime <= 3000 ? (
-              <CheckCircle className="text-green-400 mr-1" size={12} />
+              <CheckCircle className="text-green-400 mr-1\" size={12} />
             ) : (
               <AlertTriangle className="text-red-400 mr-1" size={12} />
             )}
