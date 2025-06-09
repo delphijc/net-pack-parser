@@ -36,6 +36,61 @@ export interface ParsedPacket {
   rawData: string;
 }
 
+export interface PerformanceEntryData {
+  id: string;
+  entryType: string;
+  name: string;
+  startTime: number;
+  duration: number;
+  timestamp: string;
+  details: {
+    // Navigation timing details
+    domainLookupStart?: number;
+    domainLookupEnd?: number;
+    connectStart?: number;
+    connectEnd?: number;
+    requestStart?: number;
+    responseStart?: number;
+    responseEnd?: number;
+    domInteractive?: number;
+    domContentLoadedEventStart?: number;
+    domContentLoadedEventEnd?: number;
+    domComplete?: number;
+    loadEventStart?: number;
+    loadEventEnd?: number;
+    
+    // Resource timing details
+    initiatorType?: string;
+    transferSize?: number;
+    encodedBodySize?: number;
+    decodedBodySize?: number;
+    
+    // Long task details
+    attribution?: any[];
+    
+    // Largest Contentful Paint details
+    renderTime?: number;
+    loadTime?: number;
+    size?: number;
+    element?: string;
+    url?: string;
+    
+    // Paint timing details
+    
+    // First Input Delay details
+    processingStart?: number;
+    processingEnd?: number;
+    
+    // Layout shift details
+    value?: number;
+    hadRecentInput?: boolean;
+    sources?: any[];
+    
+    // Additional custom fields
+    [key: string]: any;
+  };
+}
+
 export interface User {
   id: string;
   username: string;

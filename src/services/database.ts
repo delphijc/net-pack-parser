@@ -1,9 +1,10 @@
-import { ParsedPacket, FileReference } from '../types';
+import { ParsedPacket, FileReference, PerformanceEntryData } from '../types';
 
 class DatabaseService {
   private static instance: DatabaseService;
   private packets: ParsedPacket[] = [];
   private files: FileReference[] = [];
+  private performanceEntries: PerformanceEntryData[] = [];
   private storageKey = 'network_parser_data';
   
   private constructor() {
@@ -24,11 +25,13 @@ class DatabaseService {
         const parsedData = JSON.parse(savedData);
         this.packets = parsedData.packets || [];
         this.files = parsedData.files || [];
+        this.performanceEntries = parsedData.performanceEntries || [];
       }
     } catch (error) {
       console.error('Failed to load data from storage:', error);
       this.packets = [];
       this.files = [];
+      this.performanceEntries = [];
     }
   }
   
@@ -36,7 +39,8 @@ class DatabaseService {
     try {
       const dataToSave = {
         packets: this.packets,
-        files: this.files
+        files: this.files,
+        performanceEntries: this.performanceEntries
       };
       localStorage.setItem(this.storageKey, JSON.stringify(dataToSave));
     } catch (error) {
@@ -93,6 +97,12 @@ class DatabaseService {
     this.saveToStorage();
   }
   
+  public storePerformanceEntry(entry: PerformanceEntryData): string {
+    this.performanceEntries.push(entry);
+    this.saveToStorage();
+    return entry.id;
+  }
+  
   public getAllPackets(): ParsedPacket[] {
     return [...this.packets];
   }
@@ -109,6 +119,14 @@ class DatabaseService {
     return this.files.find(f => f.id === id);
   }
   
+  public getAllPerformanceEntries(): PerformanceEntryData[] {
+    return [...this.performanceEntries];
+  }
+  
+  public getPerformanceEntriesByType(entryType: string): PerformanceEntryData[] {
+    return this.performanceEntries.filter(entry => entry.entryType === entryType);
+  }
+  
   public searchPackets(query: string): ParsedPacket[] {
     const lowerQuery = query.toLowerCase();
     return this.packets.filter(packet => 
@@ -122,6 +140,12 @@ class DatabaseService {
   public clearAllData(): void {
     this.packets = [];
     this.files = [];
+    this.performanceEntries = [];
+    this.saveToStorage();
+  }
+  
+  public clearPerformanceEntries(): void {
+    this.performanceEntries = [];
     this.saveToStorage();
   }
 }

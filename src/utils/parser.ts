@@ -1,6 +1,7 @@
-import { Token, ParsedSection, FileReference, ParsedPacket } from '../types';
+import { Token, ParsedSection, FileReference, ParsedPacket, PerformanceEntryData } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { SHA256 } from 'crypto-js';
+import database from '../services/database';
 
 /**
  * Validates a URL string
@@ -20,27 +21,132 @@ let networkObserver: PerformanceObserver | null = null;
 let capturedPackets: ParsedPacket[] = [];
 
 /**
- * Starts network traffic capture
+ * Creates performance entry data from PerformanceEntry
+ */
+const createPerformanceEntryData = (entry: PerformanceEntry): PerformanceEntryData => {
+  const performanceEntry: PerformanceEntryData = {
+    id: uuidv4(),
+    entryType: entry.entryType,
+    name: entry.name,
+    startTime: entry.startTime,
+    duration: entry.duration,
+    timestamp: new Date().toISOString(),
+    details: {}
+  };
+
+  // Handle different entry types with specific details
+  switch (entry.entryType) {
+    case 'navigation':
+      const navEntry = entry as PerformanceNavigationTiming;
+      performanceEntry.details = {
+        domainLookupStart: navEntry.domainLookupStart,
+        domainLookupEnd: navEntry.domainLookupEnd,
+        connectStart: navEntry.connectStart,
+        connectEnd: navEntry.connectEnd,
+        requestStart: navEntry.requestStart,
+        responseStart: navEntry.responseStart,
+        responseEnd: navEntry.responseEnd,
+        domInteractive: navEntry.domInteractive,
+        domContentLoadedEventStart: navEntry.domContentLoadedEventStart,
+        domContentLoadedEventEnd: navEntry.domContentLoadedEventEnd,
+        domComplete: navEntry.domComplete,
+        loadEventStart: navEntry.loadEventStart,
+        loadEventEnd: navEntry.loadEventEnd,
+        transferSize: navEntry.transferSize,
+        encodedBodySize: navEntry.encodedBodySize,
+        decodedBodySize: navEntry.decodedBodySize
+      };
+      break;
+
+    case 'resource':
+      const resourceEntry = entry as PerformanceResourceTiming;
+      performanceEntry.details = {
+        initiatorType: resourceEntry.initiatorType,
+        transferSize: resourceEntry.transferSize,
+        encodedBodySize: resourceEntry.encodedBodySize,
+        decodedBodySize: resourceEntry.decodedBodySize,
+        domainLookupStart: resourceEntry.domainLookupStart,
+        domainLookupEnd: resourceEntry.domainLookupEnd,
+        connectStart: resourceEntry.connectStart,
+        connectEnd: resourceEntry.connectEnd,
+        requestStart: resourceEntry.requestStart,
+        responseStart: resourceEntry.responseStart,
+        responseEnd: resourceEntry.responseEnd
+      };
+      break;
+
+    case 'longtask':
+      const longTaskEntry = entry as any; // PerformanceLongTaskTiming not widely supported in TS
+      performanceEntry.details = {
+        attribution: longTaskEntry.attribution || []
+      };
+      break;
+
+    case 'largest-contentful-paint':
+      const lcpEntry = entry as any; // PerformanceLargestContentfulPaint
+      performanceEntry.details = {
+        renderTime: lcpEntry.renderTime,
+        loadTime: lcpEntry.loadTime,
+        size: lcpEntry.size,
+        element: lcpEntry.element?.tagName || 'unknown',
+        url: lcpEntry.url || ''
+      };
+      break;
+
+    case 'paint':
+      // Paint entries (first-paint, first-contentful-paint)
+      performanceEntry.details = {
+        paintType: entry.name
+      };
+      break;
+
+    case 'first-input':
+      const fiEntry = entry as any; // PerformanceFirstInputTiming
+      performanceEntry.details = {
+        processingStart: fiEntry.processingStart,
+        processingEnd: fiEntry.processingEnd
+      };
+      break;
+
+    case 'layout-shift':
+      const lsEntry = entry as any; // PerformanceLayoutShiftTiming
+      performanceEntry.details = {
+        value: lsEntry.value,
+        hadRecentInput: lsEntry.hadRecentInput,
+        sources: lsEntry.sources || []
+      };
+      break;
+
+    default:
+      // Store any additional properties
+      performanceEntry.details = { ...entry };
+      break;
+  }
+
+  return performanceEntry;
+};
+
+/**
+ * Starts network traffic capture with enhanced performance monitoring
  */
 export const startNetworkCapture = async (callback: (packet: ParsedPacket) => void): Promise<void> => {
   // Reset captured packets array when starting a new capture
   capturedPackets = [];
   
   try {
-    // For browser environments, we'll use the Performance API to capture network requests
+    // Create observer for network resources and performance metrics
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
       
       for (const entry of entries) {
         if (entry.entryType === 'resource') {
-          // Extract useful information from the entry
+          // Handle resource entries as network packets (existing logic)
           const url = entry.name;
           const initiatorType = entry.initiatorType;
           const startTime = entry.startTime;
           const duration = entry.duration;
           const size = (entry as any).transferSize || 0;
           
-          // Format the raw data as a structured object
           const rawData = {
             url,
             initiatorType,
@@ -50,14 +156,15 @@ export const startNetworkCapture = async (callback: (packet: ParsedPacket) => vo
             timestamp: new Date().toISOString()
           };
           
-          // Parse the network request data into a packet
           const packet = createPacketFromPerformanceEntry(entry, rawData);
-          
-          // Store the packet in our captured packets array
           capturedPackets.push(packet);
-          
-          // Call the callback with the packet
           callback(packet);
+        } else {
+          // Handle performance metrics (navigation, longtask, paint, etc.)
+          const performanceEntryData = createPerformanceEntryData(entry);
+          database.storePerformanceEntry(performanceEntryData);
+          
+          console.log(`Captured ${entry.entryType} performance entry:`, entry.name);
         }
       }
     });
@@ -65,10 +172,26 @@ export const startNetworkCapture = async (callback: (packet: ParsedPacket) => vo
     // Store the observer instance
     networkObserver = observer;
 
-    // Observe navigation and resource timing
-    observer.observe({ entryTypes: ['resource', 'navigation'] });
+    // Observe multiple entry types for comprehensive performance monitoring
+    try {
+      observer.observe({ 
+        entryTypes: [
+          'resource', 
+          'navigation', 
+          'longtask', 
+          'largest-contentful-paint',
+          'paint',
+          'first-input',
+          'layout-shift'
+        ] 
+      });
+    } catch (error) {
+      // Fallback if some entry types aren't supported
+      console.warn('Some performance entry types not supported, using fallback:', error);
+      observer.observe({ entryTypes: ['resource', 'navigation'] });
+    }
     
-    // Force a small network request to ensure we get some data
+    // Trigger a test network request to demonstrate capture
     fetch('https://jsonplaceholder.typicode.com/posts/1')
       .then(response => response.json())
       .catch(err => console.error("Error making test request:", err));

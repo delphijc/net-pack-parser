@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Database, FileText, Clock, Settings, Filter, Hash, Text } from 'lucide-react';
+import { Activity, Database, FileText, Clock, Settings, Filter, Hash, Text, Gauge } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -14,6 +14,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, activeTab, onChangeTab }) => 
     { id: 'files', label: 'Files', icon: <FileText size={20} /> },
     { id: 'tokens', label: 'Tokens', icon: <Hash size={20} /> },
     { id: 'strings', label: 'Strings', icon: <Text size={20} /> },
+    { id: 'performance', label: 'Performance', icon: <Gauge size={20} /> },
     { id: 'history', label: 'History', icon: <Clock size={20} /> },
     { id: 'filters', label: 'Filters', icon: <Filter size={20} /> },
     { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },

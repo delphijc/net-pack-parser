@@ -7,6 +7,7 @@ import ParserForm from './components/parser/ParserForm';
 import FilesList from './components/files/FilesList';
 import TokensList from './components/tokens/TokensList';
 import StringsList from './components/strings/StringsList';
+import PerformanceDashboard from './components/performance/PerformanceDashboard';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -47,6 +48,8 @@ function App() {
         return <TokensList />;
       case 'strings':
         return <StringsList />;
+      case 'performance':
+        return <PerformanceDashboard />;
       default:
         return <Dashboard onNavigate={handleNavigate} />;
     }
