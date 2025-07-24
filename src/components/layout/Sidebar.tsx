@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Database, FileText, Clock, Settings, Filter, Hash, Text, Gauge, Shield, Timeline, Search, AlertTriangle } from 'lucide-react';
+import { Activity, Database, FileText, Clock, Settings, Filter, Hash, Text, Gauge, Shield, Baseline as Timeline, Search, AlertTriangle } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;

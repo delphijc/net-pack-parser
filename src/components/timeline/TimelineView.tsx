@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Timeline, Clock, AlertTriangle, Info, Eye, Filter } from 'lucide-react';
+import { Baseline as Timeline, Clock, AlertTriangle, Info, Eye, Filter } from 'lucide-react';
 import database from '../../services/database';
 import { TimelineEvent } from '../../types';
 
