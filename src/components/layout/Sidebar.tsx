@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Database, FileText, Clock, Settings, Filter, Hash, Text, Gauge } from 'lucide-react';
+import { Activity, Database, FileText, Clock, Settings, Filter, Hash, Text, Gauge, Shield, Timeline, Search, AlertTriangle } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -11,10 +11,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, activeTab, onChangeTab }) => 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: <Activity size={20} /> },
     { id: 'packets', label: 'Packets', icon: <Database size={20} /> },
+    { id: 'forensics', label: 'Forensic Analysis', icon: <Shield size={20} /> },
+    { id: 'timeline', label: 'Timeline', icon: <Timeline size={20} /> },
+    { id: 'threats', label: 'Threat Intel', icon: <AlertTriangle size={20} /> },
     { id: 'files', label: 'Files', icon: <FileText size={20} /> },
     { id: 'tokens', label: 'Tokens', icon: <Hash size={20} /> },
     { id: 'strings', label: 'Strings', icon: <Text size={20} /> },
     { id: 'performance', label: 'Performance', icon: <Gauge size={20} /> },
+    { id: 'search', label: 'Advanced Search', icon: <Search size={20} /> },
     { id: 'history', label: 'History', icon: <Clock size={20} /> },
     { id: 'filters', label: 'Filters', icon: <Filter size={20} /> },
     { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },

@@ -8,6 +8,10 @@ import FilesList from './components/files/FilesList';
 import TokensList from './components/tokens/TokensList';
 import StringsList from './components/strings/StringsList';
 import PerformanceDashboard from './components/performance/PerformanceDashboard';
+import ForensicAnalysis from './components/forensics/ForensicAnalysis';
+import TimelineView from './components/timeline/TimelineView';
+import ThreatIntelligence from './components/threats/ThreatIntelligence';
+import AdvancedSearch from './components/search/AdvancedSearch';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -39,6 +43,12 @@ function App() {
         return <Dashboard onNavigate={handleNavigate} />;
       case 'packets':
         return <PacketsList />;
+      case 'forensics':
+        return <ForensicAnalysis />;
+      case 'timeline':
+        return <TimelineView />;
+      case 'threats':
+        return <ThreatIntelligence />;
       case 'parser':
       case 'filters':
         return <ParserForm />;
@@ -50,6 +60,8 @@ function App() {
         return <StringsList />;
       case 'performance':
         return <PerformanceDashboard />;
+      case 'search':
+        return <AdvancedSearch />;
       default:
         return <Dashboard onNavigate={handleNavigate} />;
     }
