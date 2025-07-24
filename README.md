@@ -114,6 +114,109 @@ A comprehensive web application for monitoring network performance and analyzing
    - Search through string content
    - View occurrence statistics across packets
 
+
+## 🔍 Forensic Investigation Capabilities
+
+### Advanced Threat Detection
+- **Automated Pattern Recognition**: Detects SQL injection, XSS, command injection, and other attack patterns
+- **Behavioral Analysis**: Identifies unusual ports, large data transfers, and credential exposure
+- **MITRE ATT&CK Mapping**: Correlates detected threats with official tactics and techniques
+- **Threat Intelligence Integration**: Matches network traffic against known IOCs (Indicators of Compromise)
+- **Confidence Scoring**: Provides reliability ratings for detected threats (0-100%)
+
+### Evidence Management
+- **Chain of Custody**: Automated tracking of evidence handling with investigator attribution
+- **Hash Verification**: SHA-256 and MD5 checksums for all network packets and files
+- **Timestamp Preservation**: Maintains original acquisition times for forensic accuracy
+- **Case Management**: Organize investigations with case numbers, priorities, and status tracking
+- **Evidence Correlation**: Cross-reference indicators across multiple packets and timeframes
+
+### Timeline Reconstruction
+- **Chronological Analysis**: Reconstruct events in precise temporal order
+- **Multi-Source Correlation**: Combine network activity, file access, and authentication events
+- **Interactive Visualization**: Drill down into specific time periods and event types
+- **Evidence Linking**: Connect related activities across different protocols and sources
+
+### Advanced Search & Analysis
+- **Multi-Criteria Filtering**: Search by IP addresses, protocols, time ranges, and content
+- **Boolean Logic**: Complex queries with AND/OR operators for precise evidence discovery
+- **Suspicious Indicator Detection**: Automated flagging of potentially malicious activities
+- **File Reference Extraction**: Identify and analyze downloadable files in network traffic
+
+## 🚀 How to Use Forensic Features
+
+### Starting a Forensic Investigation
+
+1. **Data Acquisition**
+   ```bash
+   # Capture network traffic using external tools
+   tcpdump -i eth0 -w investigation.pcap
+   # OR
+   wireshark # Save as .pcap file
+   ```
+
+2. **Import Evidence**
+   - Navigate to "Parser" tab
+   - Click "Upload PCAP" and select your capture file
+   - The system automatically generates forensic metadata and hashes
+
+3. **Automated Threat Analysis**
+   - Go to "Forensic Analysis" tab
+   - Review automatically detected suspicious indicators
+   - Filter by severity: Critical, High, Medium, Low
+   - Click on indicators to view detailed evidence and MITRE mappings
+
+### Timeline Investigation
+
+1. **Access Timeline View**
+   - Navigate to "Timeline" tab
+   - Events are automatically generated from parsed packets
+
+2. **Temporal Analysis**
+   - Use date range filters to focus on specific time periods
+   - Filter by event types: Network Activity, File Access, Authentication, etc.
+   - Click on events to view supporting evidence and packet details
+
+3. **Event Correlation**
+   - Look for patterns in event timing and sources
+   - Identify potential attack sequences or data exfiltration patterns
+
+### Threat Intelligence Operations
+
+1. **Review Detected Threats**
+   - Go to "Threat Intel" tab
+   - View automatically detected IOCs from your network traffic
+   - See threats categorized by type: Malicious Domain, IP, Malware Signature, etc.
+
+2. **Add Custom IOCs**
+   - Click "Add Threat" to manually input known indicators
+   - Specify threat type, severity, and source attribution
+   - System will automatically scan future traffic against your IOC database
+
+### Advanced Forensic Search
+
+1. **Complex Evidence Discovery**
+   - Navigate to "Advanced Search" tab
+   - Use multiple search criteria simultaneously:
+     - Source/Destination IP addresses
+     - Protocol types and port numbers
+     - Time ranges and content strings
+     - File extensions and suspicious indicators
+
+2. **Evidence Export**
+   - Search results can be exported for external analysis
+   - Maintains chain of custody documentation
+   - Preserves original timestamps and hash verification
+
+### Case Management Workflow
+
+1. **Evidence Collection**: Import PCAP files from network captures
+2. **Automated Analysis**: Review detected threats and suspicious indicators
+3. **Timeline Reconstruction**: Analyze chronological sequence of events
+4. **Threat Correlation**: Cross-reference against known IOCs and attack patterns
+5. **Advanced Investigation**: Use complex searches for specific evidence
+6. **Documentation**: Export findings with preserved chain of custody
+
 ## 🎯 Use Cases
 
 ### Performance Optimization
@@ -124,13 +227,24 @@ A comprehensive web application for monitoring network performance and analyzing
 ### Network Analysis
 - **Security Analyst**: Parse PCAP files to extract file references and analyze traffic patterns
 - **Network Engineer**: Analyze protocol distribution and traffic characteristics
-- **Forensics**: Extract and download files referenced in network communications
+- **Digital Forensics**: Conduct comprehensive network traffic analysis for incident response
+- **Threat Hunter**: Proactive searching for IOCs and attack patterns in network data
+- **Incident Responder**: Rapid threat identification and timeline reconstruction
+- **Compliance Auditor**: Evidence collection and chain of custody documentation
 
 ### Development Workflow
 1. **Baseline Measurement**: Establish performance benchmarks using the real-time capture
 2. **Code Changes**: Make application improvements
 3. **Impact Assessment**: Compare new performance metrics against baseline
 4. **Optimization**: Use detailed timing data to identify specific bottlenecks
+
+### Forensic Investigation Workflow
+1. **Evidence Acquisition**: Import PCAP files from network monitoring tools
+2. **Threat Detection**: Automated analysis identifies suspicious patterns and known IOCs
+3. **Timeline Analysis**: Reconstruct chronological sequence of network events
+4. **Evidence Correlation**: Link related activities across different sources and protocols
+5. **Advanced Search**: Use complex queries to discover specific evidence
+6. **Report Generation**: Export findings with maintained chain of custody
 
 ## 🔧 Technical Details
 
@@ -174,3 +288,81 @@ A comprehensive web application for monitoring network performance and analyzing
 - Export packet data for external tools
 
 This application provides a comprehensive toolkit for both real-time performance monitoring and post-hoc network traffic analysis, making it valuable for developers, analysts, and engineers working on web application optimization and network security.
+
+## 🚀 Production Deployment Requirements
+
+### Security Enhancements
+- **User Authentication**: Implement role-based access control (RBAC) for multi-user environments
+- **Data Encryption**: Encrypt stored evidence and investigation data at rest
+- **Audit Logging**: Comprehensive logging of all user actions for compliance
+- **Session Management**: Secure session handling with timeout controls
+- **API Security**: Rate limiting and authentication for any future API endpoints
+
+### Scalability Improvements
+- **Database Migration**: Move from localStorage to enterprise database (PostgreSQL/MongoDB)
+- **Distributed Processing**: Handle large PCAP files through worker processes
+- **Caching Layer**: Implement Redis or similar for improved performance
+- **Load Balancing**: Support multiple concurrent investigations
+- **File Storage**: External storage solution for large evidence files
+
+### Enterprise Integration
+- **SIEM Integration**: Export findings to Security Information and Event Management systems
+- **Threat Intelligence Feeds**: Integrate with commercial TI providers (VirusTotal, etc.)
+- **Active Directory**: LDAP/AD integration for user management
+- **Case Management**: Integration with existing forensic case management systems
+- **Report Generation**: Automated forensic report templates with legal compliance
+
+### Compliance & Legal
+- **Evidence Integrity**: Cryptographic proof of evidence tampering detection
+- **Court Admissibility**: Features to ensure evidence meets legal standards
+- **Data Retention**: Configurable retention policies for different evidence types
+- **Export Standards**: Support for industry-standard forensic formats
+- **Compliance Reporting**: Built-in templates for regulatory requirements
+
+### Performance & Reliability
+- **Error Handling**: Robust error recovery for corrupted or malformed PCAP files
+- **Progress Tracking**: Real-time progress indicators for large file processing
+- **Background Processing**: Queue system for time-intensive analysis tasks
+- **Backup & Recovery**: Automated backup of investigation data
+- **Monitoring**: Application health monitoring and alerting
+
+### User Experience
+- **Advanced Visualization**: Interactive network topology and flow diagrams
+- **Collaborative Features**: Multi-investigator case sharing and comments
+- **Mobile Support**: Responsive design for tablet-based field investigations
+- **Customizable Dashboards**: User-configurable analysis views
+- **Keyboard Shortcuts**: Power-user efficiency features
+
+## 🔮 Future Enhancements
+
+### Advanced Analytics
+- **Machine Learning**: Behavioral anomaly detection and pattern recognition
+- **Automated Classification**: AI-powered threat categorization and scoring
+- **Predictive Analysis**: Early warning systems for emerging threats
+- **Statistical Modeling**: Advanced correlation analysis between network events
+
+### Enhanced Forensic Capabilities
+- **Memory Analysis**: Integration with memory dump analysis tools
+- **File System Forensics**: Correlation with file system timestamps and metadata
+- **Communication Analysis**: Email and messaging protocol deep packet inspection
+- **Cryptocurrency Tracking**: Blockchain transaction analysis integration
+
+### Investigation Tools
+- **Graph Analysis**: Network relationship visualization and analysis
+- **Geolocation**: IP address geolocation and mapping capabilities
+- **Reputation Services**: Automated reputation checking for IPs and domains
+- **Sandbox Integration**: Automated malware analysis for extracted files
+
+### Deployment Options
+- **Cloud Native**: Kubernetes deployment with auto-scaling
+- **Air-Gapped**: Secure deployment for classified environments
+- **Hybrid Architecture**: On-premises processing with cloud intelligence
+- **Docker Containers**: Simplified deployment and scaling
+
+### Integration Ecosystem
+- **Open Source Tools**: Integration with Wireshark, Suricata, and other FOSS tools
+- **Commercial Platforms**: APIs for major cybersecurity vendors
+- **Threat Hunting**: Integration with threat hunting platforms
+- **Incident Response**: Workflow integration with IR platforms
+
+This roadmap ensures the application evolves from a development tool into a production-ready digital forensics platform suitable for enterprise cybersecurity operations.
