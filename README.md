@@ -2,6 +2,83 @@
 
 A comprehensive web application for monitoring network performance and analyzing network traffic data. Built with React, TypeScript, and Tailwind CSS, this tool helps developers monitor application performance in real-time and analyze static PCAP files for deeper insights.
 
+## 🚀 Getting Started
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+- **Node.js** (version 18.0 or higher)
+- **npm** (comes with Node.js) or **yarn**
+- **Git** (for cloning the repository)
+
+You can verify your installations by running:
+```bash
+node --version
+npm --version
+git --version
+```
+
+### Installation
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/your-username/network-traffic-parser.git
+   cd network-traffic-parser
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+   
+   Or if you prefer yarn:
+   ```bash
+   yarn install
+   ```
+
+3. **Start the Development Server**
+   ```bash
+   npm run dev
+   ```
+   
+   Or with yarn:
+   ```bash
+   yarn dev
+   ```
+
+4. **Access the Application**
+   - Open your web browser and navigate to `http://localhost:5173`
+   - The application will automatically reload when you make changes to the code
+
+### Quick Start Guide
+
+Once the application is running:
+
+1. **Dashboard Overview**: Start with the Dashboard to see an overview of all features
+2. **Network Capture**: Go to the "Parser" tab and click "Start Capture" to begin monitoring
+3. **Performance Monitoring**: Visit the "Performance" tab to view real-time metrics
+4. **Upload PCAP Files**: Use the "Upload PCAP" button to analyze existing network captures
+5. **Forensic Analysis**: Navigate to "Forensic Analysis" for security investigations
+
+### Development Commands
+
+- **Start Development Server**: `npm run dev`
+- **Build for Production**: `npm run build`
+- **Preview Production Build**: `npm run preview`
+- **Run Linting**: `npm run lint`
+
+### Troubleshooting
+
+**Port Already in Use**:
+If port 5173 is already in use, Vite will automatically try the next available port (5174, 5175, etc.).
+
+**Permission Issues**:
+On some systems, you may need to run with elevated permissions for certain network monitoring features.
+
+**Browser Compatibility**:
+For best results, use a modern browser with full PerformanceObserver API support (Chrome 58+, Firefox 57+, Safari 11+).
+
 ## 🚀 Key Features Implemented
 
 ### Real-Time Performance Monitoring
