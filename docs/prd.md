@@ -126,6 +126,9 @@ None identified.
 - FR18: Users can manage plug‑in lifecycle.
 - FR19: Users can update plug‑ins.
 - FR20: Users can view plugin documentation.
+- FR21: The tool can be installed via a single binary, Docker image, or common package managers (Homebrew, Snap, MSI).
+- FR22: Users can configure core settings (e.g., default capture interface, alert destinations) via a configuration file.
+- FR23: The tool can check for updates and be updated to the latest version.
 
 ---
 
