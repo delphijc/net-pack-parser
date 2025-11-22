@@ -1,6 +1,8 @@
 # Network Traffic Parser
 
-A comprehensive web application for monitoring network performance and analyzing network traffic data. Built with React, TypeScript, and Tailwind CSS, this tool helps developers monitor application performance in real-time and analyze static PCAP files for deeper insights.
+A comprehensive web application and CLI toolkit for monitoring network performance and analyzing network traffic data. Built with React, TypeScript, and Tailwind CSS, this tool helps developers monitor application performance in real-time and analyze static PCAP files for deeper insights.
+
+---
 
 ## 🚀 Getting Started
 
@@ -79,6 +81,8 @@ On some systems, you may need to run with elevated permissions for certain netwo
 **Browser Compatibility**:
 For best results, use a modern browser with full PerformanceObserver API support (Chrome 58+, Firefox 57+, Safari 11+).
 
+---
+
 ## 🚀 Key Features Implemented
 
 ### Real-Time Performance Monitoring
@@ -94,12 +98,18 @@ For best results, use a modern browser with full PerformanceObserver API support
 - **Protocol Detection**: Automatic classification of HTTP, HTTPS, FTP, SMTP, and other protocols
 - **File Reference Detection**: Automatically detect and extract downloadable file references from network traffic
 - **Section Analysis**: Parse headers, body, and footer sections from network data
+- **BPF Rule Engine**: Filter packets on the fly using native BPF syntax
+- **YARA Signature Engine**: Scan packets and extracted files for known patterns
 
 ### Data Management
 - **Local Storage**: All data stored securely in your browser
 - **Search & Filter**: Advanced search capabilities across packets, tokens, and strings
 - **Export Capabilities**: Download detected files and view file previews
 - **Performance History**: Track performance metrics over time with configurable time ranges
+- **Integrity Checks**: Hash, Merkle-tree, and file-system snapshot verification
+- **Alerting & Reporting**: Email, Slack, or dashboard notifications; export CSV/JSON reports
+
+---
 
 ## 📊 Performance Metrics Tracked
 
@@ -119,6 +129,8 @@ For best results, use a modern browser with full PerformanceObserver API support
 - **Long Tasks**: Tasks that block the main thread for >50ms
 - **Task Attribution**: Identify which scripts cause performance issues
 - **Total Blocking Time**: Cumulative impact of long tasks
+
+---
 
 ## 🛠️ How to Use
 
@@ -191,6 +203,7 @@ For best results, use a modern browser with full PerformanceObserver API support
    - Search through string content
    - View occurrence statistics across packets
 
+---
 
 ## 🔍 Forensic Investigation Capabilities
 
@@ -200,6 +213,7 @@ For best results, use a modern browser with full PerformanceObserver API support
 - **MITRE ATT&CK Mapping**: Correlates detected threats with official tactics and techniques
 - **Threat Intelligence Integration**: Matches network traffic against known IOCs (Indicators of Compromise)
 - **Confidence Scoring**: Provides reliability ratings for detected threats (0-100%)
+- **Data-Loss Prevention**: Policy enforcement and quarantine of suspicious traffic
 
 ### Evidence Management
 - **Chain of Custody**: Automated tracking of evidence handling with investigator attribution
@@ -219,6 +233,8 @@ For best results, use a modern browser with full PerformanceObserver API support
 - **Boolean Logic**: Complex queries with AND/OR operators for precise evidence discovery
 - **Suspicious Indicator Detection**: Automated flagging of potentially malicious activities
 - **File Reference Extraction**: Identify and analyze downloadable files in network traffic
+
+---
 
 ## 🚀 How to Use Forensic Features
 
@@ -294,6 +310,8 @@ For best results, use a modern browser with full PerformanceObserver API support
 5. **Advanced Investigation**: Use complex searches for specific evidence
 6. **Documentation**: Export findings with preserved chain of custody
 
+---
+
 ## 🎯 Use Cases
 
 ### Performance Optimization
@@ -323,6 +341,8 @@ For best results, use a modern browser with full PerformanceObserver API support
 5. **Advanced Search**: Use complex queries to discover specific evidence
 6. **Report Generation**: Export findings with maintained chain of custody
 
+---
+
 ## 🔧 Technical Details
 
 ### Browser Compatibility
@@ -340,6 +360,8 @@ For best results, use a modern browser with full PerformanceObserver API support
 - Efficient data structures for large datasets
 - Automatic cleanup of old performance entries
 
+---
+
 ## 🚨 Limitations
 
 ### Network Capture Scope
@@ -351,6 +373,8 @@ For best results, use a modern browser with full PerformanceObserver API support
 - Some metrics require HTTPS for security reasons
 - Long Task API may not be available in all browsers
 - Layout Shift detection requires user interaction
+
+---
 
 ## 🔄 Data Management
 
@@ -365,6 +389,8 @@ For best results, use a modern browser with full PerformanceObserver API support
 - Export packet data for external tools
 
 This application provides a comprehensive toolkit for both real-time performance monitoring and post-hoc network traffic analysis, making it valuable for developers, analysts, and engineers working on web application optimization and network security.
+
+---
 
 ## 🚀 Production Deployment Requirements
 
@@ -410,6 +436,8 @@ This application provides a comprehensive toolkit for both real-time performance
 - **Customizable Dashboards**: User-configurable analysis views
 - **Keyboard Shortcuts**: Power-user efficiency features
 
+---
+
 ## 🔮 Future Enhancements
 
 ### Advanced Analytics
@@ -443,3 +471,24 @@ This application provides a comprehensive toolkit for both real-time performance
 - **Incident Response**: Workflow integration with IR platforms
 
 This roadmap ensures the application evolves from a development tool into a production-ready digital forensics platform suitable for enterprise cybersecurity operations.
+
+---
+
+## 🔌 Plugin System
+
+{{ ... }}
+
+---
+
+## 📄 License & Contribution
+
+This project is dual‑licensed under **MIT** and **Apache 2.0**.
+Contributions are welcome – see the [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines.
+
+---
+
+## 📞 Support & Community
+
+- **GitHub Issues** – report bugs or request features.
+- **Slack Channel** – join `#net-pack-parser` on the official workspace.
+- **Commercial Support** – contact sales@your‑org.com for enterprise contracts.

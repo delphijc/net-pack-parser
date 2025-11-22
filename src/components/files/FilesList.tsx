@@ -8,10 +8,10 @@ const FilesList: React.FC = () => {
   const [viewingFile, setViewingFile] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
-  
+
   const getFileIcon = (fileName: string) => {
     const extension = fileName.split('.').pop()?.toLowerCase() || '';
-    
+
     switch (extension) {
       case 'pdf':
         return <FilePdf size={20} className="text-red-400" />;
@@ -74,13 +74,13 @@ const FilesList: React.FC = () => {
       // Ensure URI is properly formatted
       let fileUrl: URL;
       let uri = file.uri.trim();
-      
+
       // Add protocol if missing
       if (!uri.startsWith('http://') && !uri.startsWith('https://') && !uri.startsWith('data:')) {
         // Default to https if no protocol is specified
         uri = `https://${uri}`;
       }
-      
+
       try {
         fileUrl = new URL(uri);
       } catch (error) {
@@ -108,7 +108,7 @@ const FilesList: React.FC = () => {
       const fetchFile = async () => {
         try {
           const response = await fetch(uri, requestOptions);
-          
+
           if (!response.ok) {
             if (response.status === 403) {
               throw new Error('Access denied. You may need to log in or request access to this file.');
@@ -120,7 +120,7 @@ const FilesList: React.FC = () => {
               throw new Error(`Server error (HTTP ${response.status}). Please try again later.`);
             }
           }
-          
+
           return response;
         } catch (fetchError) {
           // Handle specific network errors
@@ -129,11 +129,11 @@ const FilesList: React.FC = () => {
             console.error('Network error details:', fetchError);
             throw new Error('Network error: Unable to connect to the server. Check your internet connection or try again later.');
           }
-          
+
           if (fetchError.message.includes('NetworkError')) {
             throw new Error('Network error: The request was blocked due to CORS restrictions. This file may not be accessible from your current location.');
           }
-          
+
           // Rethrow any other errors
           throw fetchError;
         }
@@ -143,20 +143,20 @@ const FilesList: React.FC = () => {
       console.log('Attempting to download file from:', uri);
       const response = await retryWithBackoff(fetchFile);
       setIsRetrying(false);
-      
+
       // Check if we have content
       const contentLength = response.headers.get('content-length');
       if (contentLength && parseInt(contentLength) === 0) {
         throw new Error('File is empty or not available for download.');
       }
-      
+
       const blob = await response.blob();
       if (blob.size === 0) {
         throw new Error('Downloaded file is empty. The file may be corrupted or not properly accessible.');
       }
-      
+
       const url = window.URL.createObjectURL(blob);
-      
+
       if (file.fileType?.startsWith('image/') || file.fileType?.startsWith('text/') || file.fileType === 'application/pdf') {
         setViewingFile(url);
       } else {
@@ -171,9 +171,9 @@ const FilesList: React.FC = () => {
     } catch (error) {
       console.error('Error downloading file:', error);
       setIsRetrying(false);
-      
+
       let errorMessage = 'Failed to download file. ';
-      
+
       if (error instanceof Error) {
         if (error.message.includes('Failed to fetch') || error.message.includes('Network error')) {
           errorMessage += error.message;
@@ -187,19 +187,19 @@ const FilesList: React.FC = () => {
       } else {
         errorMessage += 'An unknown error occurred. Please try again later.';
       }
-      
+
       setDownloadError(errorMessage);
     }
   };
-  
+
   const selectedFileData = selectedFile ? files.find(f => f.id === selectedFile) : null;
 
   return (
     <div className="h-full flex flex-col">
       {/* Fixed Header Section */}
       <div className="sticky top-0 z-10 bg-gray-900 p-6">
-        <h1 className="text-2xl font-bold mb-6">File References</h1>
-        
+        <h2 className="text-2xl font-bold mb-6">File References</h2>
+
         {downloadError && (
           <div className="mb-4 bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg">
             <p className="flex items-center">
@@ -223,14 +223,14 @@ const FilesList: React.FC = () => {
           <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
             <div className="bg-gray-700 px-4 py-3 flex items-center justify-between">
               <h2 className="font-medium">File Details</h2>
-              <button 
+              <button
                 className="text-gray-400 hover:text-white"
                 onClick={() => setSelectedFile(null)}
               >
                 Close
               </button>
             </div>
-            
+
             <div className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -251,7 +251,7 @@ const FilesList: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h3 className="text-sm font-medium text-gray-400 mb-2">Source</h3>
                     <div className="bg-gray-900 p-3 rounded">
@@ -266,7 +266,7 @@ const FilesList: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h3 className="text-sm font-medium text-gray-400 mb-2">Security Information</h3>
                   <div className="bg-gray-900 p-3 rounded">
@@ -274,17 +274,17 @@ const FilesList: React.FC = () => {
                       <p className="text-sm mb-1 text-gray-500">SHA-256 Hash</p>
                       <p className="font-mono text-xs break-all">{selectedFileData.hash}</p>
                     </div>
-                    
+
                     <div>
                       <p className="text-sm mb-1 text-gray-500">Actions</p>
                       <div className="grid grid-cols-2 gap-2">
-                        <button 
+                        <button
                           className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-2 px-3 rounded flex items-center justify-center"
                           onClick={() => handleDownload(selectedFileData)}
                         >
                           <Download size={14} className="mr-1" /> Download File
                         </button>
-                        <button 
+                        <button
                           className="w-full bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 px-3 rounded flex items-center justify-center"
                           onClick={() => window.open(selectedFileData.uri, '_blank')}
                         >
@@ -315,11 +315,10 @@ const FilesList: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {files.map(file => (
-              <div 
+              <div
                 key={file.id}
-                className={`bg-gray-800 rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:translate-y-[-2px] ${
-                  selectedFile === file.id ? 'ring-2 ring-blue-500' : ''
-                }`}
+                className={`bg-gray-800 rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:translate-y-[-2px] ${selectedFile === file.id ? 'ring-2 ring-blue-500' : ''
+                  }`}
                 onClick={() => setSelectedFile(file.id === selectedFile ? null : file.id)}
               >
                 <div className="p-4">
@@ -334,14 +333,14 @@ const FilesList: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="mb-3">
                     <div className="text-xs text-gray-500 mb-1">Hash (SHA-256)</div>
                     <div className="bg-gray-900 p-2 rounded font-mono text-xs break-all">
                       {file.hash.substring(0, 20)}...
                     </div>
                   </div>
-                  
+
                   <div className="text-xs text-gray-500 mb-1">Source URI</div>
                   <div className="bg-gray-900 p-2 rounded text-xs">
                     <div className="truncate" title={file.uri}>
@@ -349,21 +348,20 @@ const FilesList: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mt-2 border-t border-gray-700 px-4 py-3 flex items-center justify-between">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    file.downloadStatus === 'downloaded' 
-                      ? 'bg-green-900 text-green-200' 
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${file.downloadStatus === 'downloaded'
+                      ? 'bg-green-900 text-green-200'
                       : file.downloadStatus === 'failed'
                         ? 'bg-red-900 text-red-200'
                         : 'bg-yellow-900 text-yellow-200'
-                  }`}>
+                    }`}>
                     {file.downloadStatus}
                   </span>
-                  
+
                   <div className="flex space-x-2">
-                    <button 
-                      className="p-1 hover:bg-gray-700 rounded" 
+                    <button
+                      className="p-1 hover:bg-gray-700 rounded"
                       title="Download/View"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -372,8 +370,8 @@ const FilesList: React.FC = () => {
                     >
                       <Download size={16} className="text-gray-400" />
                     </button>
-                    <button 
-                      className="p-1 hover:bg-gray-700 rounded" 
+                    <button
+                      className="p-1 hover:bg-gray-700 rounded"
                       title="Open source"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -396,7 +394,7 @@ const FilesList: React.FC = () => {
           <div className="bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full mx-4 overflow-hidden">
             <div className="bg-gray-700 px-4 py-3 flex items-center justify-between">
               <h3 className="font-medium">File Preview</h3>
-              <button 
+              <button
                 className="text-gray-400 hover:text-white"
                 onClick={() => {
                   setViewingFile(null);

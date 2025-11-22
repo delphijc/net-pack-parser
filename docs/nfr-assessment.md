@@ -1,259 +1,174 @@
-# NFR Assessment - net-pack-parser
+# NFR Assessment Report: Network Traffic Parser
 
-**Date:** 2025-11-17
-**Story:** N/A (System-Level Assessment)
-**Overall Status:** CONCERNS ⚠️
-
----
-
-## Executive Summary
-
-**Assessment:** 0 PASS, 4 CONCERNS, 0 FAIL
-
-**Blockers:** 0 - No direct blockers, but lack of evidence is a major risk.
-
-**High Priority Issues:** 4 - All NFR categories are unverified.
-
-**Recommendation:** Immediately prioritize the setup of testing and monitoring infrastructure to gather evidence for all NFR categories. Do not proceed to production release without validating critical NFRs, especially performance and security.
+**Date**: 2025-11-22
+**Assessor**: Antigravity (AI Agent)
+**Project**: Network Traffic Parser
+**Version**: 1.0
 
 ---
 
-## Performance Assessment
+## 1. Executive Summary
 
-### Response Time (p95)
+This report assesses the Network Traffic Parser application against the Non-Functional Requirements (NFRs) defined in the Product Requirements Document (PRD). The assessment covers Performance, Security, Reliability, Maintainability, Scalability, Accessibility, and Browser Compatibility.
 
-- **Status:** CONCERNS ⚠️
-- **Threshold:** 500ms (default)
-- **Actual:** UNKNOWN
-- **Evidence:** MISSING
-- **Findings:** No performance test results available.
+**Overall Status**: 🟡 **AT RISK** (Initial Assessment - Verification Pending)
 
-### Throughput
-
-- **Status:** CONCERNS ⚠️
-- **Threshold:** 1 Gbps (from PRD/Architecture)
-- **Actual:** UNKNOWN
-- **Evidence:** MISSING
-- **Findings:** No load test results available to validate throughput.
-
-### Resource Usage
-
-- **CPU Usage**
-  - **Status:** CONCERNS ⚠️
-  - **Threshold:** < 70% average (default)
-  - **Actual:** UNKNOWN
-  - **Evidence:** MISSING
-
-- **Memory Usage**
-  - **Status:** CONCERNS ⚠️
-  - **Threshold:** < 80% max (default)
-  - **Actual:** UNKNOWN
-  - **Evidence:** MISSING
-
-### Scalability
-
-- **Status:** CONCERNS ⚠️
-- **Threshold:** Support up to 10 concurrent capture sessions per host.
-- **Actual:** UNKNOWN
-- **Evidence:** MISSING
-- **Findings:** No stress or scalability test results available.
+**Key Findings**:
+- **Performance**: 15 NFRs defined (Browser + Server). Verification required for PCAP parsing speed and WebSocket latency.
+- **Security**: 15 NFRs defined. Critical requirements include WSS/TLS 1.3, JWT validation, and CSP.
+- **Reliability**: 7 NFRs defined. Focus on error handling for malformed PCAP files and connection loss.
+- **Maintainability**: 6 NFRs defined. TypeScript strict mode and test coverage are key.
+- **Accessibility**: 7 NFRs defined. WCAG 2.1 AA compliance is the target.
 
 ---
 
-## Security Assessment
+## 2. Performance Assessment
 
-### Authentication Strength
+### Browser Performance (NFR-P)
 
-- **Status:** CONCERNS ⚠️
-- **Threshold:** MFA enabled for all users (default)
-- **Actual:** UNKNOWN
-- **Evidence:** MISSING
-- **Findings:** No security audit or E2E tests for authentication flows.
+| ID | Requirement | Threshold | Status | Evidence / Notes |
+|----|-------------|-----------|--------|------------------|
+| **NFR-P1** | PCAP parsing speed (small) | < 5s for 10MB | 🟡 | **CONCERNS**: Synchronous parsing in `parser.ts` will block main thread. |
+| **NFR-P2** | PCAP parsing speed (medium) | < 30s for 50MB | 🔴 | **FAIL**: No Web Worker implementation; large files will freeze UI. |
+| **NFR-P3** | Search query latency | < 500ms for 10k packets | ⚪ | Pending benchmark test. |
+| **NFR-P4** | UI interaction latency | < 100ms | ⚪ | Pending manual/automated verification. |
+| **NFR-P5** | Monitoring overhead | < 1% CPU/RAM | ⚪ | Pending measurement. |
+| **NFR-P6** | Bundle size | < 2MB | ⚪ | Check build output size. |
+| **NFR-P7** | Memory usage | < 500MB | ⚪ | Pending memory profiling. |
+| **NFR-P8** | Low storage handling | Graceful degradation | ⚪ | Pending manual verification. |
 
-### Authorization Controls
+### Server & Streaming Performance (NFR-SP)
 
-- **Status:** CONCERNS ⚠️
-- **Threshold:** Least privilege principle enforced.
-- **Actual:** UNKNOWN
-- **Evidence:** MISSING
-- **Findings:** No tests verifying RBAC or access control policies.
-
-### Data Protection
-
-- **Status:** CONCERNS ⚠️
-- **Threshold:** PII encrypted at rest and in transit.
-- **Actual:** UNKNOWN
-- **Evidence:** MISSING
-- **Findings:** No verification of encryption implementation.
-
-### Vulnerability Management
-
-- **Status:** CONCERNS ⚠️
-- **Threshold:** 0 critical, < 3 high vulnerabilities (default)
-- **Actual:** UNKNOWN
-- **Evidence:** MISSING
-- **Findings:** No SAST, DAST, or dependency scanning results available.
+| ID | Requirement | Threshold | Status | Evidence / Notes |
+|----|-------------|-----------|--------|------------------|
+| **NFR-SP1** | WebSocket latency | < 500ms | ⚪ | Pending E2E latency test. |
+| **NFR-SP2** | Capture rate | 10k packets/sec | ⚪ | Pending load test. |
+| **NFR-SP3** | Streaming throughput | 5 Mbps | ⚪ | Pending load test. |
+| **NFR-SP4** | Compression ratio | ≥ 50% | ⚪ | Pending compression test. |
+| **NFR-SP5** | Agent resource usage | < 100MB + buffer | ⚪ | Pending resource monitoring. |
+| **NFR-SP6** | Reconnection time | < 5s | ⚪ | Pending resilience test. |
+| **NFR-SP7** | Concurrency | ≥ 5 clients | ⚪ | Pending load test. |
 
 ---
 
-## Reliability Assessment
+## 3. Security Assessment
 
-### Availability (Uptime)
+### Browser Security (NFR-S)
 
-- **Status:** CONCERNS ⚠️
-- **Threshold:** >= 99.9% (three nines) (default)
-- **Actual:** UNKNOWN
-- **Evidence:** MISSING
-- **Findings:** No uptime monitoring data available.
+| ID | Requirement | Criteria | Status | Evidence / Notes |
+|----|-------------|----------|--------|------------------|
+| **NFR-S1** | Client-side processing | No upload to server | 🟢 | **PASS**: Validated `parser.ts` is purely client-side. |
+| **NFR-S2** | Secure Hashing | Web Crypto API | 🔴 | **FAIL**: Using `crypto-js` instead of `crypto.subtle`. |
+| **NFR-S3** | CSP Headers | Strict CSP | 🔴 | **FAIL**: No CSP meta tag in `index.html`. |
+| **NFR-S4** | Input Sanitization | No XSS | 🟢 | **PASS**: React escapes output; no `dangerouslySetInnerHTML`. |
+| **NFR-S5** | Storage Scoping | Per-origin | 🟢 | **PASS**: Uses `localStorage` (per-origin). |
+| **NFR-S6** | Data Clearing | On-demand clear | 🟢 | **PASS**: `clearAllData` implemented in `database.ts`. |
+| **NFR-S7** | No Tracking | No 3rd party scripts | ⚪ | Check network requests. |
 
-### Error Rate
+### Capture Agent Security (NFR-S)
 
-- **Status:** CONCERNS ⚠️
-- **Threshold:** < 0.1% (1 in 1000) (default)
-- **Actual:** UNKNOWN
-- **Evidence:** MISSING
-- **Findings:** No error tracking or production log analysis available.
-
-### CI Burn-In (Stability)
-
-- **Status:** CONCERNS ⚠️
-- **Threshold:** 100 consecutive successful runs (default)
-- **Actual:** UNKNOWN
-- **Evidence:** MISSING
-- **Findings:** No CI burn-in tests configured to validate stability.
-
----
-
-## Maintainability Assessment
-
-### Test Coverage
-
-- **Status:** CONCERNS ⚠️
-- **Threshold:** >= 80% (from Test Design)
-- **Actual:** UNKNOWN
-- **Evidence:** MISSING
-- **Findings:** No code coverage reports available.
-
-### Code Quality
-
-- **Status:** CONCERNS ⚠️
-- **Threshold:** >= 85/100 (default)
-- **Actual:** UNKNOWN
-- **Evidence:** MISSING
-- **Findings:** No static analysis (SonarQube, etc.) results available.
-
-### Technical Debt
-
-- **Status:** CONCERNS ⚠️
-- **Threshold:** < 5% debt ratio (default)
-- **Actual:** UNKNOWN
-- **Evidence:** MISSING
-- **Findings:** No technical debt analysis available.
+| ID | Requirement | Criteria | Status | Evidence / Notes |
+|----|-------------|----------|--------|------------------|
+| **NFR-S8** | WSS/TLS 1.3 | Enforced | ⚪ | Check server config / connection. |
+| **NFR-S9** | JWT Validation | Every request | ⚪ | Check middleware. |
+| **NFR-S10**| Password Hashing | bcrypt/Argon2 | ⚪ | Check auth service code. |
+| **NFR-S11**| API Key Strength | 256-bit random | ⚪ | Check key generation logic. |
+| **NFR-S12**| IP ACLs | Supported | ⚪ | Check access control logic. |
+| **NFR-S13**| No Disk Logging | Configurable | ⚪ | Check logging config. |
+| **NFR-S14**| Least Privilege | Non-root capability | ⚪ | Check Dockerfile / service config. |
+| **NFR-S15**| mTLS | Supported (Optional) | ⚪ | Check TLS config. |
 
 ---
 
-## Quick Wins
+## 4. Reliability & Stability Assessment (NFR-R)
 
-4 quick wins identified for immediate implementation:
-
-1. **Integrate Dependency Scanning (Security)** - HIGH - 2 hours
-   - Run `npm audit` for the frontend and `cargo audit` for the backend in the CI pipeline to catch known vulnerabilities in dependencies.
-   - No code changes needed.
-
-2. **Enable Basic Code Coverage (Maintainability)** - HIGH - 4 hours
-   - Configure `cargo-tarpaulin` for the backend and Jest/Vite's built-in coverage for the frontend to get an initial baseline.
-   - Minimal configuration changes.
-
-3. **Set up Basic Load Test (Performance)** - HIGH - 8 hours
-   - Create a simple k6 script to test the main API endpoints and establish a baseline for response time and throughput.
-   - This will provide initial evidence for the most critical performance NFRs.
-
-4. **Implement Health Check Endpoint (Reliability)** - MEDIUM - 4 hours
-   - Add a `/api/health` endpoint to the backend that checks database connectivity. This is a foundational step for uptime monitoring.
+| ID | Requirement | Criteria | Status | Evidence / Notes |
+|----|-------------|----------|--------|------------------|
+| **NFR-R1** | Malformed PCAP | Graceful error | ⚪ | Pending negative testing. |
+| **NFR-R2** | Upload Progress | Visible | ⚪ | Verify UI. |
+| **NFR-R3** | Data Persistence | Auto-save | ⚪ | Verify crash recovery. |
+| **NFR-R4** | Storage Quota | Graceful error | ⚪ | Pending quota test. |
+| **NFR-R5** | Format Validation | Pre-parse check | ⚪ | Verify validation logic. |
+| **NFR-R6** | Error Boundaries | Prevent cascade | ⚪ | Check React Error Boundaries. |
+| **NFR-R7** | Console Logging | Errors only | ⚪ | Check console output. |
 
 ---
 
-## Recommended Actions
+## 5. Maintainability & Development Assessment (NFR-M)
 
-### Immediate (Before Release) - CRITICAL/HIGH Priority
-
-1. **Set up Performance Testing with k6** - HIGH - 3 days - DevOps/Eng
-   - Create k6 scripts to simulate realistic user loads and test the 1 Gbps throughput and ≤5s latency NFRs.
-   - Integrate k6 into the CI/CD pipeline to run on every release candidate.
-   - **Validation:** Performance test results are generated and compared against defined thresholds.
-
-2. **Implement Security Scanning in CI/CD** - CRITICAL - 2 days - Security/DevOps
-   - Integrate SAST (e.g., SonarQube, CodeQL) and DAST (e.g., OWASP ZAP) tools into the CI/CD pipeline.
-   - Run `npm audit` and `cargo audit` on every build.
-   - **Validation:** Security reports are generated and reviewed. No critical vulnerabilities are present.
-
-3. **Configure CI Burn-In Tests** - HIGH - 2 days - DevOps/Eng
-   - Identify critical E2E tests and configure them to run in a burn-in loop (e.g., 10-20 iterations) in the CI pipeline to detect flakiness.
-   - **Validation:** Burn-in tests pass consistently.
-
-### Short-term (Next Sprint) - MEDIUM Priority
-
-1. **Integrate Error Tracking and APM** - MEDIUM - 3 days - Eng
-   - Integrate a tool like Sentry or Datadog for error tracking and Application Performance Monitoring (APM).
-   - This will provide evidence for error rates and help diagnose performance bottlenecks.
-
-2. **Establish Code Quality Gates** - MEDIUM - 2 days - Eng
-   - Integrate SonarQube or a similar tool into the CI/CD pipeline to enforce code quality and maintainability standards.
+| ID | Requirement | Criteria | Status | Evidence / Notes |
+|----|-------------|----------|--------|------------------|
+| **NFR-M1** | TypeScript Strict | Enabled | 🟢 | **PASS**: `strict: true` in `tsconfig.app.json`. |
+| **NFR-M2** | Documentation | JSDoc / Props | ⚪ | Spot check components. |
+| **NFR-M3** | Test Coverage | ≥ 80% | 🟡 | **CONCERNS**: No unit test script/coverage report found. |
+| **NFR-M4** | Build Time | < 30s (Dev) | ⚪ | Measure `npm run dev`. |
+| **NFR-M5** | Prod Optimization | Minified | ⚪ | Check `npm run build` output. |
+| **NFR-M6** | Dep Updates | Automated | ⚪ | Check Dependabot/Renovate. |
 
 ---
 
-## Evidence Gaps
+## 6. Other Assessments
 
-4 evidence gaps identified - action required:
+### Scalability (NFR-SC)
+- **NFR-SC1** (Decoupled Backend): ⚪ Pending architecture review.
+- **NFR-SC2** (Pagination): ⚪ Verify data tables.
+- **NFR-SC3** (IndexedDB Upgrade): 🟡 **CONCERNS**: Uses `localStorage` directly; no abstraction for IndexedDB upgrade.
+- **NFR-SC4** (Code Splitting): ⚪ Verify lazy loading.
+- **NFR-SC5** (Large Dataset): ⚪ Pending load test (50k packets).
 
-- [ ] **Performance Test Results** (Performance)
-  - **Owner:** Eng/DevOps
-  - **Deadline:** Next Sprint
-  - **Suggested Evidence:** k6 load test reports, APM data.
-  - **Impact:** Without this, the system's ability to handle load is unknown, posing a significant risk to production stability.
+### Accessibility (NFR-A)
+- **NFR-A1** (WCAG 2.1 AA): ⚪ Pending audit.
+- **NFR-A2** (Keyboard Nav): ⚪ Pending manual test.
+- **NFR-A3** (Screen Reader): ⚪ Pending manual test.
+- **NFR-A4** (Color Indep): ⚪ Verify UI design.
+- **NFR-A5** (Font Resizing): ⚪ Verify UI responsiveness.
+- **NFR-A6** (Focus Indicators): ⚪ Verify UI styles.
+- **NFR-A7** (Alt Text): ⚪ Verify images/charts.
 
-- [ ] **Security Scan Reports** (Security)
-  - **Owner:** Security/DevOps
-  - **Deadline:** Next Sprint
-  - **Suggested Evidence:** SAST, DAST, and dependency scan reports.
-  - **Impact:** Critical vulnerabilities may exist, exposing the application and users to attack.
-
-- [ ] **Reliability Metrics** (Reliability)
-  - **Owner:** DevOps/Eng
-  - **Deadline:** Next Sprint
-  - **Suggested Evidence:** Uptime reports, error rate dashboards, CI burn-in results.
-  - **Impact:** The stability and availability of the application in production are unverified.
-
-- [ ] **Maintainability Metrics** (Maintainability)
-  - **Owner:** Eng
-  - **Deadline:** Next Sprint
-  - **Suggested Evidence:** Code coverage reports, static analysis reports.
-  - **Impact:** High technical debt and low code quality could slow down future development and increase the risk of bugs.
+### Browser Compatibility (NFR-BC)
+- **NFR-BC1** (Browser Support): ⚪ Pending cross-browser test.
+- **NFR-BC2** (API Fallback): ⚪ Verify PerformanceObserver check.
+- **NFR-BC3** (File API Fallback): ⚪ Verify file picker.
+- **NFR-BC4** (Crypto API): ⚪ Verify requirement check.
+- **NFR-BC5** (Incompatible Msg): ⚪ Verify detection logic.
 
 ---
 
-## Gate YAML Snippet
+## 7. Quick Wins & Recommendations
+
+### Quick Wins
+- [ ] Enable TypeScript strict mode if not already enabled.
+- [ ] Configure `npm audit` in CI pipeline.
+- [ ] Add bundle analyzer to build process.
+
+### Recommended Actions
+1.  **Performance**: Implement `k6` load tests for WebSocket streaming.
+2.  **Security**: Configure CSP headers in `index.html` or server middleware.
+3.  **Reliability**: Add React Error Boundaries to top-level components.
+4.  **Maintainability**: Set up Jest/Vitest coverage reporting.
+5.  **Critical Fixes**:
+    -   Replace `crypto-js` with `window.crypto.subtle` (NFR-S2).
+    -   Move PCAP parsing to a Web Worker (NFR-P1/P2).
+    -   Implement IndexedDB adapter for storage (NFR-SC3).
+    -   Add CSP meta tag to `index.html` (NFR-S3).
+
+---
+
+## 8. Gate YAML Snippet
 
 ```yaml
-nfr_assessment:
-  date: '2025-11-17'
-  story_id: 'N/A'
-  feature_name: 'net-pack-parser'
-  categories:
-    performance: 'CONCERNS'
-    security: 'CONCERNS'
-    reliability: 'CONCERNS'
-    maintainability: 'CONCERNS'
-  overall_status: 'CONCERNS'
-  critical_issues: 0
-  high_priority_issues: 4
-  medium_priority_issues: 0
-  concerns: 4
-  blockers: false
-  quick_wins: 4
-  evidence_gaps: 4
-  recommendations:
-    - 'Set up Performance Testing with k6'
-    - 'Implement Security Scanning in CI/CD'
-    - 'Configure CI Burn-In Tests'
+quality_gate:
+  nfr_check:
+    name: "NFR Validation"
+    runs_on: ubuntu-latest
+    steps:
+      - name: Check Bundle Size
+        run: |
+          npm run build
+          # Check if dist folder size is < 2MB (simplified)
+          du -sh dist/
+      - name: Verify TypeScript Strict Mode
+        run: grep '"strict": true' tsconfig.app.json
+      - name: Security Audit
+        run: npm audit --audit-level=high
 ```

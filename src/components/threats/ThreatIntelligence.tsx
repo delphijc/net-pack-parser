@@ -16,10 +16,10 @@ const ThreatIntelligence: React.FC = () => {
     source: '',
     description: ''
   });
-  
+
   const threats = database.getAllThreatIntelligence();
   const packets = database.getAllPackets();
-  
+
   // Get all threat intelligence from packets
   const packetThreats = useMemo(() => {
     const allThreats: (ThreatIntelligenceType & { packetId: string })[] = [];
@@ -32,13 +32,13 @@ const ThreatIntelligence: React.FC = () => {
     });
     return allThreats;
   }, [packets]);
-  
+
   // Combine stored threats with packet threats
   const allThreats = useMemo(() => {
     const combined = [...threats.map(t => ({ ...t, packetId: null })), ...packetThreats];
     return combined;
   }, [threats, packetThreats]);
-  
+
   // Filter threats
   const filteredThreats = useMemo(() => {
     return allThreats.filter(threat => {
@@ -48,19 +48,19 @@ const ThreatIntelligence: React.FC = () => {
       return true;
     });
   }, [allThreats, searchQuery, severityFilter, typeFilter]);
-  
+
   // Statistics
   const stats = useMemo(() => {
     const severityCounts = allThreats.reduce((acc, threat) => {
       acc[threat.severity] = (acc[threat.severity] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
     const typeCounts = allThreats.reduce((acc, threat) => {
       acc[threat.type] = (acc[threat.type] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
     return {
       total: allThreats.length,
       detected: packetThreats.length,
@@ -69,7 +69,7 @@ const ThreatIntelligence: React.FC = () => {
       typeCounts
     };
   }, [allThreats, packetThreats, threats]);
-  
+
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical': return 'text-red-400 bg-red-900/20';
@@ -79,7 +79,7 @@ const ThreatIntelligence: React.FC = () => {
       default: return 'text-gray-400 bg-gray-900/20';
     }
   };
-  
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'malicious_domain': return '🌐';
@@ -89,10 +89,10 @@ const ThreatIntelligence: React.FC = () => {
       default: return '⚠️';
     }
   };
-  
+
   const handleAddThreat = () => {
     if (!newThreat.value || !newThreat.description) return;
-    
+
     const threat: ThreatIntelligenceType = {
       id: uuidv4(),
       type: newThreat.type,
@@ -102,7 +102,7 @@ const ThreatIntelligence: React.FC = () => {
       description: newThreat.description,
       lastUpdated: new Date().toISOString()
     };
-    
+
     database.storeThreatIntelligence(threat);
     setNewThreat({
       type: 'malicious_domain',
@@ -113,13 +113,13 @@ const ThreatIntelligence: React.FC = () => {
     });
     setShowAddThreat(false);
   };
-  
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <AlertTriangle className="text-red-400 mr-3" size={28} />
-          <h1 className="text-2xl font-bold">Threat Intelligence</h1>
+          <h2 className="text-2xl font-bold">Threat Intelligence</h2>
         </div>
         <div className="flex items-center space-x-4">
           <button
@@ -163,24 +163,24 @@ const ThreatIntelligence: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <h3 className="text-sm font-medium text-gray-400 mb-2">Total Threats</h3>
           <div className="text-2xl font-bold">{stats.total}</div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <h3 className="text-sm font-medium text-gray-400 mb-2">Detected in Traffic</h3>
           <div className="text-2xl font-bold text-red-400">{stats.detected}</div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <h3 className="text-sm font-medium text-gray-400 mb-2">Stored Intelligence</h3>
           <div className="text-2xl font-bold text-blue-400">{stats.stored}</div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <h3 className="text-sm font-medium text-gray-400 mb-2">Critical Threats</h3>
           <div className="text-2xl font-bold text-red-400">
@@ -188,7 +188,7 @@ const ThreatIntelligence: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Threat Categories */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow-md p-6">
@@ -205,7 +205,7 @@ const ThreatIntelligence: React.FC = () => {
             ))}
           </div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-6">
           <h2 className="text-lg font-semibold mb-4">Threats by Type</h2>
           <div className="space-y-3">
@@ -221,7 +221,7 @@ const ThreatIntelligence: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Threats List */}
       <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden">
         <div className="p-6 border-b border-gray-700">
@@ -230,13 +230,13 @@ const ThreatIntelligence: React.FC = () => {
             Showing {filteredThreats.length} of {allThreats.length} threats
           </p>
         </div>
-        
+
         {filteredThreats.length === 0 ? (
           <div className="p-8 text-center">
             <Database size={48} className="text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No Threats Found</h3>
             <p className="text-gray-400">
-              {allThreats.length === 0 
+              {allThreats.length === 0
                 ? "Add threat intelligence or parse network traffic to populate this database."
                 : "Try adjusting your filters to see more results."
               }
@@ -262,15 +262,15 @@ const ThreatIntelligence: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    
+
                     <h3 className="font-medium mb-1">{threat.description}</h3>
-                    
+
                     <div className="text-sm text-gray-400 mb-2">
                       <span className="font-mono bg-gray-900 px-2 py-1 rounded">
                         {threat.value}
                       </span>
                     </div>
-                    
+
                     <div className="text-xs text-gray-500 flex items-center space-x-4">
                       <span>Source: {threat.source}</span>
                       <span>Updated: {new Date(threat.lastUpdated).toLocaleDateString()}</span>
@@ -279,7 +279,7 @@ const ThreatIntelligence: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     {threat.value.includes('http') && (
                       <button
@@ -303,21 +303,21 @@ const ThreatIntelligence: React.FC = () => {
           </div>
         )}
       </div>
-      
+
       {/* Add Threat Modal */}
       {showAddThreat && (
         <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
             <div className="bg-gray-700 px-6 py-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold">Add Threat Intelligence</h3>
-              <button 
+              <button
                 className="text-gray-400 hover:text-white"
                 onClick={() => setShowAddThreat(false)}
               >
                 ✕
               </button>
             </div>
-            
+
             <div className="p-6">
               <div className="space-y-4">
                 <div>
@@ -335,7 +335,7 @@ const ThreatIntelligence: React.FC = () => {
                     <option value="suspicious_pattern">Suspicious Pattern</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">
                     Value
@@ -348,7 +348,7 @@ const ThreatIntelligence: React.FC = () => {
                     placeholder="e.g., malicious-site.com or 192.168.1.100"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">
                     Severity
@@ -364,7 +364,7 @@ const ThreatIntelligence: React.FC = () => {
                     <option value="critical">Critical</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">
                     Source
@@ -377,7 +377,7 @@ const ThreatIntelligence: React.FC = () => {
                     placeholder="e.g., VirusTotal, Internal Analysis"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">
                     Description
@@ -390,7 +390,7 @@ const ThreatIntelligence: React.FC = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="mt-6 flex justify-end space-x-3">
                 <button
                   onClick={() => setShowAddThreat(false)}

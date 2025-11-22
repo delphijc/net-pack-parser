@@ -6,12 +6,12 @@ const TokensList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<'value' | 'count'>('count');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  
+
   const packets = database.getAllPackets();
-  
+
   const tokenStats = useMemo(() => {
     const stats = new Map<string, { count: number, packets: Set<string> }>();
-    
+
     packets.forEach(packet => {
       packet.tokens
         .filter(token => token.type === 'token')
@@ -24,28 +24,28 @@ const TokensList: React.FC = () => {
           stat.packets.add(packet.id);
         });
     });
-    
+
     return Array.from(stats.entries()).map(([value, { count, packets }]) => ({
       value,
       count,
       packetCount: packets.size
     }));
   }, [packets]);
-  
+
   const filteredAndSortedTokens = useMemo(() => {
     return tokenStats
-      .filter(token => 
+      .filter(token =>
         token.value.toLowerCase().includes(searchQuery.toLowerCase())
       )
       .sort((a, b) => {
         const aValue = sortField === 'value' ? a.value : a.count;
         const bValue = sortField === 'value' ? b.value : b.count;
-        return sortDirection === 'asc' 
+        return sortDirection === 'asc'
           ? aValue > bValue ? 1 : -1
           : bValue > aValue ? 1 : -1;
       });
   }, [tokenStats, searchQuery, sortField, sortDirection]);
-  
+
   const handleSort = (field: 'value' | 'count') => {
     if (field === sortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -54,16 +54,16 @@ const TokensList: React.FC = () => {
       setSortDirection('asc');
     }
   };
-  
+
   const SortIcon = ({ field }: { field: 'value' | 'count' }) => {
     if (field !== sortField) return null;
     return sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
   };
-  
+
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Parsed Tokens</h1>
-      
+      <h2 className="text-2xl font-bold mb-6">Parsed Tokens</h2>
+
       <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden">
         <div className="p-4 border-b border-gray-700">
           <div className="flex items-center">
@@ -79,13 +79,13 @@ const TokensList: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-900">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  <button 
+                  <button
                     className="flex items-center focus:outline-none"
                     onClick={() => handleSort('value')}
                   >
@@ -94,7 +94,7 @@ const TokensList: React.FC = () => {
                   </button>
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  <button 
+                  <button
                     className="flex items-center focus:outline-none"
                     onClick={() => handleSort('count')}
                   >

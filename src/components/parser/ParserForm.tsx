@@ -12,38 +12,38 @@ const ParserForm: React.FC = () => {
   const [lastParsedPacket, setLastParsedPacket] = useState<ParsedPacket | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!inputData.trim()) {
       setErrorMessage('Please enter some data to parse');
       return;
     }
-    
+
     try {
       setParsing(true);
       setErrorMessage('');
-      
+
       // Parse the input data
       const parsedPacket = parseNetworkData(inputData);
-      
+
       // Store the parsed packet in the database
       database.storePacket(parsedPacket);
-      
+
       // Process file downloads
       const filePromises = parsedPacket.fileReferences.map(async (fileRef) => {
         const updatedFile = await downloadFile(fileRef);
         database.updateFileReference(updatedFile);
         return updatedFile;
       });
-      
+
       // Wait for all file downloads to complete
       await Promise.all(filePromises);
-      
+
       // Set the last parsed packet
       setLastParsedPacket(parsedPacket);
-      
+
       // Clear the input data
       setInputData('');
       setCapturedData([]);
@@ -65,7 +65,7 @@ const ParserForm: React.FC = () => {
 
       const buffer = await file.arrayBuffer();
       const parsedPacket = parseNetworkData(buffer);
-      
+
       database.storePacket(parsedPacket);
       setLastParsedPacket(parsedPacket);
       setInputData('');
@@ -87,11 +87,11 @@ const ParserForm: React.FC = () => {
         // Stop the capture and load captured data into the parser content viewer
         const packets = stopNetworkCapture();
         setCapturing(false);
-        
+
         // Update captured data in the UI
         if (packets.length > 0) {
           setCapturedData(packets);
-          
+
           // Load the first packet's rawData into the input field
           if (packets[0].rawData) {
             setInputData(packets[0].rawData);
@@ -102,7 +102,7 @@ const ParserForm: React.FC = () => {
       } else {
         setErrorMessage('');
         setCapturedData([]);
-        
+
         // Start network capture with a callback that updates the UI in real-time
         await startNetworkCapture((packet) => {
           setCapturedData(prev => {
@@ -113,7 +113,7 @@ const ParserForm: React.FC = () => {
             return prev;
           });
         });
-        
+
         setCapturing(true);
       }
     } catch (error) {
@@ -136,30 +136,30 @@ const ParserForm: React.FC = () => {
 
     // Set the last packet as the most recently parsed
     setLastParsedPacket(capturedData[capturedData.length - 1]);
-    
+
     // Clear the captured data
     setCapturedData([]);
   };
-  
+
   const sampleData = [
     'GET /api/users HTTP/1.1\nHost: example.com\nUser-Agent: Mozilla/5.0\nAccept: */*\n\nid=123&name=John',
     'HTTP/1.1 200 OK\nContent-Type: application/json\nServer: nginx\n\n{"data": {"url": "https://example.com/files/document.pdf", "items": [1, 2, 3]}}',
     'From: user@example.com\nTo: admin@example.com\nSubject: Weekly Report\n\nPlease find the attached report at https://example.com/reports/weekly.xlsx'
   ];
-  
+
   const loadSampleData = (index: number) => {
     setInputData(sampleData[index]);
   };
-  
+
   const handleViewPacket = (packet: ParsedPacket) => {
     // Load the raw data into the input field
     setInputData(packet.rawData);
   };
-  
+
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Network Traffic Parser</h1>
-      
+      <h2 className="text-2xl font-bold mb-6">Network Traffic Parser</h2>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
           <div className="bg-gray-800 rounded-lg shadow-md p-6">
@@ -171,11 +171,10 @@ const ParserForm: React.FC = () => {
               <div className="flex space-x-2">
                 <button
                   onClick={handleCaptureToggle}
-                  className={`px-4 py-2 rounded-md text-sm flex items-center ${
-                    capturing 
-                      ? 'bg-red-600 hover:bg-red-700' 
+                  className={`px-4 py-2 rounded-md text-sm flex items-center ${capturing
+                      ? 'bg-red-600 hover:bg-red-700'
                       : 'bg-green-600 hover:bg-green-700'
-                  }`}
+                    }`}
                 >
                   {capturing ? (
                     <>
@@ -205,7 +204,7 @@ const ParserForm: React.FC = () => {
                 </button>
               </div>
             </div>
-            
+
             {capturedData.length > 0 && (
               <div className="mb-4 bg-gray-900 p-4 rounded-md">
                 <div className="flex items-center justify-between mb-3">
@@ -230,8 +229,8 @@ const ParserForm: React.FC = () => {
                 </div>
                 <div className="max-h-48 overflow-y-auto">
                   {capturedData.map((packet, index) => (
-                    <div 
-                      key={packet.id} 
+                    <div
+                      key={packet.id}
                       className="mb-1 py-1 px-2 hover:bg-gray-800 rounded cursor-pointer flex justify-between items-center"
                       onClick={() => handleViewPacket(packet)}
                     >
@@ -246,7 +245,7 @@ const ParserForm: React.FC = () => {
                 </div>
               </div>
             )}
-            
+
             {capturing && capturedData.length === 0 && (
               <div className="mb-4 bg-blue-900/30 border border-blue-800 rounded-md p-3 flex items-center">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
@@ -255,7 +254,7 @@ const ParserForm: React.FC = () => {
                 </p>
               </div>
             )}
-            
+
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label htmlFor="inputData" className="block text-sm font-medium text-gray-400 mb-2">
@@ -269,14 +268,14 @@ const ParserForm: React.FC = () => {
                   placeholder="Paste network traffic data here (HTTP headers, email content, etc.)"
                 ></textarea>
               </div>
-              
+
               {errorMessage && (
                 <div className="mb-4 p-3 bg-red-900/50 border border-red-800 rounded-md flex items-start">
                   <AlertTriangle size={16} className="text-red-400 mr-2 mt-0.5 flex-shrink-0" />
                   <p className="text-sm text-red-300">{errorMessage}</p>
                 </div>
               )}
-              
+
               <div className="flex flex-wrap items-center justify-between">
                 <div className="mb-2 md:mb-0">
                   <button
@@ -301,15 +300,14 @@ const ParserForm: React.FC = () => {
                     Load Email
                   </button>
                 </div>
-                
+
                 <button
                   type="submit"
                   disabled={parsing}
-                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center ${
-                    parsing
+                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center ${parsing
                       ? 'bg-blue-700 cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
+                    }`}
                 >
                   {parsing ? (
                     <>
@@ -327,30 +325,30 @@ const ParserForm: React.FC = () => {
             </form>
           </div>
         </div>
-        
+
         <div>
           <div className="bg-gray-800 rounded-lg shadow-md p-6 h-full">
             <h2 className="text-lg font-semibold mb-4">Quick Help</h2>
-            
+
             <div className="space-y-4 text-sm">
               <div>
                 <h3 className="font-medium text-blue-400 mb-1">What data can I parse?</h3>
                 <p className="text-gray-400">
-                  You can paste any network traffic data including HTTP requests/responses, 
+                  You can paste any network traffic data including HTTP requests/responses,
                   emails, JSON payloads, and more. You can also upload PCAP files from Wireshark
                   or use direct network capture.
                 </p>
               </div>
-              
+
               <div>
                 <h3 className="font-medium text-blue-400 mb-1">How does it work?</h3>
                 <p className="text-gray-400">
-                  The parser extracts tokens (non-alphanumeric characters) and string content, 
+                  The parser extracts tokens (non-alphanumeric characters) and string content,
                   identifies sections, and detects file references in URLs. For PCAP files,
                   it analyzes packet headers and payload data.
                 </p>
               </div>
-              
+
               <div>
                 <h3 className="font-medium text-blue-400 mb-1">Where is data stored?</h3>
                 <p className="text-gray-400">
@@ -361,14 +359,14 @@ const ParserForm: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {lastParsedPacket && (
         <div className="mt-6 bg-gray-800 rounded-lg shadow-md p-6 border-l-4 border-green-500 animate-fadeIn">
           <h2 className="text-lg font-semibold mb-4 flex items-center">
             <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
             Successfully Parsed Packet
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h3 className="text-sm font-medium text-gray-400 mb-2">Packet Information</h3>
@@ -383,7 +381,7 @@ const ParserForm: React.FC = () => {
                 </p>
               </div>
             </div>
-            
+
             <div>
               <h3 className="text-sm font-medium text-gray-400 mb-2">Extracted Data</h3>
               <div className="bg-gray-900 p-3 rounded">

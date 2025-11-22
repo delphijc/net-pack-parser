@@ -9,34 +9,34 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const packets = database.getAllPackets();
   const files = database.getAllFiles();
-  
+
   // Statistics
   const totalPackets = packets.length;
   const totalFiles = files.length;
-  const tokenCount = packets.reduce((acc, packet) => 
+  const tokenCount = packets.reduce((acc, packet) =>
     acc + packet.tokens.filter(t => t.type === 'token').length, 0);
-  const stringCount = packets.reduce((acc, packet) => 
+  const stringCount = packets.reduce((acc, packet) =>
     acc + packet.tokens.filter(t => t.type === 'string').length, 0);
-  
+
   // Protocol distribution
   const protocolCounts = packets.reduce((acc: Record<string, number>, packet) => {
     acc[packet.protocol] = (acc[packet.protocol] || 0) + 1;
     return acc;
   }, {});
-  
+
   const handleCardClick = (tab: string) => {
     if (onNavigate) {
       onNavigate(tab);
     }
   };
-  
+
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Network Traffic Dashboard</h1>
-      
+      <h2 className="text-2xl font-bold mb-6">Network Traffic Dashboard</h2>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         {/* Stats Cards */}
-        <div 
+        <div
           onClick={() => handleCardClick('packets')}
           className="bg-blue-600 text-white rounded-lg shadow-md p-4 flex items-center cursor-pointer hover:bg-blue-700 transition-colors"
         >
@@ -48,8 +48,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <p className="text-2xl font-bold">{totalPackets}</p>
           </div>
         </div>
-        
-        <div 
+
+        <div
           onClick={() => handleCardClick('files')}
           className="bg-teal-600 text-white rounded-lg shadow-md p-4 flex items-center cursor-pointer hover:bg-teal-700 transition-colors"
         >
@@ -61,8 +61,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <p className="text-2xl font-bold">{totalFiles}</p>
           </div>
         </div>
-        
-        <div 
+
+        <div
           onClick={() => handleCardClick('tokens')}
           className="bg-amber-600 text-white rounded-lg shadow-md p-4 flex items-center cursor-pointer hover:bg-amber-700 transition-colors"
         >
@@ -75,7 +75,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        <div 
+        <div
           onClick={() => handleCardClick('strings')}
           className="bg-indigo-600 text-white rounded-lg shadow-md p-4 flex items-center cursor-pointer hover:bg-indigo-700 transition-colors"
         >
@@ -88,7 +88,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </div>
         </div>
       </div>
-      
+
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow-md p-6">
@@ -108,10 +108,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                       <span className="text-gray-400">{count}</span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full ${
-                          ['bg-blue-500', 'bg-teal-500', 'bg-purple-500', 'bg-amber-500', 'bg-red-500'][index % 5]
-                        }`}
+                      <div
+                        className={`h-2 rounded-full ${['bg-blue-500', 'bg-teal-500', 'bg-purple-500', 'bg-amber-500', 'bg-red-500'][index % 5]
+                          }`}
                         style={{ width: `${(count / totalPackets) * 100}%` }}
                       ></div>
                     </div>
@@ -121,7 +120,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             )}
           </div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-white">Traffic History</h2>
@@ -141,7 +140,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </div>
         </div>
       </div>
-      
+
       {/* Action Card */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-lg shadow-md p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between">
@@ -149,7 +148,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <h2 className="text-xl font-bold text-white mb-2">Ready to capture network traffic?</h2>
             <p className="text-blue-100">Start by parsing some network data to begin analyzing traffic patterns.</p>
           </div>
-          <button 
+          <button
             onClick={() => handleCardClick('parser')}
             className="bg-white text-blue-700 px-6 py-2 rounded-md font-medium hover:bg-blue-50 transition-colors shadow-sm"
           >

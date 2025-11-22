@@ -8,23 +8,23 @@ const PacketsList: React.FC = () => {
   const [sortField, setSortField] = useState<keyof ParsedPacket>('timestamp');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
-  
+
   const packets = database.getAllPackets();
 
   // Sort packets
   const sortedPackets = [...packets].sort((a, b) => {
     const aValue = a[sortField];
     const bValue = b[sortField];
-    
+
     if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortDirection === 'asc' 
+      return sortDirection === 'asc'
         ? aValue.localeCompare(bValue)
         : bValue.localeCompare(aValue);
     }
-    
+
     return 0;
   });
-  
+
   const handleSort = (field: keyof ParsedPacket) => {
     if (field === sortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -33,7 +33,7 @@ const PacketsList: React.FC = () => {
       setSortDirection('asc');
     }
   };
-  
+
   const handleDeletePacket = (packetId: string) => {
     database.deletePacket(packetId);
     setExpandedPacketId(null);
@@ -46,7 +46,7 @@ const PacketsList: React.FC = () => {
     // Navigate to filters tab
     window.dispatchEvent(new CustomEvent('navigateTab', { detail: 'filters' }));
   };
-  
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('en-US', {
@@ -57,16 +57,16 @@ const PacketsList: React.FC = () => {
       second: '2-digit'
     }).format(date);
   };
-  
+
   const SortIcon = ({ field }: { field: keyof ParsedPacket }) => {
     if (field !== sortField) return null;
     return sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
   };
-  
+
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Network Packets</h1>
-      
+      <h2 className="text-2xl font-bold mb-6">Network Packets</h2>
+
       {packets.length === 0 ? (
         <div className="bg-gray-800 rounded-lg shadow-md p-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-700 rounded-full mb-4">
@@ -84,7 +84,7 @@ const PacketsList: React.FC = () => {
               <thead className="bg-gray-900">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    <button 
+                    <button
                       className="flex items-center focus:outline-none"
                       onClick={() => handleSort('timestamp')}
                     >
@@ -93,7 +93,7 @@ const PacketsList: React.FC = () => {
                     </button>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    <button 
+                    <button
                       className="flex items-center focus:outline-none"
                       onClick={() => handleSort('protocol')}
                     >
@@ -102,7 +102,7 @@ const PacketsList: React.FC = () => {
                     </button>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    <button 
+                    <button
                       className="flex items-center focus:outline-none"
                       onClick={() => handleSort('source')}
                     >
@@ -111,7 +111,7 @@ const PacketsList: React.FC = () => {
                     </button>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    <button 
+                    <button
                       className="flex items-center focus:outline-none"
                       onClick={() => handleSort('destination')}
                     >
@@ -138,13 +138,12 @@ const PacketsList: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          packet.protocol === 'HTTP' ? 'bg-green-800 text-green-100' :
-                          packet.protocol === 'HTTPS' ? 'bg-blue-800 text-blue-100' :
-                          packet.protocol === 'FTP' ? 'bg-purple-800 text-purple-100' :
-                          packet.protocol === 'SMTP' ? 'bg-yellow-800 text-yellow-100' :
-                          'bg-gray-700 text-gray-100'
-                        }`}>
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${packet.protocol === 'HTTP' ? 'bg-green-800 text-green-100' :
+                            packet.protocol === 'HTTPS' ? 'bg-blue-800 text-blue-100' :
+                              packet.protocol === 'FTP' ? 'bg-purple-800 text-purple-100' :
+                                packet.protocol === 'SMTP' ? 'bg-yellow-800 text-yellow-100' :
+                                  'bg-gray-700 text-gray-100'
+                          }`}>
                           {packet.protocol}
                         </span>
                       </td>
@@ -172,7 +171,7 @@ const PacketsList: React.FC = () => {
                         </div>
                       </td>
                     </tr>
-                    
+
                     {showDeleteConfirm === packet.id && (
                       <tr>
                         <td colSpan={6} className="px-4 py-3 bg-red-900/20">
@@ -199,7 +198,7 @@ const PacketsList: React.FC = () => {
                         </td>
                       </tr>
                     )}
-                    
+
                     {expandedPacketId === packet.id && (
                       <tr>
                         <td colSpan={6} className="px-4 py-4 bg-gray-750">
@@ -221,25 +220,24 @@ const PacketsList: React.FC = () => {
                                 </div>
                               </div>
                             </div>
-                            
+
                             <div className="mb-4">
                               <h3 className="text-sm font-semibold text-blue-400 mb-2">Extracted Tokens</h3>
                               <div className="bg-gray-900 p-3 rounded max-h-40 overflow-y-auto font-mono text-sm">
                                 {packet.tokens.map((token, index) => (
-                                  <span 
+                                  <span
                                     key={token.id}
-                                    className={`${
-                                      token.type === 'token' 
-                                        ? 'text-yellow-400' 
+                                    className={`${token.type === 'token'
+                                        ? 'text-yellow-400'
                                         : 'text-blue-300'
-                                    } ${index > 0 ? 'ml-1' : ''}`}
+                                      } ${index > 0 ? 'ml-1' : ''}`}
                                   >
                                     {token.value}
                                   </span>
                                 ))}
                               </div>
                             </div>
-                            
+
                             <div className="mb-4">
                               <h3 className="text-sm font-semibold text-blue-400 mb-2">Sections</h3>
                               <div className="space-y-2">
@@ -260,7 +258,7 @@ const PacketsList: React.FC = () => {
                                 ))}
                               </div>
                             </div>
-                            
+
                             {packet.fileReferences.length > 0 && (
                               <div>
                                 <h3 className="text-sm font-semibold text-blue-400 mb-2">File References</h3>
@@ -273,13 +271,12 @@ const PacketsList: React.FC = () => {
                                           {file.fileName} • {file.hash.substring(0, 8)}...
                                         </div>
                                       </div>
-                                      <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
-                                        file.downloadStatus === 'downloaded' 
-                                          ? 'bg-green-800 text-green-100' 
+                                      <span className={`ml-2 px-2 py-1 text-xs rounded-full ${file.downloadStatus === 'downloaded'
+                                          ? 'bg-green-800 text-green-100'
                                           : file.downloadStatus === 'failed'
                                             ? 'bg-red-800 text-red-100'
                                             : 'bg-yellow-800 text-yellow-100'
-                                      }`}>
+                                        }`}>
                                         {file.downloadStatus}
                                       </span>
                                     </div>

@@ -7,16 +7,16 @@ const ForensicAnalysis: React.FC = () => {
   const [selectedPacket, setSelectedPacket] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const packets = database.getAllPackets();
-  
+
   // Filter packets with suspicious indicators
   const suspiciousPackets = useMemo(() => {
-    return packets.filter(packet => 
+    return packets.filter(packet =>
       packet.suspiciousIndicators && packet.suspiciousIndicators.length > 0
     );
   }, [packets]);
-  
+
   // Get all suspicious indicators across all packets
   const allIndicators = useMemo(() => {
     const indicators: (SuspiciousIndicator & { packetId: string })[] = [];
@@ -29,7 +29,7 @@ const ForensicAnalysis: React.FC = () => {
     });
     return indicators;
   }, [packets]);
-  
+
   // Filter indicators by severity and search query
   const filteredIndicators = useMemo(() => {
     return allIndicators.filter(indicator => {
@@ -38,19 +38,19 @@ const ForensicAnalysis: React.FC = () => {
       return true;
     });
   }, [allIndicators, severityFilter, searchQuery]);
-  
+
   // Statistics
   const stats = useMemo(() => {
     const severityCounts = allIndicators.reduce((acc, indicator) => {
       acc[indicator.severity] = (acc[indicator.severity] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
     const typeCounts = allIndicators.reduce((acc, indicator) => {
       acc[indicator.type] = (acc[indicator.type] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
     return {
       totalPackets: packets.length,
       suspiciousPackets: suspiciousPackets.length,
@@ -59,7 +59,7 @@ const ForensicAnalysis: React.FC = () => {
       typeCounts
     };
   }, [packets, suspiciousPackets, allIndicators]);
-  
+
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical': return 'text-red-400 bg-red-900/20';
@@ -69,7 +69,7 @@ const ForensicAnalysis: React.FC = () => {
       default: return 'text-gray-400 bg-gray-900/20';
     }
   };
-  
+
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
       case 'critical': return <XCircle size={16} className="text-red-400" />;
@@ -79,15 +79,15 @@ const ForensicAnalysis: React.FC = () => {
       default: return <Eye size={16} className="text-gray-400" />;
     }
   };
-  
+
   const selectedPacketData = selectedPacket ? packets.find(p => p.id === selectedPacket) : null;
-  
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <Shield className="text-blue-400 mr-3" size={28} />
-          <h1 className="text-2xl font-bold">Forensic Analysis</h1>
+          <h2 className="text-2xl font-bold">Forensic Analysis</h2>
         </div>
         <div className="flex items-center space-x-4">
           <select
@@ -113,14 +113,14 @@ const ForensicAnalysis: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <h3 className="text-sm font-medium text-gray-400 mb-2">Total Packets</h3>
           <div className="text-2xl font-bold">{stats.totalPackets}</div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <h3 className="text-sm font-medium text-gray-400 mb-2">Suspicious Packets</h3>
           <div className="text-2xl font-bold text-orange-400">{stats.suspiciousPackets}</div>
@@ -128,12 +128,12 @@ const ForensicAnalysis: React.FC = () => {
             {stats.totalPackets > 0 ? Math.round((stats.suspiciousPackets / stats.totalPackets) * 100) : 0}% of total
           </div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <h3 className="text-sm font-medium text-gray-400 mb-2">Security Indicators</h3>
           <div className="text-2xl font-bold text-red-400">{stats.totalIndicators}</div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <h3 className="text-sm font-medium text-gray-400 mb-2">Risk Level</h3>
           <div className="text-2xl font-bold">
@@ -147,7 +147,7 @@ const ForensicAnalysis: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Severity Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow-md p-6">
@@ -172,12 +172,12 @@ const ForensicAnalysis: React.FC = () => {
             ))}
           </div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-6">
           <h2 className="text-lg font-semibold mb-4">Top Threat Types</h2>
           <div className="space-y-3">
             {Object.entries(stats.typeCounts)
-              .sort(([,a], [,b]) => b - a)
+              .sort(([, a], [, b]) => b - a)
               .slice(0, 5)
               .map(([type, count]) => (
                 <div key={type} className="flex items-center justify-between">
@@ -188,7 +188,7 @@ const ForensicAnalysis: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Security Indicators List */}
       <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden">
         <div className="p-6 border-b border-gray-700">
@@ -197,13 +197,13 @@ const ForensicAnalysis: React.FC = () => {
             Showing {filteredIndicators.length} of {allIndicators.length} indicators
           </p>
         </div>
-        
+
         {filteredIndicators.length === 0 ? (
           <div className="p-8 text-center">
             <Shield size={48} className="text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No Security Indicators Found</h3>
             <p className="text-gray-400">
-              {allIndicators.length === 0 
+              {allIndicators.length === 0
                 ? "Parse some network traffic to begin security analysis."
                 : "Try adjusting your filters to see more results."
               }
@@ -229,15 +229,15 @@ const ForensicAnalysis: React.FC = () => {
                           Confidence: {indicator.confidence}%
                         </span>
                       </div>
-                      
+
                       <h3 className="font-medium mb-1">{indicator.description}</h3>
-                      
+
                       <div className="text-sm text-gray-400 mb-2">
                         <span className="font-mono bg-gray-900 px-2 py-1 rounded">
                           {indicator.evidence}
                         </span>
                       </div>
-                      
+
                       {packet && (
                         <div className="text-xs text-gray-500">
                           Packet: {packet.source} → {packet.destination} ({packet.protocol})
@@ -250,7 +250,7 @@ const ForensicAnalysis: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     <button
                       onClick={() => setSelectedPacket(indicator.packetId)}
                       className="ml-4 p-2 hover:bg-gray-700 rounded"
@@ -265,21 +265,21 @@ const ForensicAnalysis: React.FC = () => {
           </div>
         )}
       </div>
-      
+
       {/* Packet Details Modal */}
       {selectedPacketData && (
         <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
             <div className="bg-gray-700 px-6 py-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold">Packet Forensic Details</h3>
-              <button 
+              <button
                 className="text-gray-400 hover:text-white"
                 onClick={() => setSelectedPacket(null)}
               >
                 ✕
               </button>
             </div>
-            
+
             <div className="p-6 overflow-y-auto max-h-[70vh]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -292,7 +292,7 @@ const ForensicAnalysis: React.FC = () => {
                     <p><span className="text-gray-400">Destination:</span> {selectedPacketData.destination}</p>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-semibold mb-3">Forensic Metadata</h4>
                   <div className="bg-gray-900 p-4 rounded space-y-2 text-sm">
@@ -308,7 +308,7 @@ const ForensicAnalysis: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               {selectedPacketData.suspiciousIndicators && selectedPacketData.suspiciousIndicators.length > 0 && (
                 <div className="mt-6">
                   <h4 className="font-semibold mb-3">Security Indicators</h4>
@@ -328,7 +328,7 @@ const ForensicAnalysis: React.FC = () => {
                   </div>
                 </div>
               )}
-              
+
               <div className="mt-6">
                 <h4 className="font-semibold mb-3">Raw Packet Data</h4>
                 <div className="bg-gray-900 p-4 rounded">

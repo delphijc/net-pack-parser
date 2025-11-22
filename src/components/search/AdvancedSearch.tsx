@@ -16,19 +16,19 @@ const AdvancedSearch: React.FC = () => {
     portNumber: '',
     fileExtension: ''
   });
-  
+
   const [searchResults, setSearchResults] = useState<ParsedPacket[]>([]);
   const [selectedPacket, setSelectedPacket] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
-  
+
   const allPackets = database.getAllPackets();
-  
+
   const handleSearch = async () => {
     setIsSearching(true);
-    
+
     // Simulate search delay for better UX
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     const results = database.searchPacketsByForensicCriteria({
       sourceIp: searchCriteria.sourceIp || undefined,
       destIp: searchCriteria.destIp || undefined,
@@ -39,28 +39,28 @@ const AdvancedSearch: React.FC = () => {
       hasSuspiciousIndicators: searchCriteria.hasSuspiciousIndicators,
       threatLevel: searchCriteria.threatLevel || undefined
     });
-    
+
     // Additional filtering for advanced criteria
     let filteredResults = results;
-    
+
     if (searchCriteria.portNumber) {
-      filteredResults = filteredResults.filter(packet => 
+      filteredResults = filteredResults.filter(packet =>
         packet.rawData.includes(`:${searchCriteria.portNumber}`)
       );
     }
-    
+
     if (searchCriteria.fileExtension) {
-      filteredResults = filteredResults.filter(packet => 
-        packet.fileReferences.some(file => 
+      filteredResults = filteredResults.filter(packet =>
+        packet.fileReferences.some(file =>
           file.fileName.toLowerCase().endsWith(`.${searchCriteria.fileExtension.toLowerCase()}`)
         )
       );
     }
-    
+
     setSearchResults(filteredResults);
     setIsSearching(false);
   };
-  
+
   const clearSearch = () => {
     setSearchCriteria({
       sourceIp: '',
@@ -76,37 +76,37 @@ const AdvancedSearch: React.FC = () => {
     });
     setSearchResults([]);
   };
-  
+
   const searchStats = useMemo(() => {
     const total = searchResults.length;
-    const withThreats = searchResults.filter(p => 
+    const withThreats = searchResults.filter(p =>
       p.threatIntelligence && p.threatIntelligence.length > 0
     ).length;
-    const withSuspicious = searchResults.filter(p => 
+    const withSuspicious = searchResults.filter(p =>
       p.suspiciousIndicators && p.suspiciousIndicators.length > 0
     ).length;
     const protocols = searchResults.reduce((acc, packet) => {
       acc[packet.protocol] = (acc[packet.protocol] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
     return { total, withThreats, withSuspicious, protocols };
   }, [searchResults]);
-  
-  const selectedPacketData = selectedPacket ? 
+
+  const selectedPacketData = selectedPacket ?
     searchResults.find(p => p.id === selectedPacket) : null;
-  
+
   return (
     <div className="p-6">
       <div className="flex items-center mb-6">
         <Search className="text-blue-400 mr-3" size={28} />
-        <h1 className="text-2xl font-bold">Advanced Forensic Search</h1>
+        <h2 className="text-2xl font-bold">Advanced Forensic Search</h2>
       </div>
-      
+
       {/* Search Form */}
       <div className="bg-gray-800 rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-lg font-semibold mb-4">Search Criteria</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">
@@ -120,7 +120,7 @@ const AdvancedSearch: React.FC = () => {
               placeholder="e.g., 192.168.1.100"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">
               Destination IP Address
@@ -133,7 +133,7 @@ const AdvancedSearch: React.FC = () => {
               placeholder="e.g., 10.0.0.1"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">
               Protocol
@@ -153,7 +153,7 @@ const AdvancedSearch: React.FC = () => {
             </select>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">
@@ -166,7 +166,7 @@ const AdvancedSearch: React.FC = () => {
               className="w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-sm"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">
               End Time
@@ -179,7 +179,7 @@ const AdvancedSearch: React.FC = () => {
             />
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">
@@ -193,7 +193,7 @@ const AdvancedSearch: React.FC = () => {
               placeholder="Search packet content..."
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">
               Port Number
@@ -206,7 +206,7 @@ const AdvancedSearch: React.FC = () => {
               placeholder="e.g., 80, 443, 8080"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">
               File Extension
@@ -220,7 +220,7 @@ const AdvancedSearch: React.FC = () => {
             />
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">
@@ -238,15 +238,15 @@ const AdvancedSearch: React.FC = () => {
               <option value="critical">Critical</option>
             </select>
           </div>
-          
+
           <div className="flex items-end">
             <label className="flex items-center">
               <input
                 type="checkbox"
                 checked={searchCriteria.hasSuspiciousIndicators}
-                onChange={(e) => setSearchCriteria(prev => ({ 
-                  ...prev, 
-                  hasSuspiciousIndicators: e.target.checked 
+                onChange={(e) => setSearchCriteria(prev => ({
+                  ...prev,
+                  hasSuspiciousIndicators: e.target.checked
                 }))}
                 className="mr-2"
               />
@@ -254,7 +254,7 @@ const AdvancedSearch: React.FC = () => {
             </label>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <button
             onClick={handleSearch}
@@ -273,7 +273,7 @@ const AdvancedSearch: React.FC = () => {
               </>
             )}
           </button>
-          
+
           <button
             onClick={clearSearch}
             className="bg-gray-700 hover:bg-gray-600 px-6 py-2 rounded-md text-sm flex items-center"
@@ -281,13 +281,13 @@ const AdvancedSearch: React.FC = () => {
             <Filter size={16} className="mr-2" />
             Clear
           </button>
-          
+
           <div className="text-sm text-gray-400">
             Total packets: {allPackets.length}
           </div>
         </div>
       </div>
-      
+
       {/* Search Results Statistics */}
       {searchResults.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
@@ -295,45 +295,45 @@ const AdvancedSearch: React.FC = () => {
             <h3 className="text-sm font-medium text-gray-400 mb-2">Results Found</h3>
             <div className="text-2xl font-bold">{searchStats.total}</div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg shadow-md p-4">
             <h3 className="text-sm font-medium text-gray-400 mb-2">With Threats</h3>
             <div className="text-2xl font-bold text-red-400">{searchStats.withThreats}</div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg shadow-md p-4">
             <h3 className="text-sm font-medium text-gray-400 mb-2">Suspicious</h3>
             <div className="text-2xl font-bold text-yellow-400">{searchStats.withSuspicious}</div>
           </div>
-          
+
           <div className="bg-gray-800 rounded-lg shadow-md p-4">
             <h3 className="text-sm font-medium text-gray-400 mb-2">Top Protocol</h3>
             <div className="text-lg font-bold">
               {Object.entries(searchStats.protocols)
-                .sort(([,a], [,b]) => b - a)[0]?.[0] || 'N/A'}
+                .sort(([, a], [, b]) => b - a)[0]?.[0] || 'N/A'}
             </div>
           </div>
         </div>
       )}
-      
+
       {/* Search Results */}
       <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden">
         <div className="p-6 border-b border-gray-700">
           <h2 className="text-lg font-semibold">Search Results</h2>
           <p className="text-sm text-gray-400 mt-1">
-            {searchResults.length > 0 
+            {searchResults.length > 0
               ? `Found ${searchResults.length} matching packets`
               : 'Enter search criteria and click Search to find packets'
             }
           </p>
         </div>
-        
+
         {searchResults.length === 0 ? (
           <div className="p-8 text-center">
             <Database size={48} className="text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No Results</h3>
             <p className="text-gray-400">
-              {allPackets.length === 0 
+              {allPackets.length === 0
                 ? "No packets available to search. Parse some network traffic first."
                 : "No packets match your search criteria. Try adjusting your filters."
               }
@@ -350,11 +350,10 @@ const AdvancedSearch: React.FC = () => {
                       <span className="text-sm">
                         {new Date(packet.timestamp).toLocaleString()}
                       </span>
-                      <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
-                        packet.protocol === 'HTTP' ? 'bg-green-800 text-green-100' :
-                        packet.protocol === 'HTTPS' ? 'bg-blue-800 text-blue-100' :
-                        'bg-gray-700 text-gray-100'
-                      }`}>
+                      <span className={`ml-2 px-2 py-1 text-xs rounded-full ${packet.protocol === 'HTTP' ? 'bg-green-800 text-green-100' :
+                          packet.protocol === 'HTTPS' ? 'bg-blue-800 text-blue-100' :
+                            'bg-gray-700 text-gray-100'
+                        }`}>
                         {packet.protocol}
                       </span>
                       {packet.suspiciousIndicators && packet.suspiciousIndicators.length > 0 && (
@@ -369,11 +368,11 @@ const AdvancedSearch: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    
+
                     <div className="text-sm text-gray-300 mb-1">
                       {packet.source} → {packet.destination}
                     </div>
-                    
+
                     <div className="text-xs text-gray-500">
                       Size: {packet.rawData.length} bytes
                       {packet.fileReferences.length > 0 && (
@@ -383,7 +382,7 @@ const AdvancedSearch: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  
+
                   <button
                     onClick={() => setSelectedPacket(packet.id)}
                     className="p-2 hover:bg-gray-700 rounded"
@@ -397,21 +396,21 @@ const AdvancedSearch: React.FC = () => {
           </div>
         )}
       </div>
-      
+
       {/* Packet Details Modal */}
       {selectedPacketData && (
         <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
             <div className="bg-gray-700 px-6 py-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold">Packet Details</h3>
-              <button 
+              <button
                 className="text-gray-400 hover:text-white"
                 onClick={() => setSelectedPacket(null)}
               >
                 ✕
               </button>
             </div>
-            
+
             <div className="p-6 overflow-y-auto max-h-[70vh]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
@@ -425,7 +424,7 @@ const AdvancedSearch: React.FC = () => {
                     <p><span className="text-gray-400">Size:</span> {selectedPacketData.rawData.length} bytes</p>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-semibold mb-3">Security Analysis</h4>
                   <div className="bg-gray-900 p-4 rounded space-y-2 text-sm">
@@ -444,7 +443,7 @@ const AdvancedSearch: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-3">Raw Packet Data</h4>
                 <div className="bg-gray-900 p-4 rounded max-h-64 overflow-y-auto">

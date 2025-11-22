@@ -11,50 +11,50 @@ const TimelineView: React.FC = () => {
     start: '',
     end: ''
   });
-  
+
   const allEvents = database.getAllTimelineEvents();
-  
+
   // Filter events
   const filteredEvents = useMemo(() => {
     return allEvents.filter(event => {
       if (severityFilter !== 'all' && event.severity !== severityFilter) return false;
       if (typeFilter !== 'all' && event.type !== typeFilter) return false;
-      
+
       if (dateRange.start || dateRange.end) {
         const eventTime = new Date(event.timestamp).getTime();
         if (dateRange.start && eventTime < new Date(dateRange.start).getTime()) return false;
         if (dateRange.end && eventTime > new Date(dateRange.end).getTime()) return false;
       }
-      
+
       return true;
     });
   }, [allEvents, severityFilter, typeFilter, dateRange]);
-  
+
   // Group events by date
   const groupedEvents = useMemo(() => {
     const groups: Record<string, TimelineEvent[]> = {};
-    
+
     filteredEvents.forEach(event => {
       const date = new Date(event.timestamp).toDateString();
       if (!groups[date]) groups[date] = [];
       groups[date].push(event);
     });
-    
+
     // Sort dates descending
-    const sortedDates = Object.keys(groups).sort((a, b) => 
+    const sortedDates = Object.keys(groups).sort((a, b) =>
       new Date(b).getTime() - new Date(a).getTime()
     );
-    
+
     const sortedGroups: Record<string, TimelineEvent[]> = {};
     sortedDates.forEach(date => {
-      sortedGroups[date] = groups[date].sort((a, b) => 
+      sortedGroups[date] = groups[date].sort((a, b) =>
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
     });
-    
+
     return sortedGroups;
   }, [filteredEvents]);
-  
+
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical': return 'text-red-400 bg-red-900/20 border-red-500';
@@ -63,7 +63,7 @@ const TimelineView: React.FC = () => {
       default: return 'text-gray-400 bg-gray-900/20 border-gray-500';
     }
   };
-  
+
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
       case 'critical': return <AlertTriangle size={16} className="text-red-400" />;
@@ -72,7 +72,7 @@ const TimelineView: React.FC = () => {
       default: return <Clock size={16} className="text-gray-400" />;
     }
   };
-  
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'network_activity': return '🌐';
@@ -83,15 +83,15 @@ const TimelineView: React.FC = () => {
       default: return '📋';
     }
   };
-  
+
   const selectedEventData = selectedEvent ? allEvents.find(e => e.id === selectedEvent) : null;
-  
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <Timeline className="text-blue-400 mr-3" size={28} />
-          <h1 className="text-2xl font-bold">Timeline Analysis</h1>
+          <h2 className="text-2xl font-bold">Timeline Analysis</h2>
         </div>
         <div className="flex items-center space-x-4">
           <select
@@ -104,7 +104,7 @@ const TimelineView: React.FC = () => {
             <option value="warning">Warning</option>
             <option value="info">Info</option>
           </select>
-          
+
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
@@ -117,7 +117,7 @@ const TimelineView: React.FC = () => {
             <option value="data_transfer">Data Transfer</option>
             <option value="suspicious_activity">Suspicious Activity</option>
           </select>
-          
+
           <div className="flex items-center space-x-2">
             <input
               type="date"
@@ -135,28 +135,28 @@ const TimelineView: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <h3 className="text-sm font-medium text-gray-400 mb-2">Total Events</h3>
           <div className="text-2xl font-bold">{filteredEvents.length}</div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <h3 className="text-sm font-medium text-gray-400 mb-2">Critical Events</h3>
           <div className="text-2xl font-bold text-red-400">
             {filteredEvents.filter(e => e.severity === 'critical').length}
           </div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <h3 className="text-sm font-medium text-gray-400 mb-2">Warnings</h3>
           <div className="text-2xl font-bold text-yellow-400">
             {filteredEvents.filter(e => e.severity === 'warning').length}
           </div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <h3 className="text-sm font-medium text-gray-400 mb-2">Time Range</h3>
           <div className="text-sm">
@@ -168,7 +168,7 @@ const TimelineView: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Timeline */}
       <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden">
         <div className="p-6 border-b border-gray-700">
@@ -177,7 +177,7 @@ const TimelineView: React.FC = () => {
             Chronological view of system events and activities
           </p>
         </div>
-        
+
         {Object.keys(groupedEvents).length === 0 ? (
           <div className="p-8 text-center">
             <Timeline size={48} className="text-gray-600 mx-auto mb-4" />
@@ -192,28 +192,28 @@ const TimelineView: React.FC = () => {
               <div key={date} className="mb-8">
                 <div className="flex items-center mb-4">
                   <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                    {new Date(date).toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
+                    {new Date(date).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
                     })}
                   </div>
                   <div className="ml-3 text-sm text-gray-400">
                     {events.length} event{events.length !== 1 ? 's' : ''}
                   </div>
                 </div>
-                
+
                 <div className="relative">
                   <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-700"></div>
-                  
+
                   <div className="space-y-4">
                     {events.map((event, index) => (
                       <div key={event.id} className="relative flex items-start">
                         <div className={`relative z-10 w-8 h-8 rounded-full border-2 flex items-center justify-center ${getSeverityColor(event.severity)}`}>
                           {getSeverityIcon(event.severity)}
                         </div>
-                        
+
                         <div className="ml-4 flex-1 bg-gray-900 rounded-lg p-4">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center">
@@ -233,7 +233,7 @@ const TimelineView: React.FC = () => {
                               </button>
                             </div>
                           </div>
-                          
+
                           <div className="text-sm text-gray-400 mb-2">
                             <span className="capitalize">{event.type.replace('_', ' ')}</span>
                             {event.source && event.destination && (
@@ -242,7 +242,7 @@ const TimelineView: React.FC = () => {
                               </span>
                             )}
                           </div>
-                          
+
                           {event.evidence && event.evidence.length > 0 && (
                             <div className="text-xs bg-gray-800 p-2 rounded font-mono">
                               {event.evidence[0]}
@@ -258,21 +258,21 @@ const TimelineView: React.FC = () => {
           </div>
         )}
       </div>
-      
+
       {/* Event Details Modal */}
       {selectedEventData && (
         <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
             <div className="bg-gray-700 px-6 py-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold">Event Details</h3>
-              <button 
+              <button
                 className="text-gray-400 hover:text-white"
                 onClick={() => setSelectedEvent(null)}
               >
                 ✕
               </button>
             </div>
-            
+
             <div className="p-6 overflow-y-auto">
               <div className="space-y-4">
                 <div>
@@ -290,14 +290,14 @@ const TimelineView: React.FC = () => {
                     )}
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-semibold mb-2">Description</h4>
                   <div className="bg-gray-900 p-4 rounded text-sm">
                     {selectedEventData.description}
                   </div>
                 </div>
-                
+
                 {selectedEventData.evidence && selectedEventData.evidence.length > 0 && (
                   <div>
                     <h4 className="font-semibold mb-2">Evidence</h4>

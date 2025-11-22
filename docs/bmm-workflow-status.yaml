@@ -35,7 +35,7 @@ workflow_status:
       - id: "prd"
         status: "docs/prd.md"
       - id: "validate-prd"
-        status: "docs/prd-validation.md"
+        status: "docs/prd-validation-2025-11-22.md"
       - id: "create-epics-and-stories"
         status: "docs/epics.md"
       - id: "create-design"
@@ -43,14 +43,15 @@ workflow_status:
   - phase: "Solutioning"
     workflows:
       - id: "create-architecture"
-        status: "docs/architecture-2025-11-17.md"
+        status: "docs/architecture.md" 
       - id: "test-design"
         status: "docs/test-design-system.md"
       - id: "validate-architecture"
-        status: "docs/architecture-validation.md"
+        status: "architecture-validation-2025-11-22.md"
       - id: "implementation-readiness"
-        status: "docs/implementation-readiness-report-2025-11-17.md"
+        status: "docs/implementation-readiness-report-2025-11-22.md"
   - phase: "Implementation"
     workflows:
       - id: "sprint-planning"
-        status: "pending"
+        status: "docs/sprint-status.yaml"
+        

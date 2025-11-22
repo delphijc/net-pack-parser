@@ -6,9 +6,9 @@ import { PerformanceEntryData } from '../../types';
 const PerformanceDashboard: React.FC = () => {
   const [selectedMetric, setSelectedMetric] = useState<string | null>(null);
   const [timeFilter, setTimeFilter] = useState<'1h' | '24h' | '7d' | 'all'>('1h');
-  
+
   const performanceEntries = database.getAllPerformanceEntries();
-  
+
   // Filter entries by time
   const filteredEntries = useMemo(() => {
     const now = Date.now();
@@ -18,13 +18,13 @@ const PerformanceDashboard: React.FC = () => {
       '7d': 7 * 24 * 60 * 60 * 1000,
       'all': Infinity
     };
-    
+
     const threshold = timeThresholds[timeFilter];
-    return performanceEntries.filter(entry => 
+    return performanceEntries.filter(entry =>
       now - new Date(entry.timestamp).getTime() < threshold
     );
   }, [performanceEntries, timeFilter]);
-  
+
   // Group entries by type
   const entriesByType = useMemo(() => {
     return filteredEntries.reduce((acc, entry) => {
@@ -35,7 +35,7 @@ const PerformanceDashboard: React.FC = () => {
       return acc;
     }, {} as Record<string, PerformanceEntryData[]>);
   }, [filteredEntries]);
-  
+
   // Calculate key metrics
   const metrics = useMemo(() => {
     const navigation = entriesByType.navigation?.[0];
@@ -43,33 +43,33 @@ const PerformanceDashboard: React.FC = () => {
     const longTasks = entriesByType.longtask || [];
     const lcp = entriesByType['largest-contentful-paint']?.[0];
     const paint = entriesByType.paint || [];
-    
+
     // Page Load Time (from navigation timing)
-    const pageLoadTime = navigation ? 
+    const pageLoadTime = navigation ?
       navigation.details.loadEventEnd! - navigation.details.domainLookupStart! : 0;
-    
+
     // DOM Interactive Time
     const domInteractiveTime = navigation ?
       navigation.details.domInteractive! - navigation.details.domainLookupStart! : 0;
-    
+
     // First Contentful Paint
     const fcp = paint.find(p => p.name === 'first-contentful-paint');
     const fcpTime = fcp ? fcp.startTime : 0;
-    
+
     // Largest Contentful Paint
     const lcpTime = lcp ? (lcp.details.renderTime || lcp.details.loadTime || 0) : 0;
-    
+
     // Long Tasks count and total duration
     const longTasksCount = longTasks.length;
     const longTasksDuration = longTasks.reduce((sum, task) => sum + task.duration, 0);
-    
+
     // Resource timing stats
     const totalResources = resources.length;
-    const totalTransferSize = resources.reduce((sum, r) => 
+    const totalTransferSize = resources.reduce((sum, r) =>
       sum + (r.details.transferSize || 0), 0);
     const avgResourceLoadTime = resources.length > 0 ?
       resources.reduce((sum, r) => sum + r.duration, 0) / resources.length : 0;
-    
+
     return {
       pageLoadTime,
       domInteractiveTime,
@@ -82,62 +82,62 @@ const PerformanceDashboard: React.FC = () => {
       avgResourceLoadTime
     };
   }, [entriesByType]);
-  
+
   // Performance score calculation (simplified Core Web Vitals approach)
   const performanceScore = useMemo(() => {
     let score = 100;
-    
+
     // Deduct points for slow LCP (> 2.5s is poor)
     if (metrics.lcpTime > 2500) score -= 30;
     else if (metrics.lcpTime > 1200) score -= 15;
-    
+
     // Deduct points for slow FCP (> 1.8s is poor)
     if (metrics.fcpTime > 1800) score -= 20;
     else if (metrics.fcpTime > 1000) score -= 10;
-    
+
     // Deduct points for long tasks
     if (metrics.longTasksCount > 5) score -= 20;
     else if (metrics.longTasksCount > 2) score -= 10;
-    
+
     // Deduct points for slow page load
     if (metrics.pageLoadTime > 5000) score -= 20;
     else if (metrics.pageLoadTime > 3000) score -= 10;
-    
+
     return Math.max(0, score);
   }, [metrics]);
-  
+
   const getScoreColor = (score: number) => {
     if (score >= 90) return 'text-green-400';
     if (score >= 70) return 'text-yellow-400';
     return 'text-red-400';
   };
-  
+
   const getScoreBg = (score: number) => {
     if (score >= 90) return 'bg-green-600';
     if (score >= 70) return 'bg-yellow-600';
     return 'bg-red-600';
   };
-  
+
   const formatTime = (ms: number) => {
     if (ms < 1000) return `${Math.round(ms)}ms`;
     return `${(ms / 1000).toFixed(2)}s`;
   };
-  
+
   const formatSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes}B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)}KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
   };
-  
+
   const clearPerformanceData = () => {
     database.clearPerformanceEntries();
     window.location.reload(); // Refresh to update the dashboard
   };
-  
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Performance Dashboard</h1>
+        <h2 className="text-2xl font-bold">Performance Dashboard</h2>
         <div className="flex items-center space-x-4">
           <select
             value={timeFilter}
@@ -157,7 +157,7 @@ const PerformanceDashboard: React.FC = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Performance Score */}
       <div className="mb-6">
         <div className="bg-gray-800 rounded-lg shadow-md p-6">
@@ -171,20 +171,20 @@ const PerformanceDashboard: React.FC = () => {
             </div>
             <div className="flex-1">
               <div className="w-full bg-gray-700 rounded-full h-3">
-                <div 
+                <div
                   className={`h-3 rounded-full ${getScoreBg(performanceScore)}`}
                   style={{ width: `${performanceScore}%` }}
                 ></div>
               </div>
               <p className="text-sm text-gray-400 mt-1">
-                {performanceScore >= 90 ? 'Excellent' : 
-                 performanceScore >= 70 ? 'Good' : 'Needs Improvement'}
+                {performanceScore >= 90 ? 'Excellent' :
+                  performanceScore >= 70 ? 'Good' : 'Needs Improvement'}
               </p>
             </div>
           </div>
         </div>
       </div>
-      
+
       {/* Core Web Vitals */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow-md p-6">
@@ -204,7 +204,7 @@ const PerformanceDashboard: React.FC = () => {
             <span className="text-gray-500">Target: ≤ 2.5s</span>
           </div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-gray-400">First Contentful Paint</h3>
@@ -222,7 +222,7 @@ const PerformanceDashboard: React.FC = () => {
             <span className="text-gray-500">Target: ≤ 1.8s</span>
           </div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-gray-400">Page Load Time</h3>
@@ -241,7 +241,7 @@ const PerformanceDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Resource & Task Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
@@ -254,7 +254,7 @@ const PerformanceDashboard: React.FC = () => {
             Avg: {formatTime(metrics.avgResourceLoadTime)}
           </div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-400">Transfer Size</h3>
@@ -263,7 +263,7 @@ const PerformanceDashboard: React.FC = () => {
           <div className="text-xl font-bold">{formatSize(metrics.totalTransferSize)}</div>
           <div className="text-xs text-gray-500">Total downloaded</div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-400">Long Tasks</h3>
@@ -274,7 +274,7 @@ const PerformanceDashboard: React.FC = () => {
             {formatTime(metrics.longTasksDuration)} total
           </div>
         </div>
-        
+
         <div className="bg-gray-800 rounded-lg shadow-md p-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-gray-400">DOM Interactive</h3>
@@ -286,7 +286,7 @@ const PerformanceDashboard: React.FC = () => {
           <div className="text-xs text-gray-500">Time to interactive</div>
         </div>
       </div>
-      
+
       {/* Performance Entries by Type */}
       <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden">
         <div className="p-6 border-b border-gray-700">
@@ -295,7 +295,7 @@ const PerformanceDashboard: React.FC = () => {
             Showing {filteredEntries.length} entries from the {timeFilter === 'all' ? 'entire' : `last ${timeFilter}`} period
           </p>
         </div>
-        
+
         {Object.keys(entriesByType).length === 0 ? (
           <div className="p-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-700 rounded-full mb-4">
@@ -310,18 +310,17 @@ const PerformanceDashboard: React.FC = () => {
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Object.entries(entriesByType).map(([type, entries]) => (
-                <div 
+                <div
                   key={type}
-                  className={`bg-gray-900 rounded-lg p-4 cursor-pointer transition-colors ${
-                    selectedMetric === type ? 'ring-2 ring-blue-500' : 'hover:bg-gray-750'
-                  }`}
+                  className={`bg-gray-900 rounded-lg p-4 cursor-pointer transition-colors ${selectedMetric === type ? 'ring-2 ring-blue-500' : 'hover:bg-gray-750'
+                    }`}
                   onClick={() => setSelectedMetric(selectedMetric === type ? null : type)}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-medium capitalize">{type}</h3>
                     <span className="text-sm text-gray-400">{entries.length}</span>
                   </div>
-                  
+
                   {type === 'resource' && (
                     <div className="text-sm text-gray-500">
                       <div>Avg Duration: {formatTime(
@@ -332,7 +331,7 @@ const PerformanceDashboard: React.FC = () => {
                       )}</div>
                     </div>
                   )}
-                  
+
                   {type === 'longtask' && (
                     <div className="text-sm text-gray-500">
                       Total Duration: {formatTime(
@@ -340,14 +339,14 @@ const PerformanceDashboard: React.FC = () => {
                       )}
                     </div>
                   )}
-                  
+
                   {type === 'navigation' && entries[0] && (
                     <div className="text-sm text-gray-500">
                       <div>Load: {formatTime(entries[0].details.loadEventEnd! - entries[0].details.domainLookupStart!)}</div>
                       <div>DOM: {formatTime(entries[0].details.domInteractive! - entries[0].details.domainLookupStart!)}</div>
                     </div>
                   )}
-                  
+
                   {selectedMetric === type && (
                     <div className="mt-3 pt-3 border-t border-gray-700">
                       <div className="max-h-40 overflow-y-auto space-y-2">
@@ -357,7 +356,7 @@ const PerformanceDashboard: React.FC = () => {
                               {entry.name}
                             </div>
                             <div className="text-gray-400 mt-1">
-                              Duration: {formatTime(entry.duration)} | 
+                              Duration: {formatTime(entry.duration)} |
                               Start: {formatTime(entry.startTime)}
                             </div>
                           </div>
