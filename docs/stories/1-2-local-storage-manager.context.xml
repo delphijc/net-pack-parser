@@ -1,0 +1,277 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>2</storyId>
+    <title>Local Storage Manager</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-23</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/Users/delphijc/Projects/net-pack-parser/docs/1-2-local-storage-manager.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>As a user,</asA>
+    <iWant>I want my analysis data to be stored locally in my browser,</iWant>
+    <soThat>so that I can work privately without any data leaving my device.</soThat>
+    <tasks>
+      - [ ] Implement localStorage wrapper with quota monitoring
+      - [ ] Use compression (e.g., LZ-string) for large datasets (Optional, consider only if needed)
+      - [ ] Store data in namespaced keys: `npp.packets`, `npp.filters`, `npp.settings`
+      - [ ] Implement data versioning for future migrations
+      - [ ] Handle localStorage quota exceeded errors gracefully
+      - [ ] Implement UI for localStorage usage monitoring (e.g., progress bar in settings)
+      - [ ] Implement warning notification system for quota limits
+      - [ ] Implement "Clear Data" button and confirmation dialog in settings
+      - [ ] Display success message after clearing data
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Given the application is running in browser-only mode
+       When I perform analysis actions (upload PCAP, create filters, save notes)
+       Then all data is stored in browser localStorage
+    2. And the system monitors localStorage usage continuously
+    3. And when usage exceeds 80% of browser limit (typically 4-8MB of 5-10MB)
+       Then a warning notification appears: "Storage approaching limit (X% used)"
+    4. And users can clear all stored data via Settings → Clear Data button
+    5. And a confirmation dialog appears before clearing: "Are you sure? This action cannot be undone."
+    6. And after clearing, a success message confirms: "All local data cleared successfully"
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <entry>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document: Network Traffic Parser</title>
+        <section>Functional Requirements</section>
+        <snippet>FR2: All user data is stored locally in browser localStorage. FR5: System monitors localStorage usage and warns users before approaching browser limits (typically 5-10MB). FR6: Users can clear all stored data with confirmation dialog.</snippet>
+      </entry>
+      <entry>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document: Network Traffic Parser</title>
+        <section>Non-Functional Requirements</section>
+        <snippet>NFR-P8: Application must handle browsers with limited localStorage (graceful degradation). NFR-S5: localStorage data must be scoped per-origin (no cross-site data leakage). NFR-S6: Sensitive data (hashes, IOCs) must be clearable on demand. NFR-R4: Application must handle localStorage quota exceeded errors gracefully. NFR-SC3: localStorage strategy must include upgrade path to IndexedDB for larger data.</snippet>
+      </entry>
+      <entry>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document: Network Traffic Parser</title>
+        <section>Project Classification</section>
+        <snippet>Key Concerns: Data privacy and client-side processing.</snippet>
+      </entry>
+      <entry>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document: Network Traffic Parser</title>
+        <section>Product Differentiator</section>
+        <snippet>The Unique Value: Network Traffic Parser is the first platform to offer flexible deployment modes—browser-only for privacy-sensitive PCAP analysis or connected mode with server-side live packet capture. Privacy Options: Choose between local-only analysis or connected live capture.</snippet>
+      </entry>
+      <entry>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document: Network Traffic Parser</title>
+        <section>Architecture & Deployment</section>
+        <snippet>Mode 1: Browser-Only (Standalone) - Use Case: PCAP file analysis, no live capture needed. Data Flow: User uploads PCAP → browser parses → analysis runs locally → results displayed. Privacy: 100% client-side processing, zero data transmission.</snippet>
+      </entry>
+      <entry>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Decision Summary</section>
+        <snippet>Database: localStorage → IndexedDB (browser), file system (server), PostgreSQL (future).</snippet>
+      </entry>
+      <entry>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Data Architecture: Browser Storage</section>
+        <snippet>localStorage: Capacity: 5-10MB typical browser limit. Data: User settings/preferences, Saved BPF filters, Capture agent connection profiles, Performance monitoring data (last 24 hours). IndexedDB: Capacity: Much larger (~50MB+ varies by browser). Data: Parsed packet metadata, Extracted files, Threat detection results, Chain of custody logs. NFR-SC3: localStorage strategy must include upgrade path to IndexedDB for larger data.</snippet>
+      </entry>
+      <entry>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Project Structure</section>
+        <snippet>client/src/services/localStorage.ts # LocalStorage wrapper. client/src/hooks/useLocalStorage.ts # Custom React hooks (if applicable).</snippet>
+      </entry>
+      <entry>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Architecture Decision Records (ADRs)</section>
+        <snippet>ADR-004: Browser-Only Mode for Privacy - Rationale: Privacy-first architecture, users can analyze sensitive PCAP files without uploading to any server. ADR-005: Hybrid Architecture (Browser + Optional Server) - Rationale: Maximum flexibility - users choose privacy (browser-only) or live capture (connected mode).</snippet>
+      </entry>
+      <entry>
+        <path>docs/ux-design-specification.md</path>
+        <title>Network Traffic Parser UX Design Specification</title>
+        <section>Core User Experience</section>
+        <snippet>Defining Experience: The defining experience is the ability to securely monitor and analyze real-time network traffic streams with complete confidence in data security. Key Constraint: All communications with backend server data streams must be encrypted and secure. Emotional Goal: Users should feel Empowered and in Control.</snippet>
+      </entry>
+      <entry>
+        <path>docs/ux-design-specification.md</path>
+        <title>Network Traffic Parser UX Design Specification</title>
+        <section>Responsive Design & Accessibility</section>
+        <snippet>Mobile (<768px): "Triage Mode." Hide: Full packet stream table, complex topology graphs. Show: High-level metrics, alert cards, and single-packet inspection views.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Detailed Design: Services and Modules</section>
+        <snippet>localStorage.ts: Manages data storage in browser localStorage with quota monitoring.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Detailed Design: APIs and Interfaces</section>
+        <snippet>localStorage API: For storing user settings and smaller datasets. IndexedDB API: For storing larger datasets like parsed packets and extracted files.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Non-Functional Requirements: Performance</section>
+        <snippet>NFR-P7: Memory usage must remain < 500MB during a typical analysis session. NFR-P8: Application must handle browsers with limited localStorage (graceful degradation).</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Non-Functional Requirements: Reliability/Availability</section>
+        <snippet>NFR-R3: Browser crashes should not lose in-progress analysis data (periodic auto-save to IndexedDB). NFR-R4: Application must handle localStorage quota exceeded errors gracefully.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Acceptance Criteria (Authoritative)</section>
+        <snippet>Story 1.2: Local Storage Manager - All analysis data is stored in browser `localStorage`. The system warns when storage exceeds 80% of the browser limit. Users can clear all stored data with confirmation.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Risks, Assumptions, Open Questions</section>
+        <snippet>Risk: Inconsistent `localStorage` and `IndexedDB` quota limits across different browsers. Mitigation: Implement robust quota-checking and provide clear, user-friendly error messages when limits are approached or exceeded.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Traceability Mapping</section>
+        <snippet>Story 1.2: `localStorage.ts`, `useLocalStorage.ts`. Test Idea: Mock `localStorage` limit and verify warning.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Dependencies and Integrations</section>
+        <snippet>zustand: For UI state management.</snippet>
+      </entry>
+    </docs>
+    <code>
+      <entry>
+        <path>client/src/services/localStorage.ts</path>
+        <kind>service</kind>
+        <symbol>localStorageService</symbol>
+        <lines>N/A</lines>
+        <reason>To be created: Centralized service for managing local storage interactions, including quota monitoring and data serialization/deserialization.</reason>
+      </entry>
+      <entry>
+        <path>client/src/hooks/useLocalStorage.ts</path>
+        <kind>hook</kind>
+        <symbol>useLocalStorage</symbol>
+        <lines>N/A</lines>
+        <reason>To be created: React hook for easy integration of local storage values into functional components, providing reactive updates.</reason>
+      </entry>
+      <entry>
+        <path>client/src/components/SettingsPage.tsx</path>
+        <kind>component</kind>
+        <symbol>SettingsPage</symbol>
+        <lines>N/A</lines>
+        <reason>To be modified/created: UI component for user settings, including the "Clear Data" button and local storage usage display.</reason>
+      </entry>
+    </code>
+    <dependencies>
+      <npm>
+        <package name="crypto-js" type="dependency" version="^4.2.0"/>
+        <package name="lucide-react" type="dependency" version="^0.554.0"/>
+        <package name="pcap-parser" type="dependency" version="^0.2.1"/>
+        <package name="react" type="dependency" version="^19.2.0"/>
+        <package name="react-dom" type="dependency" version="^19.2.0"/>
+        <package name="tiktoken" type="dependency" version="^1.0.22"/>
+        <package name="uuid" type="dependency" version="^9.0.1"/>
+        <package name="@radix-ui/react-dialog" type="dependency" version="^1.1.15"/>
+        <package name="@radix-ui/react-select" type="dependency" version="^2.2.6"/>
+        <package name="@radix-ui/react-slot" type="dependency" version="^1.2.4"/>
+        <package name="@radix-ui/react-tabs" type="dependency" version="^1.1.13"/>
+        <package name="@radix-ui/react-tooltip" type="dependency" version="^1.2.8"/>
+        <package name="class-variance-authority" type="dependency" version="^0.7.1"/>
+        <package name="clsx" type="dependency" version="^2.1.1"/>
+        <package name="tailwind-merge" type="dependency" version="^3.4.0"/>
+        <package name="tailwindcss-animate" type="dependency" version="^1.0.7"/>
+
+        <package name="@eslint/js" type="devDependency" version="^9.39.1"/>
+        <package name="@faker-js/faker" type="devDependency" version="^8.4.1"/>
+        <package name="@playwright/test" type="devDependency" version="^1.45.3"/>
+        <package name="@types/crypto-js" type="devDependency" version="^4.2.1"/>
+        <package name="@types/node" type="devDependency" version="^24.10.1"/>
+        <package name="@types/react" type="devDependency" version="^19.2.5"/>
+        <package name="@types/react-dom" type="devDependency" version="^19.2.3"/>
+        <package name="@types/uuid" type="devDependency" version="^9.0.7"/>
+        <package name="@vitejs/plugin-react" type="devDependency" version="^5.1.1"/>
+        <package name="autoprefixer" type="devDependency" version="^10.4.22"/>
+        <package name="eslint" type="devDependency" version="^9.39.1"/>
+        <package name="eslint-config-prettier" type="devDependency" version="^10.1.8"/>
+        <package name="eslint-plugin-prettier" type="devDependency" version="^5.5.4"/>
+        <package name="eslint-plugin-react-hooks" type="devDependency" version="^7.0.1"/>
+        <package name="eslint-plugin-react-refresh" type="devDependency" version="^0.4.24"/>
+        <package name="globals" type="devDependency" version="^16.5.0"/>
+        <package name="postcss" type="devDependency" version="^8.5.6"/>
+        <package name="prettier" type="devDependency" version="^3.6.2"/>
+        <package name="tailwindcss" type="devDependency" version="^4.1.17"/>
+        <package name="typescript" type="devDependency" version="~5.9.3"/>
+        <package name="typescript-eslint" type="devDependency" version="^8.46.4"/>
+        <package name="vite" type="devDependency" version="^7.2.4"/>
+        <package name="@shadcn/ui" type="devDependency" version="^0.0.4"/>
+        <package name="@tailwindcss/postcss" type="devDependency" version="^4.1.17"/>
+        <package name="@typescript-eslint/eslint-plugin" type="devDependency" version="^8.47.0"/>
+        <package name="@typescript-eslint/parser" type="devDependency" version="^8.47.0"/>
+      </npm>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Data storage must primarily use browser localStorage for browser-only mode.</constraint>
+    <constraint>The localStorage strategy should include an upgrade path to IndexedDB for larger data in the future (NFR-SC3).</constraint>
+    <constraint>Application must handle localStorage quota exceeded errors gracefully (NFR-R4).</constraint>
+    <constraint>Application must handle browsers with limited localStorage (NFR-P8).</constraint>
+    <constraint>localStorage data must be scoped per-origin (NFR-S5) for security.</constraint>
+    <constraint>Sensitive data (hashes, IOCs) must be clearable on demand (NFR-S6).</constraint>
+    <constraint>All relevant data should remain client-side (ADR-004).</constraint>
+  </constraints>
+  <interfaces>
+    <interface>
+      <name>ILocalStorageService</name>
+      <kind>TypeScript Interface</kind>
+      <signature>
+        getValue&lt;T&gt;(key: string): T | null;
+        setValue&lt;T&gt;(key: string, value: T): void;
+        removeItem(key: string): void;
+        clearAll(): void;
+        getUsagePercentage(): number;
+        onQuotaExceeded(callback: (usage: number) => void): () => void;
+      </signature>
+      <path>client/src/services/localStorage.ts</path>
+    </interface>
+    <interface>
+      <name>useLocalStorage Hook</name>
+      <kind>React Hook</kind>
+      <signature>
+        useLocalStorage&lt;T&gt;(key: string, initialValue: T): [T, (value: T) => void, () => void];
+      </signature>
+      <path>client/src/hooks/useLocalStorage.ts</path>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>
+      Unit tests will be implemented using Vitest for localStorage wrapper functionality, quota monitoring, and error handling. Component tests for the settings UI (including "Clear Data" button and warning notifications) will use React Testing Library. E2E tests will use Playwright. Mock localStorage will be used for testing quota limits and error scenarios.
+    </standards>
+    <locations>
+      Unit tests will likely be co-located with the `localStorage.ts` service and `useLocalStorage.ts` hook. Component tests for UI elements will be co-located with relevant React components (e.g., SettingsPage). E2E tests are located in `tests/e2e/`.
+    </locations>
+    <ideas>
+      <idea>Mock `localStorage` limit and verify warning notification appears when usage exceeds 80%.</idea>
+      <idea>Verify `localStorage` wrapper correctly stores and retrieves different data types.</idea>
+      <idea>Test `clearAll` functionality ensures all namespaced keys are removed and confirmation dialog is handled.</idea>
+      <idea>Test graceful handling of `localStorage` quota exceeded errors during `setValue` operations.</idea>
+      <idea>E2E test for navigating to settings, clicking "Clear Data", confirming, and verifying success message.</idea>
+    </ideas>
+  </tests>
+</story-context>

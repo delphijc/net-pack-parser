@@ -216,3 +216,6 @@ This epic will primarily use browser-native APIs:
 ## Post-Review Follow-ups
 
 - Provide verifiable evidence for the npm run dev functionality (AC #5) (Story 1.1)
+- (From Story 1.2) Implement data versioning logic in `localStorage.ts`.
+- (From Story 1.2) Update the "Tasks / Subtasks" section in story 1.2 to accurately reflect completion status.
+

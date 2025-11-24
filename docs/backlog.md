@@ -13,3 +13,5 @@ Routing guidance:
 | 2025-11-22 | 1.1 | 1 | Bug | Medium | TBD | Open | Integrate 'deep-blue' and 'teal' colors into the root theme in `client/src/index.css`. |
 | 2025-11-22 | 1.1 | 1 | TechDebt | Low | TBD | Open | Update `architecture.md` to reflect correct Vite/TS versions. |
 | 2025-11-22 | 1.1 | 1 | Test | Medium | TBD | Open | Provide verifiable evidence for the npm run dev functionality (AC #5). |
+| 2025-11-23 | 1.2 | 1 | Feature | Medium | TBD | Open | Implement data versioning logic in `localStorage.ts`. [file: `client/src/services/localStorage.ts:12`] |
+| 2025-11-23 | 1.2 | 1 | Process | High | TBD | Open | Update the "Tasks / Subtasks" section in story 1.2 to accurately reflect completion status. |

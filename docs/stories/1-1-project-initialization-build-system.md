@@ -81,7 +81,7 @@ so that **I can start building the web application with a solid foundation**.
 
 ### Context Reference
 
-- docs/sprint-artifacts/stories/1-1-project-initialization-build-system.context.xml
+- docs/stories/1-1-project-initialization-build-system.context.xml
 
 ### Agent Model Used
 
