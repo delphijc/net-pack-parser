@@ -218,4 +218,7 @@ This epic will primarily use browser-native APIs:
 - Provide verifiable evidence for the npm run dev functionality (AC #5) (Story 1.1)
 - (From Story 1.2) Implement data versioning logic in `localStorage.ts`.
 - (From Story 1.2) Update the "Tasks / Subtasks" section in story 1.2 to accurately reflect completion status.
+- (Story 1.3) [High] Unskip and fix unit test for `generateExportJson`. Verify AC1 and AC2. [file: `client/src/utils/dataImportExport.test.ts:42`]
+- (Story 1.3) [High] Unskip and fix component tests for `SettingsPage`. Verify AC1, AC5, AC6. [file: `client/src/components/SettingsPage.test.tsx:12`]
+- (Story 1.3) [Low] Dynamically read `APP_VERSION` from `package.json`. [file: `client/src/utils/dataImportExport.ts:5`]
 

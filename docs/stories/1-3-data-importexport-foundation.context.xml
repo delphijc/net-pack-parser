@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<technical_context>
+  <story_id>1-3-data-importexport-foundation</story_id>
+  <title>Data Import/Export Foundation</title>
+  <description>
+    As a user, I want to export my analysis data and import it later,
+    so that I can backup my work or move it to another device.
+  </description>
+
+  <objectives>
+    <objective>Enable users to export all client-side analysis data (packets, filters, notes, settings) into a single JSON file.</objective>
+    <objective>Enable users to import data from a previously exported JSON file, with robust validation and options for merging/replacing existing data.</objective>
+    <objective>Ensure data integrity and versioning during export and import operations.</objective>
+  </objectives>
+
+  <acceptance_criteria>
+    <criterion id="AC1">Export functionality to generate a JSON file containing all current analysis data (packets, filters, notes, settings) from local storage.</criterion>
+    <criterion id="AC2">Exported JSON includes metadata: `export_date`, `app_version`, `data_schema_version`.</criterion>
+    <criterion id="AC3">Import functionality validates the selected JSON file's format and `data_schema_version`.</criterion>
+    <criterion id="AC4">Upon valid import, system merges or replaces existing data based on explicit user choice.</criterion>
+    <criterion id="AC5">Displays an "Invalid import file format" error for invalid files.</criterion>
+    <criterion id="AC6">Displays a confirmation message (e.g., "X packets, Y filters imported successfully") after successful import.</criterion>
+  </acceptance_criteria>
+
+  <technical_details>
+    <component_changes>
+      <file path="client/src/services/localStorage.ts">
+        <change type="modification">Implement data versioning logic (Post-Review Follow-up from Story 1.2).</change>
+        <change type="modification">Add functions to retrieve all data for export and to store/merge imported data.</change>
+      </file>
+      <file path="client/src/components/SettingsPage.tsx">
+        <change type="modification">Add UI elements: "Export Data" button, "Import Data" button, file input for import.</change>
+        <change type="modification">Integrate import/export logic and display confirmation/error messages.</change>
+        <change type="modification">Implement user choice for merging vs. replacing data during import.</change>
+      </file>
+      <file path="client/src/utils/dataImportExport.ts">
+        <change type="creation">New utility file for core import/export logic.</change>
+        <functions>
+          <function name="exportDataToJson">
+            <description>Collects all relevant data from localStorage/IndexedDB, adds metadata, and prepares a JSON object for download.</description>
+            <inputs>None</inputs>
+            <outputs>JSON string</outputs>
+          </function>
+          <function name="importDataFromJson">
+            <description>Parses JSON, validates schema and version, and dispatches data to localStorage/IndexedDB services.</description>
+            <inputs>JSON string, mergeOption (enum: 'merge'|'replace')</inputs>
+            <outputs>Success/Error status, counts of imported items</outputs>
+          </function>
+          <function name="validateImportSchema">
+            <description>Validates the structure and data_schema_version of the imported JSON.</description>
+            <inputs>JSON object</inputs>
+            <outputs>Boolean (isValid), validationErrors</outputs>
+          </function>
+        </functions>
+      </file>
+    </component_changes>
+
+    <data_storage_strategy>
+      <primary_storage>localStorage</primary_storage>
+      <consideration>IndexedDB for larger datasets (e.g., raw packet data) if `localStorage` quota becomes a consistent issue.</consideration>
+      <data_schema_versioning>
+        <description>Implement a `data_schema_version` within the exported JSON and a corresponding version check during import. This is crucial for backward compatibility.</description>
+        <impact>Requires `localStorage.ts` to manage schema versions of stored data.</impact>
+      </data_schema_versioning>
+      <metadata_format>
+        <field name="export_date" type="string">ISO 8601 format (e.g., "2025-11-24T12:00:00Z")</field>
+        <field name="app_version" type="string">Current application version (e.g., from `package.json`)</field>
+        <field name="data_schema_version" type="string">Current internal data schema version</field>
+      </metadata_format>
+    </data_storage_strategy>
+
+    <error_handling>
+      <frontend_errors>
+        <error_type>Invalid File Format:</error_type>
+        <message>
+          Displays "Invalid import file format" notification for non-JSON files or files failing schema validation (AC5).
+          Leverage existing frontend notification system (e.g., shadcn/ui `toast` component).
+        </message>
+        <error_type>Quota Exceeded:</error_type>
+        <message>Gracefully handles `localStorage` quota exceeded during export/import (NFR-R4).</message>
+      </frontend_errors>
+    </error_handling>
+
+    <technical_debt_considerations>
+      <item>Using `LZ-string` or similar compression for large exported JSON files, if performance or size becomes an issue.</item>
+      <item>Full migration to `IndexedDB` for all analysis data if `localStorage` proves insufficient.</item>
+    </technical_debt_considerations>
+
+    <testing_approach>
+      <unit_tests framework="Vitest" target="client/src/utils/dataImportExport.ts">
+        <test>Schema validation logic (valid/invalid schemas, different versions).</test>
+        <test>Data merging logic (various merge strategies).</test>
+        <test>Data replacement logic.</test>
+      </unit_tests>
+      <component_tests framework="React Testing Library" target="client/src/components/SettingsPage.tsx">
+        <test>Clicking "Export Data" triggers file download.</test>
+        <test>Selecting a valid import file triggers successful import flow.</test>
+        <test>Selecting an invalid import file displays error message.</test>
+        <test>User choice for merge/replace is presented and functions correctly.</test>
+        <mocking>Mock `localStorage` and `IndexedDB` interactions.</mocking>
+      </component_tests>
+    </testing_approach>
+
+    <traceability_mapping>
+      <ac_task_mapping>
+        <ac id="AC1">Task: Implement export functionality; Task: Implement UI for "Export Data".</ac>
+        <ac id="AC2">Task: Ensure exported JSON includes metadata.</ac>
+        <ac id="AC3">Task: Implement import functionality; Task: Implement schema validation.</ac>
+        <ac id="AC4">Task: Implement logic to merge or replace data.</ac>
+        <ac id="AC5">Task: Display appropriate error messages.</ac>
+        <ac id="AC6">Task: Display confirmation message.</ac>
+      </ac_task_mapping>
+    </traceability_mapping>
+
+  </technical_details>
+</technical_context>

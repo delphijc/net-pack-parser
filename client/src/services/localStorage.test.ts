@@ -113,6 +113,7 @@ describe('LocalStorageService', () => {
 
     // Check that old data is cleared and new version is set
     expect(window.localStorage.getItem('npp.old-data')).toBeNull();
-    expect(window.localStorage.getItem('npp.data-version')).toBe('1.0');
+    // It's now stored as a JSON string
+    expect(window.localStorage.getItem('npp.data-version')).toBe(JSON.stringify('1.0'));
   });
 });

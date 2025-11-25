@@ -21,13 +21,13 @@ class LocalStorageService {
   }
 
   private checkVersion() {
-    const versionKey = this.getNamespacedKey('data-version');
-    const storedVersion = window.localStorage.getItem(versionKey);
+    const versionKey = 'data-version';
+    const storedVersion = this.getValue<string>(versionKey);
     if (storedVersion !== DATA_VERSION) {
       // For now, our migration strategy is to clear old data.
       // More sophisticated migration logic can be added here in the future.
       this.clearAll();
-      window.localStorage.setItem(versionKey, DATA_VERSION);
+      this.setValue(versionKey, DATA_VERSION);
     }
   }
 
