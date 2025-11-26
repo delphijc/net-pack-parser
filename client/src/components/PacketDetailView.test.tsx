@@ -126,17 +126,18 @@ describe('PacketDetailView', () => {
   it('renders packet summary information correctly', () => {
     render(<PacketDetailView packet={mockPacketWithRawData} isOpen={true} onOpenChange={vi.fn()} />);
 
-    expect(screen.getByText('Packet Details - ID: 1')).toBeInTheDocument();
-    expect(screen.getByText('Timestamp:')).toBeInTheDocument();
+    expect(screen.getByText('Packet Details')).toBeInTheDocument();
+    expect(screen.getByText('ID: 1')).toBeInTheDocument();
+    expect(screen.getByText('Timestamp')).toBeInTheDocument();
     // Check for locale string format or part of it
     expect(screen.getByText(/2023/)).toBeInTheDocument();
-    expect(screen.getByText('Source:')).toBeInTheDocument();
+    expect(screen.getByText('Source')).toBeInTheDocument();
     expect(screen.getAllByText('192.168.1.1').length).toBeGreaterThan(0);
-    expect(screen.getByText('Destination:')).toBeInTheDocument();
+    expect(screen.getByText('Destination')).toBeInTheDocument();
     expect(screen.getAllByText('192.168.1.100').length).toBeGreaterThan(0);
-    expect(screen.getByText('Protocol:')).toBeInTheDocument();
+    expect(screen.getByText('Protocol')).toBeInTheDocument();
     expect(screen.getByText('TCP')).toBeInTheDocument();
-    expect(screen.getByText('Length:')).toBeInTheDocument();
+    expect(screen.getByText('Length')).toBeInTheDocument();
     // Length is byte length of "some raw data" (13 bytes)
     expect(screen.getByText('13 bytes')).toBeInTheDocument();
   });
@@ -145,11 +146,11 @@ describe('PacketDetailView', () => {
     render(<PacketDetailView packet={mockPacketWithRawData} isOpen={true} onOpenChange={vi.fn()} />);
 
     expect(screen.getByText('Decoded Headers')).toBeInTheDocument();
-    expect(screen.getByText('Ethernet - Source MAC:')).toBeInTheDocument();
+    expect(screen.getByText('Ethernet - Source MAC')).toBeInTheDocument();
     expect(screen.getByText('aa:bb:cc:dd:ee:ff')).toBeInTheDocument();
-    expect(screen.getByText('IP - Source IP:')).toBeInTheDocument();
+    expect(screen.getByText('IP - Source IP')).toBeInTheDocument();
     expect(screen.getAllByText('192.168.1.1').length).toBeGreaterThan(0);
-    expect(screen.getByText('TCP - Source Port:')).toBeInTheDocument();
+    expect(screen.getByText('TCP - Source Port')).toBeInTheDocument();
     expect(screen.getByText('12345')).toBeInTheDocument();
 
     // Expect called with the converted packet structure
@@ -220,10 +221,10 @@ describe('PacketDetailView', () => {
     expect(screen.getByText('Copy ASCII')).toBeDisabled();
   });
 
-  it('downloads packet data when "Download Packet" button is clicked', () => {
+  it('downloads packet data when "Download" button is clicked', () => {
     render(<PacketDetailView packet={mockPacketWithRawData} isOpen={true} onOpenChange={vi.fn()} />);
 
-    fireEvent.click(screen.getByText('Download Packet'));
+    fireEvent.click(screen.getByText('Download'));
 
     expect(mockCreateObjectURL).toHaveBeenCalledWith(
       expect.any(Blob)
@@ -234,6 +235,6 @@ describe('PacketDetailView', () => {
   it('disables download button when no raw data is present', () => {
     render(<PacketDetailView packet={mockPacketNoRawData} isOpen={true} onOpenChange={vi.fn()} />);
 
-    expect(screen.getByText('Download Packet')).toBeDisabled();
+    expect(screen.getByText('Download')).toBeDisabled();
   });
 });

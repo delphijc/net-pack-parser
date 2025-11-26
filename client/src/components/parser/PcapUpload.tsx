@@ -220,23 +220,23 @@ const PcapUpload: React.FC = () => {
     };
 
     return (
-        <div className="p-6">
-            <h2 className="text-2xl font-bold mb-6">Network Traffic Parser</h2>
+        <div className="p-6 h-full overflow-y-auto animate-fadeIn">
+            <h2 className="text-2xl font-bold mb-6 text-foreground">Network Traffic Parser</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2">
-                    <div className="bg-gray-800 rounded-lg shadow-md p-6">
+                    <div className="bg-card border border-white/10 rounded-lg shadow-sm p-6 backdrop-blur-sm">
                         <div className="mb-4 flex items-center justify-between">
                             <div className="flex items-center">
-                                <Terminal size={20} className="text-blue-400 mr-2" />
-                                <h2 className="text-lg font-semibold">Parse Network Data</h2>
+                                <Terminal size={20} className="text-primary mr-2" />
+                                <h2 className="text-lg font-semibold text-foreground">Parse Network Data</h2>
                             </div>
                             <div className="flex space-x-2">
                                 <button
                                     onClick={handleCaptureToggle}
-                                    className={`px-4 py-2 rounded-md text-sm flex items-center ${capturing
-                                        ? 'bg-red-600 hover:bg-red-700'
-                                        : 'bg-green-600 hover:bg-green-700'
+                                    className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${capturing
+                                        ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
+                                        : 'bg-emerald-600 hover:bg-emerald-700 text-white'
                                         }`}
                                 >
                                     {capturing ? (
@@ -260,7 +260,7 @@ const PcapUpload: React.FC = () => {
                                 />
                                 <button
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md text-sm flex items-center"
+                                    className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-md text-sm flex items-center text-secondary-foreground transition-colors"
                                 >
                                     <Upload size={16} className="mr-2" />
                                     Upload PCAP
@@ -269,38 +269,38 @@ const PcapUpload: React.FC = () => {
                         </div>
 
                         {capturedData.length > 0 && (
-                            <div className="mb-4 bg-gray-900 p-4 rounded-md">
+                            <div className="mb-4 bg-black/40 border border-white/5 p-4 rounded-md">
                                 <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-sm font-medium text-gray-300">
+                                    <h3 className="text-sm font-medium text-muted-foreground">
                                         Captured Packets ({capturedData.length})
                                     </h3>
                                     <div className="flex space-x-2">
                                         <button
                                             onClick={handleParseCapture}
-                                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm flex items-center"
+                                            className="px-3 py-1.5 bg-primary hover:bg-primary/90 rounded text-sm flex items-center text-primary-foreground transition-colors"
                                         >
                                             <Play size={14} className="mr-1.5" />
                                             Parse All
                                         </button>
                                         {capturing && (
-                                            <div className="flex items-center text-xs text-green-400">
-                                                <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+                                            <div className="flex items-center text-xs text-emerald-500">
+                                                <span className="w-2 h-2 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span>
                                                 Capturing...
                                             </div>
                                         )}
                                     </div>
                                 </div>
-                                <div className="max-h-48 overflow-y-auto">
+                                <div className="max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                                     {capturedData.map((packet, index) => (
                                         <div
                                             key={packet.id}
-                                            className="mb-1 py-1 px-2 hover:bg-gray-800 rounded cursor-pointer flex justify-between items-center"
+                                            className="mb-1 py-1 px-2 hover:bg-white/5 rounded cursor-pointer flex justify-between items-center transition-colors"
                                             onClick={() => handleViewPacket(packet)}
                                         >
-                                            <div className="text-sm truncate">
+                                            <div className="text-sm truncate text-foreground/80 font-mono">
                                                 {index + 1}. {packet.protocol} - {packet.destination}
                                             </div>
-                                            <div className="text-xs text-gray-500">
+                                            <div className="text-xs text-muted-foreground">
                                                 {new Date(packet.timestamp).toLocaleTimeString()}
                                             </div>
                                         </div>
@@ -310,9 +310,9 @@ const PcapUpload: React.FC = () => {
                         )}
 
                         {capturing && capturedData.length === 0 && (
-                            <div className="mb-4 bg-blue-900/30 border border-blue-800 rounded-md p-3 flex items-center">
+                            <div className="mb-4 bg-blue-500/10 border border-blue-500/20 rounded-md p-3 flex items-center">
                                 <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
-                                <p className="text-sm text-blue-300">
+                                <p className="text-sm text-blue-400">
                                     Waiting for network traffic... Open websites or perform network operations to capture traffic.
                                 </p>
                             </div>
@@ -320,12 +320,12 @@ const PcapUpload: React.FC = () => {
 
                         <form onSubmit={handleSubmit}>
                             <div className="mb-4">
-                                <label htmlFor="inputData" className="block text-sm font-medium text-gray-400 mb-2">
+                                <label htmlFor="inputData" className="block text-sm font-medium text-muted-foreground mb-2">
                                     Enter Network Data to Parse
                                 </label>
                                 <textarea
                                     id="inputData"
-                                    className="w-full h-48 px-3 py-2 text-sm bg-gray-900 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                                    className="w-full h-48 px-3 py-2 text-sm bg-black/40 border border-white/10 rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-mono text-foreground placeholder:text-muted-foreground/50"
                                     value={inputData}
                                     onChange={(e) => setInputData(e.target.value)}
                                     placeholder="Paste network traffic data here (HTTP headers, email content, etc.)"
@@ -333,31 +333,31 @@ const PcapUpload: React.FC = () => {
                             </div>
 
                             {errorMessage && (
-                                <div className="mb-4 p-3 bg-red-900/50 border border-red-800 rounded-md flex items-start">
-                                    <AlertTriangle size={16} className="text-red-400 mr-2 mt-0.5 flex-shrink-0" />
-                                    <p className="text-sm text-red-300">{errorMessage}</p>
+                                <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md flex items-start">
+                                    <AlertTriangle size={16} className="text-destructive mr-2 mt-0.5 flex-shrink-0" />
+                                    <p className="text-sm text-destructive-foreground">{errorMessage}</p>
                                 </div>
                             )}
 
                             <div className="flex flex-wrap items-center justify-between">
-                                <div className="mb-2 md:mb-0">
+                                <div className="mb-2 md:mb-0 space-x-3">
                                     <button
                                         type="button"
-                                        className="text-xs text-blue-400 hover:text-blue-300 mr-3"
+                                        className="text-xs text-primary hover:text-primary/80 transition-colors"
                                         onClick={() => loadSampleData(0)}
                                     >
                                         Load HTTP Request
                                     </button>
                                     <button
                                         type="button"
-                                        className="text-xs text-blue-400 hover:text-blue-300 mr-3"
+                                        className="text-xs text-primary hover:text-primary/80 transition-colors"
                                         onClick={() => loadSampleData(1)}
                                     >
                                         Load HTTP Response
                                     </button>
                                     <button
                                         type="button"
-                                        className="text-xs text-blue-400 hover:text-blue-300"
+                                        className="text-xs text-primary hover:text-primary/80 transition-colors"
                                         onClick={() => loadSampleData(2)}
                                     >
                                         Load Email
@@ -367,9 +367,9 @@ const PcapUpload: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={parsing}
-                                    className={`px-4 py-2 rounded-md text-white font-medium flex items-center ${parsing
-                                        ? 'bg-blue-700 cursor-not-allowed'
-                                        : 'bg-blue-600 hover:bg-blue-700'
+                                    className={`px-4 py-2 rounded-md text-white font-medium flex items-center transition-colors ${parsing
+                                        ? 'bg-primary/50 cursor-not-allowed'
+                                        : 'bg-primary hover:bg-primary/90'
                                         }`}
                                 >
                                     {parsing ? (
@@ -390,13 +390,13 @@ const PcapUpload: React.FC = () => {
                 </div>
 
                 <div>
-                    <div className="bg-gray-800 rounded-lg shadow-md p-6 h-full">
-                        <h2 className="text-lg font-semibold mb-4">Quick Help</h2>
+                    <div className="bg-card border border-white/10 rounded-lg shadow-sm p-6 h-full backdrop-blur-sm">
+                        <h2 className="text-lg font-semibold mb-4 text-foreground">Quick Help</h2>
 
                         <div className="space-y-4 text-sm">
                             <div>
-                                <h3 className="font-medium text-blue-400 mb-1">What data can I parse?</h3>
-                                <p className="text-gray-400">
+                                <h3 className="font-medium text-primary mb-1">What data can I parse?</h3>
+                                <p className="text-muted-foreground">
                                     You can paste any network traffic data including HTTP requests/responses,
                                     emails, JSON payloads, and more. You can also upload PCAP files from Wireshark
                                     or use direct network capture.
@@ -404,8 +404,8 @@ const PcapUpload: React.FC = () => {
                             </div>
 
                             <div>
-                                <h3 className="font-medium text-blue-400 mb-1">How does it work?</h3>
-                                <p className="text-gray-400">
+                                <h3 className="font-medium text-primary mb-1">How does it work?</h3>
+                                <p className="text-muted-foreground">
                                     The parser extracts tokens (non-alphanumeric characters) and string content,
                                     identifies sections, and detects file references in URLs. For PCAP files,
                                     it analyzes packet headers and payload data.
@@ -413,8 +413,8 @@ const PcapUpload: React.FC = () => {
                             </div>
 
                             <div>
-                                <h3 className="font-medium text-blue-400 mb-1">Where is data stored?</h3>
-                                <p className="text-gray-400">
+                                <h3 className="font-medium text-primary mb-1">Where is data stored?</h3>
+                                <p className="text-muted-foreground">
                                     All parsed data is stored locally in your browser. Nothing is sent to external servers.
                                 </p>
                             </div>
@@ -424,41 +424,41 @@ const PcapUpload: React.FC = () => {
             </div>
 
             {lastParsedPacket && (
-                <div className="mt-6 bg-gray-800 rounded-lg shadow-md p-6 border-l-4 border-green-500 animate-fadeIn">
-                    <h2 className="text-lg font-semibold mb-4 flex items-center">
-                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                <div className="mt-6 bg-card border border-white/10 rounded-lg shadow-sm p-6 border-l-4 border-l-emerald-500 animate-fadeIn backdrop-blur-sm">
+                    <h2 className="text-lg font-semibold mb-4 flex items-center text-foreground">
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>
                         Successfully Parsed Packet
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2">Packet Information</h3>
-                            <div className="bg-gray-900 p-3 rounded">
-                                <p className="text-sm"><span className="text-gray-500">ID:</span> {lastParsedPacket.id}</p>
-                                <p className="text-sm"><span className="text-gray-500">Protocol:</span> {lastParsedPacket.protocol}</p>
-                                <p className="text-sm">
-                                    <span className="text-gray-500">Source:</span> {lastParsedPacket.source}
+                            <h3 className="text-sm font-medium text-muted-foreground mb-2">Packet Information</h3>
+                            <div className="bg-black/40 border border-white/5 p-3 rounded">
+                                <p className="text-sm text-foreground"><span className="text-muted-foreground">ID:</span> {lastParsedPacket.id}</p>
+                                <p className="text-sm text-foreground"><span className="text-muted-foreground">Protocol:</span> {lastParsedPacket.protocol}</p>
+                                <p className="text-sm text-foreground">
+                                    <span className="text-muted-foreground">Source:</span> {lastParsedPacket.source}
                                 </p>
-                                <p className="text-sm">
-                                    <span className="text-gray-500">Destination:</span> {lastParsedPacket.destination}
+                                <p className="text-sm text-foreground">
+                                    <span className="text-muted-foreground">Destination:</span> {lastParsedPacket.destination}
                                 </p>
                             </div>
                         </div>
 
                         <div>
-                            <h3 className="text-sm font-medium text-gray-400 mb-2">Extracted Data</h3>
-                            <div className="bg-gray-900 p-3 rounded">
-                                <p className="text-sm">
-                                    <span className="text-gray-500">Tokens:</span> {lastParsedPacket.tokens.filter(t => t.type === 'token').length}
+                            <h3 className="text-sm font-medium text-muted-foreground mb-2">Extracted Data</h3>
+                            <div className="bg-black/40 border border-white/5 p-3 rounded">
+                                <p className="text-sm text-foreground">
+                                    <span className="text-muted-foreground">Tokens:</span> {lastParsedPacket.tokens.filter(t => t.type === 'token').length}
                                 </p>
-                                <p className="text-sm">
-                                    <span className="text-gray-500">Strings:</span> {lastParsedPacket.tokens.filter(t => t.type === 'string').length}
+                                <p className="text-sm text-foreground">
+                                    <span className="text-muted-foreground">Strings:</span> {lastParsedPacket.tokens.filter(t => t.type === 'string').length}
                                 </p>
-                                <p className="text-sm">
-                                    <span className="text-gray-500">Sections:</span> {lastParsedPacket.sections.length}
+                                <p className="text-sm text-foreground">
+                                    <span className="text-muted-foreground">Sections:</span> {lastParsedPacket.sections.length}
                                 </p>
-                                <p className="text-sm">
-                                    <span className="text-gray-500">File References:</span> {lastParsedPacket.fileReferences.length}
+                                <p className="text-sm text-foreground">
+                                    <span className="text-muted-foreground">File References:</span> {lastParsedPacket.fileReferences.length}
                                 </p>
                             </div>
                         </div>

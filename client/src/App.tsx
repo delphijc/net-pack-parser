@@ -1,18 +1,23 @@
 // src/App.tsx
 import Dashboard from './components/dashboard/Dashboard';
-import { Toaster } from "@/components/ui/toaster";
+
 
 function App() {
   return (
-    <main className="container mx-auto p-4 h-screen flex flex-col">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold">NetTraffic Parser</h1>
-      </div>
-      <div className="flex-1 overflow-hidden bg-gray-900 rounded-lg shadow-xl border border-gray-800">
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20 selection:text-primary">
+      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 max-w-screen-2xl items-center">
+          <div className="mr-4 flex">
+            <a className="mr-6 flex items-center space-x-2" href="/">
+              <span className="font-bold sm:inline-block text-primary">NetPack Parser</span>
+            </a>
+          </div>
+        </div>
+      </header>
+      <main className="container py-6">
         <Dashboard />
-      </div>
-      <Toaster />
-    </main>
+      </main>
+    </div>
   );
 }
 

@@ -103,56 +103,90 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full max-w-2xl flex flex-col">
-        <SheetHeader>
-          <SheetTitle>Packet Details - ID: {packet.id}</SheetTitle>
-          <SheetDescription>
+      <SheetContent side="right" className="w-full max-w-2xl flex flex-col bg-background/95 backdrop-blur-md border-l border-white/10 p-0 sm:max-w-2xl">
+        <SheetHeader className="p-6 border-b border-white/10">
+          <SheetTitle className="text-xl font-bold text-foreground flex items-center gap-2">
+            Packet Details
+            <span className="text-sm font-normal text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded">ID: {packet.id}</span>
+          </SheetTitle>
+          <SheetDescription className="text-muted-foreground">
             Detailed view of the selected network packet.
           </SheetDescription>
         </SheetHeader>
-        <div className="flex-grow overflow-y-auto p-4 space-y-4 font-mono text-sm">
+        <div className="flex-grow overflow-y-auto p-6 space-y-6">
           {/* Packet Summary */}
-          <div className="bg-slate-800 p-3 rounded-lg">
-            <h3 className="font-bold text-base mb-2">Summary</h3>
-            <p><strong>Timestamp:</strong> {formatTimestamp(packet.timestamp)}</p>
-            <p><strong>Source:</strong> {packet.source}</p>
-            <p><strong>Destination:</strong> {packet.destination}</p>
-            <p><strong>Protocol:</strong> {packet.protocol}</p>
-            <p><strong>Length:</strong> {rawDataBuffer.byteLength} bytes</p>
+          <div className="bg-card border border-white/10 p-4 rounded-lg shadow-sm">
+            <h3 className="font-semibold text-sm text-foreground mb-3 flex items-center gap-2">
+              <span className="w-1 h-4 bg-primary rounded-full"></span>
+              Summary
+            </h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="space-y-1">
+                <p className="text-muted-foreground text-xs uppercase tracking-wider">Timestamp</p>
+                <p className="font-mono text-foreground">{formatTimestamp(packet.timestamp)}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-muted-foreground text-xs uppercase tracking-wider">Protocol</p>
+                <p className="font-mono text-foreground">{packet.protocol}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-muted-foreground text-xs uppercase tracking-wider">Source</p>
+                <p className="font-mono text-foreground">{packet.source}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-muted-foreground text-xs uppercase tracking-wider">Destination</p>
+                <p className="font-mono text-foreground">{packet.destination}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-muted-foreground text-xs uppercase tracking-wider">Length</p>
+                <p className="font-mono text-foreground">{rawDataBuffer.byteLength} bytes</p>
+              </div>
+            </div>
           </div>
 
           {/* Decoded Headers */}
-          <div className="bg-slate-800 p-3 rounded-lg">
-            <h3 className="font-bold text-base mb-2">Decoded Headers</h3>
-            <div className="space-y-1">
+          <div className="bg-card border border-white/10 p-4 rounded-lg shadow-sm">
+            <h3 className="font-semibold text-sm text-foreground mb-3 flex items-center gap-2">
+              <span className="w-1 h-4 bg-accent rounded-full"></span>
+              Decoded Headers
+            </h3>
+            <div className="space-y-2 text-sm">
               {decodedHeaders.map((header, index) => (
-                <p key={index}>
-                  <strong>{header.name}:</strong> {header.value} {header.description && `(${header.description})`}
-                </p>
+                <div key={index} className="flex flex-col sm:flex-row sm:justify-between border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                  <span className="text-muted-foreground font-medium">{header.name}</span>
+                  <span className="font-mono text-foreground text-right">
+                    {header.value} {header.description && <span className="text-muted-foreground/70 ml-1">({header.description})</span>}
+                  </span>
+                </div>
               ))}
             </div>
           </div>
 
           {/* Hex Dump and ASCII */}
-          <div className="bg-slate-800 p-3 rounded-lg">
-            <h3 className="font-bold text-base mb-2">Payload Hex Dump / ASCII</h3>
-            {rawDataBuffer && rawDataBuffer.byteLength > 0 ? (
-              <HexDumpViewer rawData={rawDataBuffer} />
-            ) : (
-              <p>No payload data available.</p>
-            )}
+          <div className="bg-card border border-white/10 p-4 rounded-lg shadow-sm">
+            <h3 className="font-semibold text-sm text-foreground mb-3 flex items-center gap-2">
+              <span className="w-1 h-4 bg-emerald-500 rounded-full"></span>
+              Payload Hex Dump / ASCII
+            </h3>
+            <div className="bg-black/40 rounded border border-white/5 p-2 overflow-hidden">
+              {rawDataBuffer && rawDataBuffer.byteLength > 0 ? (
+                <HexDumpViewer rawData={rawDataBuffer} />
+              ) : (
+                <p className="text-muted-foreground text-sm p-4 text-center">No payload data available.</p>
+              )}
+            </div>
           </div>
 
           {/* Copy/Download buttons */}
-          <div className="mt-4 flex gap-2">
-            <Button onClick={handleCopyHex} disabled={!rawDataBuffer || rawDataBuffer.byteLength === 0}>
+          <div className="flex gap-3 pt-2">
+            <Button variant="outline" size="sm" onClick={handleCopyHex} disabled={!rawDataBuffer || rawDataBuffer.byteLength === 0} className="flex-1">
               Copy Hex
             </Button>
-            <Button onClick={handleCopyAscii} disabled={!rawDataBuffer || rawDataBuffer.byteLength === 0}>
+            <Button variant="outline" size="sm" onClick={handleCopyAscii} disabled={!rawDataBuffer || rawDataBuffer.byteLength === 0} className="flex-1">
               Copy ASCII
             </Button>
-            <Button onClick={handleDownloadPacket} disabled={!rawDataBuffer || rawDataBuffer.byteLength === 0}>
-              Download Packet
+            <Button variant="default" size="sm" onClick={handleDownloadPacket} disabled={!rawDataBuffer || rawDataBuffer.byteLength === 0} className="flex-1">
+              Download
             </Button>
           </div>
         </div>

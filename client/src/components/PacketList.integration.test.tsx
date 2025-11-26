@@ -99,8 +99,8 @@ describe('PacketList Integration with PacketDetailView', () => {
 
 
     expect(screen.getByText('Captured Packets')).toBeInTheDocument();
-    expect(screen.getByText(mockPackets[0].destination)).toBeInTheDocument();
-    expect(screen.getByText(mockPackets[1].destination)).toBeInTheDocument();
+    expect(screen.getByText(`${mockPackets[0].source} → ${mockPackets[0].destination}`)).toBeInTheDocument();
+    expect(screen.getByText(`${mockPackets[1].source} → ${mockPackets[1].destination}`)).toBeInTheDocument();
     expect(screen.queryByTestId('mock-packet-detail-view')).not.toBeInTheDocument();
   });
 
