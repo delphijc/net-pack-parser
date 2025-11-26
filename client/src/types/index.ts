@@ -37,6 +37,7 @@ export interface ParsedPacket {
     forensicMetadata?: ForensicMetadata;
     threatIntelligence?: ThreatIntelligence[];
     suspiciousIndicators?: SuspiciousIndicator[];
+    sessionId?: string;
 }
 
 export interface ForensicMetadata {
@@ -167,3 +168,15 @@ export interface User {
     username: string;
     role: 'lead_investigator' | 'investigator' | 'analyst' | 'viewer';
 }
+
+export interface FileChainOfCustodyEvent {
+    id: string;
+    timestamp: string;
+    action: string; // e.g., "File Uploaded"
+    filename: string;
+    fileSize: number;
+    sha256Hash: string;
+    md5Hash: string;
+    userAgent: string;
+}
+

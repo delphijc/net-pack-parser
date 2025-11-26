@@ -3,7 +3,13 @@ import { parseNetworkData, downloadFile } from '../../services/pcapParser';
 import { startNetworkCapture, stopNetworkCapture } from '../../services/networkCapture';
 import database from '../../services/database';
 import type { ParsedPacket } from '../../types';
-import { Terminal, Send, AlertTriangle, Loader2, Upload, Wifi, StopCircle, Play } from 'lucide-react';
+import { generateSha256Hash, generateMd5Hash } from '../../utils/hashGenerator';
+import FileInfo from '../FileInfo'; // Import the new FileInfo component
+import chainOfCustodyDb from '../../services/chainOfCustodyDb';
+import { v4 as uuidv4 } from 'uuid';
+import type { FileChainOfCustodyEvent } from '../../types';
+import ChainOfCustodyLog from '../ChainOfCustodyLog';
+import { Terminal, StopCircle, Wifi, Upload, Play, Loader2, Send, AlertTriangle } from 'lucide-react';
 
 const PcapUpload: React.FC = () => {
     const [inputData, setInputData] = useState('');
@@ -13,6 +19,27 @@ const PcapUpload: React.FC = () => {
     const [lastParsedPacket, setLastParsedPacket] = useState<ParsedPacket | null>(null);
     const [errorMessage, setErrorMessage] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // New state for file info
+    const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+    const [uploadedFileSize, setUploadedFileSize] = useState<number | null>(null);
+    const [uploadedFileSha256, setUploadedFileSha256] = useState<string | null>(null);
+    const [uploadedFileMd5, setUploadedFileMd5] = useState<string | null>(null);
+    const [uploadedFileBuffer, setUploadedFileBuffer] = useState<ArrayBuffer | null>(null);
+
+    const handleVerifyIntegrity = async (): Promise<{ sha256Match: boolean; md5Match: boolean }> => {
+        if (!uploadedFileBuffer || !uploadedFileSha256 || !uploadedFileMd5) {
+            throw new Error('No file uploaded or hashes available for verification.');
+        }
+
+        const recalculatedSha256 = await generateSha256Hash(uploadedFileBuffer);
+        const recalculatedMd5 = await generateMd5Hash(uploadedFileBuffer);
+
+        return {
+            sha256Match: recalculatedSha256 === uploadedFileSha256,
+            md5Match: recalculatedMd5 === uploadedFileMd5,
+        };
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -72,6 +99,31 @@ const PcapUpload: React.FC = () => {
             setErrorMessage('');
 
             const buffer = await file.arrayBuffer();
+            setUploadedFileBuffer(buffer);
+
+            // Generate hashes
+            const sha256Hash = await generateSha256Hash(buffer);
+            const md5Hash = await generateMd5Hash(buffer);
+
+            // Store file info and hashes in state
+            setUploadedFileName(file.name);
+            setUploadedFileSize(file.size);
+            setUploadedFileSha256(sha256Hash);
+            setUploadedFileMd5(md5Hash);
+
+            // Create and store Chain of Custody log entry
+            const cocEvent: FileChainOfCustodyEvent = {
+                id: uuidv4(),
+                timestamp: new Date().toISOString(),
+                action: 'File Uploaded',
+                filename: file.name,
+                fileSize: file.size,
+                sha256Hash: sha256Hash,
+                md5Hash: md5Hash,
+                userAgent: navigator.userAgent,
+            };
+            await chainOfCustodyDb.addFileChainOfCustodyEvent(cocEvent);
+
             const parsedPackets = await parseNetworkData(buffer);
 
             if (parsedPackets.length === 0) {
@@ -413,6 +465,18 @@ const PcapUpload: React.FC = () => {
                     </div>
                 </div>
             )}
+
+            {uploadedFileName && uploadedFileSize !== null && uploadedFileSha256 && uploadedFileMd5 && (
+                <FileInfo
+                    fileName={uploadedFileName}
+                    fileSize={uploadedFileSize}
+                    sha256Hash={uploadedFileSha256}
+                    md5Hash={uploadedFileMd5}
+                    onVerifyIntegrity={handleVerifyIntegrity}
+                />
+            )}
+
+            <ChainOfCustodyLog />
         </div>
     );
 };

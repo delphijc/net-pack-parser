@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story_context>
+  <story_key>1-5-file-hash-generation-chain-of-custody</story_key>
+  <epic_id>1</epic_id>
+  <story_title>File Hash Generation &amp; Chain of Custody</story_title>
+  <story_status>drafted</story_status>
+  <user_story>
+    <as_a>forensic investigator</as_a>
+    <i_want>cryptographic hashes generated for uploaded PCAP files</i_want>
+    <so_that>I can verify file integrity and maintain chain of custody</so_that>
+  </user_story>
+  <acceptance_criteria>
+    <criterion id="1">Given a PCAP file has been uploaded successfully, When the file is processed, Then the system generates a SHA-256 hash of the original file's content using the Web Crypto API.</criterion>
+    <criterion id="2">And the system also generates an MD5 hash for backwards compatibility (e.g., using a library like `crypto-js`).</criterion>
+    <criterion id="3">And both the SHA-256 and MD5 hashes are displayed in a "File Info" or "Properties" panel for the uploaded file.</criterion>
+    <criterion id="4">And a "Chain of Custody" log entry is created with the following details: Timestamp (in UTC ISO 8601 format), Action: "File Uploaded", Filename, File size, SHA-256 Hash, MD5 Hash, User Agent string of the browser</criterion>
+    <criterion id="5">And this log is stored durably in the browser (e.g., IndexedDB) and is included in data exports.</criterion>
+    <criterion id="6">And when a user later triggers a file integrity check, the system recalculates the hash and compares it against the stored hash, displaying a verification status ("✓ File integrity verified" or "✗ Hash mismatch detected!").</criterion>
+  </acceptance_criteria>
+  <tasks>
+    <task>- [ ] Create a `hashGenerator.ts` service in `client/src/utils/` to encapsulate hashing logic.</task>
+    <task>- [ ] Implement a function to generate SHA-256 hash using the Web Crypto API.</task>
+    <task>- [ ] Add a library like `crypto-js` and implement a function to generate MD5 hash.</task>
+    <task>- [ ] Integrate the `hashGenerator.ts` service into the file upload workflow in `PcapUpload.tsx`.</task>
+    <task>- [ ] Design and implement a `FileInfo.tsx` component to display the file's name, size, and hashes.</task>
+    <task>- [ ] Create a data model and storage mechanism (e.g., in `database.ts`) for the append-only Chain of Custody log.</task>
+    <task>- [ ] Implement the logic to create and store the "File Uploaded" log entry upon successful upload.</task>
+    <task>- [ ] Display the Chain of Custody log in the UI.</task>
+    <task>- [ ] Add a "Verify Integrity" button and implement the re-hashing and comparison logic.</task>
+    <task>- [ ] Write unit tests for `hashGenerator.ts` to verify correct hash generation for known inputs.</task>
+    <task>- [ ] Write component tests for `FileInfo.tsx` to ensure data is displayed correctly.</task>
+  </tasks>
+  <dev_notes>
+    <note_item>
+      <title>Implementation Details</title>
+      <detail>The Web Crypto API (`crypto.subtle.digest`) is asynchronous and should be handled with promises.</detail>
+      <detail>Hashing large files can be resource-intensive. Following the pattern from the previous story, consider using a Web Worker to offload this work from the main UI thread to prevent blocking.</detail>
+      <detail>The Chain of Custody log must be append-only to maintain forensic integrity.</detail>
+      <detail>All timestamps must be in UTC.</detail>
+    </note_item>
+    <note_item>
+      <title>Learnings from Previous Story (1.4-pcap-file-upload-parsing)</title>
+      <detail>Service-Oriented Architecture: The previous story established `pcapParser.ts` as a dedicated service. This story should follow that pattern by creating `hashGenerator.ts`.</detail>
+      <detail>Libraries: `pcap-decoder` was successfully integrated for parsing. This story will require integrating a library like `crypto-js` for MD5.</detail>
+      <detail>Type Safety: A declaration file (`pcap-decoder.d.ts`) was created. Ensure any new libraries have corresponding types.</detail>
+      <detail>Batch Operations: The database service was updated to handle batch packet storage (`storePackets`). A similar approach may be needed for logging chain of custody events.</detail>
+      <detail>Source: stories/1-4-pcap-file-upload-parsing.md</detail>
+    </note_item>
+    <note_item>
+      <title>Relevant architecture patterns and constraints</title>
+      <detail>Security: As per NFR-S2, use the secure Web Crypto API for SHA-256.</detail>
+      <detail>Forensics: As per FR56, FR57, and FR58, maintaining a verifiable chain of custody is critical.</detail>
+      <detail>Data Models: Refer to `architecture.md` for `Packet` and `CaptureSession` interfaces. This story will introduce a `ChainOfCustodyEvent` interface.</detail>
+    </note_item>
+  </dev_notes>
+  <artifacts>
+    <docs>
+      <entry path="docs/prd.md" title="Product Requirements Document" section="Executive Summary" snippet="Network Traffic Parser is a comprehensive web-based network analysis platform... Evidence integrity and forensic validity... Digital forensics principles (chain of custody, hash verification)." />
+      <entry path="docs/prd.md" title="Product Requirements Document" section="Product Differentiator" snippet="Forensic-Ready: Chain of custody, hash verification, evidence integrity." />
+      <entry path="docs/prd.md" title="Product Requirements Document" section="MVP Scope" snippet="Forensic Investigation (Browser) - Chain of custody tracking, Hash verification (SHA-256, MD5)." />
+      <entry path="docs/prd.md" title="Product Requirements Document" section="Functional Requirements" snippet="FR18: System generates cryptographic hashes (SHA-256, MD5) for uploaded files. FR56: System maintains chain of custody for all uploaded files. FR57: System records timestamps for all analysis actions. FR58: System verifies file integrity via hash comparison. FR59: Users can view complete chain of custody log. FR60: Users can export evidence packages with metadata and hashes." />
+      <entry path="docs/prd.md" title="Product Requirements Document" section="Non-Functional Requirements - Security" snippet="NFR-S2: Cryptographic hashes (SHA-256, MD5) must use secure browser Crypto API." />
+      <entry path="docs/tech-spec-epic-1.md" title="Epic Technical Specification: Foundation &amp; Browser-Only Infrastructure" section="Overview" snippet="Generation of SHA-256 and MD5 hashes for uploaded files to ensure integrity." />
+      <entry path="docs/tech-spec-epic-1.md" title="Epic Technical Specification: Foundation &amp; Browser-Only Infrastructure" section="In-Scope" snippet="Generation of SHA-256 and MD5 hashes for uploaded files to ensure integrity." />
+      <entry path="docs/tech-spec-epic-1.md" title="Epic Technical Specification: Foundation &amp; Browser-Only Infrastructure" section="Services and Modules" snippet="hashGenerator.ts: Generates cryptographic hashes of files. Input: File data (ArrayBuffer). Output: SHA-256 and MD5 hashes." />
+      <entry path="docs/tech-spec-epic-1.md" title="Epic Technical Specification: Foundation &amp; Browser-Only Infrastructure" section="APIs and Interfaces" snippet="Web Crypto API: For generating SHA-256 hashes (crypto.subtle.digest)." />
+      <entry path="docs/tech-spec-epic-1.md" title="Epic Technical Specification: Foundation &amp; Browser-Only Infrastructure" section="Workflows and Sequencing" snippet="Parsing and Hashing: ...hashGenerator.ts calculates its hashes." />
+      <entry path="docs/tech-spec-epic-1.md" title="Epic Technical Specification: Foundation &amp; Browser-Only Infrastructure" section="Non-Functional Requirements - Security" snippet="NFR-S2: Cryptographic hashes (SHA-256) must use the secure browser Web Crypto API." />
+      <entry path="docs/tech-spec-epic-1.md" title="Epic Technical Specification: Foundation &amp; Browser-Only Infrastructure" section="Dependencies and Integrations" snippet="crypto-js: For MD5 hashing (as Web Crypto API does not support MD5)." />
+      <entry path="docs/tech-spec-epic-1.md" title="Epic Technical Specification: Foundation &amp; Browser-Only Infrastructure" section="Acceptance Criteria" snippet="Story 1.5: File Hash Generation &amp; Chain of Custody (Verifies SHA-256 hash of a known file.)" />
+      <entry path="docs/architecture.md" title="Architecture" section="Decision Summary" snippet="Hashing: Web Crypto API (native, SHA-256/MD5)" />
+      <entry path="docs/architecture.md" title="Architecture" section="Technology Stack Details - Key Libraries" snippet="Hashing: Web Crypto API (native, SHA-256/MD5)" />
+      <entry path="docs/architecture.md" title="Architecture" section="Project Structure" snippet="client/src/utils/hashGenerator.ts (SHA-256, MD5 hashing)" />
+      <entry path="docs/architecture.md" title="Architecture" section="Epic to Architecture Mapping" snippet="Epic 1 mentions client/src/utils/hashGenerator.ts for hashing." />
+      <entry path="docs/architecture.md" title="Architecture" section="Data Architecture - Data Models" snippet="CaptureSession interface includes sha256: string; md5: string;." />
+      <entry path="docs/architecture.md" title="Architecture" section="Security Architecture - Browser Security" snippet="Crypto API: Use native Web Crypto for SHA-256/MD5 hashing." />
+      <entry path="docs/ux-design-specification.md" title="UX Design Specification" section="Visual Personality" snippet="Monospace fonts for data display (SHA hashes, IP addresses, hex dumps)." />
+      <entry path="docs/ux-design-specification.md" title="UX Design Specification" section="User Journey Flows" snippet="The 'Forensic' Flow: User uploads PCAP file -&gt; automatic hash generation." />
+      <entry path="docs/epics.md" title="Network Traffic Parser - Epic Breakdown" section="Epic 1: Foundation &amp; Browser-Only Infrastructure" snippet="Mentions FR18: System generates cryptographic hashes (SHA-256, MD5)." />
+      <entry path="docs/epics.md" title="Network Traffic Parser - Epic Breakdown" section="Story 1.5: File Hash Generation &amp; Chain of Custody" snippet="This is the current story, its full definition is included here." />
+    </docs>
+    <code_artifacts>
+      <entry path="client/src/services/networkCapture.ts" kind="service" symbol="SHA256" reason="Existing use of crypto-js for SHA256" />
+      <entry path="client/src/services/pcapParser.ts" kind="service" symbol="SHA256" reason="Existing use of crypto-js for SHA256" />
+      <entry path="client/src/utils/analysis.ts" kind="utility" symbol="SHA256" reason="Existing use of crypto-js for SHA256 and simplified MD5 simulation" />
+      <entry path="client/src/types/index.ts" kind="type_definitions" symbol="hash, md5Hash, sha256Hash" reason="Existing type definitions for hash values" />
+      <entry path="client/src/components/parser/PcapUpload.tsx" kind="component" reason="Main component for PCAP file upload, where hashing logic will integrate" />
+      <entry path="client/src/components/parser/PcapUpload.test.tsx" kind="test" reason="Existing tests for the PCAP upload component" />
+    </code_artifacts>
+    <interfaces>
+      <interface name="Packet" kind="TypeScript Interface" signature="interface Packet { id: string; timestamp: number; sourceIP: string; destIP: string; sourcePort: number; destPort: number; protocol: string; length: number; rawData: ArrayBuffer; flags?: string[]; sessionId?: string; }" path="client/src/types/packet.ts" reason="Base interface for network packets, mentioned in architecture" />
+      <interface name="CaptureSession" kind="TypeScript Interface" signature="interface CaptureSession { id: string; name: string; startTime: number; endTime?: number; packetCount: number; fileSizeBytes: number; sha256: string; md5: string; interface?: string; filter?: string; serverUrl?: string; }" path="client/src/types/captureSession.ts" reason="Interface for capture session metadata, mentioned in architecture, includes hash fields" />
+      <interface name="ChainOfCustodyEvent" kind="TypeScript Interface" signature="interface ChainOfCustodyEvent { timestamp: string; action: string; filename: string; fileSize: number; sha256Hash: string; md5Hash: string; userAgent: string; }" reason="New interface to be defined for storing chain of custody entries" />
+    </interfaces>
+    <constraints>
+      <constraint type="implementation_pattern" name="hashGenerator.ts service" description="Create a dedicated service for hashing logic in client/src/utils/." />
+      <constraint type="performance" name="Web Worker for Hashing" description="Consider using a Web Worker to offload resource-intensive hashing for large files to prevent UI blocking." />
+      <constraint type="data_integrity" name="Append-Only Chain of Custody Log" description="The Chain of Custody log must be append-only to maintain forensic integrity." />
+      <constraint type="data_format" name="UTC Timestamps" description="All timestamps in the Chain of Custody log must be in UTC." />
+      <constraint type="library_usage" name="crypto-js for MD5" description="Leverage existing crypto-js library for MD5 hashing." />
+      <constraint type="type_safety" name="Type Declarations" description="Ensure any new libraries or components have corresponding TypeScript type definitions." />
+      <constraint type="architecture" name="Service-Oriented Architecture" description="Follow established pattern of creating dedicated services (e.g., hashGenerator.ts)." />
+      <constraint type="security_nfr" name="NFR-S2 Web Crypto API" description="NFR-S2 requires secure Web Crypto API for SHA-256." />
+      <constraint type="forensic_fr" name="FR56, FR57, FR58 Chain of Custody" description="FR56, FR57, FR58 emphasize critical importance of verifiable chain of custody." />
+      <constraint type="data_model" name="ChainOfCustodyEvent Interface" description="Introduce a new ChainOfCustodyEvent interface as part of the data models." />
+    </constraints>
+      </constraints>
+    <dependencies>
+      <ecosystem name="npm">
+        <package name="crypto-js" version="^4.2.0" reason="Used for SHA256 hashing; required for MD5 hashing." />
+        <package name="@types/crypto-js" version="^4.2.1" reason="TypeScript types for crypto-js." />
+        <package name="pcap-decoder" version="^1.0.3" reason="Library for parsing PCAP files in the browser." />
+        <package name="react" version="^19.2.0" reason="Core UI library." />
+        <package name="react-dom" version="^19.2.0" reason="DOM rendering for React." />
+        <package name="uuid" version="^9.0.1" reason="Utility for generating UUIDs (likely for IDs in ChainOfCustodyEvent)." />
+        <package name="tailwind-merge" version="^3.4.0" reason="Utility for merging Tailwind CSS classes." />
+        <package name="clsx" version="^2.1.1" reason="Utility for constructing className strings conditionally." />
+        <package name="lucide-react" version="^0.554.0" reason="Icon library." />
+        <package name="class-variance-authority" version="^0.7.1" reason="Utility for building flexible component variants." />
+        <package name="@radix-ui/react-alert-dialog" version="^1.1.15" reason="Radix UI component for alert dialogs." />
+        <package name="@radix-ui/react-dialog" version="^1.1.15" reason="Radix UI component for dialogs." />
+        <package name="@radix-ui/react-progress" version="^1.1.8" reason="Radix UI component for progress indicators." />
+        <package name="@radix-ui/react-select" version="^2.2.6" reason="Radix UI component for select inputs." />
+        <package name="@radix-ui/react-slot" version="^1.2.4" reason="Radix UI component for slotting." />
+        <package name="@radix-ui/react-tabs" version="^1.1.13" reason="Radix UI component for tabbed navigation." />
+        <package name="@radix-ui/react-toast" version="^1.2.15" reason="Radix UI component for toast notifications." />
+        <package name="@radix-ui/react-tooltip" version="^1.2.8" reason="Radix UI component for tooltips." />
+        <package name="tailwindcss-animate" version="^1.0.7" reason="Tailwind CSS plugin for animations." />
+        <package name="vite" version="^7.2.4" reason="Frontend build tool." />
+        <package name="vitest" version="^4.0.13" reason="Unit testing framework." />
+        <package name="@testing-library/jest-dom" version="^6.9.1" reason="Custom Jest matchers for DOM assertions." />
+        <package name="@testing-library/react" version="^16.3.0" reason="React testing utilities." />
+        <package name="@testing-library/user-event" version="^14.6.1" reason="Simulate user interactions in tests." />
+        <package name="jsdom" version="^27.2.0" reason="DOM environment for Vitest." />
+        <package name="typescript" version="~5.9.3" reason="TypeScript language." />
+        <package name="tailwindcss" version="^4.1.17" reason="CSS framework." />
+        <package name="postcss" version="^8.5.6" reason="CSS post-processor." />
+        <package name="autoprefixer" version="^10.4.22" reason="PostCSS plugin to parse CSS and add vendor prefixes." />
+        <package name="eslint" version="^9.39.1" reason="Linter for JavaScript/TypeScript." />
+        <package name="prettier" version="^3.6.2" reason="Code formatter." />
+        <package name="@vitejs/plugin-react" version="^5.1.1" reason="Vite plugin for React." />
+      </ecosystem>
+    </dependencies>
+    <tests>
+      <standards>
+        Unit tests will use Vitest for individual functions and logic (e.g., hash generation). Component tests will use React Testing Library for React components in isolation (e.g., FileInfo.tsx). End-to-end tests will use Playwright for full user flows. Performance tests will be conducted manually with browser developer tools, with potential for automated Playwright tests later. Tests are co-located with components or in __tests__ folders.
+      </standards>
+      <locations>
+        <location>client/src/**/*.test.tsx</location>
+        <location>client/src/__tests__/</location>
+        <location>tests/e2e/</location>
+      </locations>
+      <ideas>
+        <idea ac_id="1" description="Unit test hashGenerator.ts to verify correct SHA-256 hash generation for known inputs using Web Crypto API (mocked if necessary)." />
+        <idea ac_id="2" description="Unit test hashGenerator.ts to verify correct MD5 hash generation for known inputs using crypto-js." />
+        <idea ac_id="3" description="Component test FileInfo.tsx (once created) to ensure both SHA-256 and MD5 hashes are displayed correctly in the UI." />
+        <idea ac_id="4" description="Integration test the file upload workflow in PcapUpload.tsx to ensure a Chain of Custody log entry is created with all required fields (timestamp, action, filename, size, hashes, user agent) after a successful upload." />
+        <idea ac_id="5" description="E2E test to verify Chain of Custody log entries persist in browser storage (e.g., IndexedDB) across browser sessions and are correctly included in data exports." />
+        <idea ac_id="6" description="Integration/Component test the 'Verify Integrity' functionality, covering scenarios where the recalculated hash matches the stored hash (success) and where it mismatches (failure)." />
+      </ideas>
+    </tests>
+</story_context>

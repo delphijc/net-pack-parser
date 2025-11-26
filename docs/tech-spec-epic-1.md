@@ -222,3 +222,7 @@ This epic will primarily use browser-native APIs:
 - (Story 1.3) [High] Unskip and fix component tests for `SettingsPage`. Verify AC1, AC5, AC6. [file: `client/src/components/SettingsPage.test.tsx:12`]
 - (Story 1.3) [Low] Dynamically read `APP_VERSION` from `package.json`. [file: `client/src/utils/dataImportExport.ts:5`]
 
+- (Story 1.6) [Medium] Implement Acceptance Criterion 5: "And extracted strings from the payload are highlighted (if any)." (AC #5)
+- (Story 1.6) [Low] Add unit/component tests for `PacketDetailView.tsx` to verify the rendering of the monospace font for the hex dump.
+- (Story 1.6) [Low] Evaluate performance of `generateHexDump` with large packet payloads and consider offloading to a Web Worker for future optimization. (Advisory Note)
+

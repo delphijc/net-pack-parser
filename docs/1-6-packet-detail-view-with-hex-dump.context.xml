@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StoryContext>
+  <story_key>1-6-packet-detail-view-with-hex-dump</story_key>
+  <epic_id>1</epic_id>
+  <story_title>Packet Detail View with Hex Dump</story_title>
+  <story_status>drafted</story_status>
+  <user_story>
+    <as_a>security analyst</as_a>
+    <i_want>to view detailed packet information including hex dump</i_want>
+    <so_that>I can inspect packet contents at the byte level</so_that>
+  </user_story>
+  <acceptance_criteria>
+    <criterion id="1">Given packets have been loaded from a PCAP file, When I click on a packet in the packet list table, Then a detailed packet view panel opens (using a Sheet component from `shadcn/ui` as per UX Design).</criterion>
+    <criterion id="2">And the panel displays: Packet summary: timestamp (relative and absolute), source/destination IP:port, protocol, size. Decoded headers for the detected protocol. Payload data in both hex dump and ASCII representation.</criterion>
+    <criterion id="3">And the hex dump format adheres to: `offset (4 digits hex) + 16 hex bytes + ASCII`. Example: `0000 45 00 00 3c 1c 46 40 00 40 06 b1 e6 ac 10 00 01 E..<.F@.@.......`</criterion>
+    <criterion id="4">And non-printable ASCII characters in the hex dump's ASCII representation render as '.'.</criterion>
+    <criterion id="5">And extracted strings from the payload are highlighted (if any).</criterion>
+    <criterion id="6">And I can copy the hex dump or ASCII text to the clipboard.</criterion>
+    <criterion id="7">And I can download the full packet as a separate file.</criterion>
+  </acceptance_criteria>
+  <tasks>
+    <task>
+      <description>Frontend Component Development:</description>
+      <subtask>Create `client/src/components/PacketDetailView.tsx` component.</subtask>
+      <subtask>Utilize `shadcn/ui` Sheet component for the panel as per UX Design.</subtask>
+      <subtask>Implement display of packet summary information (timestamp, IPs, ports, protocol, size).</subtask>
+      <subtask>Implement logic to display decoded headers for common protocols (e.g., Ethernet, IP, TCP, UDP).</subtask>
+      <subtask>Develop `HexDumpViewer.tsx` sub-component to render payload data in hex and ASCII. Ensure `16 bytes per line` format. Handle non-printable ASCII characters as '.'. Apply monospace font as specified in UX Design.</subtask>
+      <subtask>Integrate extracted strings highlighting in the hex dump and ASCII views (from Story 1.7).</subtask>
+      <subtask>Add "Copy Hex" and "Copy ASCII" buttons to clipboard functionality.</subtask>
+      <subtask>Implement "Download Packet" functionality, allowing users to save the raw packet data.</subtask>
+    </task>
+    <task>
+      <description>Integration with Packet List:</description>
+      <subtask>Modify `client/src/components/PacketList.tsx` (or its parent) to open `PacketDetailView.tsx` when a packet row is clicked.</subtask>
+      <subtask>Pass the selected `Packet` object to the `PacketDetailView.tsx` component.</subtask>
+    </task>
+    <task>
+      <description>Testing:</description>
+      <subtask>Write unit tests for the hex dump formatting logic in `HexDumpViewer.tsx`.</subtask>
+      <subtask>Write component tests for `PacketDetailView.tsx` to verify: Correct display of packet summary and decoded headers. Accurate rendering of hex dump and ASCII representation. Functionality of copy-to-clipboard buttons. Highlighting of extracted strings.</subtask>
+      <subtask>Write integration tests to ensure clicking a packet in the list opens the detail view correctly.</subtask>
+    </task>
+  </tasks>
+  <dev_notes>
+    <note>Implementation Details: The `Packet` interface (defined in `architecture.md`) contains `rawData: ArrayBuffer` which will be the source for the hex dump. Pay close attention to performance for large packets; ensure efficient rendering of the hex dump. Protocol decoding logic for headers should be extensible, leveraging or defining utilities in `client/src/utils/`. The UX Design specifies using `shadcn/ui` Sheet component for the detailed panel, and a monospace font for data/code (`JetBrains Mono`).</note>
+    <note>Learnings from Previous Story (1.5-file-hash-generation-chain-of-custody): Service-Oriented Architecture: Continue the pattern of creating dedicated, testable services and components (e.g., `HexDumpViewer.tsx` as a sub-component). Type Safety: Ensure all new components and functions are strongly typed using TypeScript. Code Quality: Address the pending code quality items from the previous story's review (`hashGenerator.ts` import, `chainOfCustodyDb.ts` initialization) as part of this story's cleanup if applicable, or in a dedicated tech debt story. Performance: Consider if any part of the hex dump generation or protocol decoding could benefit from Web Workers for very large packet payloads, similar to the hashing recommendation. Source: [stories/1-5-file-hash-generation-chain-of-custody.md](stories/1-5-file-hash-generation-chain-of-custody.md)</note>
+    <note>Relevant architecture patterns and constraints: Frontend Framework: React, TypeScript, Vite, Tailwind CSS as per `architecture.md`. Component Library: `shadcn/ui` as specified in `architecture.md` and `ux-design-specification.md`. Project Structure: Components go into `client/src/components/`, utilities into `client/src/utils/`. Testing: `Vitest` for unit tests, `React Testing Library` for component tests as per `architecture.md`. Naming Conventions: PascalCase for components (`PacketDetailView.tsx`, `HexDumpViewer.tsx`). Data Models: Use the `Packet` interface from `client/src/types/packet.ts` or `shared/types/packet.ts`.</note>
+  </dev_notes>
+  <review_follow_ups>
+    <follow_up status="pending">[Low] Remove duplicate `import CryptoJS from 'crypto-js';` statement in `client/src/utils/hashGenerator.ts`.</follow_up>
+    <follow_up status="pending">[Low] Optimize `initDb()` call in `client/src/services/chainOfCustodyDb.ts` to ensure `this.db` is initialized only once for better efficiency.</follow_up>
+  </review_follow_ups>
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>PCAP File Analysis</section>
+        <snippet>FR23: Users can view packet details including headers and payload data. FR24: Users can view hexadecimal dump of packet payloads.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>UX Principles / Visual Personality</section>
+        <snippet>Monospace fonts for data display (SHA hashes, IP addresses, hex dumps).</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>UX Principles / Key Interaction Patterns</section>
+        <snippet>Click-to-drill-down on any data point.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Services and Modules</section>
+        <snippet>PacketDetailView.tsx: Shows detailed information for a selected packet, including hex dump. Packet interface.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Acceptance Criteria (Story 1.6)</section>
+        <snippet>Clicking a packet opens a detailed view with decoded headers. The view includes a payload hex dump in a 16-bytes-per-line format with ASCII representation.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Decision Summary / Component Library</section>
+        <snippet>shadcn/ui: Accessible, customizable, Radix UI primitives, copy-paste components (not npm dependency).</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Project Structure</section>
+        <snippet>client/src/components/PacketDetailView.tsx.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Data Architecture / Data Models</section>
+        <snippet>Packet interface: id, timestamp, sourceIP, destIP, sourcePort, destPort, protocol, length, rawData, flags?, sessionId?.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Implementation Patterns / Naming Conventions</section>
+        <snippet>Monospace fonts for data display (SHA hashes, IP addresses, hex dumps).</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/ux-design-specification.md</path>
+        <title>Network Traffic Parser UX Design Specification</title>
+        <section>Design System Choice</section>
+        <snippet>shadcn/ui for all core interactive elements. JetBrains Mono for data/code.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/ux-design-specification.md</path>
+        <title>Network Traffic Parser UX Design Specification</title>
+        <section>Visual Foundation / Typography</section>
+        <snippet>Data/Code: JetBrains Mono (The developer standard).</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/ux-design-specification.md</path>
+        <title>Network Traffic Parser UX Design Specification</title>
+        <section>Component Library</section>
+        <snippet>HexViewer: Custom component for inspecting payload bytes with ASCII decoding.</snippet>
+      </artifact>
+      <artifact>
+        <path>README.md</path>
+        <title>Network Traffic Parser</title>
+        <section>Key Features / Packet Inspection</section>
+        <snippet>Detailed view of packet headers, payloads, and hex dumps.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/product-brief-net-pack-parser.md</path>
+        <title>Product Brief: Network Traffic Parser</title>
+        <section>MVP Scope / Network Traffic Analysis</section>
+        <snippet>PCAP file upload and parsing. Packet Inspection: Detailed view of packet headers, payloads, and hex dumps.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/ux-design-directions.html</path>
+        <title>Network Traffic Parser - Design Directions</title>
+        <section>Direction 3: Forensic Lab</section>
+        <snippet>Mockup includes a packet list and a details pane with packet dissection. Input field with filter like "tcp.port == 443".</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/ux-color-themes.html</path>
+        <title>Network Traffic Parser - Color Themes</title>
+        <section>Theme 2: Nebula</section>
+        <snippet>Palette with slate tones and blue/cyan accents. Shows UI preview with packet list entries.</snippet>
+      </artifact>
+    </docs>
+    <code>
+      <artifact>
+        <path>client/src/components/PacketDetailView.tsx</path>
+        <kind>component</kind>
+        <symbol>PacketDetailView</symbol>
+        <lines></lines>
+        <reason>New component to display detailed packet information and hex dump.</reason>
+      </artifact>
+      <artifact>
+        <path>client/src/components/HexDumpViewer.tsx</path>
+        <kind>sub-component</kind>
+        <symbol>HexDumpViewer</symbol>
+        <lines></lines>
+        <reason>New sub-component to render payload data in hex and ASCII.</reason>
+      </artifact>
+      <artifact>
+        <path>client/src/components/PacketList.tsx</path>
+        <kind>component</kind>
+        <symbol>PacketList</symbol>
+        <lines></lines>
+        <reason>Will be modified to open PacketDetailView when a packet is clicked.</reason>
+      </artifact>
+      <artifact>
+        <path>client/src/components/ui/sheet.tsx</path>
+        <kind>ui-component</kind>
+        <symbol>Sheet</symbol>
+        <lines></lines>
+        <reason>Used as the container for the detailed packet view panel.</reason>
+      </artifact>
+      <artifact>
+        <path>client/src/types/packet.ts</path>
+        <kind>type-definition</kind>
+        <symbol>Packet</symbol>
+        <lines></lines>
+        <reason>Defines the structure of a network packet.</reason>
+      </artifact>
+      <artifact>
+        <path>client/src/utils/</path>
+        <kind>directory</kind>
+        <symbol></symbol>
+        <lines></lines>
+        <reason>Location for utility functions, including potential protocol decoding logic.</reason>
+      </artifact>
+      <artifact>
+        <path>client/src/utils/hashGenerator.ts</path>
+        <kind>utility</kind>
+        <symbol>hashGenerator</symbol>
+        <lines></lines>
+        <reason>Pending review follow-up: remove duplicate import.</reason>
+      </artifact>
+      <artifact>
+        <path>client/src/services/chainOfCustodyDb.ts</path>
+        <kind>service</kind>
+        <symbol>chainOfCustodyDb</symbol>
+        <lines></lines>
+        <reason>Pending review follow-up: optimize initDb() call.</reason>
+      </artifact>
+    </code>
+    <interfaces>
+      <interface>
+        <name>Packet</name>
+        <kind>TypeScript Interface</kind>
+        <signature>export interface Packet { id: string; timestamp: number; sourceIP: string; destIP: string; sourcePort: number; destPort: number; protocol: string; length: number; rawData: ArrayBuffer; flags?: string[]; sessionId?: string; }</signature>
+        <path>client/src/types/packet.ts</path>
+      </interface>
+      <interface>
+        <name>shadcn/ui Sheet</name>
+        <kind>React Component</kind>
+        <signature>&lt;Sheet&gt;...&lt;/Sheet&gt;</signature>
+        <path>client/src/components/ui/sheet.tsx</path>
+      </interface>
+    </interfaces>
+    <constraints>
+      <constraint>
+        <type>Frontend Framework</type>
+        <description>React, TypeScript, Vite, Tailwind CSS.</description>
+      </constraint>
+      <constraint>
+        <type>Component Library</type>
+        <description>shadcn/ui.</description>
+      </constraint>
+      <constraint>
+        <type>Project Structure</type>
+        <description>Components in client/src/components/, utilities in client/src/utils/.</description>
+      </constraint>
+      <constraint>
+        <type>Testing</type>
+        <description>Vitest for unit tests, React Testing Library for component tests.</description>
+      </constraint>
+      <constraint>
+        <type>Naming Conventions</type>
+        <description>PascalCase for components (e.g., PacketDetailView.tsx, HexDumpViewer.tsx).</description>
+      </constraint>
+      <constraint>
+        <type>Data Models</type>
+        <description>Use the Packet interface from client/src/types/packet.ts.</description>
+      </constraint>
+      <constraint>
+        <type>Performance</type>
+        <description>Pay close attention to performance for large packets; ensure efficient rendering of the hex dump. Consider Web Workers for very large packet payloads.</description>
+      </constraint>
+      <constraint>
+        <type>Styling</type>
+        <description>Use monospace font (JetBrains Mono) for data/code in the hex dump view.</description>
+      </constraint>
+    </constraints>
+  </artifacts>
+      <dependencies>
+        <npm>
+          <package name="@radix-ui/react-alert-dialog" version="^1.1.15" />
+          <package name="@radix-ui/react-dialog" version="^1.1.15" />
+          <package name="@radix-ui/react-progress" version="^1.1.8" />
+          <package name="@radix-ui/react-select" version="^2.2.6" />
+          <package name="@radix-ui/react-slot" version="^1.2.4" />
+          <package name="@radix-ui/react-tabs" version="^1.1.13" />
+          <package name="@radix-ui/react-toast" version="^1.2.15" />
+          <package name="@radix-ui/react-tooltip" version="^1.2.8" />
+          <package name="class-variance-authority" version="^0.7.1" />
+          <package name="clsx" version="^2.1.1" />
+          <package name="lucide-react" version="^0.554.0" />
+          <package name="pcap-decoder" version="^1.0.3" />
+          <package name="react" version="^19.2.0" />
+          <package name="react-dom" version="^19.2.0" />
+          <package name="tailwind-merge" version="^3.4.0" />
+          <package name="tailwindcss-animate" version="^1.0.7" />
+          <package name="crypto-js" version="^4.2.0" />
+        </npm>
+        <npm-dev>
+          <package name="@eslint/js" version="^9.39.1" />
+          <package name="@shadcn/ui" version="^0.0.4" />
+          <package name="@tailwindcss/postcss" version="^4.1.17" />
+          <package name="@testing-library/jest-dom" version="^6.9.1" />
+          <package name="@testing-library/react" version="^16.3.0" />
+          <package name="@testing-library/user-event" version="^14.6.1" />
+          <package name="@types/crypto-js" version="^4.2.1" />
+          <package name="@types/node" version="^24.10.1" />
+          <package name="@types/react" version="^19.2.5" />
+          <package name="@types/react-dom" version="^19.2.3" />
+          <package name="@typescript-eslint/eslint-plugin" version="^8.47.0" />
+          <package name="@typescript-eslint/parser" version="^8.47.0" />
+          <package name="@vitejs/plugin-react" version="^5.1.1" />
+          <package name="autoprefixer" version="^10.4.22" />
+          <package name="eslint" version="^9.39.1" />
+          <package name="eslint-config-prettier" version="^10.1.8" />
+          <package name="eslint-plugin-prettier" version="^5.5.4" />
+          <package name="eslint-plugin-react-hooks" version="^7.0.1" />
+          <package name="eslint-plugin-react-refresh" version="^0.4.24" />
+          <package name="globals" version="^16.5.0" />
+          <package name="jsdom" version="^27.2.0" />
+          <package name="postcss" version="^8.5.6" />
+          <package name="prettier" version="^3.6.2" />
+          <package name="tailwindcss" version="^4.1.17" />
+          <package name="typescript" version="~5.9.3" />
+          <package name="typescript-eslint" version="^8.46.4" />
+          <package name="vite" version="^7.2.4" />
+          <package name="vitest" version="^4.0.13" />
+        </npm-dev>
+      </dependencies>    <tests>
+      <standards>
+        Unit tests are written using Vitest, component tests use React Testing Library, and integration/E2E tests use Playwright. Tests should be co-located with their respective source files.
+      </standards>
+      <locations>
+        <location>client/src/**/*.test.tsx</location>
+        <location>tests/e2e/</location>
+      </locations>
+      <ideas>
+        <idea ac_id="1,2">Write component tests for `PacketDetailView.tsx` to verify correct display of packet summary and decoded headers when opened from a `PacketList` click.</idea>
+        <idea ac_id="3,4">Write unit tests for the hex dump formatting logic in `HexDumpViewer.tsx` to ensure accurate rendering of hex dump and ASCII representation, including handling of non-printable characters.</idea>
+        <idea ac_id="5">Write component tests for `PacketDetailView.tsx` to verify highlighting of extracted strings (once Story 1.7 is integrated).</idea>
+        <idea ac_id="6">Write component tests for `PacketDetailView.tsx` to verify functionality of copy-to-clipboard buttons for hex and ASCII.</idea>
+        <idea ac_id="7">Write component tests for `PacketDetailView.tsx` to verify "Download Packet" functionality.</idea>
+        <idea ac_id="integration">Write integration tests to ensure clicking a packet in the list opens the detail view correctly and passes the selected `Packet` object.</idea>
+      </ideas>
+    </tests>
+</StoryContext>

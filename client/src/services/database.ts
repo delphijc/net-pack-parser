@@ -1,5 +1,6 @@
 import type { ParsedPacket, FileReference, PerformanceEntryData } from '../types';
 import type { ForensicCase, TimelineEvent, ThreatIntelligence } from '../types';
+import type { CaptureSession } from '../types/captureSession'; // Import CaptureSession
 
 class DatabaseService {
     private static instance: DatabaseService;
@@ -9,6 +10,7 @@ class DatabaseService {
     private forensicCases: ForensicCase[] = [];
     private timelineEvents: TimelineEvent[] = [];
     private threatIntelligence: ThreatIntelligence[] = [];
+    private captureSessions: CaptureSession[] = []; // Add captureSessions array
     private storageKey = 'network_parser_data';
 
     private constructor() {
@@ -33,6 +35,7 @@ class DatabaseService {
                 this.forensicCases = parsedData.forensicCases || [];
                 this.timelineEvents = parsedData.timelineEvents || [];
                 this.threatIntelligence = parsedData.threatIntelligence || [];
+                this.captureSessions = parsedData.captureSessions || []; // Load captureSessions
             }
         } catch (error) {
             console.error('Failed to load data from storage:', error);
@@ -42,6 +45,7 @@ class DatabaseService {
             this.forensicCases = [];
             this.timelineEvents = [];
             this.threatIntelligence = [];
+            this.captureSessions = []; // Initialize on error
         }
     }
 
@@ -53,7 +57,8 @@ class DatabaseService {
                 performanceEntries: this.performanceEntries,
                 forensicCases: this.forensicCases,
                 timelineEvents: this.timelineEvents,
-                threatIntelligence: this.threatIntelligence
+                threatIntelligence: this.threatIntelligence,
+                captureSessions: this.captureSessions // Save captureSessions
             };
             localStorage.setItem(this.storageKey, JSON.stringify(dataToSave));
         } catch (error) {
@@ -268,6 +273,16 @@ class DatabaseService {
     public clearPerformanceEntries(): void {
         this.performanceEntries = [];
         this.saveToStorage();
+    }
+
+    // Capture Session Management
+    public storeCaptureSession(session: CaptureSession): void {
+        this.captureSessions.push(session);
+        this.saveToStorage();
+    }
+
+    public getCaptureSession(id: string): CaptureSession | undefined {
+        return this.captureSessions.find(session => session.id === id);
     }
 }
 

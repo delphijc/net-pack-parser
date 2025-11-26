@@ -6,7 +6,7 @@ import {
     AlertTriangle
 } from 'lucide-react';
 import PcapUpload from '../parser/PcapUpload';
-import PacketView from '../packets/PacketView';
+import PcapAnalysisPage from '../../pages/PcapAnalysisPage';
 
 interface DashboardProps {
     onNavigate?: (tab: string) => void;
@@ -223,7 +223,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
             <div className="flex-1 overflow-y-auto">
                 {activeTab === 'overview' && renderOverview()}
                 {activeTab === 'parser' && <PcapUpload />}
-                {activeTab === 'packets' && <PacketView />}
+                {activeTab === 'packets' && <PcapAnalysisPage />}
             </div>
         </div>
     );

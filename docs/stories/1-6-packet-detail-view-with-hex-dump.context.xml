@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story_context>
+  <story_info>
+    <epic_id>1</epic_id>
+    <story_key>1-6-packet-detail-view-with-hex-dump</story_key>
+    <story_title>Packet Detail View with Hex Dump</story_title>
+    <story_status>drafted</story_status>
+    <user_story>
+      <as_a>security analyst</as_a>
+      <i_want>to view detailed packet information including hex dump</i_want>
+      <so_that>I can inspect packet contents at the byte level</so_that>
+    </user_story>
+    <acceptance_criteria>
+      <item id="1">Given packets have been loaded from a PCAP file, When I click on a packet in the packet list table, Then a detailed packet view panel opens (using a Sheet component from `shadcn/ui` as per UX Design).</item>
+      <item id="2">And the panel displays: - Packet summary: timestamp (relative and absolute), source/destination IP:port, protocol, size. - Decoded headers for the detected protocol. - Payload data in both hex dump and ASCII representation.</item>
+      <item id="3">And the hex dump format adheres to: `offset (4 digits hex) + 16 hex bytes + ASCII`. Example: `0000 45 00 00 3c 1c 46 40 00 40 06 b1 e6 ac 10 00 01 E..<.F@.@.......`</item>
+      <item id="4">And non-printable ASCII characters in the hex dump's ASCII representation render as '.'.</item>
+      <item id="5">And extracted strings from the payload are highlighted (if any).</item>
+      <item id="6">And I can copy the hex dump or ASCII text to the clipboard.</item>
+      <item id="7">And I can download the full packet as a separate file.</item>
+    </acceptance_criteria>
+    <tasks>
+      <item>- [ ] **Frontend Component Development:**</item>
+      <item>    - [ ] Create `client/src/components/PacketDetailView.tsx` component.</item>
+      <item>    - [ ] Utilize `shadcn/ui` Sheet component for the panel as per UX Design.</item>
+      <item>    - [ ] Implement display of packet summary information (timestamp, IPs, ports, protocol, size).</item>
+      <item>    - [ ] Implement logic to display decoded headers for common protocols (e.g., Ethernet, IP, TCP, UDP).</item>
+      <item>    - [ ] Develop `HexDumpViewer.tsx` sub-component to render payload data in hex and ASCII.</item>
+      <item>        - [ ] Ensure `16 bytes per line` format.</item>
+      <item>        - [ ] Handle non-printable ASCII characters as '.'.</item>
+      <item>        - [ ] Apply monospace font as specified in UX Design.</item>
+      <item>    - [ ] Integrate extracted strings highlighting in the hex dump and ASCII views (from Story 1.7).</item>
+      <item>    - [ ] Add "Copy Hex" and "Copy ASCII" buttons to clipboard functionality.</item>
+      <item>    - [ ] Implement "Download Packet" functionality, allowing users to save the raw packet data.</item>
+      <item>- [ ] **Integration with Packet List:**</item>
+      <item>    - [ ] Modify `client/src/components/PacketList.tsx` (or its parent) to open `PacketDetailView.tsx` when a packet row is clicked.</item>
+      <item>    - [ ] Pass the selected `Packet` object to the `PacketDetailView.tsx` component.</item>
+      <item>- [ ] **Testing:**</item>
+      <item>    - [ ] Write unit tests for the hex dump formatting logic in `HexDumpViewer.tsx`.</item>
+      <item>    - [ ] Write component tests for `PacketDetailView.tsx` to verify:</item>
+      <item>        - Correct display of packet summary and decoded headers.</item>
+      <item>        - Accurate rendering of hex dump and ASCII representation.</item>
+      <item>        - Functionality of copy-to-clipboard buttons.</item>
+      <item>        - Highlighting of extracted strings.</item>
+      <item>    - [ ] Write integration tests to ensure clicking a packet in the list opens the detail view correctly.</item>
+      <item>- [ ] [Low] Remove duplicate `import CryptoJS from 'crypto-js';` statement in `client/src/utils/hashGenerator.ts`.</item>
+      <item>- [ ] [Low] Optimize `initDb()` call in `client/src/services/chainOfCustodyDb.ts` to ensure `this.db` is initialized only once for better efficiency.</item>
+    </tasks>
+  </story_info>
+  <artifacts>
+    <docs>
+      <entry>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Project Structure</section>
+        <snippet>Mentions PacketDetailView.tsx and PacketList.tsx under client/src/components/. Defines Packet interface with rawData: ArrayBuffer. Specifies Naming conventions for components, hooks, utilities, types.</snippet>
+      </entry>
+      <entry>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Technology Stack Details</section>
+        <snippet>References shadcn/ui as Component Library. Specifies Vitest, React Testing Library, Playwright for testing. Mentions pcap-decoder for PCAP parsing.</snippet>
+      </entry>
+      <entry>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Implementation Patterns</section>
+        <snippet>Covers Naming Conventions, Code Organization (component structure, test co-location, absolute imports).</snippet>
+      </entry>
+      <entry>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document: Network Traffic Parser</title>
+        <section>Functional Requirements</section>
+        <snippet>FR23: Users can view packet details including headers and payload data. FR24: Users can view hexadecimal dump of packet payloads.</snippet>
+      </entry>
+      <entry>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document: Network Traffic Parser</title>
+        <section>Non-Functional Requirements</section>
+        <snippet>NFR-P4: UI interactions must respond within 100ms. NFR-A7: Complex visualizations must include text alternatives.</snippet>
+      </entry>
+      <entry>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document: Network Traffic Parser</title>
+        <section>UX Principles</section>
+        <snippet>Visual Personality: Dark mode, Monospace fonts for data display, Hex dumps. Key Interaction Patterns: Click-to-drill-down.</snippet>
+      </entry>
+      <entry>
+        <path>docs/ux-design-specification.md</path>
+        <title>Network Traffic Parser UX Design Specification</title>
+        <section>Design System Foundation</section>
+        <snippet>Specifies shadcn/ui for components, JetBrains Mono for data/code typography.</snippet>
+      </entry>
+      <entry>
+        <path>docs/ux-design-specification.md</path>
+        <title>Network Traffic Parser UX Design Specification</title>
+        <section>Component Library</section>
+        <snippet>Identifies HexViewer as a custom component for inspecting payload bytes with ASCII decoding.</snippet>
+      </entry>
+      <entry>
+        <path>docs/ux-design-specification.md</path>
+        <title>Network Traffic Parser UX Design Specification</title>
+        <section>Visual Foundation</section>
+        <snippet>Details the Nebula color theme, Slate-950 for backgrounds, and rounded-lg radius.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Overview & Objectives and Scope</section>
+        <snippet>States that a detailed packet view including a hex dump and ASCII representation is in scope for this epic.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Services and Modules</section>
+        <snippet>Lists PacketDetailView.tsx and PacketList.tsx as key components.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Data Models and Contracts</section>
+        <snippet>References the Packet interface with rawData: ArrayBuffer as the source for hex dump.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Acceptance Criteria (Story 1.6)</section>
+        <snippet>Provides explicit acceptance criteria for the packet detail view and hex dump formatting.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation & Browser-Only Infrastructure</title>
+        <section>Test Strategy Summary</section>
+        <snippet>Mentions React Testing Library for PacketDetailView component tests and Vitest for hex dump formatting logic unit tests.</snippet>
+      </entry>
+    </docs>
+    <code></code>
+    <interfaces></interfaces>
+    <constraints></constraints>
+    <dependencies></dependencies>
+  </artifacts>
+  <tests>
+    <standards></standards>
+    <locations></locations>
+    <ideas></ideas>
+  </tests>
+</story_context>

@@ -18,3 +18,7 @@ Routing guidance:
 | 2025-11-24 | 1.3 | 1 | Test | High | TBD | Open | Unskip and fix unit test for `generateExportJson`. Verify AC1 and AC2. [file: `client/src/utils/dataImportExport.test.ts:42`] |
 | 2025-11-24 | 1.3 | 1 | Test | High | TBD | Open | Unskip and fix component tests for `SettingsPage`. Verify AC1, AC5, AC6. [file: `client/src/components/SettingsPage.test.tsx:12`] |
 | 2025-11-24 | 1.3 | 1 | TechDebt | Low | TBD | Open | Dynamically read `APP_VERSION` from `package.json`. [file: `client/src/utils/dataImportExport.ts:5`] |
+| 2025-11-26 | 1.6 | 1 | Feature | Medium | TBD | Open | Implement Acceptance Criterion 5: "And extracted strings from the payload are highlighted (if any)." This functionality is explicitly deferred to Story 1.7 but is an AC for this story. This should be addressed either by implementing it or by moving AC5 to Story 1.7. |
+| 2025-11-26 | 1.6 | 1 | Test | Low | TBD | Open | Add unit/component tests for `PacketDetailView.tsx` to verify the rendering of the monospace font for the hex dump, as specified in UX Design. |
+| 2025-11-26 | 1.6 | 1 | Performance | Low | TBD | Open | Evaluate performance of `generateHexDump` with large packet payloads and consider offloading to a Web Worker for future optimization (Referenced in Story 1.6 Dev Notes and Epic Tech Spec).
+| 2025-11-26 | 1.6 | 1 | Performance | Low | TBD | Open | Evaluate performance of `generateHexDump` with large packet payloads and consider offloading to a Web Worker for future optimization (Referenced in Story 1.6 Dev Notes and Epic Tech Spec).

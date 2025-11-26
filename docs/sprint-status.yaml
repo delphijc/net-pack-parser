@@ -39,8 +39,8 @@ development_status:
   1-2-local-storage-manager: done
   1-3-data-importexport-foundation: done
   1-4-pcap-file-upload-parsing: done
-  1-5-file-hash-generation-chain-of-custody: backlog
-  1-6-packet-detail-view-with-hex-dump: backlog
+  1-5-file-hash-generation-chain-of-custody: done
+  1-6-packet-detail-view-with-hex-dump: done
   1-7-token-string-extraction: backlog
   1-8-protocol-detection-classification: backlog
   1-9-file-reference-detection-download: backlog

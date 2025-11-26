@@ -1,6 +1,6 @@
 # Story 1.4: PCAP File Upload and Parsing
 
-Status: review
+Status: done
 
 ## Story
 

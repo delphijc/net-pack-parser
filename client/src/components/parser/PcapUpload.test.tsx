@@ -1,9 +1,29 @@
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi, describe, it, expect } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import PcapUpload from './PcapUpload';
 import * as pcapParser from '../../services/pcapParser';
 import database from '../../services/database';
+
+// Mock lucide-react components
+vi.mock('lucide-react', async (importOriginal) => {
+    const actual = await importOriginal<any>();
+    return {
+        ...actual,
+        Terminal: vi.fn(() => <svg data-testid="Terminal" />),
+        Send: vi.fn(() => <svg data-testid="Send" />),
+        AlertTriangle: vi.fn(() => <svg data-testid="AlertTriangle" />),
+        Loader2: vi.fn(() => <svg data-testid="Loader2" />),
+        Upload: vi.fn(() => <svg data-testid="Upload" />),
+        Wifi: vi.fn(() => <svg data-testid="Wifi" />),
+        StopCircle: vi.fn(() => <svg data-testid="StopCircle" />),
+        Play: vi.fn(() => <svg data-testid="Play" />),
+        History: vi.fn(() => <svg data-testid="History" />), // Also mock History for ChainOfCustodyLog
+        CheckCircle: vi.fn(() => <svg data-testid="CheckCircle" />), // For FileInfo
+        XCircle: vi.fn(() => <svg data-testid="XCircle" />), // For FileInfo
+        RefreshCw: vi.fn(() => <svg data-testid="RefreshCw" />), // For FileInfo
+    };
+});
 
 // Mock dependencies
 vi.mock('../../services/pcapParser', () => ({
@@ -22,6 +42,13 @@ vi.mock('../../services/database', () => ({
         storePackets: vi.fn(),
         updateFileReference: vi.fn(),
     }
+}));
+
+vi.mock('@/services/chainOfCustodyDb', () => ({
+    default: {
+        addFileChainOfCustodyEvent: vi.fn(() => Promise.resolve()),
+        getAllFileChainOfCustodyEvents: vi.fn(() => Promise.resolve([])),
+    },
 }));
 
 describe('PcapUpload Component', () => {
