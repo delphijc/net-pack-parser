@@ -1,0 +1,296 @@
+import type { ParsedPacket, Token, ParsedSection, FileReference } from '../types';
+import { v4 as uuidv4 } from 'uuid';
+import { SHA256 } from 'crypto-js';
+import database from './database';
+import {
+    analyzeSuspiciousIndicators,
+    checkThreatIntelligence,
+    createForensicMetadata,
+    createTimelineEvent,
+    isValidUrl
+} from '../utils/analysis';
+
+// @ts-ignore
+import PcapDecoder from 'pcap-decoder';
+
+/**
+ * Parses network traffic data into tokens and strings
+ */
+/**
+ * Parses network traffic data into tokens and strings
+ */
+export const parseNetworkData = async (data: string | ArrayBuffer): Promise<ParsedPacket[]> => {
+    // Check if the data is a PCAP file (starts with magic number)
+    if (data instanceof ArrayBuffer) {
+        return parsePcapData(data);
+    }
+
+    // Fallback to string parsing for text input
+    return [parseStringData(data)];
+};
+
+/**
+ * Browser-compatible PCAP parser implementation using pcap-decoder
+ */
+const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
+    const packets: ParsedPacket[] = [];
+
+    try {
+        const decoder = new (PcapDecoder as any)(data);
+        const decodedPackets = decoder.decode();
+
+        for (const packet of decodedPackets) {
+            const packetId = uuidv4();
+            const tokens: Token[] = [];
+            const sections: ParsedSection[] = [];
+            let index = 0;
+
+            // Convert packet data to hex string
+            const packetData = Array.from(packet.data)
+                .map((b: any) => b.toString(16).padStart(2, '0'))
+                .join('');
+
+            // Add packet data tokens (in 2-byte chunks)
+            for (let i = 0; i < packetData.length; i += 2) {
+                tokens.push({
+                    id: uuidv4(),
+                    value: packetData.substr(i, 2),
+                    type: 'token',
+                    index: index++
+                });
+            }
+
+            // Add packet data section
+            sections.push({
+                id: uuidv4(),
+                type: 'body',
+                startIndex: 0,
+                endIndex: tokens.length,
+                content: packetData
+            });
+
+            const parsedPacket: ParsedPacket = {
+                id: packetId,
+                timestamp: new Date(packet.header.timestampSeconds * 1000 + packet.header.timestampMicroseconds / 1000).toISOString(),
+                source: generateRandomIP(), // Placeholder until we fully decode IP headers
+                destination: generateRandomIP(),
+                protocol: determineProtocol(packet.data),
+                tokens,
+                sections,
+                fileReferences: [],
+                rawData: packetData
+            };
+
+            // Add forensic analysis
+            parsedPacket.suspiciousIndicators = analyzeSuspiciousIndicators(parsedPacket);
+            parsedPacket.threatIntelligence = checkThreatIntelligence(parsedPacket);
+            parsedPacket.forensicMetadata = createForensicMetadata(parsedPacket);
+
+            // Create timeline event
+            const timelineEvent = createTimelineEvent(parsedPacket);
+            database.storeTimelineEvent(timelineEvent);
+
+            packets.push(parsedPacket);
+        }
+
+    } catch (error) {
+        console.warn('Error using pcap-decoder:', error);
+        // If decoding fails, we might want to throw or return empty array
+        // For now, let's try to return what we have or a placeholder error packet if empty
+        if (packets.length === 0) {
+            console.error("Failed to decode any packets");
+        }
+    }
+
+    return packets;
+};
+
+const parseStringData = (data: string): ParsedPacket => {
+    // Generate a unique ID for this packet
+    const packetId = uuidv4();
+
+    // Parse tokens (non-alphanumeric characters excluding spaces and some symbols)
+    const tokenRegex = /[^\w\s]/g;
+    const tokens: Token[] = [];
+    const sections: ParsedSection[] = [];
+    const fileReferences: FileReference[] = [];
+
+    let match;
+    let index = 0;
+    let lastIndex = 0;
+
+    // Extract tokens and strings
+    while ((match = tokenRegex.exec(data)) !== null) {
+        // Add the string before the token if it exists
+        if (match.index > lastIndex) {
+            const stringContent = data.substring(lastIndex, match.index).trim();
+            if (stringContent) {
+                tokens.push({
+                    id: uuidv4(),
+                    value: stringContent,
+                    type: 'string',
+                    index: index++
+                });
+            }
+        }
+
+        // Add the token
+        tokens.push({
+            id: uuidv4(),
+            value: match[0],
+            type: 'token',
+            index: index++
+        });
+
+        lastIndex = match.index + match[0].length;
+    }
+
+    // Add any remaining string after the last token
+    if (lastIndex < data.length) {
+        const stringContent = data.substring(lastIndex).trim();
+        if (stringContent) {
+            tokens.push({
+                id: uuidv4(),
+                value: stringContent,
+                type: 'string',
+                index: index++
+            });
+        }
+    }
+
+    // Identify sections like headers, body, etc.
+    const headerEndIndex = Math.floor(tokens.length * 0.2);
+    sections.push({
+        id: uuidv4(),
+        type: 'header',
+        startIndex: 0,
+        endIndex: headerEndIndex,
+        content: tokens.slice(0, headerEndIndex).map(t => t.value).join('')
+    });
+
+    const bodyEndIndex = Math.floor(tokens.length * 0.8);
+    sections.push({
+        id: uuidv4(),
+        type: 'body',
+        startIndex: headerEndIndex,
+        endIndex: bodyEndIndex,
+        content: tokens.slice(headerEndIndex, bodyEndIndex).map(t => t.value).join('')
+    });
+
+    sections.push({
+        id: uuidv4(),
+        type: 'footer',
+        startIndex: bodyEndIndex,
+        endIndex: tokens.length,
+        content: tokens.slice(bodyEndIndex).map(t => t.value).join('')
+    });
+
+    // Extract URIs for file references
+    const uriRegex = /(https?:\/\/[^\s]+)/g;
+    let uriMatch;
+
+    while ((uriMatch = uriRegex.exec(data)) !== null) {
+        const uri = uriMatch[0].replace(/[.,;!?]$/, ''); // Remove trailing punctuation
+
+        if (isValidUrl(uri)) {
+            const url = new URL(uri);
+            const fileName = url.pathname.split('/').pop() || 'unknown';
+
+            fileReferences.push({
+                id: uuidv4(),
+                uri,
+                fileName,
+                hash: SHA256(uri).toString(),
+                downloadStatus: 'pending'
+            });
+        }
+    }
+
+    const parsedPacket: ParsedPacket = {
+        id: packetId,
+        timestamp: new Date().toISOString(),
+        source: generateRandomIP(),
+        destination: generateRandomIP(),
+        protocol: determineStringProtocol(data),
+        tokens,
+        sections,
+        fileReferences,
+        rawData: data
+    };
+
+    parsedPacket.suspiciousIndicators = analyzeSuspiciousIndicators(parsedPacket);
+    parsedPacket.threatIntelligence = checkThreatIntelligence(parsedPacket);
+    parsedPacket.forensicMetadata = createForensicMetadata(parsedPacket);
+
+    const timelineEvent = createTimelineEvent(parsedPacket);
+    database.storeTimelineEvent(timelineEvent);
+
+    return parsedPacket;
+};
+
+/**
+ * Determines protocol from PCAP data
+ */
+const determineProtocol = (_data: Uint8Array | ArrayBuffer): string => {
+    // Implementation would analyze packet headers and data
+    return 'TCP'; // Default to TCP for now instead of random
+};
+
+const determineStringProtocol = (data: string): string => {
+    if (data.startsWith('GET') || data.startsWith('POST') || data.startsWith('HTTP')) {
+        return 'HTTP';
+    }
+    return 'TCP';
+};
+
+/**
+ * Generates a random IP address for demo purposes
+ */
+const generateRandomIP = (): string => {
+    return Array(4).fill(0).map(() => Math.floor(Math.random() * 256)).join('.');
+};
+
+/**
+ * Simulates downloading a file from a URI
+ */
+export const downloadFile = async (fileRef: FileReference): Promise<FileReference> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const updatedFile = {
+                ...fileRef,
+                downloadStatus: 'downloaded' as const,
+                fileSize: Math.floor(Math.random() * 1000000),
+                fileType: getFileTypeFromName(fileRef.fileName),
+                lastModified: new Date().toISOString()
+            };
+
+            resolve(updatedFile);
+        }, 1500);
+    });
+};
+
+/**
+ * Gets file type based on filename extension
+ */
+const getFileTypeFromName = (fileName: string): string => {
+    const extension = fileName.split('.').pop()?.toLowerCase() || '';
+    const fileTypes: Record<string, string> = {
+        'pdf': 'application/pdf',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+        'doc': 'application/msword',
+        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'xls': 'application/vnd.ms-excel',
+        'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'txt': 'text/plain',
+        'html': 'text/html',
+        'htm': 'text/html',
+        'xml': 'application/xml',
+        'json': 'application/json',
+        'zip': 'application/zip'
+    };
+
+    return fileTypes[extension] || 'application/octet-stream';
+};

@@ -86,18 +86,18 @@ describe('LocalStorageService', () => {
 
     // Mock a large value to trigger the quota check
     const largeValue = 'a'.repeat(5 * 1024 * 1024); // 5MB string
-    
+
     // Temporarily mock setItem to throw a QuotaExceededError
     const originalSetItem = window.localStorage.setItem;
     window.localStorage.setItem = vi.fn(() => {
-        const error = new DOMException('Quota exceeded', 'QuotaExceededError');
-        throw error;
+      const error = new DOMException('Quota exceeded', 'QuotaExceededError');
+      throw error;
     });
 
     localStorageService.setValue('large-data', largeValue);
 
     expect(callback).toHaveBeenCalled();
-    
+
     // Restore original setItem
     window.localStorage.setItem = originalSetItem;
   });
@@ -109,7 +109,7 @@ describe('LocalStorageService', () => {
 
     // Re-initialize the service to trigger the version check
     vi.resetModules();
-    const { localStorageService: newService } = await import('./localStorage');
+    await import('./localStorage');
 
     // Check that old data is cleared and new version is set
     expect(window.localStorage.getItem('npp.old-data')).toBeNull();

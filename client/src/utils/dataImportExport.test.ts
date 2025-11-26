@@ -1,5 +1,5 @@
 // src/utils/dataImportExport.test.ts
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 import { generateExportJson, importDataFromJson } from './dataImportExport';
 import { localStorageService } from '@/services/localStorage';
 
@@ -60,16 +60,16 @@ describe('dataImportExport', () => {
       // Arrange
       const settingsData = { theme: 'dark' };
       const filtersData = [{ id: 'f1', query: 'ip.addr == 1.1.1.1' }];
-      
+
       // 1. Mock window.localStorage
       localStorageMock.store = {
         'npp.settings': JSON.stringify(settingsData),
         'npp.filters': JSON.stringify(filtersData),
         'other.data': 'should_be_ignored',
       };
-      
+
       // 2. Mock localStorageService.getValue to return the data
-      (localStorageService.getValue as vi.Mock).mockImplementation((key: string) => {
+      (localStorageService.getValue as Mock).mockImplementation((key: string) => {
         if (key === 'settings') return settingsData;
         if (key === 'filters') return filtersData;
         return null;
@@ -90,10 +90,10 @@ describe('dataImportExport', () => {
       expect(result.data).toBeDefined();
       expect(result.data.settings).toEqual(settingsData);
       expect(result.data.filters).toEqual(filtersData);
-      
+
       // Ensure non-namespaced data is ignored
       expect(result.data['other.data']).toBeUndefined();
-      
+
       // Verify mocks were called as expected
       expect(localStorageService.getValue).toHaveBeenCalledWith('settings');
       expect(localStorageService.getValue).toHaveBeenCalledWith('filters');
@@ -161,7 +161,7 @@ describe('dataImportExport', () => {
       // Arrange
       const wrongVersionExport = { ...mockExport, metadata: { ...mockExport.metadata, data_schema_version: '0.9' } };
       const jsonString = JSON.stringify(wrongVersionExport);
-      
+
       // Act
       const result = importDataFromJson(jsonString, 'merge');
 

@@ -13,6 +13,7 @@ const TOAST_REMOVE_DELAY = 1000000
 
 type ToastProps = {
   // props for the toast component
+  variant?: "default" | "destructive"
 }
 
 type ToastActionElement = React.ReactElement<{
@@ -26,7 +27,7 @@ type State = {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
-const addToRemoveQueue = (toastId: string) => {
+export const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
     return
   }

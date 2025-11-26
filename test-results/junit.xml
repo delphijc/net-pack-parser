@@ -1,0 +1,14 @@
+<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="0" time="1.716899">
+<testsuite name="app.spec.ts" timestamp="2025-11-26T02:02:25.225Z" hostname="chromium" tests="1" failures="0" skipped="0" time="0.309" errors="0">
+<testcase name="should load the application and display &quot;NetTraffic Parser&quot;" classname="app.spec.ts" time="0.309">
+</testcase>
+</testsuite>
+<testsuite name="app.spec.ts" timestamp="2025-11-26T02:02:25.225Z" hostname="firefox" tests="1" failures="0" skipped="0" time="0.62" errors="0">
+<testcase name="should load the application and display &quot;NetTraffic Parser&quot;" classname="app.spec.ts" time="0.62">
+</testcase>
+</testsuite>
+<testsuite name="app.spec.ts" timestamp="2025-11-26T02:02:25.225Z" hostname="webkit" tests="1" failures="0" skipped="0" time="0.428" errors="0">
+<testcase name="should load the application and display &quot;NetTraffic Parser&quot;" classname="app.spec.ts" time="0.428">
+</testcase>
+</testsuite>
+</testsuites>

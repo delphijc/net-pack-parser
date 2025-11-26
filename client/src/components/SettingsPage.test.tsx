@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SettingsPage from './SettingsPage';
@@ -34,7 +34,7 @@ describe('SettingsPage', () => {
   });
 
   it('renders the settings page with storage usage', () => {
-    (localStorageService.getUsagePercentage as vi.Mock).mockReturnValue(15);
+    (localStorageService.getUsagePercentage as Mock).mockReturnValue(15);
     render(<SettingsPage />);
 
     expect(screen.getByText('Settings')).toBeInTheDocument();
@@ -90,11 +90,11 @@ describe('SettingsPage', () => {
 
     await user.upload(input, file);
 
-    expect(screen.getByText('Choose Import Mode')).toBeInTheDocument();
+    expect(await screen.findByText('Choose Import Mode')).toBeInTheDocument();
   });
 
   it('calls importDataFromJson with "merge" mode when Merge is clicked', async () => {
-    (importDataFromJson as vi.Mock).mockReturnValue({ success: true, message: 'Imported 5 items', importedCount: 5 });
+    (importDataFromJson as Mock).mockReturnValue({ success: true, message: 'Imported 5 items', importedCount: 5 });
     const { container } = render(<SettingsPage />);
     const user = userEvent.setup();
 
@@ -102,7 +102,7 @@ describe('SettingsPage', () => {
     const input = container.querySelector('input[type="file"]') as HTMLInputElement;
     await user.upload(input, file);
 
-    const mergeButton = screen.getByRole('button', { name: /Merge/i });
+    const mergeButton = await screen.findByRole('button', { name: /Merge/i });
     await user.click(mergeButton);
 
     expect(importDataFromJson).toHaveBeenCalledWith(expect.any(String), 'merge');
@@ -113,7 +113,7 @@ describe('SettingsPage', () => {
   });
 
   it('calls importDataFromJson with "replace" mode when Replace is clicked', async () => {
-    (importDataFromJson as vi.Mock).mockReturnValue({ success: true, message: 'Replaced all data', importedCount: 10 });
+    (importDataFromJson as Mock).mockReturnValue({ success: true, message: 'Replaced all data', importedCount: 10 });
     const { container } = render(<SettingsPage />);
     const user = userEvent.setup();
 
@@ -121,7 +121,7 @@ describe('SettingsPage', () => {
     const input = container.querySelector('input[type="file"]') as HTMLInputElement;
     await user.upload(input, file);
 
-    const replaceButton = screen.getByRole('button', { name: /Replace/i });
+    const replaceButton = await screen.findByRole('button', { name: /Replace/i });
     await user.click(replaceButton);
 
     expect(importDataFromJson).toHaveBeenCalledWith(expect.any(String), 'replace');
@@ -132,7 +132,7 @@ describe('SettingsPage', () => {
   });
 
   it('displays error toast when import fails', async () => {
-    (importDataFromJson as vi.Mock).mockReturnValue({ success: false, message: 'Invalid format', importedCount: 0 });
+    (importDataFromJson as Mock).mockReturnValue({ success: false, message: 'Invalid format', importedCount: 0 });
     const { container } = render(<SettingsPage />);
     const user = userEvent.setup();
 
@@ -140,7 +140,7 @@ describe('SettingsPage', () => {
     const input = container.querySelector('input[type="file"]') as HTMLInputElement;
     await user.upload(input, file);
 
-    const mergeButton = screen.getByRole('button', { name: /Merge/i });
+    const mergeButton = await screen.findByRole('button', { name: /Merge/i });
     await user.click(mergeButton);
 
     expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({
