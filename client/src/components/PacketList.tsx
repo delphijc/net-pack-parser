@@ -1,56 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import database from '../services/database'; // Updated import path
 import type { ParsedPacket } from '../types'; // Updated import path
 import {
-    Search, Trash2, Clock, Activity, Shield
-} from 'lucide-react'; // Removed unused imports
+    Search, Trash2, Clock, Shield
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import database from '../services/database';
 
 interface PacketListProps {
     onPacketSelect: (packet: ParsedPacket | null) => void;
     selectedPacketId: string | null;
-    disablePolling?: boolean; // New prop to disable automatic polling
+    packets: ParsedPacket[]; // Packets now received as a prop
+    onClearAllPackets: () => void; // Callback to clear all packets in parent
+    selectedProtocol?: string;
+    onPacketDeleted?: () => void; // Optional callback when a packet is deleted
 }
 
-const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketId, disablePolling }) => {
-    const [packets, setPackets] = useState<ParsedPacket[]>([]);
+const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketId, packets, onClearAllPackets, selectedProtocol, onPacketDeleted }) => {
     const [filteredPackets, setFilteredPackets] = useState<ParsedPacket[]>([]);
-    // selectedPacket is now managed by the parent via onPacketSelect and selectedPacketId
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterProtocol, setFilterProtocol] = useState<string>('ALL');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-    // expandedSections and related functions/state are moved to PacketDetailView or its parent
-
-    useEffect(() => {
-        loadPackets();
-
-        let intervalId: ReturnType<typeof setTimeout> | undefined;
-        if (!disablePolling) {
-            intervalId = setInterval(() => {
-                loadPackets();
-            }, 2000);
-        }
-
-        return () => {
-            if (intervalId) {
-                clearInterval(intervalId);
-            }
-        };
-    }, [disablePolling]);
 
     useEffect(() => {
         filterPackets();
-    }, [packets, searchTerm, filterProtocol, sortOrder]);
-
-    const loadPackets = () => {
-        const allPackets = database.getAllPackets();
-        // Only update if count changed to avoid unnecessary re-renders
-        setPackets(prev => {
-            if (prev.length !== allPackets.length) {
-                return allPackets;
-            }
-            return prev;
-        });
-    };
+    }, [packets, searchTerm, selectedProtocol, sortOrder]);
 
     const filterPackets = () => {
         let result = [...packets];
@@ -59,16 +31,17 @@ const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketI
         if (searchTerm) {
             const lowerTerm = searchTerm.toLowerCase();
             result = result.filter(p =>
-                p.source.toLowerCase().includes(lowerTerm) ||
-                p.destination.toLowerCase().includes(lowerTerm) ||
+                p.sourceIP.toLowerCase().includes(lowerTerm) ||
+                p.destIP.toLowerCase().includes(lowerTerm) ||
                 p.protocol.toLowerCase().includes(lowerTerm) ||
-                (p.rawData && p.rawData.toLowerCase().includes(lowerTerm)) // Check for rawData existence before calling toLowerCase
+                p.detectedProtocols?.some(dp => dp.toLowerCase().includes(lowerTerm)) ||
+                (p.rawData && new TextDecoder().decode(new Uint8Array(p.rawData)).toLowerCase().includes(lowerTerm))
             );
         }
 
         // Apply protocol filter
-        if (filterProtocol !== 'ALL') {
-            result = result.filter(p => p.protocol === filterProtocol);
+        if (selectedProtocol && selectedProtocol !== 'ALL') {
+            result = result.filter(p => p.detectedProtocols?.includes(selectedProtocol));
         }
 
         // Apply sort
@@ -83,29 +56,25 @@ const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketI
 
     const handleDeletePacket = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        database.deletePacket(id);
-        loadPackets();
-        if (selectedPacketId === id) { // Updated to use selectedPacketId prop
+        if (window.confirm('Are you sure you want to delete this packet?')) {
+            database.deletePacket(id);
             onPacketSelect(null); // Clear selected packet in parent
+            onPacketDeleted?.(); // Notify parent that a packet was deleted
         }
     };
 
     const handleClearAll = () => {
         if (window.confirm('Are you sure you want to delete all packets?')) {
-            database.clearAllData();
-            loadPackets();
-            onPacketSelect(null); // Clear selected packet in parent
+            onClearAllPackets(); // Call parent's clear function
+            onPacketSelect(null);
         }
     };
-
-
 
     return (
         <div className="bg-card border border-white/10 rounded-lg shadow-sm flex flex-col overflow-hidden backdrop-blur-sm h-full">
             <div className="p-3 border-b border-white/10 bg-card/50">
                 <div className="flex justify-between items-center mb-3">
                     <h2 className="text-sm font-semibold flex items-center text-foreground">
-                        <Activity size={16} className="mr-2 text-primary" />
                         Captured Packets
                         <span className="ml-2 text-xs bg-secondary px-2 py-0.5 rounded-full text-muted-foreground">
                             {filteredPackets.length}
@@ -141,20 +110,6 @@ const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketI
                     </button>
                 </div>
 
-                <div className="flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
-                    {['ALL', 'HTTP', 'HTTPS', 'TCP', 'UDP', 'DNS'].map(proto => (
-                        <button
-                            key={proto}
-                            onClick={() => setFilterProtocol(proto)}
-                            className={`px-3 py-1 text-[10px] font-medium rounded-full whitespace-nowrap transition-colors ${filterProtocol === proto
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
-                                }`}
-                        >
-                            {proto}
-                        </button>
-                    ))}
-                </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-2 space-y-1">
@@ -169,21 +124,23 @@ const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketI
                             key={packet.id}
                             data-testid={`packet-item-${packet.id}`}
                             onClick={() => onPacketSelect(packet)}
-                            className={`p-2 rounded-md cursor-pointer border transition-all duration-200 ${selectedPacketId === packet.id
+                            className={`group p-2 rounded-md cursor-pointer border transition-all duration-200 ${selectedPacketId === packet.id
                                 ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
                                 : 'bg-card/30 border-transparent hover:bg-secondary/50 hover:border-white/5'
                                 }`}
                         >
                             <div className="flex justify-between items-center mb-1">
                                 <div className="flex items-center gap-2">
-                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${packet.protocol === 'HTTP' || packet.protocol === 'HTTPS' ? 'bg-emerald-500/10 text-emerald-500' :
-                                        packet.protocol === 'TCP' ? 'bg-blue-500/10 text-blue-500' :
-                                            packet.protocol === 'UDP' ? 'bg-orange-500/10 text-orange-500' :
-                                                packet.protocol === 'DNS' ? 'bg-purple-500/10 text-purple-500' :
-                                                    'bg-gray-500/10 text-gray-400'
-                                        }`}>
-                                        {packet.protocol}
-                                    </span>
+                                    {packet.detectedProtocols?.map(proto => (
+                                        <Badge key={proto} variant="outline" className={`text-[10px] font-bold px-1.5 py-0.5 ${proto === 'HTTP' || proto === 'HTTPS' ? 'bg-emerald-500/10 text-emerald-500' :
+                                            proto === 'TCP' ? 'bg-blue-500/10 text-blue-500' :
+                                                proto === 'UDP' ? 'bg-orange-500/10 text-orange-500' :
+                                                    proto === 'DNS' ? 'bg-purple-500/10 text-purple-500' :
+                                                        'bg-gray-500/10 text-gray-400'
+                                            }`}>
+                                            {proto}
+                                        </Badge>
+                                    ))}
                                     <span className="text-[10px] text-muted-foreground font-mono">
                                         {new Date(packet.timestamp).toLocaleTimeString()}
                                     </span>
@@ -195,7 +152,7 @@ const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketI
 
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center text-xs font-mono text-foreground/80 truncate max-w-[180px]">
-                                    <span className="truncate">{packet.source} → {packet.destination}</span>
+                                    <span className="truncate">{packet.sourceIP} → {packet.destIP}</span>
                                 </div>
                                 <button
                                     onClick={(e) => handleDeletePacket(packet.id, e)}

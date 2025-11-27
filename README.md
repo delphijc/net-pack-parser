@@ -120,7 +120,7 @@ The build artifacts will be generated in the `client/dist` directory, ready for 
 ### Network Traffic Analysis
 -   **PCAP File Support**: Upload and parse `.pcap` and `.pcapng` files directly in the browser.
 -   **Packet Inspection**: Detailed view of packet headers, payloads, and hex dumps.
--   **Protocol Detection**: Automatic classification of HTTP, TCP, UDP, and more.
+-   **Protocol Detection**: Automatic classification of common protocols (HTTP, HTTPS, DNS, FTP, SSH, etc.) based on port heuristics, IP header fields, and basic deep packet inspection.
 -   **File Extraction**: Detect and extract files referenced in network streams.
 -   **Forensic Analysis**: Identify suspicious indicators and threat patterns.
 

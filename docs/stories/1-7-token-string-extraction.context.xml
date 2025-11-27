@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StoryContext>
+  <Story>
+    <ID>1.7</ID>
+    <Title>Token &amp; String Extraction</Title>
+    <Status>drafted</Status>
+    <UserStory>
+      <AsA>security analyst</AsA>
+      <IWant>to extract tokens and strings from packet payloads automatically</IWant>
+      <SoThat>I can quickly find credentials, URLs, and other interesting data.</SoThat>
+    </UserStory>
+    <AcceptanceCriteria>
+      <Criterion id="AC1">
+        <Given>a PCAP file has been parsed and packets loaded</Given>
+        <When>the system processes packet payloads</When>
+        <Then>it extracts: IP addresses (IPv4 and IPv6 format), URLs (http://, https://, ftp:// patterns), Email addresses, Potential credentials (patterns like "username=", "password=", "api_key="), File paths and filenames, Printable ASCII strings longer than 4 characters</Then>
+      </Criterion>
+      <Criterion id="AC2">
+        <And>these extracted strings are displayed in a "Extracted Strings" tab</And>
+      </Criterion>
+      <Criterion id="AC3">
+        <And>strings are searchable and filterable</And>
+      </Criterion>
+      <Criterion id="AC4">
+        <And>clicking a string highlights all packets containing it</And>
+      </Criterion>
+      <Criterion id="AC5">
+        <And>strings are categorized by type (IP, URL, Email, Credential, Other)</And>
+      </Criterion>
+    </AcceptanceCriteria>
+    <Tasks>
+      <Task id="1.0" title="Data Model &amp; Storage Design" estimated="0.5 days">
+        <SubTask id="1.1">Define `ExtractedString` Interface: Create `client/src/types/extractedStrings.ts` with a TypeScript interface for extracted strings, including properties like `id`, `type` (IP, URL, Email, Credential, FilePath, Other), `value`, `packetId`, `offset`, `length`, `category`, and `originalPayloadOffset`.</SubTask>
+        <SubTask id="1.2">Determine Storage Strategy: Integrate extracted strings into IndexedDB alongside packet data or establish a new object store for them. Consider performance implications for querying.</SubTask>
+      </Task>
+      <Task id="2.0" title="String Extraction Logic Development" estimated="2 days">
+        <SubTask id="2.1">Create `client/src/utils/stringExtractor.ts`: Develop a core function `extractStrings(payload: ArrayBuffer, packetId: string, payloadOffset: number)` that returns an array of `ExtractedString` objects.</SubTask>
+        <SubTask id="2.2">Implement Regex Patterns: Add robust regex patterns for: IPv4 and IPv6 addresses. URLs (http/s, ftp schemes). Email addresses. File paths and filenames (e.g., common extensions, directory separators). Potential credentials (e.g., `username=`, `password=`, `api_key=`, `token=`, `auth=` patterns).</SubTask>
+        <SubTask id="2.3">Implement Printable ASCII String Extraction: Develop logic to find sequences of printable ASCII characters longer than a configurable minimum length (default 4 characters) in both text and binary payloads.</SubTask>
+        <SubTask id="2.4">Offload to Web Worker (Performance Optimization): Proactively implement the `extractStrings` logic within a Web Worker to prevent UI blocking for large packet payloads. This aligns with the warning from Story 1.6.</SubTask>
+      </Task>
+      <Task id="3.0" title="Integration with PCAP Parsing &amp; Data Persistence" estimated="1 day">
+        <SubTask id="3.1">Modify `client/src/utils/pcapParser.ts`: After parsing `rawData` for each packet, call the `stringExtractor` (via the Web Worker API if implemented) to process the `rawData`.</SubTask>
+        <SubTask id="3.2">Store the resulting `ExtractedString` objects in IndexedDB, linking them to their respective `packetId`.</SubTask>
+      </Task>
+      <Task id="4.0" title="UI Component: Extracted Strings Tab" estimated="2 days">
+        <SubTask id="4.1">Create `client/src/components/ExtractedStringsTab.tsx`: Develop a React component to display extracted strings.</SubTask>
+        <SubTask id="4.2">Integrate into `PacketDetailView.tsx`: Add a new tab to the `shadcn/ui` Tabs component in `PacketDetailView.tsx` for "Extracted Strings".</SubTask>
+        <SubTask id="4.3">Implement Display List: Render extracted strings in a sortable and filterable table or list. Display `type`, `value`, and `packetId` (if not already implicitly known from context).</SubTask>
+        <SubTask id="4.4">Implement Search &amp; Filter: Add an input field to search through the displayed extracted strings. Add filter options by `type` (IP, URL, Email, Credential, etc.).</SubTask>
+      </Task>
+      <Task id="5.0" title="Highlighting Functionality" estimated="1.5 days">
+        <SubTask id="5.1">Update `ExtractedStringsTab.tsx`: Implement a click handler for each `ExtractedString` item that dispatches an event or calls a callback with the `offset`, `length`, and `packetId` of the selected string.</SubTask>
+        <SubTask id="5.2">Enhance `PacketDetailView.tsx` (and `HexDumpViewer.tsx`): Receive the highlighting request. Modify `HexDumpViewer.tsx` to accept optional `highlightRanges: Array&lt;{offset: number, length: number}&gt;` props. Implement visual highlighting (e.g., yellow background) for the specified byte ranges within both the hex and ASCII representations in `HexDumpViewer`.</SubTask>
+      </Task>
+      <Task id="6.0" title="Testing" estimated="2 days">
+        <SubTask id="6.1">Unit Tests for `client/src/utils/stringExtractor.ts`: Write tests for `extractStrings` covering various valid and invalid inputs for IPs, URLs, emails, and credential patterns. Test generic ASCII string extraction with diverse payloads (text, mixed text/binary, purely binary). Test edge cases (empty payload, very long strings, etc.).</SubTask>
+        <SubTask id="6.2">Component Tests for `client/src/components/ExtractedStringsTab.tsx`: Test rendering of lists with different sets of `ExtractedString` objects. Test search functionality (e.g., filtering by keyword). Test filter by category functionality. Mock interaction to ensure clicking an item correctly triggers a highlighting event.</SubTask>
+        <SubTask id="6.3">Integration Tests for `PacketDetailView.tsx`: Verify that `PacketDetailView` correctly displays the "Extracted Strings" tab. Simulate selecting a packet with extracted strings and verify their presence in the tab. Test the end-to-end flow of clicking an `ExtractedString` in the tab and observing the corresponding highlight in `HexDumpViewer` (mocking `HexDumpViewer` if necessary, or using a full integration test setup).</SubTask>
+        <SubTask id="6.4">Performance Testing (Advisory): Perform basic manual performance checks with large PCAP files to ensure string extraction (especially if in a Web Worker) does not significantly degrade UI responsiveness.</SubTask>
+      </Task>
+    </Tasks>
+  </Story>
+  <Artifacts>
+    <Docs>
+      <Document>
+        <Path>docs/prd.md</Path>
+        <Title>Product Requirements Document: Network Traffic Parser</Title>
+        <Section>Functional Requirements</Section>
+        <Snippet>System extracts tokens and strings from packet payloads, providing quick access to credentials, URLs, and other critical data for security analysts.</Snippet>
+      </Document>
+      <Document>
+        <Path>docs/tech-spec-epic-1.md</Path>
+        <Title>Epic Technical Specification: Foundation &amp; Browser-Only Infrastructure</Title>
+        <Section>Story 1.7: Token &amp; String Extraction</Section>
+        <Snippet>This story specifies the extraction of IPs, URLs, emails, potential credentials, and printable strings from packet payloads. It requires a new `stringExtractor.ts` module and integration with the PCAP parsing process.</Snippet>
+      </Document>
+      <Document>
+        <Path>docs/architecture.md</Path>
+        <Title>Architecture</Title>
+        <Section>Project Structure</Section>
+        <Snippet>The browser-only architecture relies on client-side utilities such as `pcap-decoder` for parsing, with new modules like `stringExtractor.ts` integrating into the `client/src/utils/` directory for token and string extraction from packet payloads.</Snippet>
+      </Document>
+      <Document>
+        <Path>docs/ux-design-specification.md</Path>
+        <Title>Network Traffic Parser UX Design Specification</Title>
+        <Section>Core User Experience</Section>
+        <Snippet>The 'Forensic' user flow highlights the need for efficient PCAP analysis. Extracted strings will be displayed in an 'Extracted Strings' tab within the Packet Detail View, making critical data easily accessible and aiding in rapid threat identification.</Snippet>
+      </Document>
+      <Document>
+        <Path>docs/epics.md</Path>
+        <Title>Network Traffic Parser - Epic Breakdown</Title>
+        <Section>Story 1.7: Token &amp; String Extraction</Section>
+        <Snippet>Story 1.7 details the requirement for extracting tokens and strings from packet payloads (IPs, URLs, emails, credentials, filenames, printable ASCII strings) and displaying them in a searchable, filterable, and highlightable 'Extracted Strings' tab.</Snippet>
+      </Document>
+      <Document>
+        <Path>docs/index.md</Path>
+        <Title>Network Traffic Parser - Documentation</Title>
+        <Section>Project Overview</Section>
+        <Snippet>Central index linking to key project documentation including PRD, Architecture, Epics, and individual stories, providing a comprehensive overview of the Network Traffic Parser project.</Snippet>
+      </Document>
+    </Docs>
+    <Code>
+      <Entry>
+        <Path>client/src/components/PacketDetailView.tsx</Path>
+        <Kind>component</Kind>
+        <Symbol>PacketDetailView</Symbol>
+        <Lines>All</Lines>
+        <Reason>This component will be modified to include a new "Extracted Strings" tab and to pass highlighting information to the HexDumpViewer.</Reason>
+      </Entry>
+      <Entry>
+        <Path>client/src/components/HexDumpViewer.tsx</Path>
+        <Kind>component</Kind>
+        <Symbol>HexDumpViewer</Symbol>
+        <Lines>All</Lines>
+        <Reason>This component will be modified to accept `highlightRanges` prop and visually highlight specified byte ranges in both hex and ASCII representations.</Reason>
+      </Entry>
+      <Entry>
+        <Path>client/src/services/pcapParser.ts</Path>
+        <Kind>service</Kind>
+        <Symbol>parsePcapData</Symbol>
+        <Lines>All</Lines>
+        <Reason>This file will be modified to integrate the `stringExtractor` web worker and store the resulting `ExtractedString` objects in IndexedDB.</Reason>
+      </Entry>
+      <Entry>
+        <Path>client/src/types/packet.ts</Path>
+        <Kind>type_definition</Kind>
+        <Symbol>ParsedPacket</Symbol>
+        <Lines>N/A</Lines>
+        <Reason>The `ParsedPacket` interface will be extended to include an array of `ExtractedString` objects.</Reason>
+      </Entry>
+      <Entry>
+        <Path>client/src/types/extractedStrings.ts</Path>
+        <Kind>type_definition</Kind>
+        <Symbol>ExtractedString</Symbol>
+        <Lines>N/A</Lines>
+        <Reason>This new file will define the `ExtractedString` interface for extracted tokens and strings.</Reason>
+      </Entry>
+      <Entry>
+        <Path>client/src/utils/stringExtractor.ts</Path>
+        <Kind>utility</Kind>
+        <Symbol>extractStrings</Symbol>
+        <Lines>N/A</Lines>
+        <Reason>This new file will contain the core string extraction logic, potentially running in a Web Worker.</Reason>
+      </Entry>
+      <Entry>
+        <Path>client/src/components/ExtractedStringsTab.tsx</Path>
+        <Kind>component</Kind>
+        <Symbol>ExtractedStringsTab</Symbol>
+        <Lines>N/A</Lines>
+        <Reason>This new component will display the extracted strings in a searchable and filterable list.</Reason>
+      </Entry>
+      <Entry>
+        <Path>client/src/services/chainOfCustodyDb.ts</Path>
+        <Kind>service</Kind>
+        <Symbol>ChainOfCustodyDb</Symbol>
+        <Lines>All</Lines>
+        <Reason>The `IndexedDB` interaction for extracted strings will be similar to how chain of custody events are handled, implying potential usage or architectural pattern reuse.</Reason>
+      </Entry>
+    </Code>
+    <Interfaces>
+      <Interface>
+        <Name>ParsedPacket (extended)</Name>
+        <Kind>TypeScript Interface</Kind>
+        <Signature>interface ParsedPacket { ..., extractedStrings?: ExtractedString[] }</Signature>
+        <Path>client/src/types/packet.ts</Path>
+      </Interface>
+      <Interface>
+        <Name>ExtractedString</Name>
+        <Kind>TypeScript Interface</Kind>
+        <Signature>
+interface ExtractedString {
+  id: string;
+  type: 'IP' | 'URL' | 'Email' | 'Credential' | 'FilePath' | 'Other';
+  value: string;
+  packetId: string;
+  payloadOffset: number;
+  length: number;
+  category: string;
+}
+        </Signature>
+        <Path>client/src/types/extractedStrings.ts</Path>
+      </Interface>
+      <Interface>
+        <Name>HexDumpViewer highlightRanges prop</Name>
+        <Kind>React Prop</Kind>
+        <Signature>highlightRanges?: Array&lt;{offset: number, length: number}&gt;</Signature>
+        <Path>client/src/components/HexDumpViewer.tsx</Path>
+      </Interface>
+    </Interfaces>
+    <Constraints>
+      <Constraint>
+        <Type>Architectural Context</Type>
+        <Description>This story contributes to Epic 1: Foundation &amp; Browser-Only Infrastructure. All processing must occur client-side, aligning with the Browser-Only (Standalone) mode. Frontend (React, TypeScript, Vite) with shadcn/ui. Data storage will utilize IndexedDB for parsed packets. `pcap-decoder` library handles initial PCAP parsing, and this story extends its capabilities or uses its output for string extraction.</Description>
+      </Constraint>
+      <Constraint>
+        <Type>Key Design Consideration</Type>
+        <Description>Use regex patterns for common data types (IPs, URLs, Emails, Credentials, File Paths).</Description>
+      </Constraint>
+      <Constraint>
+        <Type>Key Design Consideration</Type>
+        <Description>For binary payloads, implement standard "strings" algorithm.</Description>
+      </Constraint>
+      <Constraint>
+        <Type>Key Design Consideration</Type>
+        <Description>Define a minimum string length (e.g., 4 characters) to reduce noise.</Description>
+      </Constraint>
+      <Constraint>
+        <Type>Key Design Consideration</Type>
+        <Description>Strings should be indexed for fast searching and filtering.</Description>
+      </Constraint>
+      <Constraint>
+        <Type>Key Design Consideration</Type>
+        <Description>Consider flagging potential credentials with a warning icon for security.</Description>
+      </Constraint>
+      <Constraint>
+        <Type>Key Design Consideration</Type>
+        <Description>Highlighting of extracted strings within the packet detail view (as deferred from Story 1.6).</Description>
+      </Constraint>
+      <Constraint>
+        <Type>Non-Functional Requirement</Type>
+        <Description>NFR-P7: Memory usage must remain &lt; 500MB during typical analysis sessions, implying efficient string handling and indexing.</Description>
+      </Constraint>
+      <Constraint>
+        <Type>Non-Functional Requirement</Type>
+        <Description>NFR-S1: All browser-side processing must occur client-side; no data leaves the browser.</Description>
+      </Constraint>
+      <Constraint>
+        <Type>Technical Debt</Type>
+        <Description>Evaluate performance of `generateHexDump` with large packet payloads and consider offloading to a Web Worker for future optimization. This warning is directly relevant to string extraction and should be considered for this story.</Description>
+      </Constraint>
+    </Constraints>
+    <Dependencies>
+      <Node>
+        <Package name="@radix-ui/react-alert-dialog" version="^1.1.15" type="dependency"/>
+        <Package name="@radix-ui/react-dialog" version="^1.1.15" type="dependency"/>
+        <Package name="@radix-ui/react-progress" version="^1.1.8" type="dependency"/>
+        <Package name="@radix-ui/react-select" version="^2.2.6" type="dependency"/>
+        <Package name="@radix-ui/react-slot" version="^1.2.4" type="dependency"/>
+        <Package name="@radix-ui/react-tabs" version="^1.1.13" type="dependency"/>
+        <Package name="@radix-ui/react-toast" version="^1.2.15" type="dependency"/>
+        <Package name="@radix-ui/react-tooltip" version="^1.2.8" type="dependency"/>
+        <Package name="class-variance-authority" version="^0.7.1" type="dependency"/>
+        <Package name="clsx" version="^2.1.1" type="dependency"/>
+        <Package name="lucide-react" version="^0.554.0" type="dependency"/>
+        <Package name="pcap-decoder" version="^1.0.3" type="dependency"/>
+        <Package name="react" version="^19.2.0" type="dependency"/>
+        <Package name="react-dom" version="^19.2.0" type="dependency"/>
+        <Package name="tailwind-merge" version="^3.4.0" type="dependency"/>
+        <Package name="tailwindcss-animate" version="^1.0.7" type="dependency"/>
+        <Package name="crypto-js" version="^4.2.0" type="dependency"/>
+        <Package name="@eslint/js" version="^9.39.1" type="devDependency"/>
+        <Package name="@shadcn/ui" version="^0.0.4" type="devDependency"/>
+        <Package name="@tailwindcss/postcss" version="^4.1.17" type="devDependency"/>
+        <Package name="@testing-library/jest-dom" version="^6.9.1" type="devDependency"/>
+        <Package name="@testing-library/react" version="^16.3.0" type="devDependency"/>
+        <Package name="@testing-library/user-event" version="^14.6.1" type="devDependency"/>
+        <Package name="@types/crypto-js" version="^4.2.1" type="devDependency"/>
+        <Package name="@types/node" version="^24.10.1" type="devDependency"/>
+        <Package name="@types/react" version="^19.2.5" type="devDependency"/>
+        <Package name="@types/react-dom" version="^19.2.3" type="devDependency"/>
+        <Package name="@typescript-eslint/eslint-plugin" version="^8.47.0" type="devDependency"/>
+        <Package name="@typescript-eslint/parser" version="^8.47.0" type="devDependency"/>
+        <Package name="@vitejs/plugin-react" version="^5.1.1" type="devDependency"/>
+        <Package name="autoprefixer" version="^10.4.22" type="devDependency"/>
+        <Package name="eslint" version="^9.39.1" type="devDependency"/>
+        <Package name="eslint-config-prettier" version="^10.1.8" type="devDependency"/>
+        <Package name="eslint-plugin-prettier" version="^5.5.4" type="devDependency"/>
+        <Package name="eslint-plugin-react-hooks" version="^7.0.1" type="devDependency"/>
+        <Package name="eslint-plugin-react-refresh" version="^0.4.24" type="devDependency"/>
+        <Package name="globals" version="^16.5.0" type="devDependency"/>
+        <Package name="jsdom" version="^27.2.0" type="devDependency"/>
+        <Package name="postcss" version="^8.5.6" type="devDependency"/>
+        <Package name="prettier" version="^3.6.2" type="devDependency"/>
+        <Package name="tailwindcss" version="^4.1.17" type="devDependency"/>
+        <Package name="typescript" version="~5.9.3" type="devDependency"/>
+        <Package name="typescript-eslint" version="^8.46.4" type="devDependency"/>
+        <Package name="vite" version="^7.2.4" type="devDependency"/>
+        <Package name="vitest" version="^4.0.13" type="devDependency"/>
+      </Node>
+    </Dependencies>
+  </Artifacts>
+  <Tests>
+    <Standards>
+      <Paragraph>Unit tests will be written using Vitest, co-located with source files (`*.test.tsx`). Component tests will utilize React Testing Library, focusing on user-centric interactions. End-to-End tests will use Playwright to verify full user flows. Performance testing will be advised for large packet payloads, potentially involving Web Workers for string extraction.</Paragraph>
+    </Standards>
+    <Locations>
+      <Location>client/src/**/*.test.tsx</Location>
+      <Location>tests/e2e/**/*.spec.ts</Location>
+    </Locations>
+    <Ideas>
+      <Idea ac_id="AC1">
+        <Description>Write unit tests for `extractStrings` covering various valid and invalid inputs for IPs, URLs, emails, and credential patterns. Test generic ASCII string extraction with diverse payloads (text, mixed text/binary, purely binary). Test edge cases (empty payload, very long strings, etc.).</Description>
+      </Idea>
+      <Idea ac_id="AC2">
+        <Description>Test rendering of lists with different sets of `ExtractedString` objects in `ExtractedStringsTab.tsx`.</Description>
+      </Idea>
+      <Idea ac_id="AC3">
+        <Description>Test search functionality (e.g., filtering by keyword) and filter by category functionality in `ExtractedStringsTab.tsx`.</Description>
+      </Idea>
+      <Idea ac_id="AC4">
+        <Description>Mock interaction to ensure clicking an item correctly triggers a highlighting event in `ExtractedStringsTab.tsx`. Verify that `PacketDetailView` correctly displays the "Extracted Strings" tab. Test the end-to-end flow of clicking an `ExtractedString` in the tab and observing the corresponding highlight in `HexDumpViewer`.</Description>
+      </Idea>
+      <Idea ac_id="AC5">
+        <Description>Test filter by category functionality in `ExtractedStringsTab.tsx`.</Description>
+      </Idea>
+    </Ideas>
+  </Tests>
+</StoryContext>

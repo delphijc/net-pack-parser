@@ -1,0 +1,10 @@
+- **Given** packets have been loaded from PCAP file
+- **When** the system analyzes each packet
+- **Then** it detects and labels the protocol based on:
+    - Port numbers (heuristic): 80/HTTP, 443/HTTPS, 53/DNS, 21/FTP, 25/SMTP, 22/SSH
+    - Protocol field in IP header: TCP (6), UDP (17), ICMP (1)
+    - Deep packet inspection for common protocols
+- **And** each packet is tagged with detected protocols: eg "TCP, HTTP" or "UDP, DNS"
+- **And** I can filter packets by protocol using dropdown: "Show only HTTP", "Show only DNS", etc.
+- **And** a protocol distribution chart shows breakdown: X% HTTP, Y% HTTPS, Z% DNS
+- **And** when protocol detection is uncertain, label as "Unknown" with port number

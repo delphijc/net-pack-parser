@@ -1,0 +1,1 @@
+- 2025-11-27: Story 1.8 created as 'drafted'.

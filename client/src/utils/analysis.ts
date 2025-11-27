@@ -1,6 +1,6 @@
 import type { ParsedPacket, SuspiciousIndicator, ThreatIntelligence, ForensicMetadata, TimelineEvent, ChainOfCustodyEntry } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import { SHA256 } from 'crypto-js';
+import CryptoJS from 'crypto-js';
 
 // Threat Intelligence Database (simplified for demo)
 const KNOWN_THREATS = [
@@ -67,10 +67,11 @@ const getMitreTechnique = (type: string): string => {
  */
 export const analyzeSuspiciousIndicators = (packet: ParsedPacket): SuspiciousIndicator[] => {
     const indicators: SuspiciousIndicator[] = [];
+    const rawDataString = new TextDecoder().decode(new Uint8Array(packet.rawData));
 
     // Check for suspicious patterns
     SUSPICIOUS_PATTERNS.forEach(({ pattern, type, severity }) => {
-        const matches = packet.rawData.match(pattern);
+        const matches = rawDataString.match(pattern);
         if (matches) {
             indicators.push({
                 id: uuidv4(),
@@ -86,7 +87,8 @@ export const analyzeSuspiciousIndicators = (packet: ParsedPacket): SuspiciousInd
     });
 
     // Check for unusual ports
-    const urlMatches = packet.rawData.match(/https?:\/\/[^:]+:(\d+)/g);
+    // This pattern looks for URLs with a specific port, e.g., http://host:port
+    const urlMatches = rawDataString.match(/https?:\/\/[^:]+:(\d+)/g);
     if (urlMatches) {
         urlMatches.forEach(url => {
             const port = parseInt(url.split(':').pop() || '0');
@@ -104,13 +106,13 @@ export const analyzeSuspiciousIndicators = (packet: ParsedPacket): SuspiciousInd
     }
 
     // Check for large data transfers (potential exfiltration)
-    if (packet.rawData.length > 10000) {
+    if (packet.rawData.byteLength > 10000) { // Use byteLength for ArrayBuffer
         indicators.push({
             id: uuidv4(),
             type: 'data_exfiltration',
             severity: 'medium',
-            description: `Large data transfer detected: ${packet.rawData.length} bytes`,
-            evidence: `Data size: ${packet.rawData.length} bytes`,
+            description: `Large data transfer detected: ${packet.rawData.byteLength} bytes`,
+            evidence: `Data size: ${packet.rawData.byteLength} bytes`,
             confidence: 60
         });
     }
@@ -123,9 +125,10 @@ export const analyzeSuspiciousIndicators = (packet: ParsedPacket): SuspiciousInd
  */
 export const checkThreatIntelligence = (packet: ParsedPacket): ThreatIntelligence[] => {
     const threats: ThreatIntelligence[] = [];
+    const rawDataString = new TextDecoder().decode(new Uint8Array(packet.rawData));
 
     KNOWN_THREATS.forEach(threat => {
-        if (threat.domain && packet.rawData.includes(threat.domain)) {
+        if (threat.domain && rawDataString.includes(threat.domain)) {
             threats.push({
                 id: uuidv4(),
                 type: threat.type as any,
@@ -137,7 +140,7 @@ export const checkThreatIntelligence = (packet: ParsedPacket): ThreatIntelligenc
             });
         }
 
-        if (threat.ip && (packet.source.includes(threat.ip) || packet.destination.includes(threat.ip))) {
+        if (threat.ip && (packet.sourceIP.includes(threat.ip) || packet.destIP.includes(threat.ip))) {
             threats.push({
                 id: uuidv4(),
                 type: threat.type as any,
@@ -168,8 +171,8 @@ export const createForensicMetadata = (packet: ParsedPacket, investigator?: stri
 
     return {
         acquisitionTimestamp: new Date().toISOString(),
-        md5Hash: SHA256(packet.rawData).toString().substring(0, 32), // Simplified MD5 simulation
-        sha256Hash: SHA256(packet.rawData).toString(),
+        md5Hash: CryptoJS.MD5(CryptoJS.lib.WordArray.create(packet.rawData)).toString().substring(0, 32), // Simplified MD5 simulation
+        sha256Hash: CryptoJS.SHA256(CryptoJS.lib.WordArray.create(packet.rawData)).toString(),
         sourceDevice: 'Network Interface',
         investigator: investigator || 'System',
         chainOfCustody: [chainOfCustodyEntry]
@@ -191,15 +194,18 @@ export const createTimelineEvent = (packet: ParsedPacket): TimelineEvent => {
         severity = maxSeverity;
     }
 
+    // Convert rawData for evidence to avoid issues with non-string types
+    const evidenceRawData = new TextDecoder().decode(new Uint8Array(packet.rawData));
+
     return {
         id: uuidv4(),
-        timestamp: packet.timestamp,
+        timestamp: new Date(packet.timestamp).toISOString(),
         type: 'network_activity',
-        source: packet.source,
-        destination: packet.destination,
-        description: `${packet.protocol} communication from ${packet.source} to ${packet.destination}`,
+        source: packet.sourceIP, // Use sourceIP
+        destination: packet.destIP, // Use destIP
+        description: `${packet.protocol} communication from ${packet.sourceIP} to ${packet.destIP}`,
         severity,
         packetId: packet.id,
-        evidence: [packet.rawData.substring(0, 200) + '...']
+        evidence: [evidenceRawData.substring(0, 200) + '...']
     };
 };

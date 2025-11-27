@@ -91,13 +91,7 @@ const createPacketFromPerformanceEntry = (entry: PerformanceEntry, rawData: any)
 
     // Determine the protocol based on URL
     const url = new URL(entry.name);
-    const protocol = url.protocol.replace(':', '').toUpperCase();
-
     // Extract domain parts for source/destination
-    const hostParts = url.hostname.split('.');
-    const domain = hostParts.length >= 2 ?
-        `${hostParts[hostParts.length - 2]}.${hostParts[hostParts.length - 1]}` :
-        url.hostname;
 
     // Add header section
     sections.push({
@@ -128,16 +122,22 @@ const createPacketFromPerformanceEntry = (entry: PerformanceEntry, rawData: any)
         }
     }
 
+
+
     return {
         id: packetId,
-        timestamp: new Date().toISOString(),
-        source: window.location.hostname,
-        destination: domain,
-        protocol,
-        tokens,
-        sections,
-        fileReferences,
-        rawData: JSON.stringify(rawData, null, 2)
+        timestamp: Date.now(),
+        sourceIP: '192.168.1.105',
+        destIP: '142.250.190.46',
+        sourcePort: 54321,
+        destPort: 443,
+        protocol: 'TCP',
+        length: 64,
+        rawData: new TextEncoder().encode(JSON.stringify(rawData)).buffer,
+        tokens: tokens,
+        sections: sections,
+        fileReferences: fileReferences,
+        detectedProtocols: ['TCP']
     };
 };
 

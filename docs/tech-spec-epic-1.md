@@ -226,3 +226,7 @@ This epic will primarily use browser-native APIs:
 - (Story 1.6) [Low] Add unit/component tests for `PacketDetailView.tsx` to verify the rendering of the monospace font for the hex dump.
 - (Story 1.6) [Low] Evaluate performance of `generateHexDump` with large packet payloads and consider offloading to a Web Worker for future optimization. (Advisory Note)
 
+- (Story 1.7) [Low] Consider removing the redundant `category` field from `ExtractedString` interface in a future refactor. (Advisory Note)
+- (Story 1.7) [Low] Monitor performance of regex matching on extremely large packets; if issues arise, consider chunking the payload or optimizing regexes. (Advisory Note)
+- (Story 1.7) [Low] For the "Extracted Strings" table, if the number of strings is very large (>1000), consider implementing virtual scrolling. (Advisory Note)
+

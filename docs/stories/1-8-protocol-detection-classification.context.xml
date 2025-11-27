@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <story-id>1-8-protocol-detection-classification</story-id>
+  <epic-id>1</epic-id>
+  <title>Protocol Detection & Classification</title>
+  <status>drafted</status>
+  <user-story>
+    <as-a>a security analyst</as-a>
+    <i-want>packets to be automatically classified by protocol</i-want>
+    <so-that>I can filter and analyze traffic by protocol type</so-that>
+  </user-story>
+  <acceptance-criteria>
+    <criterion id="AC1">Given packets have been loaded from PCAP file</criterion>
+    <criterion id="AC2">When the system analyzes each packet</criterion>
+    <criterion id="AC3">Then it detects and labels the protocol based on:</criterion>
+    <sub-criterion id="AC3.1">Port numbers (heuristic): 80/HTTP, 443/HTTPS, 53/DNS, 21/FTP, 25/SMTP, 22/SSH</sub-criterion>
+    <sub-criterion id="AC3.2">Protocol field in IP header: TCP (6), UDP (17), ICMP (1)</sub-criterion>
+    <sub-criterion id="AC3.3">Deep packet inspection for common protocols</sub-criterion>
+    <criterion id="AC4">And each packet is tagged with detected protocols: eg "TCP, HTTP" or "UDP, DNS"</criterion>
+    <criterion id="AC5">And I can filter packets by protocol using dropdown: "Show only HTTP", "Show only DNS", etc.</criterion>
+    <criterion id="AC6">And a protocol distribution chart shows breakdown: X% HTTP, Y% HTTPS, Z% DNS</criterion>
+    <criterion id="AC7">And when protocol detection is uncertain, label as "Unknown" with port number</criterion>
+  </acceptance-criteria>
+  <tasks>
+    <task id="1" title="Data Model Enhancement">
+      <subtask id="1.1" title="Update Packet Interface">
+        <detail>Modify `client/src/types/packet.ts` to include a `detectedProtocols: string[]` field to store a list of detected protocols (e.g., ["TCP", "HTTP"]).</detail>
+        <detail>Consider adding `portBasedProtocol: string` and `deepInspectionProtocol: string` for more granular control if required by further analysis.</detail>
+      </subtask>
+    </task>
+    <task id="2" title="Protocol Detection Logic Development">
+      <subtask id="2.1" title="Create client/src/utils/protocolDetector.ts">
+        <detail>Develop a core function `detectProtocols(packet: Packet, payload: Uint8Array)` that returns `string[]`.</detail>
+      </subtask>
+      <subtask id="2.2" title="Implement Port-Based Heuristics">
+        <detail>Add logic to identify common protocols based on source and destination port numbers (e.g., HTTP on 80/8080, HTTPS on 443, DNS on 53, FTP on 20/21, SSH on 22, Telnet on 23, SMTP on 25, POP3 on 110, IMAP on 143, RDP on 3389).</detail>
+      </subtask>
+      <subtask id="2.3" title="Implement IP Header Protocol Field Detection">
+        <detail>Extract protocol from the IP header (e.g., 6 for TCP, 17 for UDP, 1 for ICMP).</detail>
+      </subtask>
+      <subtask id="2.4" title="Implement Basic Deep Packet Inspection (DPI) for HTTP">
+        <detail>Examine the start of the payload for "GET ", "POST ", "HTTP/1.1", etc., to confirm HTTP traffic, especially on non-standard ports.</detail>
+      </subtask>
+      <subtask id="2.5" title="Implement Basic DPI for DNS">
+        <detail>Identify DNS query/response patterns in UDP packets on port 53.</detail>
+      </subtask>
+      <subtask id="2.6" title="Handle Uncertain Detection">
+        <detail>If no specific protocol is confidently detected, classify as "Unknown" or combine with port number (e.g., "Unknown (Port 12345)").</detail>
+      </subtask>
+    </task>
+    <task id="3" title="Integration with PCAP Parsing &amp; Data Persistence">
+      <subtask id="3.1" title="Modify client/src/services/pcapParser.ts">
+        <detail>After initial parsing, pass each `Packet` object and its `rawData` to `protocolDetector.ts`.</detail>
+        <detail>Store the returned `detectedProtocols` array in the `Packet` object before persisting to IndexedDB.</detail>
+      </subtask>
+    </task>
+    <task id="4" title="UI Component: Protocol Filter &amp; Display">
+      <subtask id="4.1" title="Create a Protocol Filter Component">
+        <detail>Develop a React component (e.g., `client/src/components/ProtocolFilter.tsx`) with a dropdown or checkboxes to allow users to select protocols for filtering.</detail>
+        <detail>This component will need to obtain the list of unique detected protocols from the loaded packets.</detail>
+      </subtask>
+      <subtask id="4.2" title="Integrate Protocol Filter into Main UI">
+        <detail>Add `ProtocolFilter.tsx` to the `PCAPAnalysisPage.tsx` or a relevant parent component to allow filtering of the `PacketList`.</detail>
+      </subtask>
+      <subtask id="4.3" title="Update PacketList Display">
+        <detail>Modify `PacketList.tsx` to display the `detectedProtocols` for each packet, possibly as badges or a column.</detail>
+      </subtask>
+      <subtask id="4.4" title="Create Protocol Distribution Chart Component">
+        <detail>Develop a React component (e.g., `client/src/components/ProtocolDistributionChart.tsx`) using Recharts to display a pie or bar chart showing the breakdown of detected protocols.</detail>
+        <detail>Integrate this chart into the main analysis dashboard.</detail>
+      </subtask>
+    </task>
+    <task id="5" title="Testing">
+      <subtask id="5.1" title="Unit Tests for client/src/utils/protocolDetector.ts">
+        <detail>Write tests for `detectProtocols` covering various scenarios:</detail>
+        <detail>- Standard HTTP/HTTPS/DNS/FTP/SSH traffic (port-based).</detail>
+        <detail>- TCP/UDP/ICMP traffic (IP header field).</detail>
+        <detail>- HTTP/DNS deep packet inspection on non-standard ports.</detail>
+        <detail>- Malicious or ambiguous packets to ensure "Unknown" classification.</detail>
+        <detail>- Edge cases (empty payload, very short packets).</detail>
+      </subtask>
+      <subtask id="5.2" title="Component Tests for ProtocolFilter.tsx">
+        <detail>Test rendering with different sets of available protocols.</detail>
+        <detail>Test filter selection and event emission.</detail>
+      </subtask>
+      <subtask id="5.3" title="Integration Tests">
+        <detail>Verify that `pcapParser.ts` correctly calls `protocolDetector.ts` and stores the results.</detail>
+        <detail>Test the end-to-end flow of uploading a PCAP, seeing protocol labels in the packet list, and filtering by protocol.</detail>
+        <detail>Verify the `ProtocolDistributionChart` accurately reflects the detected protocols.</detail>
+      </subtask>
+    </task>
+    <task id="6" title="Documentation">
+      <subtask id="6.1" title="Update README.md (if necessary)">
+        <detail>Add a brief mention of the new protocol detection feature.</detail>
+      </subtask>
+      <subtask id="6.2" title="Inline Code Comments">
+        <detail>Add comments for complex logic in `protocolDetector.ts`.</detail>
+      </subtask>
+    </task>
+  </tasks>
+  <artifacts>
+    <docs>
+      <entry>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document: Network Traffic Parser</title>
+        <section>PCAP File Analysis</section>
+        <snippet>FR20: System detects protocols (HTTP, HTTPS, FTP, SMTP, DNS, TCP, UDP, ICMP)</snippet>
+      </entry>
+      <entry>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document: Network Traffic Parser</title>
+        <section>Domain: Cybersecurity / Network Forensics &amp; Performance</section>
+        <snippet>Key Concerns: Network protocols (TCP/IP, HTTP, HTTPS, DNS)</snippet>
+      </entry>
+      <entry>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document: Network Traffic Parser</title>
+        <section>Non-Functional Requirements: Performance Requirements</section>
+        <snippet>NFR-P1: PCAP files up to 10MB must parse within 5 seconds on modern hardware. NFR-P2: PCAP files up to 50MB should parse within 30 seconds (with progress indicator). NFR-P7: Memory usage must remain &lt; 500MB during typical analysis session.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation &amp; Browser-Only Infrastructure</title>
+        <section>Acceptance Criteria (Authoritative)</section>
+        <snippet>Story 1.8: Protocol Detection &amp; Classification - Packets are automatically classified by protocol (HTTP, DNS, TCP, etc.) based on port and content. Users can filter packets by the detected protocol.</snippet>
+      </entry>
+      <entry>
+        <path>docs/tech-spec-epic-1.md</path>
+        <title>Epic Technical Specification: Foundation &amp; Browser-Only Infrastructure</title>
+        <section>Risks, Assumptions, Open Questions</section>
+        <snippet>Risk: Browser performance limitations when parsing very large (100MB+) PCAP files. Mitigation: Use Web Workers to offload parsing from the main UI thread.</snippet>
+      </entry>
+      <entry>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Decision Summary</section>
+        <snippet>PCAP Parser (Browser): pcap-decoder. Testing: Vitest, React Testing Library, Playwright.</snippet>
+      </entry>
+      <entry>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Project Structure</section>
+        <snippet>client/src/utils/pcapParser.ts: PCAP file parsing logic. client/src/types/packet.ts: TypeScript types/interfaces for Packet.</snippet>
+      </entry>
+      <entry>
+        <path>docs/ux-design-specification.md</path>
+        <title>Network Traffic Parser UX Design Specification</title>
+        <section>Visual Foundation: Typography</section>
+        <snippet>Typography: Data/Code: JetBrains Mono (The developer standard).</snippet>
+      </entry>
+      <entry>
+        <path>docs/epics.md</path>
+        <title>Network Traffic Parser - Epic Breakdown</title>
+        <section>Epic 1: Foundation &amp; Browser-Only Infrastructure</section>
+        <snippet>Story 1.8: Protocol Detection &amp; Classification - As a security analyst, I want packets to be automatically classified by protocol, So that I can filter and analyze traffic by protocol type.</snippet>
+      </entry>
+    </docs>
+    <code-artifacts>
+      <entry>
+        <path>client/src/types/packet.ts</path>
+        <kind>type definition</kind>
+        <symbol>Packet</symbol>
+        <reason>Defines the structure of a packet object, needs modification to include `detectedProtocols: string[]`.</reason>
+      </entry>
+      <entry>
+        <path>client/src/services/pcapParser.ts</path>
+        <kind>service</kind>
+        <symbol>parsePcapData</symbol>
+        <reason>Main function responsible for parsing PCAP data and will need to integrate the new protocol detection logic.</reason>
+      </entry>
+      <entry>
+        <path>client/src/services/pcapParser.ts</path>
+        <kind>utility</kind>
+        <symbol>determineProtocol</symbol>
+        <reason>Existing placeholder function that will be replaced/enhanced by the new protocol detection logic for PCAP data.</reason>
+      </entry>
+      <entry>
+        <path>client/src/services/pcapParser.ts</path>
+        <kind>utility</kind>
+        <symbol>determineStringProtocol</symbol>
+        <reason>Existing placeholder function that will be replaced/enhanced by the new protocol detection logic for string data.</reason>
+      </entry>
+      <entry>
+        <path>client/src/components/PacketList.tsx</path>
+        <kind>component</kind>
+        <reason>Will need modification to display detected protocols and respond to filtering.</reason>
+      </entry>
+      <entry>
+        <path>client/src/components/PacketDetailView.tsx</path>
+        <kind>component</kind>
+        <reason>Will need modification to display detailed protocol information in the summary.</reason>
+      </entry>
+      <entry>
+        <path>client/src/components/ProtocolFilter.tsx</path>
+        <kind>component</kind>
+        <reason>New component to be created for filtering packets by protocol.</reason>
+      </entry>
+      <entry>
+        <path>client/src/components/ProtocolDistributionChart.tsx</path>
+        <kind>component</kind>
+        <reason>New component to be created for visualizing protocol distribution.</reason>
+      </entry>
+      <entry>
+        <path>client/src/utils/protocolDetector.ts</path>
+        <kind>utility</kind>
+        <reason>New utility function to be created for the core protocol detection logic.</reason>
+      </entry>
+    </code-artifacts>
+    <interfaces>
+      <entry>
+        <name>Packet</name>
+        <kind>TypeScript Interface</kind>
+        <signature>interface Packet { id: string; timestamp: number; sourceIP: string; destIP: string; sourcePort: number; destPort: number; protocol: string; length: number; rawData: ArrayBuffer; flags?: string[]; sessionId?: string; extractedStrings?: ExtractedString[]; }</signature>
+        <path>client/src/types/packet.ts</path>
+      </entry>
+    </interfaces>
+    <constraints>
+      <entry>
+        <description>All processing must occur client-side, aligning with the Browser-Only (Standalone) mode.</description>
+        <source>Story 1.8 Dev Notes</source>
+      </entry>
+      <entry>
+        <description>Heuristic-based Detection: Prioritize port-based heuristics for speed, then apply deep packet inspection.</description>
+        <source>Story 1.8 Dev Notes</source>
+      </entry>
+      <entry>
+        <description>IP Header Protocol Field: Leverage the protocol field in IP headers for initial TCP/UDP/ICMP classification.</description>
+        <source>Story 1.8 Dev Notes</source>
+      </entry>
+      <entry>
+        <description>Deep Packet Inspection (DPI): Implement lightweight DPI for common application protocols (HTTP, DNS) to enhance accuracy, especially for non-standard ports.</description>
+        <source>Story 1.8 Dev Notes</source>
+      </entry>
+      <entry>
+        <description>Performance: Ensure protocol detection logic is efficient and does not introduce significant parsing overhead.</description>
+        <source>Story 1.8 Dev Notes</source>
+      </entry>
+      <entry>
+        <description>PCAP files up to 10MB must parse within 5 seconds.</description>
+        <source>PRD NFR-P1 / Tech Spec NFR-P1</source>
+      </entry>
+      <entry>
+        <description>PCAP files up to 50MB should parse within 30 seconds.</description>
+        <source>PRD NFR-P2 / Tech Spec NFR-P2</source>
+      </entry>
+      <entry>
+        <description>Memory usage must remain &lt; 500MB.</description>
+        <source>PRD NFR-P7 / Tech Spec NFR-P7</source>
+      </entry>
+    </constraints>
+    <dependencies>
+      <ecosystem name="npm">
+        <package name="pcap-decoder" version="^1.0.3" scope="client"/>
+        <package name="react" version="^19.2.0" scope="client"/>
+        <package name="react-dom" version="^19.2.0" scope="client"/>
+        <package name="crypto-js" version="^4.2.0" scope="client"/>
+        <package name="uuid" version="^9.0.1" scope="root"/>
+        <package name="@radix-ui/react-alert-dialog" version="^1.1.15" scope="client"/>
+        <package name="@radix-ui/react-dialog" version="^1.1.15" scope="client"/>
+        <package name="@radix-ui/react-progress" version="^1.1.8" scope="client"/>
+        <package name="@radix-ui/react-select" version="^2.2.6" scope="client"/>
+        <package name="@radix-ui/react-slot" version="^1.2.4" scope="client"/>
+        <package name="@radix-ui/react-tabs" version="^1.1.13" scope="client"/>
+        <package name="@radix-ui/react-toast" version="^1.2.15" scope="client"/>
+        <package name="@radix-ui/react-tooltip" version="^1.2.8" scope="client"/>
+        <package name="class-variance-authority" version="^0.7.1" scope="client"/>
+        <package name="clsx" version="^2.1.1" scope="client"/>
+        <package name="lucide-react" version="^0.554.0" scope="client"/>
+        <package name="tailwind-merge" version="^3.4.0" scope="client"/>
+        <package name="tailwindcss-animate" version="^1.0.7" scope="client"/>
+        <package name="lucide-react" version="^0.344.0" scope="root"/>
+        <package name="pcap-parser" version="^0.2.1" scope="root"/>
+        <package name="react" version="^18.3.1" scope="root"/>
+        <package name="react-dom" version="^18.3.1" scope="root"/>
+        <package name="tiktoken" version="^1.0.22" scope="root"/>
+      </ecosystem>
+    </dependencies>
+    <tests>
+      <standards>The project uses Vitest for unit tests, React Testing Library for component tests, and Playwright for end-to-end tests. Unit tests are co-located with the source files (`*.test.ts`, `*.test.tsx`). Component tests focus on isolated UI elements, and integration tests cover end-to-end flows.</standards>
+      <locations>
+        <glob-pattern>client/src/**/*.test.ts</glob-pattern>
+        <glob-pattern>client/src/**/*.test.tsx</glob-pattern>
+        <glob-pattern>tests/e2e/**/*.spec.ts</glob-pattern>
+      </locations>
+      <ideas>
+        <idea ac-id="AC3">
+          <description>Unit test `protocolDetector.ts` to verify correct protocol detection for various packet headers/payloads (HTTP, DNS, TCP, UDP, ICMP with correct ports/protocol fields).</description>
+        </idea>
+        <idea ac-id="AC3">
+          <description>Unit test `protocolDetector.ts` with non-standard ports where deep packet inspection should still detect the protocol (e.g., HTTP on port 8080).</description>
+        </idea>
+        <idea ac-id="AC3">
+          <description>Unit test `protocolDetector.ts` with ambiguous or malformed packets to verify "Unknown" classification with port number.</description>
+        </idea>
+        <idea ac-id="AC4">
+          <description>Integration test `pcapParser.ts` to ensure the `detectedProtocols` array is populated correctly in the `Packet` object after protocol detection.</description>
+        </idea>
+        <idea ac-id="AC5">
+          <description>Component test `ProtocolFilter.tsx` to verify filter selection, event emission, and dynamic display of unique protocols found in loaded packets.</description>
+        </idea>
+        <idea ac-id="AC5">
+          <description>Integration test `PacketList.tsx` with `ProtocolFilter.tsx` to ensure packets are filtered correctly based on selected protocols.</description>
+        </idea>
+        <idea ac-id="AC6">
+          <description>Component test `ProtocolDistributionChart.tsx` to verify correct rendering with various simulated protocol distributions.</description>
+        </idea>
+      </ideas>
+    </tests>
+</artifacts>

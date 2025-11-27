@@ -24,20 +24,15 @@ export interface FileReference {
     lastModified?: string;
 }
 
-export interface ParsedPacket {
-    id: string;
-    timestamp: string;
-    source: string;
-    destination: string;
-    protocol: string;
+import type { Packet } from './packet';
+
+export interface ParsedPacket extends Packet {
     tokens: Token[];
     sections: ParsedSection[];
     fileReferences: FileReference[];
-    rawData: string;
     forensicMetadata?: ForensicMetadata;
     threatIntelligence?: ThreatIntelligence[];
     suspiciousIndicators?: SuspiciousIndicator[];
-    sessionId?: string;
 }
 
 export interface ForensicMetadata {

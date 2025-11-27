@@ -1,3 +1,5 @@
+import { extractStrings } from '../utils/stringExtractor';
+import { detectProtocols } from '../utils/protocolDetector'; // Import detectProtocols
 import type { ParsedPacket, Token, ParsedSection, FileReference } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { SHA256 } from 'crypto-js';
@@ -45,16 +47,20 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
             const sections: ParsedSection[] = [];
             let index = 0;
 
-            // Convert packet data to hex string
-            const packetData = Array.from(packet.data)
+            // `packet.data` is a Uint8Array, which is a view on an ArrayBuffer.
+            // We need the underlying ArrayBuffer for string extraction.
+            const rawPacketDataBuffer = packet.data.buffer as ArrayBuffer;
+
+            // Convert packet data to hex string for tokens and sections
+            const packetDataHexString = Array.from(new Uint8Array(rawPacketDataBuffer))
                 .map((b: any) => b.toString(16).padStart(2, '0'))
                 .join('');
 
             // Add packet data tokens (in 2-byte chunks)
-            for (let i = 0; i < packetData.length; i += 2) {
+            for (let i = 0; i < packetDataHexString.length; i += 2) {
                 tokens.push({
                     id: uuidv4(),
-                    value: packetData.substr(i, 2),
+                    value: packetDataHexString.substr(i, 2),
                     type: 'token',
                     index: index++
                 });
@@ -66,20 +72,43 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
                 type: 'body',
                 startIndex: 0,
                 endIndex: tokens.length,
-                content: packetData
+                content: packetDataHexString
             });
 
             const parsedPacket: ParsedPacket = {
                 id: packetId,
-                timestamp: new Date(packet.header.timestampSeconds * 1000 + packet.header.timestampMicroseconds / 1000).toISOString(),
-                source: generateRandomIP(), // Placeholder until we fully decode IP headers
-                destination: generateRandomIP(),
-                protocol: determineProtocol(packet.data),
+                timestamp: new Date(packet.header.timestampSeconds * 1000 + packet.header.timestampMicroseconds / 1000).getTime(),
+                sourceIP: '127.0.0.1', // Placeholder for now, needs proper IP header decoding for actual IPs
+                destIP: '127.0.0.1', // Placeholder for now, needs proper IP header decoding for actual IPs
+                sourcePort: packet.transport.sourcePort,
+                destPort: packet.transport.destPort,
+                protocol: packet.network.protocol, // From pcap-decoder's network layer
+                length: packet.header.captureLength,
+                rawData: rawPacketDataBuffer, // Assign raw ArrayBuffer
+                // Initialize new fields
+                detectedProtocols: [], // Will be populated by detectProtocols
+                portBasedProtocol: undefined,
+                deepInspectionProtocol: undefined,
+
                 tokens,
                 sections,
                 fileReferences: [],
-                rawData: packetData
+                extractedStrings: [] // Initialize extractedStrings
             };
+
+            // --- Integrate protocol detection here ---
+            parsedPacket.detectedProtocols = detectProtocols(parsedPacket, new Uint8Array(rawPacketDataBuffer));
+            // -----------------------------------------
+
+            // --- Integrate string extraction here ---
+            try {
+                // Pass the ArrayBuffer to the worker
+                const extracted = await extractStrings(rawPacketDataBuffer, packetId, 0); // Assuming payloadOffset is 0 for the whole packet data
+                parsedPacket.extractedStrings = extracted;
+            } catch (strExtractError) {
+                console.error(`Error extracting strings for packet ${packetId}:`, strExtractError);
+            }
+            // ----------------------------------------
 
             // Add forensic analysis
             parsedPacket.suspiciousIndicators = analyzeSuspiciousIndicators(parsedPacket);
@@ -95,8 +124,6 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
 
     } catch (error) {
         console.warn('Error using pcap-decoder:', error);
-        // If decoding fails, we might want to throw or return empty array
-        // For now, let's try to return what we have or a placeholder error packet if empty
         if (packets.length === 0) {
             console.error("Failed to decode any packets");
         }
@@ -208,16 +235,20 @@ const parseStringData = (data: string): ParsedPacket => {
 
     const parsedPacket: ParsedPacket = {
         id: packetId,
-        timestamp: new Date().toISOString(),
-        source: generateRandomIP(),
-        destination: generateRandomIP(),
+        timestamp: Date.now(),
+        sourceIP: generateRandomIP(),
+        destIP: generateRandomIP(),
+        sourcePort: 0,
+        destPort: 0,
         protocol: determineStringProtocol(data),
+        length: data.length,
         tokens,
         sections,
         fileReferences,
-        rawData: data
+        rawData: new TextEncoder().encode(data).buffer, // Convert string to ArrayBuffer
+        extractedStrings: [],
+        detectedProtocols: []
     };
-
     parsedPacket.suspiciousIndicators = analyzeSuspiciousIndicators(parsedPacket);
     parsedPacket.threatIntelligence = checkThreatIntelligence(parsedPacket);
     parsedPacket.forensicMetadata = createForensicMetadata(parsedPacket);
@@ -228,13 +259,11 @@ const parseStringData = (data: string): ParsedPacket => {
     return parsedPacket;
 };
 
-/**
- * Determines protocol from PCAP data
- */
-const determineProtocol = (_data: Uint8Array | ArrayBuffer): string => {
-    // Implementation would analyze packet headers and data
-    return 'TCP'; // Default to TCP for now instead of random
-};
+// No longer needed as protocol detection is handled by protocolDetector.ts
+// const determineProtocol = (_data: Uint8Array | ArrayBuffer): string => {
+//     // Implementation would analyze packet headers and data
+//     return 'TCP'; // Default to TCP for now instead of random
+// };
 
 const determineStringProtocol = (data: string): string => {
     if (data.startsWith('GET') || data.startsWith('POST') || data.startsWith('HTTP')) {

@@ -1,5 +1,7 @@
 // client/src/types/packet.ts
 
+import type { ExtractedString } from './extractedStrings';
+
 export interface Packet {
   id: string;                    // UUID
   timestamp: number;             // Unix timestamp (ms)
@@ -12,4 +14,8 @@ export interface Packet {
   rawData: ArrayBuffer;          // Packet payload
   flags?: string[];              // TCP flags ['SYN', 'ACK']
   sessionId?: string;            // For TCP session grouping
+  extractedStrings?: ExtractedString[]; // Array of extracted strings from the payload
+  detectedProtocols: string[];   // List of detected protocols (e.g., ["TCP", "HTTP"])
+  portBasedProtocol?: string;    // Protocol detected via port heuristics
+  deepInspectionProtocol?: string; // Protocol detected via deep packet inspection
 }

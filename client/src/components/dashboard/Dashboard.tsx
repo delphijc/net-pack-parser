@@ -167,7 +167,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                                         }`}></div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate text-foreground">
-                                            {packet.protocol} request to {packet.destination}
+                                            {packet.protocol} request to {packet.destIP}
                                         </p>
                                         <p className="text-xs text-muted-foreground">
                                             {new Date(packet.timestamp).toLocaleTimeString()}

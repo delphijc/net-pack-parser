@@ -157,9 +157,9 @@ const PcapUpload: React.FC = () => {
                 if (packets.length > 0) {
                     setCapturedData(packets);
 
-                    // Load the first packet's rawData into the input field
+                    // Load the first packet's rawData into the input field (as string for display)
                     if (packets[0].rawData) {
-                        setInputData(packets[0].rawData);
+                        setInputData(new TextDecoder().decode(new Uint8Array(packets[0].rawData)));
                     }
                 } else {
                     setErrorMessage('No network traffic was captured. Try visiting different websites while capturing.');
@@ -215,8 +215,8 @@ const PcapUpload: React.FC = () => {
     };
 
     const handleViewPacket = (packet: ParsedPacket) => {
-        // Load the raw data into the input field
-        setInputData(packet.rawData);
+        // Load the raw data into the input field as string
+        setInputData(new TextDecoder().decode(new Uint8Array(packet.rawData)));
     };
 
     return (
@@ -298,7 +298,7 @@ const PcapUpload: React.FC = () => {
                                             onClick={() => handleViewPacket(packet)}
                                         >
                                             <div className="text-sm truncate text-foreground/80 font-mono">
-                                                {index + 1}. {packet.protocol} - {packet.destination}
+                                                {index + 1}. {packet.protocol} - {packet.destIP}
                                             </div>
                                             <div className="text-xs text-muted-foreground">
                                                 {new Date(packet.timestamp).toLocaleTimeString()}
@@ -437,10 +437,10 @@ const PcapUpload: React.FC = () => {
                                 <p className="text-sm text-foreground"><span className="text-muted-foreground">ID:</span> {lastParsedPacket.id}</p>
                                 <p className="text-sm text-foreground"><span className="text-muted-foreground">Protocol:</span> {lastParsedPacket.protocol}</p>
                                 <p className="text-sm text-foreground">
-                                    <span className="text-muted-foreground">Source:</span> {lastParsedPacket.source}
+                                    <span className="text-muted-foreground">Source:</span> {lastParsedPacket.sourceIP}
                                 </p>
                                 <p className="text-sm text-foreground">
-                                    <span className="text-muted-foreground">Destination:</span> {lastParsedPacket.destination}
+                                    <span className="text-muted-foreground">Destination:</span> {lastParsedPacket.destIP}
                                 </p>
                             </div>
                         </div>

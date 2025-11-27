@@ -234,10 +234,10 @@ class DatabaseService {
         threatLevel?: string;
     }): ParsedPacket[] {
         return this.packets.filter(packet => {
-            if (criteria.sourceIp && !packet.source.includes(criteria.sourceIp)) return false;
-            if (criteria.destIp && !packet.destination.includes(criteria.destIp)) return false;
+            if (criteria.sourceIp && !packet.sourceIP.includes(criteria.sourceIp)) return false;
+            if (criteria.destIp && !packet.destIP.includes(criteria.destIp)) return false;
             if (criteria.protocol && packet.protocol !== criteria.protocol) return false;
-            if (criteria.containsString && !packet.rawData.toLowerCase().includes(criteria.containsString.toLowerCase())) return false;
+            if (criteria.containsString && !new TextDecoder().decode(new Uint8Array(packet.rawData)).toLowerCase().includes(criteria.containsString.toLowerCase())) return false;
             if (criteria.hasSuspiciousIndicators && (!packet.suspiciousIndicators || packet.suspiciousIndicators.length === 0)) return false;
 
             if (criteria.startTime || criteria.endTime) {
@@ -253,9 +253,9 @@ class DatabaseService {
     public searchPackets(query: string): ParsedPacket[] {
         const lowerQuery = query.toLowerCase();
         return this.packets.filter(packet =>
-            packet.rawData.toLowerCase().includes(lowerQuery) ||
-            packet.source.includes(lowerQuery) ||
-            packet.destination.includes(lowerQuery) ||
+            new TextDecoder().decode(new Uint8Array(packet.rawData)).toLowerCase().includes(lowerQuery) ||
+            packet.sourceIP.includes(lowerQuery) ||
+            packet.destIP.includes(lowerQuery) ||
             packet.protocol.toLowerCase().includes(lowerQuery)
         );
     }

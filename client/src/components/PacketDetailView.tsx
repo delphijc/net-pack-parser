@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { ParsedPacket } from '@/types';
 import type { Packet } from '@/types/packet';
 import {
@@ -11,6 +11,8 @@ import {
 import { Button } from '@/components/ui/button'; // Import Button component
 import { decodePacketHeaders } from '@/utils/packetDecoder';
 import HexDumpViewer, { generateHexDump } from '@/components/HexDumpViewer'; // Import HexDumpViewer and generateHexDump
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'; // Import Tabs components
+import ExtractedStringsTab from '@/components/ExtractedStringsTab'; // Import ExtractedStringsTab
 
 interface PacketDetailViewProps {
   packet: ParsedPacket | null;
@@ -19,22 +21,23 @@ interface PacketDetailViewProps {
 }
 
 const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onOpenChange }) => {
+  const [highlightRanges, setHighlightRanges] = useState<{ offset: number; length: number }[]>([]); // New state for highlight ranges
+
   if (!packet) {
     return null;
   }
 
   // Helper to format timestamp
-  const formatTimestamp = (timestamp: string) => {
+  const formatTimestamp = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
   };
 
   // Convert ParsedPacket to Packet-like structure for decoder
-  // Assuming rawData is a hex string or similar. For now, using TextEncoder as fallback if not hex.
-  // Ideally ParsedPacket should store encoding info.
-  const getRawDataBuffer = (data: string): ArrayBuffer => {
+  const getRawDataBuffer = (data: string | ArrayBuffer): ArrayBuffer => {
+    if (data instanceof ArrayBuffer) {
+      return data;
+    }
     try {
-      // Try hex first? Or just assume text for now as per test data?
-      // Test data uses "some raw data 1".
       return new TextEncoder().encode(data).buffer;
     } catch (e) {
       return new ArrayBuffer(0);
@@ -46,28 +49,27 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
   // Construct a temporary Packet object for the decoder
   const tempPacket: Packet = {
     id: packet.id,
-    timestamp: new Date(packet.timestamp).getTime(),
-    sourceIP: packet.source, // Simplified mapping
-    destIP: packet.destination,
-    sourcePort: 0, // Not available in ParsedPacket directly
-    destPort: 0,
+    timestamp: packet.timestamp,
+    sourceIP: packet.sourceIP,
+    destIP: packet.destIP,
+    sourcePort: packet.sourcePort || 0,
+    destPort: packet.destPort || 0,
     protocol: packet.protocol,
     length: rawDataBuffer.byteLength,
-    rawData: rawDataBuffer
+    rawData: rawDataBuffer,
+    detectedProtocols: packet.detectedProtocols || []
   };
 
   const decodedHeaders = decodePacketHeaders(tempPacket);
 
   const handleCopyHex = async () => {
     if (rawDataBuffer && rawDataBuffer.byteLength > 0) {
-      const { fullHexDump } = generateHexDump(rawDataBuffer);
+      const hexDump = generateHexDump(rawDataBuffer);
       try {
-        await navigator.clipboard.writeText(fullHexDump);
-        // Optionally, show a toast notification for success
+        await navigator.clipboard.writeText(hexDump.lines.map(l => `${l.offset} ${l.hexBytes} ${l.asciiChars}`).join('\n'));
         console.log('Hex dump copied to clipboard!');
       } catch (err) {
         console.error('Failed to copy hex dump: ', err);
-        // Optionally, show an error notification
       }
     }
   };
@@ -77,11 +79,9 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
       const { fullAsciiDump } = generateHexDump(rawDataBuffer);
       try {
         await navigator.clipboard.writeText(fullAsciiDump);
-        // Optionally, show a toast notification for success
         console.log('ASCII dump copied to clipboard!');
       } catch (err) {
         console.error('Failed to copy ASCII dump: ', err);
-        // Optionally, show an error notification
       }
     }
   };
@@ -99,6 +99,11 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
       URL.revokeObjectURL(url);
       console.log('Packet data downloaded!');
     }
+  };
+
+  // Callback for ExtractedStringsTab to set highlight ranges
+  const handleHighlightString = (offset: number, length: number) => {
+    setHighlightRanges([{ offset, length }]);
   };
 
   return (
@@ -131,11 +136,11 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground text-xs uppercase tracking-wider">Source</p>
-                <p className="font-mono text-foreground">{packet.source}</p>
+                <p className="font-mono text-foreground">{packet.sourceIP}{packet.sourcePort ? `:${packet.sourcePort}` : ''}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground text-xs uppercase tracking-wider">Destination</p>
-                <p className="font-mono text-foreground">{packet.destination}</p>
+                <p className="font-mono text-foreground">{packet.destIP}{packet.destPort ? `:${packet.destPort}` : ''}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground text-xs uppercase tracking-wider">Length</p>
@@ -162,20 +167,36 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
             </div>
           </div>
 
-          {/* Hex Dump and ASCII */}
-          <div className="bg-card border border-white/10 p-4 rounded-lg shadow-sm">
-            <h3 className="font-semibold text-sm text-foreground mb-3 flex items-center gap-2">
-              <span className="w-1 h-4 bg-emerald-500 rounded-full"></span>
-              Payload Hex Dump / ASCII
-            </h3>
-            <div className="bg-black/40 rounded border border-white/5 p-2 overflow-hidden">
-              {rawDataBuffer && rawDataBuffer.byteLength > 0 ? (
-                <HexDumpViewer rawData={rawDataBuffer} />
-              ) : (
-                <p className="text-muted-foreground text-sm p-4 text-center">No payload data available.</p>
-              )}
-            </div>
-          </div>
+          {/* Tabs for Hex Dump and Extracted Strings */}
+          <Tabs defaultValue="hex-dump" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="hex-dump">Hex Dump / ASCII</TabsTrigger>
+              <TabsTrigger value="extracted-strings">Extracted Strings</TabsTrigger>
+            </TabsList>
+            <TabsContent value="hex-dump">
+              <div className="bg-card border border-white/10 p-4 rounded-lg shadow-sm mt-4">
+                <h3 className="font-semibold text-sm text-foreground mb-3 flex items-center gap-2">
+                  <span className="w-1 h-4 bg-emerald-500 rounded-full"></span>
+                  Payload Hex Dump / ASCII
+                </h3>
+                <div className="bg-black/40 rounded border border-white/5 p-2 overflow-hidden">
+                  {rawDataBuffer && rawDataBuffer.byteLength > 0 ? (
+                    <HexDumpViewer rawData={rawDataBuffer} highlightRanges={highlightRanges} /> // Pass highlightRanges
+                  ) : (
+                    <p className="text-muted-foreground text-sm p-4 text-center">No payload data available.</p>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="extracted-strings">
+              <div className="bg-card border border-white/10 p-4 rounded-lg shadow-sm mt-4">
+                <ExtractedStringsTab
+                  extractedStrings={packet.extractedStrings || []}
+                  onHighlight={handleHighlightString} // Pass the callback
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
 
           {/* Copy/Download buttons */}
           <div className="flex gap-3 pt-2">
