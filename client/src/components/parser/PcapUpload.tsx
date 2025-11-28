@@ -76,6 +76,10 @@ const PcapUpload: React.FC = () => {
             // Wait for all file downloads to complete
             await Promise.all(filePromises);
 
+
+            await database.storePackets(parsedPackets);
+            // Ensure DB transaction completes before proceeding
+
             // Set the last parsed packet (use the last one for display)
             setLastParsedPacket(parsedPackets[parsedPackets.length - 1]);
 
@@ -131,7 +135,9 @@ const PcapUpload: React.FC = () => {
                 return;
             }
 
-            database.storePackets(parsedPackets);
+            await database.storePackets(parsedPackets);
+            // Ensure DB transaction completes before proceeding
+            // (storePackets resolves after transaction oncomplete)
             setLastParsedPacket(parsedPackets[parsedPackets.length - 1]);
             setInputData('');
             setCapturedData([]);

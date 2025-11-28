@@ -13,18 +13,11 @@ export interface ParsedSection {
     content: string;
 }
 
-export interface FileReference {
-    id: string;
-    uri: string;
-    fileName: string;
-    hash: string;
-    downloadStatus: 'pending' | 'downloaded' | 'failed';
-    fileSize?: number;
-    fileType?: string;
-    lastModified?: string;
-}
 
 import type { Packet } from './packet';
+export type { Packet };
+import type { FileReference } from './fileReference';
+export * from './fileReference';
 
 export interface ParsedPacket extends Packet {
     tokens: Token[];

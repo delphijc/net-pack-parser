@@ -31,10 +31,10 @@ const Dashboard: React.FC<DashboardProps> = () => {
         return () => clearInterval(intervalId);
     }, []);
 
-    const updateStats = () => {
-        const packets = database.getAllPackets();
-        const files = database.getAllFiles();
-        const threats = database.getAllThreatIntelligence();
+    const updateStats = async () => {
+        const packets = await database.getAllPackets();
+        const files = await database.getAllFiles();
+        const threats = await database.getAllThreatIntelligence();
 
         // Calculate protocol distribution
         const protocols: Record<string, number> = {};

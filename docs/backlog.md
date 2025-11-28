@@ -25,3 +25,13 @@ Routing guidance:
 | 2025-11-27 | 1.7 | 1 | TechDebt | Low | TBD | Open | Consider removing the redundant `category` field from `ExtractedString` interface in a future refactor. [file: `client/src/types/extractedStrings.ts`] |
 | 2025-11-27 | 1.7 | 1 | Performance | Low | TBD | Open | Monitor performance of regex matching on extremely large packets; if issues arise, consider chunking the payload or optimizing regexes. [file: `client/src/utils/stringExtractor.ts`] |
 | 2025-11-27 | 1.7 | 1 | Performance | Low | TBD | Open | For the "Extracted Strings" table, if the number of strings is very large (>1000), consider implementing virtual scrolling. [file: `client/src/components/ExtractedStringsTab.tsx`] |
+| 2025-11-28 | 1.9 | 1 | Bug | Critical | TBD | Open | Fix Data Persistence Bug: `saveNonFileDataToStorage` in `database.ts` stores `ArrayBuffer` in `localStorage`. [file: `client/src/services/database.ts`] |
+| 2025-11-28 | 1.9 | 1 | Feature | High | TBD | Open | Implement Full FTP File Reassembly: Extend `fileExtractor.ts` to handle FTP data channel reassembly. [file: `client/src/utils/fileExtractor.ts`] |
+| 2025-11-28 | 1.9 | 1 | Test | High | TBD | Open | Add Component Tests for `FilesTab.tsx`. [file: `client/src/components/FilesTab.test.tsx`] |
+| 2025-11-28 | 1.9 | 1 | Test | High | TBD | Open | Add Integration/E2E Tests for file download flow. [file: `tests/e2e/app.spec.ts`] |
+| 2025-11-28 | 1.9 | 1 | Performance | Medium | TBD | Open | Improve `reassembleFile` performance (optimize concatenation or Web Worker). [file: `client/src/utils/fileExtractor.ts`] |
+| 2025-11-28 | 1.9 | 1 | UX | Medium | TBD | Open | Improve `FilesTab.tsx` UX/Error Handling. [file: `client/src/components/FilesTab.tsx`] |
+| 2025-11-28 | 1.9 | 1 | TechDebt | Low | TBD | Open | Log `parseHttpHeaders` errors. [file: `client/src/utils/fileExtractor.ts`] |
+| 2025-11-28 | 1.9 | 1 | TechDebt | Low | TBD | Open | Refine `FilesTab.tsx` Chain of Custody typing. [file: `client/src/components/FilesTab.tsx`] |
+| 2025-11-28 | 2.1 | 2 | Enhancement | Low | TBD | Open | Monitor performance on large datasets and consider Web Worker offloading if needed. (Ref: `client/src/pages/PcapAnalysisPage.tsx`) |
+

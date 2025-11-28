@@ -93,6 +93,6 @@ describe('pcapParser', () => {
         const result = await parseNetworkData(input);
 
         expect(result[0].fileReferences.length).toBeGreaterThan(0);
-        expect(result[0].fileReferences[0].fileName).toBe('document.pdf');
+        expect(result[0].fileReferences[0].filename).toBe('document.pdf');
     });
 });

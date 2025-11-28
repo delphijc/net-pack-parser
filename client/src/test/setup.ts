@@ -1,7 +1,18 @@
 // src/test/setup.ts
 import '@testing-library/jest-dom';
+import { extractStringsFromBuffer } from '../utils/stringExtractorCore';
 
-// Mock Web Worker to prevent "Worker is not defined" errors in tests
+// Mock IndexedDB
+const indexedDBMock = {
+  open: () => ({
+    result: {},
+    onerror: null,
+    onsuccess: null,
+  }),
+};
+globalThis.indexedDB = indexedDBMock as any;
+
+// Mock Web Worker to properly simulate string extraction
 globalThis.Worker = class {
   constructor(stringUrl: string) {
     this.url = stringUrl;
@@ -10,11 +21,26 @@ globalThis.Worker = class {
   url: string;
   onmessage: (msg: any) => void;
   postMessage(msg: any) {
-    // Simulate a message back from the worker
-    // For stringExtractor, we might need to mock a more complex response.
-    // For now, a simple passthrough or empty response is enough to prevent crashes.
-    // If the test expects a result from the worker, this mock will need to be enhanced.
-    this.onmessage({ data: msg });
+    // Simulate the string extraction worker behavior
+    const { payload, packetId, payloadOffset } = msg;
+
+    // If this is a string extraction request, process it
+    if (payload instanceof ArrayBuffer && packetId && payloadOffset !== undefined) {
+      try {
+        const extractedStrings = extractStringsFromBuffer(payload, packetId, payloadOffset);
+        // Simulate async worker response
+        setTimeout(() => {
+          this.onmessage({ data: { status: 'success', extractedStrings } });
+        }, 0);
+      } catch (error: any) {
+        setTimeout(() => {
+          this.onmessage({ data: { status: 'error', message: error.message } });
+        }, 0);
+      }
+    } else {
+      // Default passthrough for other worker types
+      this.onmessage({ data: msg });
+    }
   }
   terminate() { }
   addEventListener() { }

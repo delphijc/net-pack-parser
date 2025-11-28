@@ -1,20 +1,25 @@
 import type { ParsedPacket, FileReference, PerformanceEntryData } from '../types';
 import type { ForensicCase, TimelineEvent, ThreatIntelligence } from '../types';
-import type { CaptureSession } from '../types/captureSession'; // Import CaptureSession
+import type { CaptureSession } from '../types/captureSession';
+
+const DB_NAME = 'networkParserDB';
+const DB_VERSION = 2; // Increment version if schema changes
 
 class DatabaseService {
     private static instance: DatabaseService;
-    private packets: ParsedPacket[] = [];
-    private files: FileReference[] = [];
+    private db: IDBDatabase | null = null;
+    private dbPromise: Promise<IDBDatabase>;
+    // private packets: ParsedPacket[] = []; // Removed as now handled by IndexedDB
     private performanceEntries: PerformanceEntryData[] = [];
     private forensicCases: ForensicCase[] = [];
     private timelineEvents: TimelineEvent[] = [];
     private threatIntelligence: ThreatIntelligence[] = [];
-    private captureSessions: CaptureSession[] = []; // Add captureSessions array
-    private storageKey = 'network_parser_data';
+    private captureSessions: CaptureSession[] = [];
+    private storageKey = 'network_parser_data'; // For non-file data
 
     private constructor() {
-        this.loadFromStorage();
+        this.dbPromise = this.initIndexedDB();
+        this.loadNonFileDataFromStorage();
     }
 
     public static getInstance(): DatabaseService {
@@ -24,133 +29,298 @@ class DatabaseService {
         return DatabaseService.instance;
     }
 
-    private loadFromStorage(): void {
+    private initIndexedDB(): Promise<IDBDatabase> {
+        return new Promise((resolve, reject) => {
+            if (!('indexedDB' in window)) {
+                console.warn("IndexedDB not supported. File references will not be persisted.");
+                reject(new Error("IndexedDB not supported"));
+                return;
+            }
+
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+            request.onerror = (event) => {
+                console.error('IndexedDB error:', (event.target as IDBOpenDBRequest).error);
+                reject((event.target as IDBOpenDBRequest).error);
+            };
+
+            request.onsuccess = (event) => {
+                this.db = (event.target as IDBOpenDBRequest).result;
+                console.log('IndexedDB for File References opened successfully.');
+                resolve(this.db);
+            };
+
+            request.onupgradeneeded = (event) => {
+                const db = (event.target as IDBOpenDBRequest).result;
+                if (!db.objectStoreNames.contains('fileReferences')) {
+                    db.createObjectStore('fileReferences', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('packets')) {
+                    db.createObjectStore('packets', { keyPath: 'id' });
+                }
+                console.log('IndexedDB upgrade complete.');
+            };
+        });
+    }
+
+    // Load/Save non-FileReference data using localStorage
+    private loadNonFileDataFromStorage(): void {
         try {
             const savedData = localStorage.getItem(this.storageKey);
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
-                this.packets = parsedData.packets || [];
-                this.files = parsedData.files || [];
+                // this.packets is now handled by IndexedDB
+                // this.files is now handled by IndexedDB
                 this.performanceEntries = parsedData.performanceEntries || [];
                 this.forensicCases = parsedData.forensicCases || [];
                 this.timelineEvents = parsedData.timelineEvents || [];
                 this.threatIntelligence = parsedData.threatIntelligence || [];
-                this.captureSessions = parsedData.captureSessions || []; // Load captureSessions
+                this.captureSessions = parsedData.captureSessions || [];
             }
         } catch (error) {
-            console.error('Failed to load data from storage:', error);
-            this.packets = [];
-            this.files = [];
+            console.error('Failed to load non-file data from storage:', error);
+            // this.packets = [];
             this.performanceEntries = [];
             this.forensicCases = [];
             this.timelineEvents = [];
             this.threatIntelligence = [];
-            this.captureSessions = []; // Initialize on error
+            this.captureSessions = [];
         }
     }
 
-    private saveToStorage(): void {
+    private saveNonFileDataToStorage(): void {
         try {
             const dataToSave = {
-                packets: this.packets,
-                files: this.files,
+                // packets is now handled by IndexedDB
+                // files is now handled by IndexedDB
                 performanceEntries: this.performanceEntries,
                 forensicCases: this.forensicCases,
                 timelineEvents: this.timelineEvents,
                 threatIntelligence: this.threatIntelligence,
-                captureSessions: this.captureSessions // Save captureSessions
+                captureSessions: this.captureSessions
             };
             localStorage.setItem(this.storageKey, JSON.stringify(dataToSave));
         } catch (error) {
-            console.error('Failed to save data to storage:', error);
+            console.error('Failed to save non-file data to storage:', error);
         }
     }
 
-    public storePacket(packet: ParsedPacket): string {
-        this.packets.push(packet);
+    public async storePacket(packet: ParsedPacket): Promise<string> {
+        try {
+            await this.dbPromise;
+        } catch (e) {
+            console.error('IndexedDB init failed', e);
+            return packet.id;
+        }
 
-        packet.fileReferences.forEach(file => {
-            if (!this.files.some(f => f.id === file.id)) {
-                this.files.push(file);
+        if (!this.db) {
+            console.error('IndexedDB not initialized.');
+            return packet.id;
+        }
+
+        const transaction = this.db.transaction(['packets', 'fileReferences'], 'readwrite');
+        const packetStore = transaction.objectStore('packets');
+        packetStore.add(packet);
+
+        if (packet.fileReferences && packet.fileReferences.length > 0) {
+            const fileStore = transaction.objectStore('fileReferences');
+            for (const file of packet.fileReferences) {
+                const existingFile = await this.getFileById(file.id);
+                if (!existingFile) { // Only add if it doesn't already exist
+                    fileStore.add(file);
+                }
             }
+        }
+
+        await new Promise((resolve, reject) => {
+            transaction.oncomplete = () => resolve(undefined);
+            transaction.onerror = () => reject(transaction.error);
         });
 
-        this.saveToStorage();
+        this.saveNonFileDataToStorage();
         return packet.id;
     }
 
-    public storePackets(packets: ParsedPacket[]): void {
-        this.packets.push(...packets);
-
-        packets.forEach(packet => {
-            packet.fileReferences.forEach(file => {
-                if (!this.files.some(f => f.id === file.id)) {
-                    this.files.push(file);
-                }
-            });
-        });
-
-        this.saveToStorage();
-    }
-
-    public deletePacket(packetId: string): void {
-        const packet = this.packets.find(p => p.id === packetId);
-        if (!packet) return;
-
-        // Remove file references if they're not used by other packets
-        packet.fileReferences.forEach(fileRef => {
-            const isUsedElsewhere = this.packets.some(p =>
-                p.id !== packetId && p.fileReferences.some(f => f.id === fileRef.id)
-            );
-
-            if (!isUsedElsewhere) {
-                this.files = this.files.filter(f => f.id !== fileRef.id);
-            }
-        });
-
-        // Remove the packet
-        this.packets = this.packets.filter(p => p.id !== packetId);
-        this.saveToStorage();
-    }
-
-    public updateFileReference(updatedFile: FileReference): void {
-        const fileIndex = this.files.findIndex(f => f.id === updatedFile.id);
-        if (fileIndex >= 0) {
-            this.files[fileIndex] = updatedFile;
+    public async storePackets(packets: ParsedPacket[]): Promise<void> {
+        try {
+            await this.dbPromise;
+        } catch (e) {
+            console.error('IndexedDB init failed', e);
+            return;
         }
 
-        this.packets.forEach((packet, pIndex) => {
-            const fileRefIndex = packet.fileReferences.findIndex(f => f.id === updatedFile.id);
-            if (fileRefIndex >= 0) {
-                this.packets[pIndex].fileReferences[fileRefIndex] = updatedFile;
+        if (!this.db) {
+            console.error('IndexedDB not initialized.');
+            return;
+        }
+
+        const transaction = this.db.transaction(['packets', 'fileReferences'], 'readwrite');
+        const packetStore = transaction.objectStore('packets');
+        const fileStore = transaction.objectStore('fileReferences');
+
+        for (const packet of packets) {
+            packetStore.add(packet);
+            if (packet.fileReferences && packet.fileReferences.length > 0) {
+                for (const file of packet.fileReferences) {
+                    // We can't await inside this loop easily with transaction scope if we want to be strictly correct with IDB transaction lifetime,
+                    // but for bulk add, we might just overwrite or check existence.
+                    // getFileById creates a new transaction which might block.
+                    // Better to just add/put.
+                    fileStore.put(file);
+                }
             }
+        }
+
+        await new Promise((resolve, reject) => {
+            transaction.oncomplete = () => resolve(undefined);
+            transaction.onerror = () => reject(transaction.error);
         });
 
-        this.saveToStorage();
+        this.saveNonFileDataToStorage();
+    }
+    public async deletePacket(packetId: string): Promise<void> {
+        try {
+            await this.dbPromise;
+        } catch (e) {
+            console.error('IndexedDB init failed', e);
+            return;
+        }
+        if (!this.db) return;
+        const transaction = this.db.transaction(['packets'], 'readwrite');
+        const store = transaction.objectStore('packets');
+        store.delete(packetId);
+        await new Promise((resolve, reject) => {
+            transaction.oncomplete = () => resolve(undefined);
+            transaction.onerror = () => reject(transaction.error);
+        });
+        this.saveNonFileDataToStorage();
     }
 
+    public async updateFileReference(updatedFile: FileReference): Promise<void> {
+        try {
+            await this.dbPromise;
+        } catch (e) {
+            console.error('IndexedDB init failed', e);
+            return;
+        }
+        if (!this.db) {
+            console.error('IndexedDB not initialized.');
+            return;
+        }
+        const transaction = this.db.transaction(['fileReferences'], 'readwrite');
+        const store = transaction.objectStore('fileReferences');
+        store.put(updatedFile); // put will update if exists, add if not
+
+        // Re-saving packets to ensure their fileReferences array is updated to point to the correct
+        // updatedFile reference.
+        // Re-saving packets to ensure their fileReferences array is updated to point to the correct
+        // updatedFile reference.
+        // With IndexedDB, we need to fetch the packet, update it, and put it back.
+        // This is expensive if we don't know which packet it belongs to.
+        // Fortunately, FileReference has sourcePacketId.
+        if (updatedFile.sourcePacketId) {
+            const packetTransaction = this.db.transaction(['packets'], 'readwrite');
+            const packetStore = packetTransaction.objectStore('packets');
+            const packetRequest = packetStore.get(updatedFile.sourcePacketId);
+
+            packetRequest.onsuccess = () => {
+                const packet = packetRequest.result as ParsedPacket;
+                if (packet && packet.fileReferences) {
+                    const fileRefIndex = packet.fileReferences.findIndex(f => f.id === updatedFile.id);
+                    if (fileRefIndex >= 0) {
+                        packet.fileReferences[fileRefIndex] = updatedFile;
+                        packetStore.put(packet);
+                    }
+                }
+            };
+        }
+
+        await new Promise((resolve, reject) => {
+            transaction.oncomplete = () => resolve(undefined);
+            transaction.onerror = () => reject(transaction.error);
+        });
+        // this.saveNonFileDataToStorage(); // No need to save all packets to local storage
+    }
     public storePerformanceEntry(entry: PerformanceEntryData): string {
         this.performanceEntries.push(entry);
-        this.saveToStorage();
+        this.saveNonFileDataToStorage();
         return entry.id;
     }
 
-    public getAllPackets(): ParsedPacket[] {
-        return [...this.packets];
+    public async getAllPackets(): Promise<ParsedPacket[]> {
+        try {
+            await this.dbPromise;
+        } catch (e) {
+            console.error('IndexedDB init failed', e);
+            return [];
+        }
+        if (!this.db) return [];
+        const transaction = this.db.transaction(['packets'], 'readonly');
+        const store = transaction.objectStore('packets');
+        const request = store.getAll();
+        return new Promise((resolve, reject) => {
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
     }
 
-    public getPacketById(id: string): ParsedPacket | undefined {
-        return this.packets.find(p => p.id === id);
+    public async getPacketById(id: string): Promise<ParsedPacket | undefined> {
+        try {
+            await this.dbPromise;
+        } catch (e) {
+            console.error('IndexedDB init failed', e);
+            return undefined;
+        }
+        if (!this.db) return undefined;
+        const transaction = this.db.transaction(['packets'], 'readonly');
+        const store = transaction.objectStore('packets');
+        const request = store.get(id);
+        return new Promise((resolve, reject) => {
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
     }
 
-    public getAllFiles(): FileReference[] {
-        return [...this.files];
-    }
+    public async getAllFiles(): Promise<FileReference[]> {
+        try {
+            await this.dbPromise;
+        } catch (e) {
+            console.error('IndexedDB init failed', e);
+            return [];
+        }
+        if (!this.db) {
+            console.error('IndexedDB not initialized.');
+            return [];
+        }
+        const transaction = this.db.transaction(['fileReferences'], 'readonly');
+        const store = transaction.objectStore('fileReferences');
+        const request = store.getAll();
 
-    public getFileById(id: string): FileReference | undefined {
-        return this.files.find(f => f.id === id);
+        return new Promise((resolve, reject) => {
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
     }
+    public async getFileById(id: string): Promise<FileReference | undefined> {
+        try {
+            await this.dbPromise;
+        } catch (e) {
+            console.error('IndexedDB init failed', e);
+            return undefined;
+        }
+        if (!this.db) {
+            console.error('IndexedDB not initialized.');
+            return undefined;
+        }
+        const transaction = this.db.transaction(['fileReferences'], 'readonly');
+        const store = transaction.objectStore('fileReferences');
+        const request = store.get(id);
 
+        return new Promise((resolve, reject) => {
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
     public getAllPerformanceEntries(): PerformanceEntryData[] {
         return [...this.performanceEntries];
     }
@@ -162,7 +332,7 @@ class DatabaseService {
     // Forensic Case Management
     public storeForensicCase(forensicCase: ForensicCase): string {
         this.forensicCases.push(forensicCase);
-        this.saveToStorage();
+        this.saveNonFileDataToStorage();
         return forensicCase.id;
     }
 
@@ -170,7 +340,7 @@ class DatabaseService {
         const caseIndex = this.forensicCases.findIndex(c => c.id === caseId);
         if (caseIndex >= 0) {
             this.forensicCases[caseIndex] = { ...this.forensicCases[caseIndex], ...updates };
-            this.saveToStorage();
+            this.saveNonFileDataToStorage();
         }
     }
 
@@ -185,7 +355,7 @@ class DatabaseService {
     // Timeline Management
     public storeTimelineEvent(event: TimelineEvent): string {
         this.timelineEvents.push(event);
-        this.saveToStorage();
+        this.saveNonFileDataToStorage();
         return event.id;
     }
 
@@ -208,7 +378,7 @@ class DatabaseService {
     // Threat Intelligence
     public storeThreatIntelligence(threat: ThreatIntelligence): string {
         this.threatIntelligence.push(threat);
-        this.saveToStorage();
+        this.saveNonFileDataToStorage();
         return threat.id;
     }
 
@@ -223,7 +393,7 @@ class DatabaseService {
     }
 
     // Advanced Search for Forensic Analysis
-    public searchPacketsByForensicCriteria(criteria: {
+    public async searchPacketsByForensicCriteria(criteria: {
         sourceIp?: string;
         destIp?: string;
         protocol?: string;
@@ -232,8 +402,9 @@ class DatabaseService {
         containsString?: string;
         hasSuspiciousIndicators?: boolean;
         threatLevel?: string;
-    }): ParsedPacket[] {
-        return this.packets.filter(packet => {
+    }): Promise<ParsedPacket[]> {
+        const allPackets = await this.getAllPackets();
+        return allPackets.filter(packet => {
             if (criteria.sourceIp && !packet.sourceIP.includes(criteria.sourceIp)) return false;
             if (criteria.destIp && !packet.destIP.includes(criteria.destIp)) return false;
             if (criteria.protocol && packet.protocol !== criteria.protocol) return false;
@@ -250,9 +421,10 @@ class DatabaseService {
         });
     }
 
-    public searchPackets(query: string): ParsedPacket[] {
+    public async searchPackets(query: string): Promise<ParsedPacket[]> {
         const lowerQuery = query.toLowerCase();
-        return this.packets.filter(packet =>
+        const allPackets = await this.getAllPackets();
+        return allPackets.filter(packet =>
             new TextDecoder().decode(new Uint8Array(packet.rawData)).toLowerCase().includes(lowerQuery) ||
             packet.sourceIP.includes(lowerQuery) ||
             packet.destIP.includes(lowerQuery) ||
@@ -260,25 +432,43 @@ class DatabaseService {
         );
     }
 
-    public clearAllData(): void {
-        this.packets = [];
-        this.files = [];
+    public async clearAllData(): Promise<void> {
+        // this.packets = [];
         this.performanceEntries = [];
         this.forensicCases = [];
         this.timelineEvents = [];
         this.threatIntelligence = [];
-        this.saveToStorage();
+        this.captureSessions = []; // Also clear capture sessions
+
+        try {
+            await this.dbPromise;
+        } catch (e) {
+            console.error('IndexedDB init failed', e);
+        }
+
+        if (this.db) {
+            const transaction = this.db.transaction(['packets', 'fileReferences'], 'readwrite');
+            const fileStore = transaction.objectStore('fileReferences');
+            fileStore.clear();
+            const packetStore = transaction.objectStore('packets');
+            packetStore.clear();
+            await new Promise((resolve, reject) => {
+                transaction.oncomplete = () => resolve(undefined);
+                transaction.onerror = () => reject(transaction.error);
+            });
+        }
+        this.saveNonFileDataToStorage();
     }
 
     public clearPerformanceEntries(): void {
         this.performanceEntries = [];
-        this.saveToStorage();
+        this.saveNonFileDataToStorage();
     }
 
     // Capture Session Management
     public storeCaptureSession(session: CaptureSession): void {
         this.captureSessions.push(session);
-        this.saveToStorage();
+        this.saveNonFileDataToStorage();
     }
 
     public getCaptureSession(id: string): CaptureSession | undefined {

@@ -34,7 +34,7 @@ const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketI
                 p.sourceIP.toLowerCase().includes(lowerTerm) ||
                 p.destIP.toLowerCase().includes(lowerTerm) ||
                 p.protocol.toLowerCase().includes(lowerTerm) ||
-                p.detectedProtocols?.some(dp => dp.toLowerCase().includes(lowerTerm)) ||
+                p.detectedProtocols?.some((dp: string) => dp.toLowerCase().includes(lowerTerm)) ||
                 (p.rawData && new TextDecoder().decode(new Uint8Array(p.rawData)).toLowerCase().includes(lowerTerm))
             );
         }
@@ -54,10 +54,10 @@ const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketI
         setFilteredPackets(result);
     };
 
-    const handleDeletePacket = (id: string, e: React.MouseEvent) => {
+    const handleDeletePacket = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
         if (window.confirm('Are you sure you want to delete this packet?')) {
-            database.deletePacket(id);
+            await database.deletePacket(id);
             onPacketSelect(null); // Clear selected packet in parent
             onPacketDeleted?.(); // Notify parent that a packet was deleted
         }
@@ -131,7 +131,7 @@ const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketI
                         >
                             <div className="flex justify-between items-center mb-1">
                                 <div className="flex items-center gap-2">
-                                    {packet.detectedProtocols?.map(proto => (
+                                    {packet.detectedProtocols?.map((proto: string) => (
                                         <Badge key={proto} variant="outline" className={`text-[10px] font-bold px-1.5 py-0.5 ${proto === 'HTTP' || proto === 'HTTPS' ? 'bg-emerald-500/10 text-emerald-500' :
                                             proto === 'TCP' ? 'bg-blue-500/10 text-blue-500' :
                                                 proto === 'UDP' ? 'bg-orange-500/10 text-orange-500' :

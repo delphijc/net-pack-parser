@@ -1,0 +1,210 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1-9-file-reference-detection-download</storyId>
+    <title>File Reference Detection &amp; Download</title>
+    <status>drafted</status>
+    <generatedAt>Friday, November 28, 2025</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-9-file-reference-detection-download.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>forensic analyst</asA>
+    <iWant>to detect and extract files referenced in network traffic</iWant>
+    <soThat>I can analyze transmitted files for evidence or malware.</soThat>
+    <tasks>
+<task id="1" estimated-time="1.0 days">
+  <description>Data Model &amp; Storage Foundation</description>
+  <subtask id="1.1" estimated-time="0.25 days">
+    <description>**Define `FileReference` Interface**</description>
+    <details>
+      <item>**Task**: Create `client/src/types/fileReference.ts` and define the `FileReference` interface, including `id`, `filename`, `size`, `mimeType`, `sourcePacketId`, `data` (as `ArrayBuffer` or `Blob`), `sha256Hash`, `md5Hash` (optional). (Ref: `tech-spec-epic-1.md` Data Models)</item>
+      <item>**Subtask**: Integrate `FileReference` into the `Packet` interface (e.g., `packet.fileReferences?: FileReference[]`) or establish a separate IndexedDB store for `FileReference` objects, linking them by `sourcePacketId`.</item>
+    </details>
+  </subtask>
+  <subtask id="1.2" estimated-time="0.75 days">
+    <description>**IndexedDB Integration for `FileReference`**</description>
+    <details>
+      <item>**Task**: Implement or extend IndexedDB service (e.g., `client/src/services/indexedDb.ts`) to manage `FileReference` objects.</item>
+      <item>**Subtask**: Ensure efficient storage and retrieval of potentially large `Blob` data. (Ref: `architecture.md` IndexedDB for extracted files)</item>
+    </details>
+  </subtask>
+</task>
+<task id="2" estimated-time="3.0 days">
+  <description>File Detection &amp; Stream Reassembly Logic</description>
+  <subtask id="2.1" estimated-time="0.5 days">
+    <description>**Create `client/src/utils/fileExtractor.ts`**</description>
+    <details>
+      <item>**Task**: Scaffold the main utility for file extraction.</item>
+      <item>**Subtask**: Define core functions like `detectFileReferences(packet: Packet, rawData: Uint8Array)` and `reassembleFile(packets: Packet[], fileReference: FileReference)`.</item>
+    </details>
+  </subtask>
+  <subtask id="2.2" estimated-time="1.0 days">
+    <description>**Implement HTTP File Detection**</description>
+    <details>
+      <item>**Task**: Within `fileExtractor.ts`, implement logic to detect HTTP file transfers.</item>
+      <item>**Subtask**: Parse HTTP headers (`Content-Disposition`, `Content-Type`) from reassembled HTTP responses. (Ref: AC 1)</item>
+      <item>**Subtask**: Handle common HTTP content types (`application/*`, `image/*`, `video/*`, `audio/*`).</item>
+    </details>
+  </subtask>
+  <subtask id="2.3" estimated-time="1.0 days">
+    <description>**Implement FTP File Detection**</description>
+    <details>
+      <item>**Task**: Within `fileExtractor.ts`, implement logic to detect FTP file transfers.</item>
+      <item>**Subtask**: Track FTP control channel commands (`STOR`, `RETR`) and correlate with data channel traffic. (Ref: AC 1)</item>
+    </details>
+  </subtask>
+  <subtask id="2.4" estimated-time="0.5 days">
+    <description>**TCP Stream Reassembly**</description>
+    <details>
+      <item>**Task**: Implement or integrate logic to reassemble TCP streams for accurate HTTP/FTP payload analysis, handling fragmented packets. (Ref: `requirements_context_summary.md` Technical Notes)</item>
+      <item>**Subtask**: Consider leveraging or extending existing `pcapParser.ts` capabilities or creating a dedicated `tcpStreamReassembler.ts` utility, potentially as a Web Worker.</item>
+    </details>
+  </subtask>
+</task>
+<task id="3" estimated-time="1.0 days">
+  <description>Hashing and Chain of Custody Integration</description>
+  <subtask id="3.1" estimated-time="0.5 days">
+    <description>**Integrate SHA-256 Hashing**</description>
+    <details>
+      <item>**Task**: After file reassembly, generate `SHA-256` hash of the reconstructed file data using `Web Crypto API`. (Ref: AC 4, `architecture.md` Security)</item>
+      <item>**Subtask**: Store the hash in the `FileReference` object.</item>
+    </details>
+  </subtask>
+  <subtask id="3.2" estimated-time="0.5 days">
+    <description>**Update Chain of Custody Log**</description>
+    <details>
+      <item>**Task**: Integrate with the existing Chain of Custody logging mechanism (from Story 1.5).</item>
+      <item>**Subtask**: Create a new log entry for "File Downloaded" action, including file metadata and `SHA-256` hash upon user download. (Ref: AC 5)</item>
+    </details>
+  </subtask>
+</task>
+<task id="4" estimated-time="2.0 days">
+  <description>UI Component Development</description>
+  <subtask id="4.1" estimated-time="1.0 days">
+    <description>**Create `client/src/components/FilesTab.tsx`**</description>
+    <details>
+      <item>**Task**: Develop a new React component to display detected file references.</item>
+      <item>**Subtask**: Display filename, size, MIME type, source IP, timestamp, and SHA-256 hash. (Ref: AC 2, AC 4)</item>
+      <item>**Subtask**: Include a "Download" button for each file.</item>
+    </details>
+  </subtask>
+  <subtask id="4.2" estimated-time="0.5 days">
+    <description>**Integrate `FilesTab` into `PacketDetailView`**</description>
+    <details>
+      <item>**Task**: Add `FilesTab.tsx` as a new tab within the `PacketDetailView.tsx` component, alongside existing tabs (e.g., "Hex Dump", "Extracted Strings").</item>
+    </details>
+  </subtask>
+  <subtask id="4.3" estimated-time="0.5 days">
+    <description>**Implement File Download Trigger**</description>
+    <details>
+      <item>**Task**: Connect the "Download" button in `FilesTab.tsx` to a function that retrieves the `Blob` data from IndexedDB and triggers a browser download.</item>
+    </details>
+  </subtask>
+</task>
+<task id="5" estimated-time="0.5 days">
+  <description>Integration with PCAP Parsing Workflow</description>
+  <subtask id="5.1" estimated-time="0.5 days">
+    <description>**Modify `client/src/services/pcapParser.ts`**</description>
+    <details>
+      <item>**Task**: After initial packet parsing, iterate through packets and invoke `fileExtractor.ts` to detect file references.</item>
+      <item>**Subtask**: Persist detected `FileReference` objects to IndexedDB and link them to their respective packets.</item>
+      <item>**Subtask**: Consider integrating `fileExtractor.ts` as a Web Worker for performance. (Ref: `requirements_context_summary.md` Performance)</item>
+    </details>
+  </subtask>
+</task>
+<task id="6" estimated-time="1.0 days">
+  <description>Testing</description>
+  <subtask id="6.1" estimated-time="0.5 days">
+    <description>**Unit Tests for `fileExtractor.ts`**</description>
+    <details>
+      <item>**Task**: Write comprehensive unit tests for HTTP header parsing, FTP command correlation, and TCP stream reassembly logic.</item>
+      <item>**Subtask**: Test with various mock HTTP/FTP packet sequences, including fragmented and out-of-order scenarios.</item>
+      <item>**Subtask**: Test edge cases (malformed headers, zero-byte files).</item>
+    </details>
+  </subtask>
+  <subtask id="6.2" estimated-time="0.25 days">
+    <description>**Component Tests for `FilesTab.tsx`**</description>
+    <details>
+      <item>**Task**: Test rendering of file lists with different file types and metadata.</item>
+      <item>**Subtask**: Test interaction with the "Download" button.</item>
+    </details>
+  </subtask>
+  <subtask id="6.3" estimated-time="0.25 days">
+    <description>**Integration/E2E Tests**</description>
+    <details>
+      <item>**Task**: Create an integration test (using a small, known PCAP file with HTTP/FTP transfers) to verify the end-to-end flow: upload, detection, display in UI, successful download, and correct hash generation.</item>
+      <item>**Subtask**: Verify that chain of custody log is correctly updated.</item>
+    </details>
+  </subtask>
+</task>
+<task id="7" estimated-time="0.5 days">
+  <description>Documentation</description>
+  <subtask id="7.1" estimated-time="0.25 days">
+    <description>**Update `README.md`**</description>
+    <details>
+      <item>**Task**: Add a brief description of the new "File Reference Detection &amp; Download" feature.</item>
+    </details>
+  </subtask>
+  <subtask id="7.2" estimated-time="0.25 days">
+    <description>**Inline Code Comments &amp; JSDoc**</description>
+    <details>
+      <item>**Task**: Add comments to complex logic in `fileExtractor.ts`, `FilesTab.tsx`, and modified parsing services.</item>
+    </details>
+  </subtask>
+</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+<acceptance-criteria id="1">
+  <description>**Detection of File Transfers (Core Logic)**
+    *   **Given** HTTP and FTP traffic exists in captured packets
+    *   **When** the system analyzes packet payloads
+    *   **Then** it detects file transfers by:
+        *   HTTP `Content-Disposition` headers containing filenames
+        *   HTTP responses with relevant `Content-Type`s (e.g., `application/*`, `image/*`, `video/*`, `audio/*`, etc.)
+        *   FTP file transfer commands (`STOR`, `RETR`) on both control and data channels</description>
+</acceptance-criteria>
+<acceptance-criteria id="2">
+  <description>**Display of Detected Files (UI)**
+    *   **And** detected files are listed in a dedicated "Files" tab within the packet detail view,
+    *   **And** each listed file entry displays:
+        *   Filename
+        *   Size (in human-readable format)
+        *   MIME type
+        *   Source IP (of the server serving the file)
+        *   Timestamp (of the first packet in the file transfer)</description>
+</acceptance-criteria>
+<acceptance-criteria id="3">
+  <description>**Local File Download (User Action)**
+    *   **And** I can click a "Download" button next to each listed file,
+    *   **And** upon clicking, the system reconstructs the file from the packet stream and initiates a local download to my machine.</description>
+</acceptance-criteria>
+<acceptance-criteria id="4">
+  <description>**File Integrity Hashing (Forensic Requirement)**
+    *   **And** for each reconstructed file, the system automatically generates an `SHA-256` hash for integrity verification.
+    *   **And** this `SHA-256` hash is displayed alongside the file's metadata in the "Files" tab.</description>
+</acceptance-criteria>
+<acceptance-criteria id="5">
+  <description>**Chain of Custody Integration (Forensic Requirement)**
+    *   **And** each successful file download automatically creates a new entry in the Chain of Custody log (as established in Story 1.5),
+    *   **And** this log entry includes: action ("File Downloaded"), filename, size, MIME type, `SHA-256` hash, and timestamp.</description>
+</acceptance-criteria>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs></docs>
+    <code></code>
+    <dependencies></dependencies>
+  </artifacts>
+
+  <constraints></constraints>
+  <interfaces></interfaces>
+  <tests>
+    <standards></standards>
+    <locations></locations>
+    <ideas></ideas>
+  </tests>
+</story-context>

@@ -1,0 +1,270 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>epic-2</epicId>
+    <storyId>2-1-bpf-filter-engine</storyId>
+    <title>BPF Filter Engine</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/home/jaysoncavendish/net-pack-parser/docs/stories/2-1-bpf-filter-engine.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>As a security analyst,</asA>
+    <iWant>I want to apply Berkeley Packet Filter (BPF) syntax to filter packets,</iWant>
+    <soThat>so that I can use industry-standard filtering expressions I already know.</soThat>
+    <tasks>
+        <task id="1.1" description="Research BPF Parser Libraries (0.5 days)">
+            <subtask description="Investigate existing JavaScript BPF parser libraries (e.g., `bpf.js`, `pcap-parser`'s internal BPF logic) or specifications for implementing a custom one." references="epics.md Technical Notes, architecture.md BPF Filtering" />
+            <subtask description="Evaluate pros/cons of using an existing library vs. custom implementation based on project conventions (lightweight, modularity, TypeScript compatibility)." />
+        </task>
+        <task id="1.2" description="Create client/src/utils/bpfFilter.ts (1.0 day)">
+            <subtask description="Implement the core BPF parsing and validation logic." />
+            <subtask description="Support common BPF primitives: `host`, `net`, `port`, `tcp`, `udp`, `icmp`, `src`, `dst`." />
+            <subtask description="Support boolean operators: `and`, `or`, `not`." />
+            <subtask description="Implement syntax validation that returns clear error messages for invalid expressions (AC 3, AC 6)." />
+        </task>
+        <task id="1.3" description="Implement BPF Matching Logic (1.0 day)">
+            <subtask description="Develop a function within `bpfFilter.ts` that takes a parsed BPF expression and a `Packet` object, returning `true` if the packet matches the filter, `false` otherwise." references="AC 4, AC 7" />
+            <subtask description="Ensure correct matching for various filter types (IP addresses, port ranges, protocols)." />
+            <subtask description="Integrate with `Packet` interface for efficient access to packet metadata." />
+        </task>
+        <task id="2.1" description="Create client/src/components/FilterBar.tsx (1.0 day)">
+            <subtask description="Develop a new React component for the BPF filter input field and status display." references="AC 2" />
+            <subtask description="Include an input field for BPF expressions." />
+            <subtask description="Display filter status (e.g., 'Showing X of Y packets') (AC 5)." />
+            <subtask description="Display inline error messages for invalid BPF syntax (AC 6)." />
+            <subtask description="Implement a 'Clear Filter' button (AC 8)." />
+            <subtask description="Use `shadcn/ui` components for styling (Input, Button, Alert for errors)." />
+        </task>
+        <task id="2.2" description="Integrate FilterBar.tsx into PcapAnalysisPage.tsx (0.5 days)">
+            <subtask description="Place the `FilterBar` component prominently on the PCAP Analysis page." />
+            <subtask description="Establish state management for the BPF expression and filter results (e.g., using Zustand)." />
+        </task>
+        <task id="2.3" description="Filter Packet List Display (0.5 days)">
+            <subtask description="Modify `client/src/components/PacketList.tsx` to receive a filtered list of packets and display them." references="AC 4" />
+            <subtask description="Update the displayed packet count to reflect the filtered results (AC 5)." />
+        </task>
+        <task id="3.1" description="Apply Filter to Loaded Packets (0.5 days)">
+            <subtask description="In the `PcapAnalysisPage.tsx` or a dedicated service, apply the `bpfFilter.ts` matching logic to the currently loaded packets whenever the BPF expression changes." references="AC 1, AC 4" />
+            <subtask description="Ensure filtering is performed in-memory efficiently." references="epics.md Technical Notes" />
+            <subtask description="Manage the state of filtered packets and pass them down to `PacketList.tsx`." />
+        </task>
+        <task id="4.1" description="Unit Tests for bpfFilter.ts (0.5 days)">
+            <subtask description="Write comprehensive unit tests for BPF parsing, validation, and matching logic." references="architecture.md Testing" />
+            <subtask description="Test valid BPF expressions (`tcp port 80`, `host 1.2.3.4`, `src net 10.0.0.0/8 and not port 22`)." />
+            <subtask description="Test invalid BPF expressions (syntax errors, unknown primitives)." />
+            <subtask description="Test edge cases (empty filter, very long filter)." />
+        </task>
+        <task id="4.2" description="Component Tests for FilterBar.tsx (0.25 days)">
+            <subtask description="Write component tests using React Testing Library." references="architecture.md Testing" />
+            <subtask description="Verify input changes, error message display, and 'Clear Filter' button functionality." />
+            <subtask description="Simulate valid and invalid filter submissions." />
+        </task>
+        <task id="4.3" description="E2E Tests for BPF Filtering (0.25 days)">
+            <subtask description="Create an E2E test using Playwright." references="architecture.md Testing" />
+            <subtask description="Upload a PCAP file (Story 1.4 prerequisite)." />
+            <subtask description="Enter a valid BPF filter and verify that the packet list updates correctly and the status message is accurate." />
+            <subtask description="Enter an invalid BPF filter and verify the error message is displayed." />
+            <subtask description="Clear the filter and verify all packets are shown again." />
+        </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1" description="Given packets are loaded in the application" />
+    <criterion id="2" description="When I enter a BPF filter expression in the filter input (e.g., 'tcp port 443')" />
+    <criterion id="3" description="Then the system validates the BPF syntax" />
+    <criterion id="4" description="And if valid, applies the filter and shows only matching packets" />
+    <criterion id="5" description="And displays filter status: 'Showing X of Y packets (filtered by: tcp port 443)'" />
+    <criterion id="6" description="And if invalid syntax, shows error inline: 'Invalid BPF syntax near 'port''" />
+    <criterion id="7" description="And common BPF filters work correctly: tcp port 443, host 192.168.1.1, src net 10.0.0.0/8, tcp and not port 22" />
+    <criterion id="8" description="And I can clear the filter with one click" />
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>docs/prd.md</path>
+        <title>Product Requirements Document: Network Traffic Parser</title>
+        <section>Packet Filtering &amp; Search</section>
+        <snippet>Users can filter packets using BPF (Berkeley Packet Filter) syntax</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Decision Summary</section>
+        <snippet>BPF Filter Engine, multi-criteria search, all client-side</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Technology Stack Details - Core Technologies - Frontend - BPF Filtering</section>
+        <snippet>Custom implementation (JavaScript BPF parser)</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Epic to Architecture Mapping - Epic 2</section>
+        <snippet>client/src/utils/bpfFilter.ts, client/src/components/FilterBar.tsx, search logic in PacketList.tsx</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/epics.md</path>
+        <title>Network Traffic Parser - Epic Breakdown</title>
+        <section>Epic 2: Search, Filter &amp; Basic Analysis</section>
+        <snippet>Goal: Provide powerful search and filtering capabilities for efficient packet analysis.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/epics.md</path>
+        <title>Network Traffic Parser - Epic Breakdown</title>
+        <section>Story 2.1: BPF Filter Engine</section>
+        <snippet>As a security analyst, I want to apply Berkeley Packet Filter (BPF) syntax to filter packets, So that I can use industry-standard filtering expressions I already know.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/ux-design-specification.md</path>
+        <title>Network Traffic Parser UX Design Specification</title>
+        <section>Component Library - Key Components to Build</section>
+        <snippet>FilterBar: Complex input with syntax highlighting for BPF/Wireshark-style queries.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/ux-design-specification.md</path>
+        <title>Network Traffic Parser UX Design Specification</title>
+        <section>Responsive Design &amp; Accessibility - Responsive Strategy</section>
+        <snippet>Full 'Cockpit' view. Multiple panels open (Stream + Details + Graph).</snippet>
+      </artifact>
+      <artifact>
+        <path>README.md</path>
+        <title>Network Traffic Parser</title>
+        <section>Key Features - Network Traffic Analysis</section>
+        <snippet>BPF Rule Engine for packet filtering.</snippet>
+      </artifact>
+    </docs>
+    <code>
+      <artifact>
+        <path>client/src/utils/bpfFilter.ts</path>
+        <kind>utility</kind>
+        <symbol>BPF Filter Engine</symbol>
+        <reason>New file for BPF parsing, validation, and packet matching logic.</reason>
+      </artifact>
+      <artifact>
+        <path>client/src/components/FilterBar.tsx</path>
+        <kind>component</kind>
+        <symbol>FilterBar Component</symbol>
+        <reason>New UI component for BPF filter input, status display, and clear button.</reason>
+      </artifact>
+      <artifact>
+        <path>client/src/components/PacketList.tsx</path>
+        <kind>component</kind>
+        <symbol>PacketList Component</symbol>
+        <reason>Modification to remove internal filtering logic, now receives pre-filtered packets.</reason>
+      </artifact>
+      <artifact>
+        <path>client/src/pages/PcapAnalysisPage.tsx</path>
+        <kind>page</kind>
+        <symbol>PcapAnalysisPage</symbol>
+        <reason>Modification to integrate FilterBar, manage BPF filter state, and apply BPF filtering to displayed packets.</reason>
+      </artifact>
+      <artifact>
+        <path>client/src/types/packet.ts</path>
+        <kind>type definition</kind>
+        <symbol>ParsedPacket</symbol>
+        <reason>Potentially add BpfAST type definition if needed for internal representation of parsed BPF.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <category name="Frontend Runtime">
+        <package name="react" version="^19.2.0" />
+        <package name="react-dom" version="^19.2.0" />
+      </category>
+      <category name="Build Tools">
+        <package name="vite" version="^7.2.4" />
+        <package name="typescript" version="~5.9.3" />
+      </category>
+      <category name="Styling">
+        <package name="tailwindcss" version="^4.1.17" />
+        <package name="postcss" version="^10.4.22" />
+        <package name="autoprefixer" version="^10.4.22" />
+        <package name="shadcn/ui" version="latest" />
+      </category>
+      <category name="State Management (UI)">
+        <package name="zustand" version="4.x" />
+      </category>
+      <category name="State Management (Server/Async)">
+        <package name="tanstack-query" version="5.x" />
+      </category>
+      <category name="Core Libraries">
+        <package name="pcap-decoder" version="^1.0.3" />
+        <package name="crypto-js" version="^4.2.0" />
+        <package name="lucide-react" version="^0.554.0" />
+        <package name="recharts" version="^3.5.0" />
+      </category>
+      <category name="Testing">
+        <package name="vitest" version="^4.0.13" />
+        <package name="@testing-library/react" version="^16.3.0" />
+        <package name="@testing-library/jest-dom" version="^6.9.1" />
+        <package name="@testing-library/user-event" version="^14.6.1" />
+        <package name="@playwright/test" version="^1.45.3" />
+      </category>
+      <category name="Linting/Formatting">
+        <package name="eslint" version="^9.39.1" />
+        <package name="prettier" version="^3.6.2" />
+      </category>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>BPF Filtering: Custom implementation (JavaScript BPF parser) will be used.</constraint>
+    <constraint>Component Placement: Core BPF parsing logic in `client/src/utils/bpfFilter.ts`, UI in `client/src/components/FilterBar.tsx`. Search logic will integrate with `PacketList.tsx`.</constraint>
+    <constraint>Technology Stack: Frontend must continue to use React, TypeScript, Vite, Tailwind CSS, and shadcn/ui.</constraint>
+    <constraint>Performance: Filtering operations should be applied in-memory and syntax validated pre-emptively to maintain responsiveness.</constraint>
+    <constraint>Testing: Adherence to Vitest (unit), React Testing Library (component), and Playwright (E2E) testing stack.</constraint>
+  </constraints>
+  <interfaces>
+    <interface>
+      <name>PacketListProps</name>
+      <kind>React Component Props</kind>
+      <signature>interface PacketListProps { onPacketSelect: (packet: ParsedPacket | null) => void; selectedPacketId: string | null; packets: ParsedPacket[]; onClearAllPackets: () => void; selectedProtocol?: string; onPacketDeleted?: () => void; }</signature>
+      <path>client/src/components/PacketList.tsx</path>
+    </interface>
+    <interface>
+      <name>ParsedPacket</name>
+      <kind>Data Structure</kind>
+      <signature>interface ParsedPacket { id: string; timestamp: number; sourceIP: string; destIP: string; sourcePort: number; destPort: number; protocol: string; length: number; rawData: ArrayBuffer; flags?: string[]; sessionId?: string; extractedStrings?: ExtractedString[]; fileReferences?: FileReference[]; detectedProtocols: string[]; portBasedProtocol?: string; deepInspectionProtocol?: string; }</signature>
+      <path>client/src/types/packet.ts</path>
+    </interface>
+    <interface>
+      <name>BPF Filter Functions</name>
+      <kind>Function Signatures</kind>
+      <signature>parseBpfFilter(expression: string): BpfAST; validateBpfFilter(expression: string): { isValid: boolean, error?: string }; matchBpfFilter(packet: ParsedPacket, ast: BpfAST): boolean;</signature>
+      <path>client/src/utils/bpfFilter.ts</path>
+    </interface>
+    <interface>
+      <name>FilterBarProps</name>
+      <kind>React Component Props</kind>
+      <signature>interface FilterBarProps { onFilterChange: (filter: string) => void; onClearFilter: () => void; errorMessage?: string; packetCount: number; totalPacketCount: number; }</signature>
+      <path>client/src/components/FilterBar.tsx</path>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>
+      <standard>Unit tests using Vitest for `bpfFilter.ts` covering parsing, validation, and matching logic.</standard>
+      <standard>Component tests using React Testing Library for `FilterBar.tsx` verifying UI interactions, error display, and button functionality.</standard>
+      <standard>E2E tests using Playwright for the end-to-end BPF filtering flow, including PCAP upload, valid/invalid filter entry, and filter clearing.</standard>
+    </standards>
+    <locations>
+      <location>Unit tests: `client/src/utils/bpfFilter.test.ts`</location>
+      <location>Component tests: `client/src/components/FilterBar.test.tsx`</location>
+      <location>E2E tests: `tests/e2e/bpf-filtering.spec.ts`</location>
+    </locations>
+    <ideas>
+      <idea>Unit: Test valid BPF expressions (e.g., "tcp port 80", "host 1.2.3.4", "src net 10.0.0.0/8 and not port 22").</idea>
+      <idea>Unit: Test invalid BPF expressions (e.g., syntax errors, unknown primitives).</idea>
+      <idea>Unit: Test edge cases (empty filter, very long filter).</idea>
+      <idea>Component: Verify `FilterBar` input changes, error message display, and "Clear Filter" button functionality.</idea>
+      <idea>Component: Simulate valid and invalid filter submissions for `FilterBar`.</idea>
+      <idea>E2E: Upload a PCAP file, enter a valid BPF filter, and verify that the packet list updates correctly and the status message is accurate (AC 4, AC 5).</idea>
+      <idea>E2E: Enter an invalid BPF filter and verify the error message is displayed (AC 6).</idea>
+      <idea>E2E: Clear the filter and verify all packets are shown again (AC 8).</idea>
+    </ideas>
+  </tests>
+</story-context>

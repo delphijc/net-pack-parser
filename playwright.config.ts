@@ -21,7 +21,7 @@ export default defineConfig({
     navigationTimeout: 30 * 1000, // Navigation timeout: 30s
   },
 
-  reporter: [['html', { outputFolder: 'test-results/html' }], ['junit', { outputFile: 'test-results/junit.xml' }], ['list']],
+  reporter: [['html', { outputFolder: 'playwright-report' }], ['junit', { outputFile: 'test-results/junit.xml' }], ['list']],
 
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },

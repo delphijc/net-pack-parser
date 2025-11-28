@@ -230,3 +230,11 @@ This epic will primarily use browser-native APIs:
 - (Story 1.7) [Low] Monitor performance of regex matching on extremely large packets; if issues arise, consider chunking the payload or optimizing regexes. (Advisory Note)
 - (Story 1.7) [Low] For the "Extracted Strings" table, if the number of strings is very large (>1000), consider implementing virtual scrolling. (Advisory Note)
 
+- (Story 1.9) [Critical] Fix Data Persistence Bug: `saveNonFileDataToStorage` in `database.ts` stores `ArrayBuffer` in `localStorage`. [file: `client/src/services/database.ts`]
+- (Story 1.9) [High] Implement Full FTP File Reassembly: Extend `fileExtractor.ts` to handle FTP data channel reassembly. [file: `client/src/utils/fileExtractor.ts`]
+- (Story 1.9) [High] Add Component Tests for `FilesTab.tsx`. [file: `client/src/components/FilesTab.test.tsx`]
+- (Story 1.9) [High] Add Integration/E2E Tests for file download flow. [file: `tests/e2e/app.spec.ts`]
+- (Story 1.9) [Medium] Improve `reassembleFile` performance (optimize concatenation or Web Worker). [file: `client/src/utils/fileExtractor.ts`]
+- (Story 1.9) [Medium] Improve `FilesTab.tsx` UX/Error Handling. [file: `client/src/components/FilesTab.tsx`]
+- (Story 1.9) [Low] Log `parseHttpHeaders` errors. [file: `client/src/utils/fileExtractor.ts`]
+- (Story 1.9) [Low] Refine `FilesTab.tsx` Chain of Custody typing. [file: `client/src/components/FilesTab.tsx`]

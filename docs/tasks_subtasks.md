@@ -1,61 +1,66 @@
-#### 1. Data Model Enhancement (0.5 days)
+# Tasks / Subtasks: Story 2.1 - BPF Filter Engine
 
-*   [ ] **1.1. Update `Packet` Interface:**
-    *   Modify `client/src/types/packet.ts` to include a `detectedProtocols: string[]` field to store a list of detected protocols (e.g., ["TCP", "HTTP"]).
-    *   Consider adding `portBasedProtocol: string` and `deepInspectionProtocol: string` for more granular control if required by further analysis.
+#### Overall Goal: Implement a client-side Berkeley Packet Filter (BPF) engine for real-time packet filtering within the application.
 
-#### 2. Protocol Detection Logic Development (2.5 days)
+#### Estimated Time: 6 days
 
-*   [ ] **2.1. Create `client/src/utils/protocolDetector.ts`:**
-    *   Develop a core function `detectProtocols(packet: Packet, payload: Uint8Array)` that returns `string[]`.
-*   [ ] **2.2. Implement Port-Based Heuristics:**
-    *   Add logic to identify common protocols based on source and destination port numbers (e.g., HTTP on 80/8080, HTTPS on 443, DNS on 53, FTP on 20/21, SSH on 22, Telnet on 23, SMTP on 25, POP3 on 110, IMAP on 143, RDP on 3389).
-*   [ ] **2.3. Implement IP Header Protocol Field Detection:**
-    *   Extract protocol from the IP header (e.g., 6 for TCP, 17 for UDP, 1 for ICMP).
-*   [ ] **2.4. Implement Basic Deep Packet Inspection (DPI) for HTTP:**
-    *   Examine the start of the payload for "GET ", "POST ", "HTTP/1.1", etc., to confirm HTTP traffic, especially on non-standard ports.
-*   [ ] **2.5. Implement Basic DPI for DNS:**
-    *   Identify DNS query/response patterns in UDP packets on port 53.
-*   [ ] **2.6. Handle Uncertain Detection:**
-    *   If no specific protocol is confidently detected, classify as "Unknown" or combine with port number (e.g., "Unknown (Port 12345)").
+## 1. BPF Parser & Validator Implementation (2.5 days)
 
-#### 3. Integration with PCAP Parsing & Data Persistence (1 day)
+*   [ ] **1.1. Research BPF Parser Libraries (0.5 days)**
+    *   **Task**: Investigate existing JavaScript BPF parser libraries (e.g., `bpf.js`, `pcap-parser`'s internal BPF logic) or specifications for implementing a custom one. (Ref: `epics.md` Technical Notes, `architecture.md` BPF Filtering)
+    *   **Subtask**: Evaluate pros/cons of using an existing library vs. custom implementation based on project conventions (lightweight, modularity, TypeScript compatibility).
+*   [ ] **1.2. Create `client/src/utils/bpfFilter.ts` (1.0 day)**
+    *   **Task**: Implement the core BPF parsing and validation logic.
+    *   **Subtask**: Support common BPF primitives: `host`, `net`, `port`, `tcp`, `udp`, `icmp`, `src`, `dst`.
+    *   **Subtask**: Support boolean operators: `and`, `or`, `not`.
+    *   **Subtask**: Implement syntax validation that returns clear error messages for invalid expressions (AC 3, AC 6).
+*   [ ] **1.3. Implement BPF Matching Logic (1.0 day)**
+    *   **Task**: Develop a function within `bpfFilter.ts` that takes a parsed BPF expression and a `Packet` object, returning `true` if the packet matches the filter, `false` otherwise. (AC 4, AC 7)
+    *   **Subtask**: Ensure correct matching for various filter types (IP addresses, port ranges, protocols).
+    *   **Subtask**: Integrate with `Packet` interface for efficient access to packet metadata.
 
-*   [ ] **3.1. Modify `client/src/services/pcapParser.ts`:**
-    *   After initial parsing, pass each `Packet` object and its `rawData` to `protocolDetector.ts`.
-    *   Store the returned `detectedProtocols` array in the `Packet` object before persisting to IndexedDB.
+## 2. UI Component Development & Integration (2.0 days)
 
-#### 4. UI Component: Protocol Filter & Display (2 days)
+*   [ ] **2.1. Create `client/src/components/FilterBar.tsx` (1.0 day)**
+    *   **Task**: Develop a new React component for the BPF filter input field and status display. (AC 2)
+    *   **Subtask**: Include an input field for BPF expressions.
+    *   **Subtask**: Display filter status (e.g., "Showing X of Y packets") (AC 5).
+    *   **Subtask**: Display inline error messages for invalid BPF syntax (AC 6).
+    *   **Subtask**: Implement a "Clear Filter" button (AC 8).
+    *   **Subtask**: Use `shadcn/ui` components for styling (Input, Button, Alert for errors).
+*   [ ] **2.2. Integrate `FilterBar.tsx` into `PcapAnalysisPage.tsx` (0.5 days)**
+    *   **Task**: Place the `FilterBar` component prominently on the PCAP Analysis page.
+    *   **Subtask**: Establish state management for the BPF expression and filter results (e.g., using Zustand).
+*   [ ] **2.3. Filter Packet List Display (0.5 days)**
+    *   **Task**: Modify `client/src/components/PacketList.tsx` to receive a filtered list of packets and display them. (AC 4)
+    *   **Subtask**: Update the displayed packet count to reflect the filtered results (AC 5).
 
-*   [ ] **4.1. Create a Protocol Filter Component:**
-    *   Develop a React component (e.g., `client/src/components/ProtocolFilter.tsx`) with a dropdown or checkboxes to allow users to select protocols for filtering.
-    *   This component will need to obtain the list of unique detected protocols from the loaded packets.
-*   [ ] **4.2. Integrate Protocol Filter into Main UI:**
-    *   Add `ProtocolFilter.tsx` to the `PCAPAnalysisPage.tsx` or a relevant parent component to allow filtering of the `PacketList`.
-*   [ ] **4.3. Update `PacketList` Display:**
-    *   Modify `PacketList.tsx` to display the `detectedProtocols` for each packet, possibly as badges or a column.
-*   [ ] **4.4. Create Protocol Distribution Chart Component:**
-    *   Develop a React component (e.g., `client/src/components/ProtocolDistributionChart.tsx`) using Recharts to display a pie or bar chart showing the breakdown of detected protocols.
-    *   Integrate this chart into the main analysis dashboard.
+## 3. Integration with Packet Data (0.5 days)
 
-#### 5. Testing (2 days)
+*   [ ] **3.1. Apply Filter to Loaded Packets (0.5 days)**
+    *   **Task**: In the `PcapAnalysisPage.tsx` or a dedicated service, apply the `bpfFilter.ts` matching logic to the currently loaded packets whenever the BPF expression changes. (AC 1, AC 4)
+    *   **Subtask**: Ensure filtering is performed in-memory efficiently. (Ref: `epics.md` Technical Notes)
+    *   **Subtask**: Manage the state of filtered packets and pass them down to `PacketList.tsx`.
 
-*   [ ] **5.1. Unit Tests for `client/src/utils/protocolDetector.ts`:**
-    *   Write tests for `detectProtocols` covering various scenarios:
-        *   Standard HTTP/HTTPS/DNS/FTP/SSH traffic (port-based).
-        *   TCP/UDP/ICMP traffic (IP header field).
-        *   HTTP/DNS deep packet inspection on non-standard ports.
-        *   Malicious or ambiguous packets to ensure "Unknown" classification.
-        *   Edge cases (empty payload, very short packets).
-*   [ ] **5.2. Component Tests for `ProtocolFilter.tsx`:**
-    *   Test rendering with different sets of available protocols.
-    *   Test filter selection and event emission.
-*   [ ] **5.3. Integration Tests:**
-    *   Verify that `pcapParser.ts` correctly calls `protocolDetector.ts` and stores the results.
-    *   Test the end-to-end flow of uploading a PCAP, seeing protocol labels in the packet list, and filtering by protocol.
-    *   Verify the `ProtocolDistributionChart` accurately reflects the detected protocols.
+## 4. Testing (1.0 day)
 
-#### 6. Documentation (0.5 days)
+*   [ ] **4.1. Unit Tests for `bpfFilter.ts` (0.5 days)**
+    *   **Task**: Write comprehensive unit tests for BPF parsing, validation, and matching logic. (Ref: `architecture.md` Testing)
+    *   **Subtask**: Test valid BPF expressions (`tcp port 80`, `host 1.2.3.4`, `src net 10.0.0.0/8 and not port 22`).
+    *   **Subtask**: Test invalid BPF expressions (syntax errors, unknown primitives).
+    *   **Subtask**: Test edge cases (empty filter, very long filter).
+*   [ ] **4.2. Component Tests for `FilterBar.tsx` (0.25 days)**
+    *   **Task**: Write component tests using React Testing Library. (Ref: `architecture.md` Testing)
+    *   **Subtask**: Verify input changes, error message display, and "Clear Filter" button functionality.
+    *   **Subtask**: Simulate valid and invalid filter submissions.
+*   [ ] **4.3. E2E Tests for BPF Filtering (0.25 days)**
+    *   **Task**: Create an E2E test using Playwright. (Ref: `architecture.md` Testing)
+    *   **Subtask**: Upload a PCAP file (Story 1.4 prerequisite).
+    *   **Subtask**: Enter a valid BPF filter and verify that the packet list updates correctly and the status message is accurate.
+    *   **Subtask**: Enter an invalid BPF filter and verify the error message is displayed.
+    *   **Subtask**: Clear the filter and verify all packets are shown again.
 
-*   [ ] **6.1. Update `README.md` (if necessary):** Add a brief mention of the new protocol detection feature.
-*   [ ] **6.2. Inline Code Comments:** Add comments for complex logic in `protocolDetector.ts`.
+## 5. Documentation (Optional, as part of Dev Notes)
+
+*   [ ] **5.1. Inline Code Comments & JSDoc (N/A days)**
+    *   **Task**: Add comments to complex logic in `bpfFilter.ts` and `FilterBar.tsx`.

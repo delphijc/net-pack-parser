@@ -13,6 +13,7 @@ import { decodePacketHeaders } from '@/utils/packetDecoder';
 import HexDumpViewer, { generateHexDump } from '@/components/HexDumpViewer'; // Import HexDumpViewer and generateHexDump
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'; // Import Tabs components
 import ExtractedStringsTab from '@/components/ExtractedStringsTab'; // Import ExtractedStringsTab
+import FilesTab from '@/components/FilesTab'; // Import FilesTab
 
 interface PacketDetailViewProps {
   packet: ParsedPacket | null;
@@ -169,9 +170,10 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
 
           {/* Tabs for Hex Dump and Extracted Strings */}
           <Tabs defaultValue="hex-dump" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3"> {/* Changed grid-cols-2 to grid-cols-3 */}
               <TabsTrigger value="hex-dump">Hex Dump / ASCII</TabsTrigger>
               <TabsTrigger value="extracted-strings">Extracted Strings</TabsTrigger>
+              <TabsTrigger value="files">Files</TabsTrigger> {/* New tab trigger */}
             </TabsList>
             <TabsContent value="hex-dump">
               <div className="bg-card border border-white/10 p-4 rounded-lg shadow-sm mt-4">
@@ -194,6 +196,12 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
                   extractedStrings={packet.extractedStrings || []}
                   onHighlight={handleHighlightString} // Pass the callback
                 />
+              </div>
+            </TabsContent>
+            {/* New TabsContent for Files */}
+            <TabsContent value="files">
+              <div className="bg-card border border-white/10 p-4 rounded-lg shadow-sm mt-4">
+                <FilesTab packet={packet} />
               </div>
             </TabsContent>
           </Tabs>

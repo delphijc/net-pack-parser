@@ -114,10 +114,12 @@ const createPacketFromPerformanceEntry = (entry: PerformanceEntry, rawData: any)
             const fileName = pathname.split('/').pop() || 'unknown';
             fileReferences.push({
                 id: uuidv4(),
-                uri: entry.name,
-                fileName,
-                hash: SHA256(entry.name).toString(),
-                downloadStatus: 'pending'
+                filename: fileName,
+                sha256Hash: SHA256(entry.name).toString(),
+                size: 0,
+                mimeType: 'application/octet-stream',
+                sourcePacketId: packetId,
+                data: new Blob([])
             });
         }
     }

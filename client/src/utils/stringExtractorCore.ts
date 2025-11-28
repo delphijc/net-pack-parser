@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid'; // For generating unique IDs
 
 // Regex patterns for various string types
 const IPV4_REGEX = /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g;
-const IPV6_REGEX = /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b|\b((?:[0-9a-fA-F]{1,4}(?::[0-9a-fA-F]{1,4})*)?::(?:[0-9a-fA-F]{1,4}(?::[0-9a-fA-F]{1,4})*)?)\\b/g;
+const IPV6_REGEX = /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b/g;
 const URL_REGEX = /(?:https?|ftp):\/\/[^\s\/$.?#].[^\s]*/gi;
 const EMAIL_REGEX = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
 const CREDENTIAL_REGEX = /\b(?:user(?:name)?|pass(?:word)?|api_key|token|auth|bearer|secret)(?:[=\s:]+)?['"]?([A-Z0-9._%+-]+)['"]?\b/gi;
