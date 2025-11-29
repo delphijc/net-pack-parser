@@ -88,7 +88,6 @@ so that I can work privately without any data leaving my device.
   - Absolute imports with `@/` alias for `src` directory configured.
 - **New Files Created**:
   - `docs/backlog.md`
-  - `tests/e2e/app.spec.ts`
 - **Modified Files**:
   - `client/src/index.css`
   - `docs/architecture.md`

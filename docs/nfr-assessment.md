@@ -41,7 +41,7 @@ This report assesses the Network Traffic Parser application against the Non-Func
 
 | ID | Requirement | Threshold | Status | Evidence / Notes |
 |----|-------------|-----------|--------|------------------|
-| **NFR-SP1** | WebSocket latency | < 500ms | ⚪ | Pending E2E latency test. |
+| **NFR-SP1** | WebSocket latency | < 500ms | ⚪ | Pending manual latency test. |
 | **NFR-SP2** | Capture rate | 10k packets/sec | ⚪ | Pending load test. |
 | **NFR-SP3** | Streaming throughput | 5 Mbps | ⚪ | Pending load test. |
 | **NFR-SP4** | Compression ratio | ≥ 50% | ⚪ | Pending compression test. |

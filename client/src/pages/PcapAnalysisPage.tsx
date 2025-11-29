@@ -8,6 +8,12 @@ import database from '@/services/database'; // Import database service
 import { FilterBar } from '@/components/FilterBar'; // Import FilterBar
 import { matchBpfFilter, validateBpfFilter } from '@/utils/bpfFilter'; // Import BPF filter utilities
 import type { BpfAST } from '@/utils/bpfFilter';
+import AdvancedSearchPanel from '@/components/AdvancedSearchPanel'; // Import AdvancedSearchPanel
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'; // Import Collapsible components
+import { Button } from '@/components/ui/button'; // Import Button for the trigger
+import { ChevronDownIcon } from 'lucide-react'; // Import an icon for the trigger
+import { multiCriteriaSearch, type MultiSearchCriteria } from '@/utils/multiCriteriaSearch'; // Import multiCriteriaSearch utilities
+import { cn } from '@/lib/utils';
 
 const PcapAnalysisPage: React.FC = () => {
   const [allPackets, setAllPackets] = useState<ParsedPacket[]>([]); // All packets loaded from DB
@@ -16,6 +22,8 @@ const PcapAnalysisPage: React.FC = () => {
   const [isDetailViewOpen, setIsDetailViewOpen] = useState(false);
   const [selectedProtocol, setSelectedProtocol] = useState<string | undefined>(undefined);
   const [availableProtocols, setAvailableProtocols] = useState<string[]>([]);
+  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false); // State for Advanced Search Panel visibility
+  const [multiSearchCriteria, setMultiSearchCriteria] = useState<MultiSearchCriteria | null>(null); // State for advanced search criteria
 
   // BPF Filter State
   const [bpfFilterAst, setBpfFilterAst] = useState<BpfAST | null>(null);
@@ -43,7 +51,7 @@ const PcapAnalysisPage: React.FC = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Filter packets whenever allPackets, selectedProtocol, or BPF filter changes
+  // Filter packets whenever allPackets, selectedProtocol, BPF filter, or multi-criteria search changes
   useEffect(() => {
     let filtered = allPackets;
 
@@ -57,8 +65,13 @@ const PcapAnalysisPage: React.FC = () => {
       filtered = filtered.filter((packet) => matchBpfFilter(packet, bpfFilterAst));
     }
 
+    // Apply multi-criteria search filter
+    if (multiSearchCriteria) {
+      filtered = filtered.filter((packet) => multiCriteriaSearch(packet, multiSearchCriteria));
+    }
+
     setDisplayedPackets(filtered);
-  }, [allPackets, selectedProtocol, bpfFilterAst]);
+  }, [allPackets, selectedProtocol, bpfFilterAst, multiSearchCriteria]);
 
 
   const handlePacketSelect = (packet: ParsedPacket | null) => {
@@ -105,6 +118,14 @@ const PcapAnalysisPage: React.FC = () => {
     setBpfFilterError(undefined);
   }, []);
 
+  const handleAdvancedSearch = useCallback((criteria: MultiSearchCriteria) => {
+    setMultiSearchCriteria(criteria);
+    setIsAdvancedSearchOpen(true); // Keep panel open after search
+  }, []);
+
+  const handleClearAdvancedSearch = useCallback(() => {
+    setMultiSearchCriteria(null);
+  }, []);
 
   const selectedPacketId = selectedPacket ? selectedPacket.id : null;
 
@@ -123,19 +144,47 @@ const PcapAnalysisPage: React.FC = () => {
           selectedProtocol={selectedProtocol}
           onProtocolChange={setSelectedProtocol}
         />
+
+        <Collapsible
+          open={isAdvancedSearchOpen}
+          onOpenChange={setIsAdvancedSearchOpen}
+          className="w-full space-y-2"
+        >
+          <div className="flex items-center justify-between space-x-4 px-4">
+            <h4 className="text-sm font-semibold">
+              Advanced Search
+            </h4>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="w-9 p-0">
+                <ChevronDownIcon className={cn("h-4 w-4", isAdvancedSearchOpen ? "rotate-180" : "")} />
+                <span className="sr-only">Toggle Advanced Search</span>
+              </Button>
+            </CollapsibleTrigger>
+          </div>
+          <CollapsibleContent>
+            <AdvancedSearchPanel onSearch={handleAdvancedSearch} onClear={handleClearAdvancedSearch} />
+          </CollapsibleContent>                  </Collapsible>
+
         <PacketList
+
           packets={displayedPackets} // Pass filtered packets to PacketList
+
           onPacketSelect={handlePacketSelect}
+
           selectedPacketId={selectedPacketId}
+
           onClearAllPackets={handleClearAllPackets} // Pass clear function
-        />
-      </div>
+
+          searchCriteria={multiSearchCriteria} // Pass multiSearchCriteria for highlighting
+
+        />      </div>
       <div className="lg:col-span-2 flex flex-col space-y-6"> {/* Added a div for the charts and detail view */}
         <ProtocolDistributionChart packets={allPackets} /> {/* Pass all packets to the chart */}
         <PacketDetailView
           packet={selectedPacket}
           isOpen={isDetailViewOpen}
           onOpenChange={handleDetailViewClose}
+          searchCriteria={multiSearchCriteria} // Pass multiSearchCriteria for highlighting
         />
       </div>
     </div>

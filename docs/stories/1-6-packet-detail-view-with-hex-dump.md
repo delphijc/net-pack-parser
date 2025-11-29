@@ -157,7 +157,7 @@ So that I can inspect packet contents at the byte level.
 **Best-Practices and References:**
 *   React 19.x, TypeScript ~5.9.3, Vite 7.2.4, Tailwind CSS 3.x, shadcn/ui.
 *   State Management: TanStack Query (server state), Zustand (UI state).
-*   Testing: Vitest, React Testing Library, Playwright.
+*   Testing: Vitest, React Testing Library.
 *   Monorepo structure (`client/src`).
 *   Naming Conventions (PascalCase for components).
 *   Absolute imports (`@/`).

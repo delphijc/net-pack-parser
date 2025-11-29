@@ -113,7 +113,6 @@
             <version>14.x</version>
         </dependency>
         <dependency ecosystem="npm">
-            <package>playwright</package>
             <version>1.x</version>
         </dependency>
     </dependencies>
@@ -133,7 +132,6 @@
     <standards>
       - Unit tests: Vitest (for individual functions)
       - Component tests: React Testing Library (for UI components)
-      - E2E tests: Playwright (for full user flows)
     </standards>
     <locations>
       - `client/src/**/*.test.ts`

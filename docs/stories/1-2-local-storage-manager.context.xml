@@ -199,7 +199,6 @@
 
         <package name="@eslint/js" type="devDependency" version="^9.39.1"/>
         <package name="@faker-js/faker" type="devDependency" version="^8.4.1"/>
-        <package name="@playwright/test" type="devDependency" version="^1.45.3"/>
         <package name="@types/crypto-js" type="devDependency" version="^4.2.1"/>
         <package name="@types/node" type="devDependency" version="^24.10.1"/>
         <package name="@types/react" type="devDependency" version="^19.2.5"/>
@@ -261,17 +260,16 @@
   </interfaces>
   <tests>
     <standards>
-      Unit tests will be implemented using Vitest for localStorage wrapper functionality, quota monitoring, and error handling. Component tests for the settings UI (including "Clear Data" button and warning notifications) will use React Testing Library. E2E tests will use Playwright. Mock localStorage will be used for testing quota limits and error scenarios.
+      Unit tests will be implemented using Vitest for localStorage wrapper functionality, quota monitoring, and error handling. Component tests for the settings UI (including "Clear Data" button and warning notifications) will use React Testing Library. Mock localStorage will be used for testing quota limits and error scenarios.
     </standards>
     <locations>
-      Unit tests will likely be co-located with the `localStorage.ts` service and `useLocalStorage.ts` hook. Component tests for UI elements will be co-located with relevant React components (e.g., SettingsPage). E2E tests are located in `tests/e2e/`.
+      Unit tests will likely be co-located with the `localStorage.ts` service and `useLocalStorage.ts` hook. Component tests for UI elements will be co-located with relevant React components (e.g., SettingsPage).
     </locations>
     <ideas>
       <idea>Mock `localStorage` limit and verify warning notification appears when usage exceeds 80%.</idea>
       <idea>Verify `localStorage` wrapper correctly stores and retrieves different data types.</idea>
       <idea>Test `clearAll` functionality ensures all namespaced keys are removed and confirmation dialog is handled.</idea>
       <idea>Test graceful handling of `localStorage` quota exceeded errors during `setValue` operations.</idea>
-      <idea>E2E test for navigating to settings, clicking "Clear Data", confirming, and verifying success message.</idea>
     </ideas>
   </tests>
 </story-context>

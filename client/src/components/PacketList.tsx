@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import type { ParsedPacket } from '../types'; // Updated import path
+import { multiCriteriaSearch, type MultiSearchCriteria } from '@/utils/multiCriteriaSearch'; // Import multiCriteriaSearch and MultiSearchCriteria
 import {
-    Search, Trash2, Clock, Shield
+    Search, Trash2, Clock, Shield, X
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import database from '../services/database';
 
 interface PacketListProps {
@@ -13,21 +20,32 @@ interface PacketListProps {
     onClearAllPackets: () => void; // Callback to clear all packets in parent
     selectedProtocol?: string;
     onPacketDeleted?: () => void; // Optional callback when a packet is deleted
+    searchCriteria?: MultiSearchCriteria | null; // Add searchCriteria prop
+    onClearSearchCriteria?: () => void; // Add callback to clear search criteria
 }
 
-const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketId, packets, onClearAllPackets, selectedProtocol, onPacketDeleted }) => {
+const PacketList: React.FC<PacketListProps> = ({
+    onPacketSelect,
+    selectedPacketId,
+    packets,
+    onClearAllPackets,
+    selectedProtocol,
+    onPacketDeleted,
+    searchCriteria,
+    onClearSearchCriteria
+}) => {
     const [filteredPackets, setFilteredPackets] = useState<ParsedPacket[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
     useEffect(() => {
         filterPackets();
-    }, [packets, searchTerm, selectedProtocol, sortOrder]);
+    }, [packets, searchTerm, selectedProtocol, sortOrder, searchCriteria]);
 
     const filterPackets = () => {
-        let result = [...packets];
+        let result = packets.map(p => ({ ...p, matchesSearch: false })); // Initialize matchesSearch
 
-        // Apply search
+        // Apply search (existing text search)
         if (searchTerm) {
             const lowerTerm = searchTerm.toLowerCase();
             result = result.filter(p =>
@@ -42,6 +60,14 @@ const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketI
         // Apply protocol filter
         if (selectedProtocol && selectedProtocol !== 'ALL') {
             result = result.filter(p => p.detectedProtocols?.includes(selectedProtocol));
+        }
+
+        // Apply multi-criteria search for highlighting
+        if (searchCriteria) {
+            result = result.map(p => ({
+                ...p,
+                matchesSearch: multiCriteriaSearch(p, searchCriteria)
+            }));
         }
 
         // Apply sort
@@ -70,6 +96,31 @@ const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketI
         }
     };
 
+    // Format search criteria for display
+    const formatSearchCriteria = (criteria: MultiSearchCriteria): string => {
+        const parts: string[] = [];
+        if (criteria.sourceIp?.ip) parts.push(`Source IP: ${criteria.sourceIp.ip}`);
+        if (criteria.destIp?.ip) parts.push(`Dest IP: ${criteria.destIp.ip}`);
+        if (criteria.sourcePort) {
+            const port = typeof criteria.sourcePort.port === 'number'
+                ? criteria.sourcePort.port
+                : `${criteria.sourcePort.port?.start}-${criteria.sourcePort.port?.end}`;
+            parts.push(`Source Port: ${port}`);
+        }
+        if (criteria.destPort) {
+            const port = typeof criteria.destPort.port === 'number'
+                ? criteria.destPort.port
+                : `${criteria.destPort.port?.start}-${criteria.destPort.port?.end}`;
+            parts.push(`Dest Port: ${port}`);
+        }
+        if (criteria.protocol?.protocol) parts.push(`Protocol: ${criteria.protocol.protocol}`);
+        if (criteria.payload?.content) parts.push(`Payload: "${criteria.payload.content}"`);
+        if (criteria.timeRange) {
+            parts.push(`Time: ${new Date(criteria.timeRange.start).toLocaleString()} - ${new Date(criteria.timeRange.end).toLocaleString()}`);
+        }
+        return parts.join(' | ') + ` (${criteria.logic})`;
+    };
+
     return (
         <div className="bg-card border border-white/10 rounded-lg shadow-sm flex flex-col overflow-hidden backdrop-blur-sm h-full">
             <div className="p-3 border-b border-white/10 bg-card/50">
@@ -89,6 +140,40 @@ const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketI
                         Clear
                     </button>
                 </div>
+
+                {searchCriteria && (
+                    <div className="mb-3">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Badge
+                                        variant="secondary"
+                                        className="bg-yellow-300 text-black hover:bg-yellow-400 cursor-help flex items-center gap-1 max-w-full"
+                                    >
+                                        <Search size={12} />
+                                        <span className="truncate">Current Search</span>
+                                        {onClearSearchCriteria && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onClearSearchCriteria();
+                                                }}
+                                                className="ml-1 hover:bg-yellow-500 rounded-full p-0.5"
+                                                title="Clear search"
+                                            >
+                                                <X size={12} />
+                                            </button>
+                                        )}
+                                    </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-sm">
+                                    <p className="text-xs font-semibold mb-1">Search Criteria:</p>
+                                    <p className="text-xs">{formatSearchCriteria(searchCriteria)}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                )}
 
                 <div className="flex space-x-2 mb-3">
                     <div className="relative flex-1">
@@ -127,7 +212,7 @@ const PacketList: React.FC<PacketListProps> = ({ onPacketSelect, selectedPacketI
                             className={`group p-2 rounded-md cursor-pointer border transition-all duration-200 ${selectedPacketId === packet.id
                                 ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
                                 : 'bg-card/30 border-transparent hover:bg-secondary/50 hover:border-white/5'
-                                }`}
+                                } ${packet.matchesSearch ? 'bg-yellow-200/20 border-yellow-300' : ''}`}
                         >
                             <div className="flex justify-between items-center mb-1">
                                 <div className="flex items-center gap-2">

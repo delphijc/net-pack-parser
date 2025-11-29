@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ParsedPacket } from '@/types';
 import type { Packet } from '@/types/packet';
+import { type MultiSearchCriteria, getMatchDetails } from '@/utils/multiCriteriaSearch'; // Import getMatchDetails
 import {
   Sheet,
   SheetContent,
@@ -14,15 +15,68 @@ import HexDumpViewer, { generateHexDump } from '@/components/HexDumpViewer'; // 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'; // Import Tabs components
 import ExtractedStringsTab from '@/components/ExtractedStringsTab'; // Import ExtractedStringsTab
 import FilesTab from '@/components/FilesTab'; // Import FilesTab
+import { cn } from '@/lib/utils'; // Import cn for conditional classnames
 
 interface PacketDetailViewProps {
   packet: ParsedPacket | null;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  searchCriteria?: MultiSearchCriteria | null; // Add searchCriteria prop
 }
 
-const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onOpenChange }) => {
+const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onOpenChange, searchCriteria }) => {
   const [highlightRanges, setHighlightRanges] = useState<{ offset: number; length: number }[]>([]); // New state for highlight ranges
+  const [payloadSearchString, setPayloadSearchString] = useState<string | null>(null);
+  const [payloadCaseSensitive, setPayloadCaseSensitive] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (searchCriteria?.payload) {
+      setPayloadSearchString(searchCriteria.payload.content);
+      setPayloadCaseSensitive(searchCriteria.payload.caseSensitive);
+    } else {
+      setPayloadSearchString(null);
+      setPayloadCaseSensitive(false);
+    }
+  }, [searchCriteria]);
+
+  // Calculate match details for highlighting
+  const matchDetails = useMemo(() => {
+    if (!packet || !searchCriteria) return null;
+
+    // Construct a temporary Packet object for the matcher if needed, 
+    // but ParsedPacket is compatible with Packet for the fields we check
+    // except rawData which might be string or ArrayBuffer in ParsedPacket
+    // but Packet expects ArrayBuffer.
+
+    // We need to ensure rawData is ArrayBuffer for getMatchDetails if it checks payload
+    let rawDataBuffer: ArrayBuffer;
+    if (packet.rawData instanceof ArrayBuffer) {
+      rawDataBuffer = packet.rawData;
+    } else {
+      try {
+        rawDataBuffer = new TextEncoder().encode(packet.rawData).buffer;
+      } catch (e) {
+        rawDataBuffer = new ArrayBuffer(0);
+      }
+    }
+
+    const tempPacketForMatch: Packet = {
+      ...packet,
+      rawData: rawDataBuffer,
+      sourcePort: packet.sourcePort || 0,
+      destPort: packet.destPort || 0,
+      detectedProtocols: packet.detectedProtocols || []
+    };
+
+    return getMatchDetails(tempPacketForMatch, searchCriteria);
+  }, [packet, searchCriteria]);
+
+  // Combine manual highlight ranges (from ExtractedStrings) with search matches
+  const combinedHighlightRanges = useMemo(() => {
+    const searchMatches = matchDetails?.payloadMatches || [];
+    return [...highlightRanges, ...searchMatches];
+  }, [highlightRanges, matchDetails]);
+
 
   if (!packet) {
     return null;
@@ -133,15 +187,31 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground text-xs uppercase tracking-wider">Protocol</p>
-                <p className="font-mono text-foreground">{packet.protocol}</p>
+                <p className={cn("font-mono text-foreground", matchDetails?.protocol && "bg-yellow-300 text-black")}>
+                  {packet.protocol}
+                </p>
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground text-xs uppercase tracking-wider">Source</p>
-                <p className="font-mono text-foreground">{packet.sourceIP}{packet.sourcePort ? `:${packet.sourcePort}` : ''}</p>
+                <p className="font-mono text-foreground">
+                  <span className={cn(matchDetails?.sourceIp && "bg-yellow-300 text-black")}>
+                    {packet.sourceIP}
+                  </span>
+                  <span className={cn(matchDetails?.sourcePort && "bg-yellow-300 text-black")}>
+                    {packet.sourcePort ? `:${packet.sourcePort}` : ''}
+                  </span>
+                </p>
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground text-xs uppercase tracking-wider">Destination</p>
-                <p className="font-mono text-foreground">{packet.destIP}{packet.destPort ? `:${packet.destPort}` : ''}</p>
+                <p className="font-mono text-foreground">
+                  <span className={cn(matchDetails?.destIp && "bg-yellow-300 text-black")}>
+                    {packet.destIP}
+                  </span>
+                  <span className={cn(matchDetails?.destPort && "bg-yellow-300 text-black")}>
+                    {packet.destPort ? `:${packet.destPort}` : ''}
+                  </span>
+                </p>
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground text-xs uppercase tracking-wider">Length</p>
@@ -183,7 +253,12 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
                 </h3>
                 <div className="bg-black/40 rounded border border-white/5 p-2 overflow-hidden">
                   {rawDataBuffer && rawDataBuffer.byteLength > 0 ? (
-                    <HexDumpViewer rawData={rawDataBuffer} highlightRanges={highlightRanges} /> // Pass highlightRanges
+                    <HexDumpViewer
+                      rawData={rawDataBuffer}
+                      highlightRanges={combinedHighlightRanges}
+                      searchString={payloadSearchString}
+                      caseSensitive={payloadCaseSensitive}
+                    />
                   ) : (
                     <p className="text-muted-foreground text-sm p-4 text-center">No payload data available.</p>
                   )}

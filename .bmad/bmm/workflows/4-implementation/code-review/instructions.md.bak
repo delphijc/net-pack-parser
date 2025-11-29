@@ -259,8 +259,10 @@
     </check>
 
     <check if="ad_hoc_review_mode != true">
-      <action>Open {{story_path}} and append a new section at the end titled exactly: "Senior Developer Review (AI)".</action>
-      <action>Insert subsections:
+      <critical>CRITICAL: You MUST preserve the entire original story content. Construct the new file content by concatenating the ORIGINAL content with the NEW review section. DO NOT overwrite the file with ONLY the review.</critical>
+      <action>Open {{story_path}} and read its full content.</action>
+      <action>Construct the new content by appending a new section at the end titled exactly: "Senior Developer Review (AI)".</action>
+      <action>Insert subsections in the appended review:
         - Reviewer: {{user_name}}
         - Date: {{date}}
         - Outcome: (Approve | Changes Requested | Blocked) with justification
@@ -287,7 +289,7 @@
       </action>
       <action>Add a Change Log entry with date, version bump if applicable, and description: "Senior Developer Review notes appended".</action>
       <action>If {{update_status_on_result}} is true: update Status to {{status_on_approve}} when approved; to {{status_on_changes_requested}} when changes requested; otherwise leave unchanged.</action>
-      <action>Save the story file.</action>
+      <action>Save the story file with the COMBINED content (Original + Review).</action>
 
       <critical>MUST include the complete validation checklists - this is the evidence that systematic review was performed</critical>
     </check>

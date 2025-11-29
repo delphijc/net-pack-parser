@@ -132,7 +132,6 @@
     </details>
   </subtask>
   <subtask id="6.3" estimated-time="0.25 days">
-    <description>**Integration/E2E Tests**</description>
     <details>
       <item>**Task**: Create an integration test (using a small, known PCAP file with HTTP/FTP transfers) to verify the end-to-end flow: upload, detection, display in UI, successful download, and correct hash generation.</item>
       <item>**Subtask**: Verify that chain of custody log is correctly updated.</item>

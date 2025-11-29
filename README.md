@@ -17,8 +17,7 @@ net-pack-parser/
 │   ├── src/             # Source code
 │   └── package.json     # Client dependencies
 ├── server/              # (Planned) Capture Agent
-├── tests/               # End-to-End Tests (Playwright)
-└── package.json         # Root configuration & E2E dependencies
+└── package.json         # Root configuration
 ```
 
 ---
@@ -39,12 +38,7 @@ net-pack-parser/
     cd network-traffic-parser
     ```
 
-2.  **Install Root Dependencies (for E2E testing)**
-    ```bash
-    npm install
-    ```
-
-3.  **Install Client Dependencies**
+2.  **Install Client Dependencies**
     ```bash
     cd client
     npm install
@@ -68,7 +62,7 @@ To start the **Browser-Only** application:
 
 ### 🧪 Testing
 
-The project includes both Unit Tests (Vitest) and End-to-End Tests (Playwright).
+The project includes Unit Tests (Vitest).
 
 #### Unit Tests (Client)
 Run unit tests for the frontend components and logic:
@@ -82,14 +76,6 @@ To run in watch mode:
 ```bash
 cd client
 npm run test:watch
-```
-
-#### End-to-End Tests
-Run full system tests using Playwright from the **root** directory:
-
-```bash
-# Ensure the dev server is running (or let Playwright start it if configured)
-npm run test:e2e
 ```
 
 ### 📦 Building for Production
@@ -141,7 +127,7 @@ The build artifacts will be generated in the `client/dist` directory, ready for 
 -   **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, shadcn/ui
 -   **State Management**: TanStack Query (Server State), Zustand (UI State)
 -   **Parsing**: `pcap-decoder` for browser-based PCAP processing
--   **Testing**: Vitest, React Testing Library, Playwright
+-   **Testing**: Vitest, React Testing Library
 
 ---
 

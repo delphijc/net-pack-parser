@@ -26,6 +26,7 @@ export interface ParsedPacket extends Packet {
     forensicMetadata?: ForensicMetadata;
     threatIntelligence?: ThreatIntelligence[];
     suspiciousIndicators?: SuspiciousIndicator[];
+    matchesSearch?: boolean;
 }
 
 export interface ForensicMetadata {

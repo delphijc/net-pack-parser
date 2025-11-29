@@ -7,7 +7,7 @@ This document outlines the CI/CD pipeline for the `net-pack-parser` project, whi
 The pipeline consists of the following stages:
 
 1.  **Lint**: Checks the code for style and quality issues using ESLint.
-2.  **Test**: Runs the Playwright end-to-end test suite in parallel across 4 shards to ensure fast execution.
+2.  **Test**: Runs the unit and component test suites.
 3.  **Burn-in**: Runs the entire test suite 10 times in a loop to detect flaky tests. This stage runs only on pull requests to `main` or `develop`.
 4.  **Report**: Aggregates test results and uploads artifacts (traces, screenshots, videos) on failure.
 
@@ -25,10 +25,6 @@ This script will run the linting, testing, and a reduced burn-in loop (3 iterati
 
 When a CI run fails, you can find the following artifacts in the "Artifacts" section of the GitHub Actions run:
 
--   **Traces**: A full trace of the test execution, including DOM snapshots, network requests, and console logs.
--   **Screenshots**: Screenshots of the application at the point of failure.
--   **Videos**: A video recording of the test execution.
--   **HTML Report**: A detailed HTML report of the test results.
 
 ## Secrets and Environment Variables
 
@@ -42,10 +38,3 @@ The following environment variables are used:
 -   `BASE_URL`: The base URL of the application under test.
 -   `API_URL`: The base URL of the API.
 
-## Badge URLs
-
-You can add the following badge to your `README.md` to show the status of the CI pipeline:
-
-```markdown
-[![E2E Tests](https://github.com/<your-username>/net-pack-parser/actions/workflows/test.yml/badge.svg)](https://github.com/<your-username>/net-pack-parser/actions/workflows/test.yml)
-```

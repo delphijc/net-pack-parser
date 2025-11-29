@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context>
+  <story-info>
+    <epic-id>2</epic-id>
+    <story-key>2-2-multi-criteria-search</story-key>
+    <story-title>Multi-Criteria Search</story-title>
+    <story-status>drafted</story-status>
+    <user-story>
+      <as-a>As a security analyst,</as-a>
+      <i-want>I want to search packets by IP, port, protocol, time range, and payload content,</i-want>
+      <so-that>So that I can find specific packets using multiple criteria.</so-that>
+    </user-story>
+  </story-info>
+
+  <acceptance-criteria>
+    <criterion id="AC1">
+      <description>Given packets are loaded in the application</description>
+    </criterion>
+    <criterion id="AC2">
+      <description>When I use the Advanced Search panel</description>
+    </criterion>
+    <criterion id="AC3">
+      <description>Then I can specify multiple search criteria:
+        <sub-criteria>
+          <item>Source IP (exact match or CIDR notation)</item>
+          <item>Destination IP (exact match or CIDR notation)</item>
+          <item>Source Port (exact or range: 80-443)</item>
+          <item>Destination Port (exact or range)</item>
+          <item>Protocol (dropdown: TCP, UDP, ICMP, HTTP, HTTPS, DNS, etc.)</item>
+          <item>Time Range (from timestamp to timestamp, with date pickers)</item>
+          <item>Payload Contains (string search in packet data, case-sensitive option)</item>
+        </sub-criteria>
+      </description>
+    </criterion>
+    <criterion id="AC4">
+      <description>And I can combine criteria with AND/OR logic using radio buttons</description>
+    </criterion>
+    <criterion id="AC5">
+      <description>And when I click "Search", results appear in the packet table</description>
+    </criterion>
+    <criterion id="AC6">
+      <description>And search completes in &lt;500ms for 10,000 packets (per NFR-P3)</description>
+    </criterion>
+    <criterion id="AC7">
+      <description>And search matches are highlighted in the packet list</description>
+    </criterion>
+    <criterion id="AC8">
+      <description>And I can save frequently used searches as "Saved Searches"</description>
+    </criterion>
+  </acceptance-criteria>
+
+  <tasks>
+    <task id="1" estimated-time="2.0 days">
+      <description>Advanced Search Panel UI Development</description>
+      <subtask id="1.1" estimated-time="1.0 day">
+        <description>Create client/src/components/AdvancedSearchPanel.tsx</description>
+        <sub-items>
+          <item>Develop the main UI component for advanced search.</item>
+          <item>Integrate shadcn/ui components for input fields, dropdowns, date pickers.</item>
+          <item>Design distinct input fields for Source IP, Destination IP, Source Port, Destination Port, Protocol, Time Range, and Payload Contains (AC 3).</item>
+          <item>Implement radio buttons or similar UI elements for AND/OR logic combination of criteria (AC 4).</item>
+          <item>Add a "Search" button (AC 5).</item>
+          <item>Add a "Save Search" button (AC 8).</item>
+          <item>Consider a clear "Clear All" button for reset.</item>
+        </sub-items>
+      </subtask>
+      <subtask id="1.2" estimated-time="0.5 day">
+        <description>Integrate AdvancedSearchPanel.tsx into PcapAnalysisPage.tsx</description>
+        <sub-items>
+          <item>Place the AdvancedSearchPanel on the PCAP Analysis page, possibly as a collapsible section or a side panel.</item>
+          <item>Manage visibility state for the panel.</item>
+        </sub-items>
+      </subtask>
+      <subtask id="1.3" estimated-time="0.5 day">
+        <description>Implement "Saved Searches" UI</description>
+        <sub-items>
+          <item>Develop UI elements to list, load, and delete saved search configurations.</item>
+          <item>Store saved searches in localStorage (reusing patterns from Story 1.2).</item>
+        </sub-items>
+      </subtask>
+    </task>
+    <task id="2" estimated-time="2.5 days">
+      <description>Multi-Criteria Search Logic Implementation</description>
+      <subtask id="2.1" estimated-time="1.5 days">
+        <description>Create client/src/utils/multiCriteriaSearch.ts</description>
+        <sub-items>
+          <item>Implement the core logic for evaluating search criteria against packet objects.</item>
+          <item>Develop functions to match IP addresses (exact/CIDR) (FR26).</item>
+          <item>Develop functions to match port numbers (exact/range) (FR27).</item>
+          <item>Develop functions to match protocol types (FR28).</item>
+          <item>Develop functions to match packets within a time range (FR29).</item>
+          <item>Implement efficient string search (e.g., Boyer-Moore, Aho-Corasick) for payload content (FR30). Consider case-sensitivity option.</item>
+          <item>Implement logical AND/OR combination of these individual criteria (FR31, AC 4).</item>
+          <item>Ensure performance is optimized for NFR-P3 (&lt;500ms for 10,000 packets), possibly using indexed data structures or pre-computed values.</item>
+        </sub-items>
+      </subtask>
+      <subtask id="2.2" estimated-time="1.0 day">
+        <description>Integrate Search Logic with Packet Data</description>
+        <sub-items>
+          <item>In PcapAnalysisPage.tsx or a dedicated service, apply the multiCriteriaSearch.ts logic to loaded packets whenever search criteria change.</item>
+          <item>Re-use the pattern from Story 2.1 (bpfFilter.ts) for passing filtered results to PacketList.tsx (AC 5).</item>
+          <item>Handle the combination of BPF filters and multi-criteria search (e.g., implicitly AND them).</item>
+        </sub-items>
+      </subtask>
+    </task>
+    <task id="3" estimated-time="1.0 day">
+      <description>Search Result Highlighting</description>
+      <subtask id="3.1" estimated-time="0.5 day">
+        <description>Enhance PacketDetailView.tsx for highlighting</description>
+        <sub-items>
+          <item>Modify PacketDetailView.tsx to accept search match information.</item>
+          <item>Highlight matched IP addresses, ports, protocol names.</item>
+          <item>Highlight matched strings in both hex dump and ASCII representations (FR32, AC 7).</item>
+          <item>Use CSS styling (e.g., yellow background) for visibility.</item>
+        </sub-items>
+      </subtask>
+      <subtask id="3.2" estimated-time="0.5 day">
+        <description>Update PacketList.tsx for highlighting</description>
+        <sub-items>
+          <item>Visually indicate packets that are part of the search results, possibly with a subtle background color or icon.</item>
+        </sub-items>
+      </subtask>
+    </task>
+    <task id="4" estimated-time="0.5 day">
+      <description>Persistence and Integration</description>
+      <subtask id="4.1" estimated-time="0.5 day">
+        <description>Save/Load Search Configurations</description>
+        <sub-items>
+          <item>Implement functions to save and load multi-criteria search configurations (the UI state of AdvancedSearchPanel) to/from localStorage. (AC 8)</item>
+          <item>Re-use existing localStorage wrapper from Story 1.2.</item>
+        </sub-items>
+      </subtask>
+    </task>
+    <task id="5" estimated-time="1.0 day">
+      <description>Testing</description>
+      <subtask id="5.1" estimated-time="0.5 day">
+        <description>Unit Tests for multiCriteriaSearch.ts</description>
+        <sub-items>
+          <item>Write comprehensive unit tests covering all individual matching functions (IP, port, protocol, time, payload).</item>
+          <item>Test AND/OR logic combinations with various valid and edge-case inputs.</item>
+          <item>Test performance against a mock dataset of 10,000 packets to verify NFR-P3.</item>
+        </sub-items>
+      </subtask>
+      <subtask id="5.2" estimated-time="0.25 day">
+        <description>Component Tests for AdvancedSearchPanel.tsx</description>
+        <sub-items>
+          <item>Write component tests using React Testing Library to verify UI interactions, input changes, and button clicks.</item>
+          <item>Verify that saved searches can be loaded and applied.</item>
+        </sub-items>
+      </subtask>
+    </task>
+  </tasks>
+
+  <dev-notes>
+    <section title="Relevant architecture patterns and constraints">
+      <note>
+        <title>Technology Stack</title>
+        <description>Continue to use React, TypeScript, Vite, Tailwind CSS, shadcn/ui. State management for search criteria will likely use Zustand.</description>
+        <source>docs/architecture.md#Decision Summary</source>
+      </note>
+      <note>
+        <title>Performance (NFR-P3)</title>
+        <description>A critical constraint is the search completion time of &lt;500ms for 10,000 packets. This mandates efficient algorithms for string search (e.g., Boyer-Moore) and indexed data structures (e.g., Maps for IP/port lookup, sorted arrays for time-based search).</description>
+        <source>docs/prd.md#NFR-P3</source>
+      </note>
+      <note>
+        <title>Search and Filter Integration</title>
+        <description>The multi-criteria search should be designed to complement the existing BPF filter (Story 2.1), likely combining their results with an implicit AND operation.</description>
+      </note>
+      <note>
+        <title>UI Components</title>
+        <description>shadcn/ui components should be consistently used for form elements within the AdvancedSearchPanel.</description>
+      </note>
+      <note>
+        <title>Testing</title>
+        <description>Adherence to the established testing stack (Vitest, React Testing Library).</description>
+        <source>docs/architecture.md#Testing Framework</source>
+      </note>
+    </section>
+
+    <section title="Source tree components to touch">
+      <list type="new">
+        <item>client/src/utils/multiCriteriaSearch.ts</item>
+        <item>client/src/components/AdvancedSearchPanel.tsx</item>
+        <item>client/src/utils/multiCriteriaSearch.test.ts</item>
+        <item>client/src/components/AdvancedSearchPanel.test.tsx</item>
+      </list>
+      <list type="modified">
+        <item>client/src/pages/PcapAnalysisPage.tsx</item>
+        <item>client/src/components/PacketList.tsx</item>
+        <item>client/src/components/PacketDetailView.tsx</item>
+        <item>client/src/types/packet.ts (potentially for new search-related metadata)</item>
+        <item>client/src/services/localStorage.ts (for saved searches)</item>
+      </list>
+    </section>
+
+    <section title="Testing standards summary">
+      <note>
+        <title>Unit Tests (Vitest)</title>
+        <description>Cover `multiCriteriaSearch.ts` exhaustively, including various combinations of search parameters, edge cases, and performance checks.</description>
+      </note>
+      <note>
+        <title>Component Tests (React Testing Library)</title>
+        <description>Focus on `AdvancedSearchPanel.tsx` UI interactions, state management, and display of saved searches.</description>
+      </note>
+      <note>
+      </note>
+    </section>
+
+    <section title="Learnings from Previous Story (Story 2.1: BPF Filter Engine)">
+      <note>
+        <title>New patterns/services created</title>
+        <description>BPF Parser &amp; Validator Implementation (client/src/utils/bpfFilter.ts): Provides a model for creating new utility functions for packet-level analysis. The approach taken for parsing BPF expressions and matching against packets can be adapted for parsing other complex query languages or patterns.</description>
+        <source>docs/stories/2-1-bpf-filter-engine.md#Learnings from Previous Story</source>
+      </note>
+      <note>
+        <title>Architectural decisions</title>
+        <description>Custom BPF parser (JavaScript BPF parser): This decision reinforces the preference for lightweight, client-side implementations over heavy external libraries. This approach should be continued for the multi-criteria search logic.</description>
+        <source>docs/stories/2-1-bpf-filter-engine.md#Dev Notes</source>
+      </note>
+      <note>
+        <title>Technical debt</title>
+        <description>Performance: Filtering is currently performed synchronously on the main thread in PcapAnalysisPage.tsx. For very large datasets (&gt;10k packets), this could cause UI jank. Consider moving filter execution to a Web Worker in a future optimization task. This is a critical learning. While Story 2.2 focuses on multi-criteria search, the volume of packets will increase with Epic 1, meaning that both BPF filtering and multi-criteria search might benefit from Web Workers. This should be kept in mind during implementation, especially when designing the search algorithms.</description>
+        <source>docs/stories/2-1-bpf-filter-engine.md#Dev Notes</source>
+      </note>
+    </section>
+
+    <section title="Project Structure Notes">
+      <note>
+        <title>Alignment</title>
+        <description>The new utilities (`multiCriteriaSearch.ts`) will reside in `client/src/utils/`, and UI components (`AdvancedSearchPanel.tsx`) in `client/src/components/`, aligning with existing project conventions.</description>
+      </note>
+      <note>
+        <title>Data Models</title>
+        <description>Ensure that the `Packet` interface (`client/src/types/packet.ts`) supports all required fields for multi-criteria search (e.g., properly parsed IPs, ports, timestamps).</description>
+      </note>
+      <note>
+        <title>State Management</title>
+        <description>Zustand will likely be used in `PcapAnalysisPage.tsx` to manage the state of the active search criteria and filtered packet list.</description>
+      </note>
+    </section>
+
+    <section title="References">
+      <ref>
+        <path>docs/epics.md#Story 2.2: Multi-Criteria Search</path>
+        <description>Epic breakdown for this story.</description>
+      </ref>
+      <ref>
+        <path>docs/prd.md#FR26-FR31</path>
+        <description>Functional requirements related to multi-criteria search.</description>
+      </ref>
+      <ref>
+        <path>docs/prd.md#NFR-P3</path>
+        <description>Non-functional requirement for search performance.</description>
+      </ref>
+      <ref>
+        <path>docs/architecture.md</path>
+        <description>Overall architecture of the project.</description>
+      </ref>
+      <ref>
+        <path>docs/ux-design-specification.md</path>
+        <description>UX design specifications.</description>
+      </ref>
+      <ref>
+        <path>docs/stories/2-1-bpf-filter-engine.md</path>
+        <description>Learnings from the previous story, BPF Filter Engine.</description>
+      </ref>
+    </section>
+  </dev-notes>
+
+  <artifacts>
+          <docs>
+            <doc>
+              <path>docs/prd.md</path>
+              <title>Product Requirements Document: Network Traffic Parser</title>
+              <section>Scope Definition - Forensic Investigation (Browser)</section>
+              <snippet>Advanced multi-criteria search</snippet>
+            </doc>
+            <doc>
+              <path>docs/prd.md</path>
+              <title>Product Requirements Document: Network Traffic Parser</title>
+              <section>Functional Requirements - Packet Filtering &amp; Search</section>
+              <snippet>FR26: Users can search packets by IP address (source or destination)</snippet>
+            </doc>
+            <doc>
+              <path>docs/prd.md</path>
+              <title>Product Requirements Document: Network Traffic Parser</title>
+              <section>Functional Requirements - Packet Filtering &amp; Search</section>
+              <snippet>FR27: Users can search packets by port number</snippet>
+            </doc>
+            <doc>
+              <path>docs/prd.md</path>
+              <title>Product Requirements Document: Network Traffic Parser</title>
+              <section>Functional Requirements - Packet Filtering &amp; Search</section>
+              <snippet>FR28: Users can search packets by protocol type</snippet>
+            </doc>
+            <doc>
+              <path>docs/prd.md</path>
+              <title>Product Requirements Document: Network Traffic Parser</title>
+              <section>Functional Requirements - Packet Filtering &amp; Search</section>
+              <snippet>FR29: Users can search packets by time range</snippet>
+            </doc>
+            <doc>
+              <path>docs/prd.md</path>
+              <title>Product Requirements Document: Network Traffic Parser</title>
+              <section>Functional Requirements - Packet Filtering &amp; Search</section>
+              <snippet>FR30: Users can search packet payloads for specific strings or patterns</snippet>
+            </doc>
+            <doc>
+              <path>docs/prd.md</path>
+              <title>Product Requirements Document: Network Traffic Parser</title>
+              <section>Functional Requirements - Packet Filtering &amp; Search</section>
+              <snippet>FR31: Users can apply multiple filter criteria simultaneously (Boolean AND/OR logic)</snippet>
+            </doc>
+            <doc>
+              <path>docs/prd.md</path>
+              <title>Product Requirements Document: Network Traffic Parser</title>
+              <section>Functional Requirements - Packet Filtering &amp; Search</section>
+              <snippet>FR32: System highlights search matches in packet details view</snippet>
+            </doc>
+            <doc>
+              <path>docs/prd.md</path>
+              <title>Product Requirements Document: Network Traffic Parser</title>
+              <section>Non-Functional Requirements - Performance Requirements</section>
+              <snippet>NFR-P3: Search queries across 10,000 packets must return results within 500ms</snippet>
+            </doc>
+            <doc>
+              <path>docs/architecture.md</path>
+              <title>Architecture</title>
+              <section>Decision Summary - State Management - UI State</section>
+              <snippet>Zustand | Epic 1-6 | Lightweight (3KB), minimal boilerplate, fast, no Provider wrapper needed, simple API</snippet>
+            </doc>
+            <doc>
+              <path>docs/architecture.md</path>
+              <title>Architecture</title>
+              <section>Decision Summary - Testing Framework</section>
+              <snippet>Vitest | 1.x | Epic 1-8 | Fast Vite-powered unit tests, compatible with Vitest ecosystem, better DX than Jest</snippet>
+            </doc>
+            <doc>
+              <path>docs/architecture.md</path>
+              <title>Architecture</title>
+              <section>Decision Summary - Component Testing</section>
+              <snippet>React Testing Library | 14.x | Epic 1-6 | User-centric testing approach, excellent with TypeScript, industry standard</snippet>
+            </doc>
+            <doc>
+              <path>docs/architecture.md</path>
+              <title>Architecture</title>
+            </doc>
+            <doc>
+              <path>docs/architecture.md</path>
+              <title>Architecture</title>
+              <section>Project Structure - client/src/components/</section>
+              <snippet>FilterBar.tsx</snippet>
+            </doc>
+            <doc>
+              <path>docs/architecture.md</path>
+              <title>Architecture</title>
+              <section>Project Structure - client/src/utils/</section>
+              <snippet>bpfFilter.ts</snippet>
+            </doc>
+            <doc>
+              <path>docs/architecture.md</path>
+              <title>Architecture</title>
+              <section>Epic to Architecture Mapping - Epic 2: Search, Filter &amp; Analysis</section>
+              <snippet>client/src/utils/bpfFilter.ts, client/src/components/FilterBar.tsx, search logic in PacketList.tsx | BPF filter engine, multi-criteria search, all client-side</snippet>
+            </doc>
+            <doc>
+              <path>docs/architecture.md</path>
+              <title>Architecture</title>
+              <section>Implementation Patterns - Code Organization - Absolute Imports</section>
+              <snippet>Use `@/` alias for `src/` directory</snippet>
+            </doc>
+            <doc>
+              <path>docs/architecture.md</path>
+              <title>Architecture</title>
+              <section>Performance Considerations - Frontend Performance</section>
+              <snippet>PCAP Parsing: Use Web Workers to avoid blocking main thread</snippet>
+            </doc>
+            <doc>
+              <path>docs/architecture.md</path>
+              <title>Architecture</title>
+              <section>Performance Considerations - Frontend Performance</section>
+              <snippet>Virtual Scrolling: For large packet lists (react-window or react-virtuoso)</snippet>
+            </doc>
+            <doc>
+              <path>docs/architecture.md</path>
+              <title>Architecture</title>
+              <section>Performance Considerations - Frontend Performance</section>
+              <snippet>Memoization: Use `React.memo`, `useMemo`, `useCallback` for expensive computations</snippet>
+            </doc>
+            <doc>
+              <path>docs/architecture.md</path>
+              <title>Architecture</title>
+              <section>Performance Considerations - Frontend Performance</section>
+              <snippet>Debouncing: Filter/search inputs debounced to 300ms</snippet>
+            </doc>
+            <doc>
+              <path>docs/ux-design-specification.md</path>
+              <title>Network Traffic Parser UX Design Specification</title>
+              <section>1.1 Design System Choice</section>
+              <snippet>System: shadcn/ui (React + Tailwind CSS + Radix UI Primitives) - Professional Aesthetic, Dark Mode Priority, Customizability</snippet>
+            </doc>
+            <doc>
+              <path>docs/ux-design-specification.md</path>
+              <title>Network Traffic Parser UX Design Specification</title>
+              <section>2.2 Novel UX Patterns</section>
+              <snippet>Progressive Disclosure: Hiding complexity until needed to maintain the "Empowered and in Control" feeling.</snippet>
+            </doc>
+            <doc>
+              <path>docs/ux-design-specification.md</path>
+              <title>Network Traffic Parser UX Design Specification</title>
+              <section>3.1 Color System</section>
+              <snippet>Theme: Nebula - Palette: Backgrounds: Slate-950, Primary Accents: Blue-600 to Cyan-400 gradients</snippet>
+            </doc>
+            <doc>
+              <path>docs/ux-design-specification.md</path>
+              <title>Network Traffic Parser UX Design Specification</title>
+              <section>4.1 Chosen Design Approach</section>
+              <snippet>Direction: Modern SaaS - Philosophy: "Complexity, Simplified." - Visual Style: Deep Zinc (Zinc-950) with subtle gradients, Glassmorphism for headers, 1px borders, vibrant gradients</snippet>
+            </doc>
+            <doc>
+              <path>docs/ux-design-specification.md</path>
+              <title>Network Traffic Parser UX Design Specification</title>
+              <section>5.1 Critical User Paths - The "Forensic" Flow (Offline Analysis)</section>
+              <snippet>User types search query: port:443 and ip.country != "US".</snippet>
+            </doc>
+            <doc>
+              <path>docs/ux-design-specification.md</path>
+              <title>Network Traffic Parser UX Design Specification</title>
+              <section>6.1 Component Strategy</section>
+              <snippet>Base: shadcn/ui for all core interactive elements (Buttons, Inputs, Dialogs, Dropdowns).</snippet>
+            </doc>
+            <doc>
+              <path>docs/ux-design-specification.md</path>
+              <title>Network Traffic Parser UX Design Specification</title>
+              <section>6.1 Component Strategy</section>
+              <snippet>Key Components to Build: FilterBar: Complex input with syntax highlighting for BPF/Wireshark-style queries.</snippet>
+            </doc>
+            <doc>
+              <path>docs/ux-design-specification.md</path>
+              <title>Network Traffic Parser UX Design Specification</title>
+              <section>7.1 Consistency Rules</section>
+              <snippet>Density: "High Density, High Clarity."</snippet>
+            </doc>
+            <doc>
+              <path>docs/ux-design-specification.md</path>
+              <title>Network Traffic Parser UX Design Specification</title>
+              <section>7.1 Consistency Rules</section>
+              <snippet>Feedback: Every action (filter apply, stream connect) must have immediate visual feedback.</snippet>
+            </doc>
+            <doc>
+              <path>docs/ux-design-specification.md</path>
+              <title>Network Traffic Parser UX Design Specification</title>
+              <section>7.1 Consistency Rules</section>
+              <snippet>Terminology: Use standard industry terms (PCAP, Payload, Handshake)—do not "dumb down" the language for this audience.</snippet>
+            </doc>
+            <doc>
+              <path>docs/epics.md</path>
+              <title>Network Traffic Parser - Epic Breakdown</title>
+              <section>Epic 2: Search, Filter &amp; Basic Analysis</section>
+              <snippet>Goal: Provide powerful search and filtering capabilities for efficient packet analysis. User Value: Users can quickly find relevant packets using BPF filters, IP/port search, and multi-criteria filtering.</snippet>
+            </doc>
+            <doc>
+              <path>docs/epics.md</path>
+              <title>Network Traffic Parser - Epic Breakdown</title>
+              <section>Epic 2: Search, Filter &amp; Basic Analysis - Story 2.2: Multi-Criteria Search</section>
+              <snippet>FR Coverage: FR26, FR27, FR28, FR29, FR30, FR31</snippet>
+            </doc>
+          </docs>    <code>
+          <entry>
+            <path>client/src/pages/PcapAnalysisPage.tsx</path>
+            <kind>page-component</kind>
+            <symbol>PcapAnalysisPage</symbol>
+            <reason>Integrates AdvancedSearchPanel and applies search logic to packets.</reason>
+          </entry>
+          <entry>
+            <path>client/src/components/PacketList.tsx</path>
+            <kind>ui-component</kind>
+            <symbol>PacketList</symbol>
+            <reason>Displays filtered packets and will be updated to show search matches.</reason>
+          </entry>
+          <entry>
+            <path>client/src/components/PacketDetailView.tsx</path>
+            <kind>ui-component</kind>
+            <symbol>PacketDetailView</symbol>
+            <reason>Displays detailed packet info and will be enhanced for search highlighting.</reason>
+          </entry>
+          <entry>
+            <path>client/src/types/packet.ts</path>
+            <kind>type-definition</kind>
+            <symbol>Packet</symbol>
+            <reason>Defines the structure of packet data used in search operations.</reason>
+          </entry>
+          <entry>
+            <path>client/src/services/localStorage.ts</path>
+            <kind>service</kind>
+            <symbol>localStorage</symbol>
+            <reason>Will be used to save and load multi-criteria search configurations.</reason>
+          </entry>
+          <entry>
+            <path>client/src/utils/bpfFilter.ts</path>
+            <kind>utility</kind>
+            <symbol>bpfFilter</symbol>
+            <reason>Provides existing filtering patterns; multi-criteria search should integrate with it.</reason>
+          </entry>
+        </code>
+        <interfaces>
+          <interface>
+            <name>Packet</name>
+            <kind>TypeScript Interface</kind>
+            <signature>
+interface Packet {
+  id: string;                    // UUID
+  timestamp: number;             // Unix timestamp (ms)
+  sourceIP: string;              // IPv4 or IPv6
+  destIP: string;
+  sourcePort: number;
+  destPort: number;
+  protocol: string;              // 'TCP', 'UDP', 'ICMP', 'HTTP', HTTPS', 'DNS'
+  length: number;                // Bytes
+  rawData: ArrayBuffer;          // Packet payload
+  flags?: string[];              // TCP flags ['SYN', 'ACK']
+  sessionId?: string;            // For TCP session grouping
+  extractedStrings?: ExtractedString[];
+  fileReferences?: FileReference[];
+  detectedProtocols: string[];   // List of detected protocols (e.g., ["TCP", "HTTP"])
+  portBasedProtocol?: string;    // Protocol detected via port heuristics
+  deepInspectionProtocol?: string; // Protocol detected via deep packet inspection
+}
+            </signature>
+            <path>client/src/types/packet.ts</path>
+          </interface>
+        </interfaces>
+        <constraints>
+          <constraint>
+            <type>Technology Stack</type>
+            <description>Continue to use React, TypeScript, Vite, Tailwind CSS, shadcn/ui. State management for search criteria will likely use Zustand.</description>
+          </constraint>
+          <constraint>
+            <type>Performance (NFR-P3)</type>
+            <description>A critical constraint is the search completion time of &lt;500ms for 10,000 packets. This mandates efficient algorithms for string search (e.g., Boyer-Moore) and indexed data structures (e.g., Maps for IP/port lookup, sorted arrays for time-based search).</description>
+          </constraint>
+          <constraint>
+            <type>Search and Filter Integration</type>
+            <description>The multi-criteria search should be designed to complement the existing BPF filter (Story 2.1), likely combining their results with an implicit AND operation.</description>
+          </constraint>
+          <constraint>
+            <type>UI Components</type>
+            <description>shadcn/ui components should be consistently used for form elements within the AdvancedSearchPanel.</description>
+          </constraint>
+          <constraint>
+            <type>Testing</type>
+            <description>Adherence to the established testing stack (Vitest, React Testing Library).</description>
+          </constraint>
+        </constraints>
+        <dependencies>
+          <npm type="dependencies">
+            <package name="@radix-ui/react-alert-dialog" version="^1.1.15" />
+            <package name="@radix-ui/react-dialog" version="^1.1.15" />
+            <package name="@radix-ui/react-progress" version="^1.1.8" />
+            <package name="@radix-ui/react-select" version="^2.2.6" />
+            <package name="@radix-ui/react-slot" version="^1.2.4" />
+            <package name="@radix-ui/react-tabs" version="^1.1.13" />
+            <package name="@radix-ui/react-toast" version="^1.2.15" />
+            <package name="@radix-ui/react-tooltip" version="^1.2.8" />
+            <package name="class-variance-authority" version="^0.7.1" />
+            <package name="clsx" version="^2.1.1" />
+            <package name="crypto-js" version="^4.2.0" />
+            <package name="lucide-react" version="^0.554.0" />
+            <package name="pcap-decoder" version="^1.0.3" />
+            <package name="react" version="^19.2.0" />
+            <package name="react-dom" version="^19.2.0" />
+            <package name="recharts" version="^3.5.0" />
+            <package name="tailwind-merge" version="^3.4.0" />
+            <package name="tailwindcss-animate" version="^1.0.7" />
+          </npm>
+          <npm type="devDependencies">
+            <package name="@eslint/js" version="^9.39.1" />
+            <package name="@shadcn/ui" version="^0.0.4" />
+            <package name="@tailwindcss/postcss" version="^4.1.17" />
+            <package name="@testing-library/jest-dom" version="^6.9.1" />
+            <package name="@testing-library/react" version="^16.3.0" />
+            <package name="@testing-library/user-event" version="^14.6.1" />
+            <package name="@types/crypto-js" version="^4.2.1" />
+            <package name="@types/node" version="^24.10.1" />
+            <package name="@types/react" version="^19.2.5" />
+            <package name="@types/react-dom" version="^19.2.3" />
+            <package name="@typescript-eslint/eslint-plugin" version="^8.47.0" />
+            <package name="@typescript-eslint/parser" version="^8.47.0" />
+            <package name="@vitejs/plugin-react" version="^5.1.1" />
+            <package name="autoprefixer" version="^10.4.22" />
+            <package name="eslint" version="^9.39.1" />
+            <package name="eslint-config-prettier" version="^10.1.8" />
+            <package name="eslint-plugin-prettier" version="^5.5.4" />
+            <package name="eslint-plugin-react-hooks" version="^7.0.1" />
+            <package name="eslint-plugin-react-refresh" version="^0.4.24" />
+            <package name="globals" version="^16.5.0" />
+            <package name="jsdom" version="^27.2.0" />
+            <package name="postcss" version="^8.5.6" />
+            <package name="prettier" version="^3.6.2" />
+            <package name="tailwindcss" version="^4.1.17" />
+            <package name="typescript" version="~5.9.3" />
+            <package name="typescript-eslint" version="^8.46.4" />
+            <package name="vite" version="^7.2.4" />
+            <package name="vitest" version="^4.0.13" />
+          </npm>
+        </dependencies>
+  </artifacts>
+
+  <tests>
+    <standards>
+      <standard>
+        <type>Unit Tests</type>
+        <framework>Vitest</framework>
+        <description>Cover `multiCriteriaSearch.ts` exhaustively, including various combinations of search parameters, edge cases, and performance checks.</description>
+      </standard>
+      <standard>
+        <type>Component Tests</type>
+        <framework>React Testing Library</framework>
+        <description>Focus on `AdvancedSearchPanel.tsx` UI interactions, state management, and display of saved searches.</description>
+      </standard>
+    </standards>
+    <locations>
+      <location>
+        <type>Unit Tests</type>
+        <path>client/src/**/*.test.ts(x)</path>
+        <description>Co-located with source files.</description>
+      </location>
+    </locations>
+    <ideas>
+      <idea related-to="AC1">Test that search functionality works correctly when no packets are loaded.</idea>
+      <idea related-to="AC3">Verify that all specified search criteria (IP, port, protocol, time range, payload content) can be entered and are respected by the search logic.</idea>
+      <idea related-to="AC4">Test the correct application of AND/OR logic when combining multiple search criteria.</idea>
+      <idea related-to="AC5">Confirm that after a search, only matching packets are displayed in the packet table.</idea>
+      <idea related-to="AC6">Performance test for search completion time (&lt;500ms for 10,000 packets).</idea>
+      <idea related-to="AC7">Verify that search matches are correctly highlighted in both the packet list and detailed view.</idea>
+      <idea related-to="AC8">Test saving, loading, and deleting saved search configurations.</idea>
+    </ideas>
+  </tests>
+</story-context>

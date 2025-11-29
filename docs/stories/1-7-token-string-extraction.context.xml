@@ -282,11 +282,10 @@ interface ExtractedString {
   </Artifacts>
   <Tests>
     <Standards>
-      <Paragraph>Unit tests will be written using Vitest, co-located with source files (`*.test.tsx`). Component tests will utilize React Testing Library, focusing on user-centric interactions. End-to-End tests will use Playwright to verify full user flows. Performance testing will be advised for large packet payloads, potentially involving Web Workers for string extraction.</Paragraph>
+      <Paragraph>Unit tests will be written using Vitest, co-located with source files (`*.test.tsx`). Component tests will utilize React Testing Library, focusing on user-centric interactions. Performance testing will be advised for large packet payloads, potentially involving Web Workers for string extraction.</Paragraph>
     </Standards>
     <Locations>
       <Location>client/src/**/*.test.tsx</Location>
-      <Location>tests/e2e/**/*.spec.ts</Location>
     </Locations>
     <Ideas>
       <Idea ac_id="AC1">

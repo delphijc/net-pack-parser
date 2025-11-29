@@ -12,7 +12,11 @@ dist
 dist-ssr
 *.local
 .env
-./test_results/
+test_results/
+playwright-report/data/
+playwright-report/trace/
+playwright-report/
+test-results/
 
 
 # Editor directories and files

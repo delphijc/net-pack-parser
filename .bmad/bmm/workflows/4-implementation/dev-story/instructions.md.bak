@@ -199,7 +199,8 @@ Expected ready-for-dev or in-progress. Continuing anyway...
       <action>Add Change Log entry: "Addressed code review findings - {{resolved_count}} items resolved (Date: {{date}})"</action>
     </check>
 
-    <action>Save the story file</action>
+    <critical>CRITICAL: You MUST preserve the entire original story content. Only update the specific sections (Tasks, File List, Dev Agent Record). DO NOT overwrite the file with partial content.</critical>
+    <action>Save the story file with the UPDATED content (Original + Updates).</action>
     <action>Determine if more incomplete tasks remain</action>
     <action if="more tasks remain"><goto step="2">Next task</goto></action>
     <action if="no tasks remain"><goto step="6">Completion</goto></action>
@@ -210,7 +211,7 @@ Expected ready-for-dev or in-progress. Continuing anyway...
     <action>Run the full regression suite (do not skip)</action>
     <action>Confirm File List includes every changed file</action>
     <action>Execute story definition-of-done checklist, if the story includes one</action>
-    <action>Update the story Status to: review</action>
+    <action>Update the story Status to: review (Preserving all other content)</action>
 
     <!-- Mark story ready for review -->
     <action>Load the FULL file: {{output_folder}}/sprint-status.yaml</action>

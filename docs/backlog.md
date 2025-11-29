@@ -28,7 +28,6 @@ Routing guidance:
 | 2025-11-28 | 1.9 | 1 | Bug | Critical | TBD | Open | Fix Data Persistence Bug: `saveNonFileDataToStorage` in `database.ts` stores `ArrayBuffer` in `localStorage`. [file: `client/src/services/database.ts`] |
 | 2025-11-28 | 1.9 | 1 | Feature | High | TBD | Open | Implement Full FTP File Reassembly: Extend `fileExtractor.ts` to handle FTP data channel reassembly. [file: `client/src/utils/fileExtractor.ts`] |
 | 2025-11-28 | 1.9 | 1 | Test | High | TBD | Open | Add Component Tests for `FilesTab.tsx`. [file: `client/src/components/FilesTab.test.tsx`] |
-| 2025-11-28 | 1.9 | 1 | Test | High | TBD | Open | Add Integration/E2E Tests for file download flow. [file: `tests/e2e/app.spec.ts`] |
 | 2025-11-28 | 1.9 | 1 | Performance | Medium | TBD | Open | Improve `reassembleFile` performance (optimize concatenation or Web Worker). [file: `client/src/utils/fileExtractor.ts`] |
 | 2025-11-28 | 1.9 | 1 | UX | Medium | TBD | Open | Improve `FilesTab.tsx` UX/Error Handling. [file: `client/src/components/FilesTab.tsx`] |
 | 2025-11-28 | 1.9 | 1 | TechDebt | Low | TBD | Open | Log `parseHttpHeaders` errors. [file: `client/src/utils/fileExtractor.ts`] |

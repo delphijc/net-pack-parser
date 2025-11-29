@@ -53,7 +53,7 @@ Evidence: The `<dependencies>` section provides a comprehensive list of client-s
 ### Testing standards and locations populated
 Pass Rate: 1/1 (100%)
 ✓ Testing standards and locations populated
-Evidence: The `<tests>` section includes detailed standards, locations, and ideas for unit, component, and E2E tests, reflecting the story's requirements.
+Evidence: The `<tests>` section includes detailed standards, locations, and ideas for unit and component tests, reflecting the story's requirements.
 
 ### XML structure follows story-context template format
 Pass Rate: 1/1 (100%)

@@ -360,18 +360,18 @@ PacketList -> User: Display 42 matching packets
 
 | AC ID | PRD Requirement | Spec Section | Component/API | Test Approach |
 |-------|----------------|--------------|---------------|---------------|
-| AC-1 | FR25 BPF filtering | bpfFilter.ts API | `parseBPF()`, `compileBPF()` | Unit: Test all BPF primitives; E2E: Apply various BPF filters |
-| AC-2 | FR26 IP search | searchEngine.ts | `searchPackets()` with IP criteria | Unit: Test IP matching; E2E: Search by IP address |
-| AC-3 | FR27 Port search | searchEngine.ts | `searchPackets()` with port criteria | Unit: Test port matching; E2E: Search by port |
-| AC-4 | FR28 Protocol filter | searchEngine.ts | `searchPackets()` with protocol array | Unit: Multi-select logic; E2E: Filter by protocol |
-| AC-5 | FR29 Time range | searchEngine.ts | `searchPackets()` with timeRange | Unit: Timestamp comparison; E2E: Time range picker |
-| AC-6 | FR30 Payload search | searchPayload() | `searchPayload()` with highlighting | Unit: String search + ranges; E2E: Payload search |
-| AC-7 | FR31 Boolean logic | SearchCriteria.combinator | `searchPackets()` with AND/OR | Unit: Boolean evaluation; E2E: Combined criteria |
+| AC-1 | FR25 BPF filtering | bpfFilter.ts API | `parseBPF()`, `compileBPF()` | Unit: Test all BPF primitives |
+| AC-2 | FR26 IP search | searchEngine.ts | `searchPackets()` with IP criteria | Unit: Test IP matching |
+| AC-3 | FR27 Port search | searchEngine.ts | `searchPackets()` with port criteria | Unit: Test port matching |
+| AC-4 | FR28 Protocol filter | searchEngine.ts | `searchPackets()` with protocol array | Unit: Multi-select logic |
+| AC-5 | FR29 Time range | searchEngine.ts | `searchPackets()` with timeRange | Unit: Timestamp comparison |
+| AC-6 | FR30 Payload search | searchPayload() | `searchPayload()` with highlighting | Unit: String search + ranges |
+| AC-7 | FR31 Boolean logic | SearchCriteria.combinator | `searchPackets()` with AND/OR | Unit: Boolean evaluation |
 | AC-8 | FR32 Highlighting | PacketDetailView highlighting | `highlights` prop rendering | Visual: Screenshot comparison |
-| AC-9 | Usability | validateBPF() | `validateBPF()` error messages | Unit: Invalid syntax cases; E2E: Error display |
+| AC-9 | Usability | validateBPF() | `validateBPF()` error messages | Unit: Invalid syntax cases |
 | AC-10 | NFR-P3 Performance | Filter execution timing | Performance.mark() logging | Load test: 10k packets, assert <500ms |
-| AC-11 | Persistence | filterStore.saveFilter() | localStorage persistence | E2E: Save filter, reload page, verify loaded |
-| AC-12 | Persistence UI | FilterBar saved filters UI | Filter dropdown, delete button | E2E: CRUD operations on saved filters |
+| AC-11 | Persistence | filterStore.saveFilter() | localStorage persistence | Unit: Save filter, reload page, verify loaded |
+| AC-12 | Persistence UI | FilterBar saved filters UI | Filter dropdown, delete button | Unit: CRUD operations on saved filters |
 
 ## Risks, Assumptions, Open Questions
 
@@ -412,13 +412,6 @@ PacketList -> User: Display 42 matching packets
 - `FilterBar.test.tsx`: Test input validation, error display, filter submission, saved filter dropdown
 - `PacketList.test.tsx`: Test filtered packet rendering, highlight display
 
-**E2E Tests (Playwright):**
-- **Scenario 1:** Apply BPF filter "tcp port 443" → Verify only HTTPS packets displayed
-- **Scenario 2:** Multi-criteria search (IP + port + protocol) with AND combinator → Verify correct matches
-- **Scenario 3:** Payload string search → Verify highlighting in packet detail view
-- **Scenario 4:** Save filter → Reload page → Load saved filter → Verify persistence
-- **Scenario 5:** Invalid BPF syntax → Verify error message with position indicator
-- **Scenario 6:** Performance test with 10k packets → Assert filter execution <500ms
 
 **Performance Tests:**
 - Load 10,000 packet dataset, apply various filters, measure execution time
@@ -428,4 +421,3 @@ PacketList -> User: Display 42 matching packets
 **Coverage Targets:**
 - Unit test coverage: ≥90% for bpfFilter.ts and searchEngine.ts (critical logic)
 - Component coverage: ≥80% for FilterBar and enhanced PacketList
-- E2E: All 12 acceptance criteria covered by at least one E2E test

@@ -143,19 +143,17 @@
     </dependencies>
     <tests>
       <standards>
-        Unit tests will use Vitest for individual functions and logic (e.g., hash generation). Component tests will use React Testing Library for React components in isolation (e.g., FileInfo.tsx). End-to-end tests will use Playwright for full user flows. Performance tests will be conducted manually with browser developer tools, with potential for automated Playwright tests later. Tests are co-located with components or in __tests__ folders.
+        Unit tests will use Vitest for individual functions and logic (e.g., hash generation). Component tests will use React Testing Library for React components in isolation (e.g., FileInfo.tsx). Performance tests will be conducted manually with browser developer tools. Tests are co-located with components or in __tests__ folders.
       </standards>
       <locations>
         <location>client/src/**/*.test.tsx</location>
         <location>client/src/__tests__/</location>
-        <location>tests/e2e/</location>
       </locations>
       <ideas>
         <idea ac_id="1" description="Unit test hashGenerator.ts to verify correct SHA-256 hash generation for known inputs using Web Crypto API (mocked if necessary)." />
         <idea ac_id="2" description="Unit test hashGenerator.ts to verify correct MD5 hash generation for known inputs using crypto-js." />
         <idea ac_id="3" description="Component test FileInfo.tsx (once created) to ensure both SHA-256 and MD5 hashes are displayed correctly in the UI." />
         <idea ac_id="4" description="Integration test the file upload workflow in PcapUpload.tsx to ensure a Chain of Custody log entry is created with all required fields (timestamp, action, filename, size, hashes, user agent) after a successful upload." />
-        <idea ac_id="5" description="E2E test to verify Chain of Custody log entries persist in browser storage (e.g., IndexedDB) across browser sessions and are correctly included in data exports." />
         <idea ac_id="6" description="Integration/Component test the 'Verify Integrity' functionality, covering scenarios where the recalculated hash matches the stored hash (success) and where it mismatches (failure)." />
       </ideas>
     </tests>

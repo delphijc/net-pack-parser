@@ -210,8 +210,7 @@ This epic will primarily use browser-native APIs:
 
 - **Unit Tests:** `Vitest` will be used to test individual functions, such as BPF filter logic, hash generation, and data formatting utilities. `pcapParser.ts` will have extensive unit tests covering different packet types.
 - **Component Tests:** `React Testing Library` will be used to test React components in isolation. This includes testing the `PacketList` rendering, `PacketDetailView` content, and `FileUploader` interactions.
-- **E2E Tests:** `Playwright` will be used to test the full user flow for PCAP analysis: uploading a file, seeing the packet list, clicking a packet, and viewing the details.
-- **Performance Tests:** Manual performance testing using browser developer tools will be conducted to ensure compliance with NFRs. Automated performance tests can be added later using Playwright.
+- **Performance Tests:** Manual performance testing using browser developer tools will be conducted to ensure compliance with NFRs.
 
 ## Post-Review Follow-ups
 
@@ -233,7 +232,6 @@ This epic will primarily use browser-native APIs:
 - (Story 1.9) [Critical] Fix Data Persistence Bug: `saveNonFileDataToStorage` in `database.ts` stores `ArrayBuffer` in `localStorage`. [file: `client/src/services/database.ts`]
 - (Story 1.9) [High] Implement Full FTP File Reassembly: Extend `fileExtractor.ts` to handle FTP data channel reassembly. [file: `client/src/utils/fileExtractor.ts`]
 - (Story 1.9) [High] Add Component Tests for `FilesTab.tsx`. [file: `client/src/components/FilesTab.test.tsx`]
-- (Story 1.9) [High] Add Integration/E2E Tests for file download flow. [file: `tests/e2e/app.spec.ts`]
 - (Story 1.9) [Medium] Improve `reassembleFile` performance (optimize concatenation or Web Worker). [file: `client/src/utils/fileExtractor.ts`]
 - (Story 1.9) [Medium] Improve `FilesTab.tsx` UX/Error Handling. [file: `client/src/components/FilesTab.tsx`]
 - (Story 1.9) [Low] Log `parseHttpHeaders` errors. [file: `client/src/utils/fileExtractor.ts`]

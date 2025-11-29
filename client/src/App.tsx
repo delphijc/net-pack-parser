@@ -1,5 +1,6 @@
 // src/App.tsx
 import Dashboard from './components/dashboard/Dashboard';
+import { Toaster } from '@/components/ui/toaster';
 
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
       <main className="container py-6">
         <Dashboard />
       </main>
+      <Toaster />
     </div>
   );
 }

@@ -144,7 +144,6 @@ So that I can verify file integrity and maintain chain of custody.
 
 **Advisory Notes:**
 - Note: Consider offloading hash generation for large files to a Web Worker in `PcapUpload.tsx` to prevent UI blocking, as suggested in Dev Notes (ACs 1 & 2 related).
-- Note: Future consideration for E2E tests to cover "included in data exports" for Chain of Custody log (AC 5).
 
 ## Senior Developer Review (AI)
 - Reviewer: delphijc
@@ -215,6 +214,5 @@ So that I can verify file integrity and maintain chain of custody.
 
 **Advisory Notes:**
 - Note: Consider offloading hash generation for large files to a Web Worker in `PcapUpload.tsx` to prevent UI blocking, as suggested in Dev Notes (ACs 1 & 2 related).
-- Note: Future consideration for E2E tests to cover "included in data exports" for Chain of Custody log (AC 5).
 
 

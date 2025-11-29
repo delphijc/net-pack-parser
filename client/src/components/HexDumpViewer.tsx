@@ -56,6 +56,8 @@ export const generateHexDump = (
 interface HexDumpViewerProps {
   rawData: ArrayBuffer;
   highlightRanges?: Array<{ offset: number; length: number }>; // New optional prop
+  searchString?: string | null;
+  caseSensitive?: boolean;
 }
 
 const HexDumpViewer: React.FC<HexDumpViewerProps> = ({ rawData, highlightRanges = [] }) => {

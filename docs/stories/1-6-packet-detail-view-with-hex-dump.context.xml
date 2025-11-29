@@ -59,7 +59,6 @@
         <path>docs/architecture.md</path>
         <title>Architecture</title>
         <section>Technology Stack Details</section>
-        <snippet>References shadcn/ui as Component Library. Specifies Vitest, React Testing Library, Playwright for testing. Mentions pcap-decoder for PCAP parsing.</snippet>
       </entry>
       <entry>
         <path>docs/architecture.md</path>

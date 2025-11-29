@@ -134,7 +134,6 @@
         <path>docs/architecture.md</path>
         <title>Architecture</title>
         <section>Decision Summary</section>
-        <snippet>PCAP Parser (Browser): pcap-decoder. Testing: Vitest, React Testing Library, Playwright.</snippet>
       </entry>
       <entry>
         <path>docs/architecture.md</path>
@@ -276,11 +275,10 @@
       </ecosystem>
     </dependencies>
     <tests>
-      <standards>The project uses Vitest for unit tests, React Testing Library for component tests, and Playwright for end-to-end tests. Unit tests are co-located with the source files (`*.test.ts`, `*.test.tsx`). Component tests focus on isolated UI elements, and integration tests cover end-to-end flows.</standards>
+      <standards>The project uses Vitest for unit tests and React Testing Library for component tests. Unit tests are co-located with the source files (`*.test.ts`, `*.test.tsx`). Component tests focus on isolated UI elements.</standards>
       <locations>
         <glob-pattern>client/src/**/*.test.ts</glob-pattern>
         <glob-pattern>client/src/**/*.test.tsx</glob-pattern>
-        <glob-pattern>tests/e2e/**/*.spec.ts</glob-pattern>
       </locations>
       <ideas>
         <idea ac-id="AC3">

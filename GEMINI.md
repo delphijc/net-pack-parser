@@ -16,7 +16,7 @@ The project is structured as a monorepo, with the main frontend application loca
 -   **Frontend:** React, TypeScript, Vite, Tailwind CSS
 -   **Component Library:** shadcn/ui
 -   **State Management:** TanStack Query (for server state) and Zustand (for UI state)
--   **Testing:** Vitest (unit), React Testing Library (component), and Playwright (E2E)
+-   **Testing:** Vitest (unit), React Testing Library (component)
 -   **Packet Parsing:** `pcap-decoder` library for in-browser parsing.
 
 ## Development Environment Setup
@@ -54,9 +54,6 @@ The application will be available at `http://localhost:5173`.
 
 -   **Run dev server:** `cd client && npm run dev`
 -   **Run linters:** `cd client && npm run lint`
--   **Run unit tests:** `cd client && npm run test`
--   **Run E2E tests:** `npm run test:e2e` (from the root directory)
-
 ### Production
 
 -   **Build the application:** `cd client && npm run build`
@@ -82,7 +79,6 @@ The project aims for a monorepo structure, but the primary focus for now is the 
 │
 ├── src/                 # Older/alternative root application source
 ├── docs/                # Project documentation (architecture, PRD)
-├── tests/               # E2E tests (Playwright)
 ├── package.json         # Root package.json
 └── README.md
 ```
@@ -96,6 +92,5 @@ The project aims for a monorepo structure, but the primary focus for now is the 
     -   Use **TanStack Query** for managing asynchronous operations and server state.
 -   **Testing:**
     -   Unit tests are co-located with the source files (`*.test.tsx`).
-    -   E2E tests are in the root `tests/e2e` directory.
 -   **Linting:** ESLint is used for code quality. Run `npm run lint` in the `client` directory to check for issues.
 -   **Imports:** Use absolute imports with the `@/` alias for the `client/src` directory.

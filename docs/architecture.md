@@ -71,7 +71,6 @@ net-pack-parser/
 | **Chart Library** | Recharts | 2.x | Epic 6 | React-native, TypeScript support, modern declarative API, composable charts, responsive |
 | **Testing Framework** | Vitest | 1.x | Epic 1-8 | Fast Vite-powered unit tests, compatible with Vitest ecosystem, better DX than Jest |
 | **Component Testing** | React Testing Library | 14.x | Epic 1-6 | User-centric testing approach, excellent with TypeScript, industry standard |
-| **E2E Testing** | Playwright | 1.x | Epic 1-8 | Cross-browser, reliable, auto-wait, great debugging, TypeScript support |
 | **YARA Engine** | yara-js | Latest | Epic 3 | WebAssembly YARA port, browser-compatible, actively maintained, full YARA syntax support |
 | **API Response Format** | Direct HTTP Status | N/A | Epic 7-8 | RESTful standard, simpler than wrapped responses, uses HTTP semantics correctly |
 
@@ -87,7 +86,7 @@ net-pack-parser/
 - ✅ PCAP parsing: pcap-decoder (browser)
 - ✅ Packet capture: cap library (server, libpcap bindings)
 - ✅ Charts: Recharts
-- ✅ Testing: Vitest + React Testing Library + Playwright
+- ✅ Testing: Vitest + React Testing Library
 - ✅ API format: Direct responses with HTTP status codes
 - ✅ YARA: yara-js (WebAssembly)
 - ✅ Database: localStorage → IndexedDB (browser), file system (server), PostgreSQL (future)
@@ -230,7 +229,7 @@ net-pack-parser/
 - **BPF Filtering:** Custom implementation (JavaScript BPF parser)
 - **YARA Engine:** yara-js (WebAssembly YARA port)
 - **Charts:** Recharts 2.x (React-native, TypeScript, composable)
-- **Testing:** Vitest 1.x + React Testing Library 14.x + Playwright 1.x (E2E)
+- **Testing:** Vitest 1.x + React Testing Library 14.x
 
 #### Server (Capture Agent)
 
@@ -784,7 +783,6 @@ npm run dev              # Start server with nodemon on http://localhost:3000
 ```bash
 cd client
 npm test                 # Vitest unit tests
-npm run test:e2e         # Playwright E2E tests
 
 cd ../server
 npm test                 # Server tests

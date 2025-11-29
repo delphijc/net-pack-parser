@@ -34,9 +34,6 @@
 - **Component: 20%**
     - **Rationale**: Complex UI visualizations (Charts, Timeline, Packet List) need verification of rendering logic and interaction handling.
     - **Focus**: `PacketList`, `TimelineView`, `Charts`, `FilterBar`.
-- **E2E: 10%**
-    - **Rationale**: Critical user journeys involving multiple systems. Expensive to run, so limited to core flows.
-    - **Focus**: "Capture -> Stream -> Analyze", "Upload PCAP -> Parse -> Report", "Threat Detection Alerting".
 
 ## NFR Testing Approach
 
@@ -46,7 +43,7 @@
     - **Auth**: Automated tests for JWT validation, expiration, and refresh flows.
 - **Performance**:
     - **Server**: `k6` load tests simulating multiple concurrent WebSocket clients and high packet rates.
-    - **Browser**: Playwright tests using CDPSession to monitor memory usage and FPS during heavy rendering.
+    - **Browser**: Manual tests using DevTools to monitor memory usage and FPS during heavy rendering.
 - **Reliability**:
     - **Chaos Testing**: Simulate network interruptions (disconnect WebSocket) to verify auto-reconnection (FR80) and buffer handling.
     - **Stress Testing**: Push capture agent to 10k+ pps to verify stability and buffer limits.
@@ -66,8 +63,8 @@
 
 - **Concern 1: Native Libpcap Dependency**: Testing the `cap` library requires root privileges and OS-specific libraries, making CI/CD complex.
     - *Mitigation*: Create a robust `MockCaptureService` that simulates packet streams from a file, allowing logic testing without root. Use a smaller set of "smoke tests" on privileged runners for actual hardware integration.
-- **Concern 2: WebSocket Mocking**: accurately simulating WebSocket frames (control vs data) in Playwright/Vitest can be flaky.
-    - *Mitigation*: Use a dedicated WebSocket mock server or Playwright's `page.routeWebSocket()` (if available/stable) or a proxy.
+- **Concern 2: WebSocket Mocking**: accurately simulating WebSocket frames (control vs data) in Vitest can be flaky.
+    - *Mitigation*: Use a dedicated WebSocket mock server or a proxy.
 
 ## Recommendations for Sprint 0
 
