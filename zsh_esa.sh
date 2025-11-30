@@ -15,7 +15,7 @@ AGENTS_DIR="$BMAD_ROOT/agents"
 WORKFLOWS_DIR="$BMAD_ROOT/workflows/4-implementation"
 SM_AGENT="sm"
 DEV_AGENT="dev"
-LLM_MODEL="gemini-2.5-flash"
+LLM_MODEL="gemini-2.5-pro"
 
 
 # -------------------------------------------------------------------
