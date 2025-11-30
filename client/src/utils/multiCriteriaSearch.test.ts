@@ -1,7 +1,10 @@
 // client/src/utils/multiCriteriaSearch.test.ts
 
 import { describe, it, expect } from 'vitest';
-import { getMatchDetails, type MultiSearchCriteria } from './multiCriteriaSearch';
+import {
+  getMatchDetails,
+  type MultiSearchCriteria,
+} from './multiCriteriaSearch';
 import type { Packet } from '@/types/packet';
 
 describe('getMatchDetails', () => {
@@ -16,7 +19,7 @@ describe('getMatchDetails', () => {
     length: 100,
     rawData: new TextEncoder().encode('test payload content').buffer,
     detectedProtocols: ['HTTP'],
-    ...overrides
+    ...overrides,
   });
 
   it('should return empty match details when no criteria provided', () => {
@@ -35,7 +38,7 @@ describe('getMatchDetails', () => {
     const packet = createTestPacket();
     const criteria: MultiSearchCriteria = {
       sourceIp: { ip: '192.168.1.1', isCidr: false },
-      logic: 'AND'
+      logic: 'AND',
     };
 
     const details = getMatchDetails(packet, criteria);
@@ -46,7 +49,7 @@ describe('getMatchDetails', () => {
     const packet = createTestPacket();
     const criteria: MultiSearchCriteria = {
       destIp: { ip: '192.168.1.2', isCidr: false },
-      logic: 'AND'
+      logic: 'AND',
     };
 
     const details = getMatchDetails(packet, criteria);
@@ -57,7 +60,7 @@ describe('getMatchDetails', () => {
     const packet = createTestPacket();
     const criteria: MultiSearchCriteria = {
       sourcePort: { port: 80 },
-      logic: 'AND'
+      logic: 'AND',
     };
 
     const details = getMatchDetails(packet, criteria);
@@ -68,7 +71,7 @@ describe('getMatchDetails', () => {
     const packet = createTestPacket();
     const criteria: MultiSearchCriteria = {
       destPort: { port: 443 },
-      logic: 'AND'
+      logic: 'AND',
     };
 
     const details = getMatchDetails(packet, criteria);
@@ -79,7 +82,7 @@ describe('getMatchDetails', () => {
     const packet = createTestPacket();
     const criteria: MultiSearchCriteria = {
       protocol: { protocol: 'HTTP' },
-      logic: 'AND'
+      logic: 'AND',
     };
 
     const details = getMatchDetails(packet, criteria);
@@ -88,11 +91,12 @@ describe('getMatchDetails', () => {
 
   it('should find payload matches with correct offsets', () => {
     const packet = createTestPacket({
-      rawData: new TextEncoder().encode('test payload content with test again').buffer
+      rawData: new TextEncoder().encode('test payload content with test again')
+        .buffer,
     });
     const criteria: MultiSearchCriteria = {
       payload: { content: 'test', caseSensitive: false },
-      logic: 'AND'
+      logic: 'AND',
     };
 
     const details = getMatchDetails(packet, criteria);
@@ -105,11 +109,11 @@ describe('getMatchDetails', () => {
 
   it('should handle case-sensitive payload matching', () => {
     const packet = createTestPacket({
-      rawData: new TextEncoder().encode('Test test TEST').buffer
+      rawData: new TextEncoder().encode('Test test TEST').buffer,
     });
     const criteria: MultiSearchCriteria = {
       payload: { content: 'test', caseSensitive: true },
-      logic: 'AND'
+      logic: 'AND',
     };
 
     const details = getMatchDetails(packet, criteria);
@@ -123,7 +127,7 @@ describe('getMatchDetails', () => {
       sourceIp: { ip: '192.168.1.1', isCidr: false },
       destPort: { port: 443 },
       protocol: { protocol: 'HTTP' },
-      logic: 'AND'
+      logic: 'AND',
     };
 
     const details = getMatchDetails(packet, criteria);
@@ -136,7 +140,7 @@ describe('getMatchDetails', () => {
     const packet = createTestPacket();
     const criteria: MultiSearchCriteria = {
       sourceIp: { ip: '10.0.0.1', isCidr: false },
-      logic: 'AND'
+      logic: 'AND',
     };
 
     const details = getMatchDetails(packet, criteria);
@@ -147,7 +151,7 @@ describe('getMatchDetails', () => {
     const packet = createTestPacket();
     const criteria: MultiSearchCriteria = {
       payload: { content: '', caseSensitive: false },
-      logic: 'AND'
+      logic: 'AND',
     };
 
     const details = getMatchDetails(packet, criteria);

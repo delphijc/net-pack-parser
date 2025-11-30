@@ -8,16 +8,20 @@ import type { FileReference } from '../types/fileReference';
  * Utility for detecting and reassembling files from network packets.
  */
 export class FileExtractor {
-
   private static HTTP_FILE_CONTENT_TYPES = [
-    /^application\//, /^image\//, /^video\//, /^audio\//, /^font\//,
-    /^text\/(?!html|css|javascript|plain)/ // Exclude common text formats that aren't typically "files" to download
+    /^application\//,
+    /^image\//,
+    /^video\//,
+    /^audio\//,
+    /^font\//,
+    /^text\/(?!html|css|javascript|plain)/, // Exclude common text formats that aren't typically "files" to download
   ];
 
   private ftpControlToDataPort = new Map<string, number>();
 
   private getControlKey(packet: ParsedPacket): string {
-    if (packet.destPort === 21) return `${packet.sourceIP}:${packet.sourcePort}`;
+    if (packet.destPort === 21)
+      return `${packet.sourceIP}:${packet.sourcePort}`;
     if (packet.sourcePort === 21) return `${packet.destIP}:${packet.destPort}`;
     return '';
   }
@@ -30,7 +34,8 @@ export class FileExtractor {
   private parseHttpHeaders(httpResponseString: string): Record<string, string> {
     const headers: Record<string, string> = {};
     const headerLines = httpResponseString.split('\r\n');
-    for (let i = 1; i < headerLines.length; i++) { // Start from second line to skip status line
+    for (let i = 1; i < headerLines.length; i++) {
+      // Start from second line to skip status line
       const line = headerLines[i];
       if (line.trim() === '') break; // End of headers
       const parts = line.split(':');
@@ -49,7 +54,10 @@ export class FileExtractor {
    * @param rawData The raw data (payload) of the packet.
    * @returns An array of detected FileReference objects.
    */
-  public detectFileReferences(packet: ParsedPacket, rawData: Uint8Array): FileReference[] {
+  public detectFileReferences(
+    packet: ParsedPacket,
+    rawData: Uint8Array,
+  ): FileReference[] {
     const detectedFiles: FileReference[] = [];
     const payloadString = new TextDecoder().decode(rawData);
 
@@ -64,7 +72,9 @@ export class FileExtractor {
 
       // Prioritize filename from Content-Disposition
       if (contentDisposition) {
-        const filenameMatch = /filename\*?=['"]?(?:UTF-8''|)([^;"]+)['"]?/.exec(contentDisposition);
+        const filenameMatch = /filename\*?=['"]?(?:UTF-8''|)([^;"]+)['"]?/.exec(
+          contentDisposition,
+        );
         if (filenameMatch && filenameMatch[1]) {
           filename = decodeURIComponent(filenameMatch[1]);
         }
@@ -77,7 +87,11 @@ export class FileExtractor {
       }
 
       // Check if content type matches file types we want to extract
-      const isFileContentType = contentType && FileExtractor.HTTP_FILE_CONTENT_TYPES.some(regex => regex.test(contentType));
+      const isFileContentType =
+        contentType &&
+        FileExtractor.HTTP_FILE_CONTENT_TYPES.some((regex) =>
+          regex.test(contentType),
+        );
 
       if (filename && isFileContentType && contentLength > 0) {
         const fileData = rawData.slice(payloadString.indexOf('\r\n\r\n') + 4); // Extract body after headers
@@ -88,7 +102,9 @@ export class FileExtractor {
           size: contentLength,
           mimeType: contentType || 'application/octet-stream',
           sourcePacketId: packet.id,
-          data: new Blob([fileData], { type: contentType || 'application/octet-stream' }),
+          data: new Blob([fileData], {
+            type: contentType || 'application/octet-stream',
+          }),
           sha256Hash: '', // Will be calculated later
         });
       }
@@ -100,11 +116,17 @@ export class FileExtractor {
     // For this iteration, we capture the metadata from the control channel.
     // Reassembly of data channel streams is a future enhancement.
     // FTP File Detection
-    if (packet.protocol === 'FTP' || packet.destPort === 21 || packet.sourcePort === 21) {
+    if (
+      packet.protocol === 'FTP' ||
+      packet.destPort === 21 ||
+      packet.sourcePort === 21
+    ) {
       const key = this.getControlKey(packet);
       if (key) {
         // Check for PORT command (Client -> Server)
-        const portMatch = payloadString.match(/PORT\s+(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/);
+        const portMatch = payloadString.match(
+          /PORT\s+(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/,
+        );
         if (portMatch) {
           const p1 = parseInt(portMatch[5], 10);
           const p2 = parseInt(portMatch[6], 10);
@@ -113,7 +135,9 @@ export class FileExtractor {
         }
 
         // Check for PASV response (Server -> Client)
-        const pasvMatch = payloadString.match(/227.*\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)/);
+        const pasvMatch = payloadString.match(
+          /227.*\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)/,
+        );
         if (pasvMatch) {
           const p1 = parseInt(pasvMatch[5], 10);
           const p2 = parseInt(pasvMatch[6], 10);
@@ -126,7 +150,9 @@ export class FileExtractor {
           const command = ftpCommandMatch[1] as 'STOR' | 'RETR';
           const filename = ftpCommandMatch[2].trim();
           const dataPort = this.ftpControlToDataPort.get(key);
-          console.log(`FTP command detected: ${command} for file: ${filename} in packet ${packet.id}, Data Port: ${dataPort}`);
+          console.log(
+            `FTP command detected: ${command} for file: ${filename} in packet ${packet.id}, Data Port: ${dataPort}`,
+          );
 
           detectedFiles.push({
             id: uuidv4(),
@@ -137,7 +163,7 @@ export class FileExtractor {
             data: new Blob([], { type: 'application/octet-stream' }), // Empty blob for now
             sha256Hash: '', // Will be calculated if we can reassemble
             ftpDataPort: dataPort,
-            ftpTransferType: command
+            ftpTransferType: command,
           });
         }
       }
@@ -152,7 +178,10 @@ export class FileExtractor {
    * @param fileReference The FileReference object describing the file to reassemble.
    * @returns A Promise resolving to the reassembled FileReference with its 'data' field populated.
    */
-  public async reassembleFile(packets: ParsedPacket[], fileReference: FileReference): Promise<FileReference> {
+  public async reassembleFile(
+    packets: ParsedPacket[],
+    fileReference: FileReference,
+  ): Promise<FileReference> {
     if (!fileReference.sourcePacketId) {
       console.error('FileReference missing sourcePacketId for reassembly.');
       return fileReference;
@@ -162,22 +191,34 @@ export class FileExtractor {
 
     if (fileReference.ftpDataPort) {
       // FTP Reassembly
-      const sourcePacket = packets.find(sp => sp.id === fileReference.sourcePacketId);
+      const sourcePacket = packets.find(
+        (sp) => sp.id === fileReference.sourcePacketId,
+      );
       const startTime = sourcePacket ? sourcePacket.timestamp : 0;
 
-      const relevantPackets = packets.filter(p =>
-        (p.sourcePort === fileReference.ftpDataPort || p.destPort === fileReference.ftpDataPort) &&
-        p.timestamp >= startTime
-      ).sort((a, b) => a.timestamp - b.timestamp);
+      const relevantPackets = packets
+        .filter(
+          (p) =>
+            (p.sourcePort === fileReference.ftpDataPort ||
+              p.destPort === fileReference.ftpDataPort) &&
+            p.timestamp >= startTime,
+        )
+        .sort((a, b) => a.timestamp - b.timestamp);
 
       for (const packet of relevantPackets) {
         chunks.push(new Uint8Array(packet.rawData));
       }
     } else {
       // HTTP Reassembly
-      const relevantPackets = packets.filter(p =>
-        p.protocol === 'HTTP' && p.sessionId === packets.find(sp => sp.id === fileReference.sourcePacketId)?.sessionId
-      ).sort((a, b) => a.timestamp - b.timestamp);
+      const relevantPackets = packets
+        .filter(
+          (p) =>
+            p.protocol === 'HTTP' &&
+            p.sessionId ===
+              packets.find((sp) => sp.id === fileReference.sourcePacketId)
+                ?.sessionId,
+        )
+        .sort((a, b) => a.timestamp - b.timestamp);
 
       for (const packet of relevantPackets) {
         let currentPacketData = new Uint8Array(packet.rawData);
@@ -193,7 +234,9 @@ export class FileExtractor {
       }
     }
 
-    const fileBlob = new Blob(chunks as any[], { type: fileReference.mimeType });
+    const fileBlob = new Blob(chunks as any[], {
+      type: fileReference.mimeType,
+    });
     const sha256Hash = await this.calculateSha256(fileBlob);
 
     return {
@@ -212,7 +255,9 @@ export class FileExtractor {
     const buffer = data instanceof Blob ? await data.arrayBuffer() : data;
     const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const hexHash = hashArray
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
     return hexHash;
   }
 }

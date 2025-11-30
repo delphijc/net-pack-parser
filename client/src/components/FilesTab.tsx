@@ -4,7 +4,15 @@ import React, { useEffect, useState } from 'react';
 import type { FileReference, ParsedPacket } from '../types';
 import DatabaseService from '../services/database';
 import ChainOfCustodyDb from '../services/chainOfCustodyDb';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 
 interface FilesTabProps {
@@ -23,9 +31,11 @@ const FilesTab: React.FC<FilesTabProps> = ({ packet }) => {
             // Fetch full file data from IndexedDB
             const fullFile = await databaseService.getFileById(fileRef.id);
             return fullFile || fileRef; // Return full file or existing reference if not found
-          })
+          }),
         );
-        setFileReferences(files.filter((file) => file.data && file.data.size > 0)); // Only show files with actual data
+        setFileReferences(
+          files.filter((file) => file.data && file.data.size > 0),
+        ); // Only show files with actual data
       }
     };
 
@@ -43,7 +53,8 @@ const FilesTab: React.FC<FilesTabProps> = ({ packet }) => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       // Integrate Chain of Custody logging (AC 5)
-      const chainOfCustodyEvent: any = { // Using any temporarily to bypass strict type check if interface mismatches, or better, match interface
+      const chainOfCustodyEvent: any = {
+        // Using any temporarily to bypass strict type check if interface mismatches, or better, match interface
         id: crypto.randomUUID(),
         timestamp: new Date().toISOString(), // Fix: timestamp should be string
         action: 'File Downloaded' as const,
@@ -54,14 +65,18 @@ const FilesTab: React.FC<FilesTabProps> = ({ packet }) => {
         md5Hash: '', // Optional or empty if not available
         userAgent: navigator.userAgent, // Add user agent
         user: 'Current User', // Placeholder for user identity
-        details: `Downloaded file extracted from packet ${packet.id}`
+        details: `Downloaded file extracted from packet ${packet.id}`,
       };
 
       ChainOfCustodyDb.addFileChainOfCustodyEvent(chainOfCustodyEvent)
         .then(() => console.log('Chain of Custody event logged'))
-        .catch(err => console.error('Failed to log Chain of Custody event', err));
+        .catch((err) =>
+          console.error('Failed to log Chain of Custody event', err),
+        );
 
-      console.log(`Downloaded file: ${file.filename}, Hash: ${file.sha256Hash}`);
+      console.log(
+        `Downloaded file: ${file.filename}, Hash: ${file.sha256Hash}`,
+      );
     }
   };
 
@@ -75,7 +90,11 @@ const FilesTab: React.FC<FilesTabProps> = ({ packet }) => {
   };
 
   if (!fileReferences || fileReferences.length === 0) {
-    return <div className="p-4 text-center text-muted-foreground">No file references detected for this packet.</div>;
+    return (
+      <div className="p-4 text-center text-muted-foreground">
+        No file references detected for this packet.
+      </div>
+    );
   }
 
   return (
@@ -99,11 +118,21 @@ const FilesTab: React.FC<FilesTabProps> = ({ packet }) => {
               <TableCell className="font-medium">{file.filename}</TableCell>
               <TableCell>{formatBytes(file.size)}</TableCell>
               <TableCell>{file.mimeType}</TableCell>
-              <TableCell>{packet.sourceIP}</TableCell> {/* Assuming source IP of the packet is the source of the file */}
-              <TableCell>{new Date(packet.timestamp).toLocaleString()}</TableCell> {/* Assuming timestamp of the packet */}
-              <TableCell className="font-mono text-xs">{file.sha256Hash || 'N/A'}</TableCell>
+              <TableCell>{packet.sourceIP}</TableCell>{' '}
+              {/* Assuming source IP of the packet is the source of the file */}
               <TableCell>
-                <Button size="sm" onClick={() => handleDownload(file)} disabled={!file.data}>
+                {new Date(packet.timestamp).toLocaleString()}
+              </TableCell>{' '}
+              {/* Assuming timestamp of the packet */}
+              <TableCell className="font-mono text-xs">
+                {file.sha256Hash || 'N/A'}
+              </TableCell>
+              <TableCell>
+                <Button
+                  size="sm"
+                  onClick={() => handleDownload(file)}
+                  disabled={!file.data}
+                >
                   Download
                 </Button>
               </TableCell>

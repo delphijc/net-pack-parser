@@ -1,4 +1,3 @@
-
 import { describe, it, expect } from 'vitest';
 import { validateBpfFilter, matchBpfFilter, parseBpfFilter } from './bpfFilter';
 import type { Packet } from '../types/packet';
@@ -80,7 +79,8 @@ describe('BPF Filter Engine', () => {
       if (hostAst) expect(matchBpfFilter(mockPacket, hostAst)).toBe(true);
       if (srcHostAst) expect(matchBpfFilter(mockPacket, srcHostAst)).toBe(true);
       if (dstHostAst) expect(matchBpfFilter(mockPacket, dstHostAst)).toBe(true);
-      if (noMatchHostAst) expect(matchBpfFilter(mockPacket, noMatchHostAst)).toBe(false);
+      if (noMatchHostAst)
+        expect(matchBpfFilter(mockPacket, noMatchHostAst)).toBe(false);
     });
 
     it('should match port', () => {
@@ -92,7 +92,8 @@ describe('BPF Filter Engine', () => {
       if (portAst) expect(matchBpfFilter(mockPacket, portAst)).toBe(true);
       if (srcPortAst) expect(matchBpfFilter(mockPacket, srcPortAst)).toBe(true);
       if (dstPortAst) expect(matchBpfFilter(mockPacket, dstPortAst)).toBe(true);
-      if (noMatchPortAst) expect(matchBpfFilter(mockPacket, noMatchPortAst)).toBe(false);
+      if (noMatchPortAst)
+        expect(matchBpfFilter(mockPacket, noMatchPortAst)).toBe(false);
     });
 
     it('should match net (CIDR)', () => {
@@ -104,14 +105,17 @@ describe('BPF Filter Engine', () => {
       if (netAst) expect(matchBpfFilter(mockPacket, netAst)).toBe(true);
       if (srcNetAst) expect(matchBpfFilter(mockPacket, srcNetAst)).toBe(true);
       if (dstNetAst) expect(matchBpfFilter(mockPacket, dstNetAst)).toBe(true);
-      if (noMatchNetAst) expect(matchBpfFilter(mockPacket, noMatchNetAst)).toBe(false);
+      if (noMatchNetAst)
+        expect(matchBpfFilter(mockPacket, noMatchNetAst)).toBe(false);
     });
 
     it('should match boolean operators', () => {
       const andAst = parseBpfFilter('tcp and port 80');
       const orAst = parseBpfFilter('tcp or udp');
       const notAst = parseBpfFilter('not udp');
-      const complexAst = parseBpfFilter('(src host 192.168.1.10 and dst port 80) or tcp');
+      const complexAst = parseBpfFilter(
+        '(src host 192.168.1.10 and dst port 80) or tcp',
+      );
 
       if (andAst) expect(matchBpfFilter(mockPacket, andAst)).toBe(true);
       if (orAst) expect(matchBpfFilter(mockPacket, orAst)).toBe(true);

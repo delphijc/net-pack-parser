@@ -1,7 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import type { ExtractedString, ExtractedStringType } from '../types/extractedStrings';
+import type {
+  ExtractedString,
+  ExtractedStringType,
+} from '../types/extractedStrings';
 import { Input } from './ui/input'; // Assuming shadcn/ui Input is available
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'; // Assuming shadcn/ui Select is available
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select'; // Assuming shadcn/ui Select is available
 import { ArrowUpDown } from 'lucide-react'; // Assuming lucide-react for sort icon
 
 import { cn } from '@/lib/utils'; // Assuming cn for utility classes
@@ -14,9 +23,14 @@ interface ExtractedStringsTabProps {
 type SortColumn = keyof ExtractedString | null;
 type SortDirection = 'asc' | 'desc';
 
-const ExtractedStringsTab: React.FC<ExtractedStringsTabProps> = ({ extractedStrings, onHighlight }) => {
+const ExtractedStringsTab: React.FC<ExtractedStringsTabProps> = ({
+  extractedStrings,
+  onHighlight,
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<ExtractedStringType | 'all'>('all');
+  const [filterType, setFilterType] = useState<ExtractedStringType | 'all'>(
+    'all',
+  );
   const [sortColumn, setSortColumn] = useState<SortColumn>('payloadOffset');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
@@ -30,9 +44,10 @@ const ExtractedStringsTab: React.FC<ExtractedStringsTabProps> = ({ extractedStri
   };
 
   const sortedAndFilteredStrings = useMemo(() => {
-    let filtered = extractedStrings.filter(str =>
-      str.value.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (filterType === 'all' || str.type === filterType)
+    let filtered = extractedStrings.filter(
+      (str) =>
+        str.value.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (filterType === 'all' || str.type === filterType),
     );
 
     if (sortColumn) {
@@ -41,7 +56,9 @@ const ExtractedStringsTab: React.FC<ExtractedStringsTabProps> = ({ extractedStri
         const bValue = b[sortColumn];
 
         if (typeof aValue === 'string' && typeof bValue === 'string') {
-          return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+          return sortDirection === 'asc'
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue);
         }
         if (typeof aValue === 'number' && typeof bValue === 'number') {
           return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
@@ -65,7 +82,12 @@ const ExtractedStringsTab: React.FC<ExtractedStringsTabProps> = ({ extractedStri
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
-        <Select value={filterType} onValueChange={(value: ExtractedStringType | 'all') => setFilterType(value)}>
+        <Select
+          value={filterType}
+          onValueChange={(value: ExtractedStringType | 'all') =>
+            setFilterType(value)
+          }
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by type" />
           </SelectTrigger>
@@ -132,11 +154,21 @@ const ExtractedStringsTab: React.FC<ExtractedStringsTabProps> = ({ extractedStri
                   className="hover:bg-gray-50 cursor-pointer" // Added cursor-pointer for visual cue
                   onClick={() => onHighlight(str.payloadOffset, str.length)} // Click handler
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{str.type}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{str.value}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{str.packetId}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{str.payloadOffset}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{str.length}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {str.type}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {str.value}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {str.packetId}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {str.payloadOffset}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {str.length}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -155,7 +187,13 @@ interface TableHeadWithSortProps {
   onSort: (column: SortColumn) => void;
 }
 
-const TableHeadWithSort: React.FC<TableHeadWithSortProps> = ({ column, label, sortColumn, sortDirection, onSort }) => (
+const TableHeadWithSort: React.FC<TableHeadWithSortProps> = ({
+  column,
+  label,
+  sortColumn,
+  sortDirection,
+  onSort,
+}) => (
   <th
     scope="col"
     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
@@ -164,9 +202,16 @@ const TableHeadWithSort: React.FC<TableHeadWithSortProps> = ({ column, label, so
     <div className="flex items-center">
       {label}
       {sortColumn === column && (
-        <ArrowUpDown className={cn("ml-2 h-4 w-4", sortDirection === 'desc' ? 'rotate-180' : '')} />
+        <ArrowUpDown
+          className={cn(
+            'ml-2 h-4 w-4',
+            sortDirection === 'desc' ? 'rotate-180' : '',
+          )}
+        />
       )}
-      {sortColumn !== column && <ArrowUpDown className="ml-2 h-4 w-4 text-gray-300" />}
+      {sortColumn !== column && (
+        <ArrowUpDown className="ml-2 h-4 w-4 text-gray-300" />
+      )}
     </div>
   </th>
 );

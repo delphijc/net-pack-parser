@@ -16,7 +16,7 @@ globalThis.indexedDB = indexedDBMock as any;
 globalThis.Worker = class {
   constructor(stringUrl: string) {
     this.url = stringUrl;
-    this.onmessage = () => { };
+    this.onmessage = () => {};
   }
   url: string;
   onmessage: (msg: any) => void;
@@ -25,9 +25,17 @@ globalThis.Worker = class {
     const { payload, packetId, payloadOffset } = msg;
 
     // If this is a string extraction request, process it
-    if (payload instanceof ArrayBuffer && packetId && payloadOffset !== undefined) {
+    if (
+      payload instanceof ArrayBuffer &&
+      packetId &&
+      payloadOffset !== undefined
+    ) {
       try {
-        const extractedStrings = extractStringsFromBuffer(payload, packetId, payloadOffset);
+        const extractedStrings = extractStringsFromBuffer(
+          payload,
+          packetId,
+          payloadOffset,
+        );
         // Simulate async worker response
         setTimeout(() => {
           this.onmessage({ data: { status: 'success', extractedStrings } });
@@ -42,9 +50,9 @@ globalThis.Worker = class {
       this.onmessage({ data: msg });
     }
   }
-  terminate() { }
-  addEventListener() { }
-  removeEventListener() { }
+  terminate() {}
+  addEventListener() {}
+  removeEventListener() {}
   dispatchEvent(_event: Event): boolean {
     return true;
   }

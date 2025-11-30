@@ -49,10 +49,10 @@ function triggerJsonDownload(jsonString: string) {
   link.href = url;
   const timestamp = new Date().toISOString().replace(/:/g, '-');
   link.download = `net-pack-parser-export-${timestamp}.json`;
-  
+
   document.body.appendChild(link);
   link.click();
-  
+
   // Clean up
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
@@ -72,18 +72,25 @@ export function exportDataAsJson() {
  * @param {'merge' | 'replace'} mode Whether to merge with or replace existing data.
  * @returns {{success: boolean, message: string, importedCount: number}} An object indicating the result.
  */
-export function importDataFromJson(jsonString: string, mode: 'merge' | 'replace'): { success: boolean, message: string, importedCount: number } {
+export function importDataFromJson(
+  jsonString: string,
+  mode: 'merge' | 'replace',
+): { success: boolean; message: string; importedCount: number } {
   try {
     const parsed = JSON.parse(jsonString);
 
     // 1. Validate basic structure
     if (!parsed.metadata || !parsed.data) {
-      throw new Error('Invalid import file format: missing metadata or data section.');
+      throw new Error(
+        'Invalid import file format: missing metadata or data section.',
+      );
     }
 
     // 2. Validate schema version
     if (parsed.metadata.data_schema_version !== DATA_SCHEMA_VERSION) {
-      throw new Error(`Invalid schema version. Expected ${DATA_SCHEMA_VERSION}, but file is version ${parsed.metadata.data_schema_version}.`);
+      throw new Error(
+        `Invalid schema version. Expected ${DATA_SCHEMA_VERSION}, but file is version ${parsed.metadata.data_schema_version}.`,
+      );
     }
 
     // 3. Process data
@@ -107,7 +114,6 @@ export function importDataFromJson(jsonString: string, mode: 'merge' | 'replace'
       message: `Successfully imported ${importedCount} items.`,
       importedCount,
     };
-
   } catch (error: any) {
     console.error('Import failed:', error);
     return {

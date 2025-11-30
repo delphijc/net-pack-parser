@@ -7,7 +7,7 @@ import type { ExtractedString } from '../types/extractedStrings';
 // Create a new Web Worker instance
 const stringExtractionWorker = new Worker(
   new URL('../workers/stringExtractionWorker.ts', import.meta.url),
-  { type: 'module' }
+  { type: 'module' },
 );
 
 /**
@@ -21,7 +21,7 @@ const stringExtractionWorker = new Worker(
 export function extractStrings(
   payload: ArrayBuffer,
   packetId: string,
-  payloadOffset: number
+  payloadOffset: number,
 ): Promise<ExtractedString[]> {
   return new Promise((resolve, reject) => {
     stringExtractionWorker.onmessage = (event: MessageEvent) => {
@@ -38,6 +38,8 @@ export function extractStrings(
     };
 
     // Post the payload data to the worker for processing
-    stringExtractionWorker.postMessage({ payload, packetId, payloadOffset }, [payload]);
+    stringExtractionWorker.postMessage({ payload, packetId, payloadOffset }, [
+      payload,
+    ]);
   });
 }

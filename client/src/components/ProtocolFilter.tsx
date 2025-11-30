@@ -1,6 +1,12 @@
 // client/src/components/ProtocolFilter.tsx
 import React from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface ProtocolFilterProps {
   protocols: string[];
@@ -15,7 +21,9 @@ export const ProtocolFilter: React.FC<ProtocolFilterProps> = ({
 }) => {
   return (
     <Select
-      onValueChange={(value) => onProtocolChange(value === 'all' ? undefined : value)}
+      onValueChange={(value) =>
+        onProtocolChange(value === 'all' ? undefined : value)
+      }
       value={selectedProtocol || 'all'}
     >
       <SelectTrigger className="w-[180px]">

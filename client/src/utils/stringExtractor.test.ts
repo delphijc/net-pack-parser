@@ -38,7 +38,11 @@ vi.stubGlobal('Worker', MockWorker);
 import type { ExtractedString } from '../types/extractedStrings';
 
 describe('stringExtractor', () => {
-  let extractStrings: (payload: ArrayBuffer, packetId: string, payloadOffset: number) => Promise<ExtractedString[]>;
+  let extractStrings: (
+    payload: ArrayBuffer,
+    packetId: string,
+    payloadOffset: number,
+  ) => Promise<ExtractedString[]>;
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -61,8 +65,12 @@ describe('stringExtractor', () => {
     extractStrings(mockPayload, mockPacketId, mockOffset);
 
     expect(lastCreatedWorker?.postMessage).toHaveBeenCalledWith(
-      { payload: mockPayload, packetId: mockPacketId, payloadOffset: mockOffset },
-      [mockPayload]
+      {
+        payload: mockPayload,
+        packetId: mockPacketId,
+        payloadOffset: mockOffset,
+      },
+      [mockPayload],
     );
   });
 
@@ -71,7 +79,14 @@ describe('stringExtractor', () => {
     const mockPacketId = 'packet-1';
     const mockOffset = 0;
     const mockExtractedStrings: ExtractedString[] = [
-      { id: '1', type: 'IP', value: '1.2.3.4', packetId: 'packet-1', payloadOffset: 0, length: 7 }
+      {
+        id: '1',
+        type: 'IP',
+        value: '1.2.3.4',
+        packetId: 'packet-1',
+        payloadOffset: 0,
+        length: 7,
+      },
     ];
 
     const promise = extractStrings(mockPayload, mockPacketId, mockOffset);
@@ -79,7 +94,7 @@ describe('stringExtractor', () => {
     // Simulate worker success response
     lastCreatedWorker?.emitMessage({
       status: 'success',
-      extractedStrings: mockExtractedStrings
+      extractedStrings: mockExtractedStrings,
     });
 
     const result = await promise;
@@ -93,7 +108,7 @@ describe('stringExtractor', () => {
     // Simulate worker error response
     lastCreatedWorker?.emitMessage({
       status: 'error',
-      message: 'Extraction failed'
+      message: 'Extraction failed',
     });
 
     await expect(promise).rejects.toThrow('Extraction failed');
@@ -105,10 +120,12 @@ describe('stringExtractor', () => {
 
     // Simulate worker error response without message
     lastCreatedWorker?.emitMessage({
-      status: 'error'
+      status: 'error',
     });
 
-    await expect(promise).rejects.toThrow('Unknown error during string extraction');
+    await expect(promise).rejects.toThrow(
+      'Unknown error during string extraction',
+    );
   });
 
   it('should reject when worker throws an error event', async () => {
@@ -117,7 +134,7 @@ describe('stringExtractor', () => {
 
     // Simulate worker error event
     lastCreatedWorker?.emitError({
-      message: 'Worker crashed'
+      message: 'Worker crashed',
     });
 
     await expect(promise).rejects.toThrow('Worker crashed');

@@ -4,12 +4,15 @@ import type { ExtractedString } from '../types/extractedStrings';
 import { v4 as uuidv4 } from 'uuid'; // For generating unique IDs
 
 // Regex patterns for various string types
-const IPV4_REGEX = /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g;
+const IPV4_REGEX =
+  /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g;
 const IPV6_REGEX = /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b/g;
 const URL_REGEX = /(?:https?|ftp):\/\/[^\s\/$.?#].[^\s]*/gi;
 const EMAIL_REGEX = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
-const CREDENTIAL_REGEX = /\b(?:user(?:name)?|pass(?:word)?|api_key|token|auth|bearer|secret)(?:[=\s:]+)?['"]?([A-Z0-9._%+-]+)['"]?\b/gi;
-const FILE_PATH_REGEX = /[A-Z]:[\\\/](?:[A-Z0-9_\-. \\\/]+?)\.(exe|dll|bat|cmd|ps1|sh|pdf|doc|docx|txt|log|conf|cfg|ini|js|ts|py|php|jar|zip|rar|7z|tar|gz|xml|json|csv)(?=\s|$)|\/(?:[a-zA-Z0-9_.\-]+\/)*[a-zA-Z0-9_.\-]+\.(exe|dll|bat|cmd|ps1|sh|pdf|doc|docx|txt|log|conf|cfg|ini|js|ts|py|php|jar|zip|rar|7z|tar|gz|xml|json|csv)\b|\b[a-zA-Z0-9_.\-]+\.(exe|dll|bat|cmd|ps1|sh|pdf|doc|docx|txt|log|conf|cfg|ini|js|ts|py|php|jar|zip|rar|7z|tar|gz|xml|json|csv)\b/gi;
+const CREDENTIAL_REGEX =
+  /\b(?:user(?:name)?|pass(?:word)?|api_key|token|auth|bearer|secret)(?:[=\s:]+)?['"]?([A-Z0-9._%+-]+)['"]?\b/gi;
+const FILE_PATH_REGEX =
+  /[A-Z]:[\\\/](?:[A-Z0-9_\-. \\\/]+?)\.(exe|dll|bat|cmd|ps1|sh|pdf|doc|docx|txt|log|conf|cfg|ini|js|ts|py|php|jar|zip|rar|7z|tar|gz|xml|json|csv)(?=\s|$)|\/(?:[a-zA-Z0-9_.\-]+\/)*[a-zA-Z0-9_.\-]+\.(exe|dll|bat|cmd|ps1|sh|pdf|doc|docx|txt|log|conf|cfg|ini|js|ts|py|php|jar|zip|rar|7z|tar|gz|xml|json|csv)\b|\b[a-zA-Z0-9_.\-]+\.(exe|dll|bat|cmd|ps1|sh|pdf|doc|docx|txt|log|conf|cfg|ini|js|ts|py|php|jar|zip|rar|7z|tar|gz|xml|json|csv)\b/gi;
 
 const MIN_PRINTABLE_STRING_LENGTH = 4;
 
@@ -25,7 +28,7 @@ const MIN_PRINTABLE_STRING_LENGTH = 4;
 export function extractStringsFromBuffer(
   payload: ArrayBuffer,
   packetId: string,
-  payloadOffset: number
+  payloadOffset: number,
 ): ExtractedString[] {
   const extracted: ExtractedString[] = [];
   const payloadUint8 = new Uint8Array(payload);
@@ -36,10 +39,14 @@ export function extractStringsFromBuffer(
     type: ExtractedString['type'],
     value: string,
     index: number,
-    length: number
+    length: number,
   ) => {
     // Check for duplicates to avoid adding the same string found by multiple regexes or printable string logic
-    if (!extracted.some(e => e.value === value && e.payloadOffset === (payloadOffset + index))) {
+    if (
+      !extracted.some(
+        (e) => e.value === value && e.payloadOffset === payloadOffset + index,
+      )
+    ) {
       extracted.push({
         id: uuidv4(),
         type,
@@ -59,8 +66,12 @@ export function extractStringsFromBuffer(
         // Use match[0] for the full matched string.
         // For CREDENTIAL_REGEX, if a capturing group is used for the value, match[1] might be more specific.
         // For simplicity, sticking to match[0] for now, and will refine CREDENTIAL_REGEX if needed.
-        const valueToExtract = type === 'Credential' && match[1] ? match[1] : match[0];
-        const index = type === 'Credential' && match[1] ? match.index + match[0].indexOf(match[1]) : match.index;
+        const valueToExtract =
+          type === 'Credential' && match[1] ? match[1] : match[0];
+        const index =
+          type === 'Credential' && match[1]
+            ? match.index + match[0].indexOf(match[1])
+            : match.index;
         const length = valueToExtract.length;
 
         addExtracted(type, valueToExtract, index, length);

@@ -9,7 +9,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-SPRINT_FILE="docs/sprint-status.yaml"
+SPRINT_FILE="docs/stories/sprint-status.yaml"
 BMAD_ROOT=".bmad/bmm"
 AGENTS_DIR="$BMAD_ROOT/agents"
 WORKFLOWS_DIR="$BMAD_ROOT/workflows/4-implementation"

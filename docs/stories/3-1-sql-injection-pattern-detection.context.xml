@@ -1,0 +1,198 @@
+<story-context>
+  <story-details>
+    <epic-id>3</epic-id>
+    <story-key>3-1-sql-injection-pattern-detection</story-key>
+    <story-title>SQL Injection Pattern Detection</story-title>
+    <status>drafted</status>
+    <user-story>
+      <as-a>security analyst</as-a>
+      <i-want>automatic detection of SQL injection attempts in network traffic</i-want>
+      <so-that>I can identify potential database attacks</so-that>
+    </user-story>
+  </story-details>
+  <acceptance-criteria>
+    <criterion id="AC1">Given HTTP traffic packets are loaded</criterion>
+    <criterion id="AC2">When the system analyzes packet payloads</criterion>
+    <criterion id="AC3">Then it detects SQL injection patterns:
+      <sub-criterion>Classic patterns: ' OR '1'='1, 'union select, '; DROP TABLE, '--</sub-criterion>
+      <sub-criterion>Encoded patterns: URL-encoded and hex-encoded variations</sub-criterion>
+      <sub-criterion>Time-based: WAITFOR DELAY '00:00:05', BENCHMARK(10000000,MD5(1))</sub-criterion>
+      <sub-criterion>Boolean-based: AND 1=1, AND 1=2</sub-criterion>
+    </criterion>
+    <criterion id="AC4">And detected threats appear in "Threats" panel with:
+      <sub-criterion>Severity: CRITICAL</sub-criterion>
+      <sub-criterion>Type: SQL Injection</sub-criterion>
+      <sub-criterion>Description: "Potential SQL Injection detected in HTTP request"</sub-criterion>
+      <sub-criterion>Source IP, Destination IP, Timestamp</sub-criterion>
+      <sub-criterion>Matched pattern highlighted in packet payload</sub-criterion>
+      <sub-criterion>MITRE ATT&CK: T1190 (Exploit Public-Facing Application)</sub-criterion>
+    </criterion>
+    <criterion id="AC5">And I can click a threat to view the full packet</criterion>
+    <criterion id="AC6">And I can mark threats as false positive or confirmed</criterion>
+  </acceptance-criteria>
+  <tasks>
+    <task id="TASK1" title="Implement SQL Injection Pattern Detection Logic">
+      <sub-task id="TASK1.1" title="Define SQL Injection Patterns">
+        <detail>Research and define comprehensive regex patterns for classic, encoded, time-based, and boolean-based SQL injection techniques (from AC3).</detail>
+        <detail>Consider external libraries or existing open-source pattern sets if suitable.</detail>
+      </sub-task>
+      <sub-task id="TASK1.2" title="Develop sqlInjectionDetector Utility">
+        <detail>Create a new utility function (e.g., detectSqlInjection(packet: Packet): ThreatAlert[]) that analyzes Packet payloads.</detail>
+        <detail>Integrate pattern matching logic to identify SQL injection attempts.</detail>
+        <detail>Ensure decoding of URL-encoded and hex-encoded content before pattern matching (per architectural guidance).</detail>
+        <detail>Focus analysis on HTTP request components (query strings, POST data, headers like Cookie and User-Agent) (per architectural guidance).</detail>
+      </sub-task>
+      <sub-task id="TASK1.3" title="Integrate with Packet Processing Pipeline">
+        <detail>Hook detectSqlInjection into the main packet analysis workflow (e.g., in client/src/utils/threatDetection.ts or similar orchestration).</detail>
+        <detail>Ensure that ThreatAlert objects are created using the client/src/types/threat.ts interface (per architectural guidance).</detail>
+        <detail>Assign CRITICAL severity and "SQL Injection" type to detected threats (per AC4).</detail>
+        <detail>Map threat to MITRE ATT&CK T1190 (Exploit Public-Facing Application) (per AC4 and architectural guidance).</detail>
+      </sub-task>
+    </task>
+    <task id="TASK2" title="Display SQL Injection Threats in UI">
+      <sub-task id="TASK2.1" title="Update Threats Panel">
+        <detail>Enhance client/src/components/ThreatPanel.tsx to display SQL Injection alerts.</detail>
+        <detail>Ensure display includes severity, type, description, source/destination IP, timestamp (per AC4).</detail>
+        <detail>Implement mechanism to click a threat to view the full packet details (per AC5).</detail>
+      </sub-task>
+      <sub-task id="TASK2.2" title="Implement Pattern Highlighting in Packet Details">
+        <detail>Adapt existing highlighting mechanisms (from Story 2.3, specifically getMatchDetails from multiCriteriaSearch.ts or similar utility) to highlight SQL Injection patterns in the hex dump and ASCII views of PacketDetailView.tsx (per AC4 and previous story learnings).</detail>
+        <detail>Ensure highlighting is visually distinct (e.g., yellow background as per existing pattern).</detail>
+      </sub-task>
+    </task>
+    <task id="TASK3" title="User Interaction for Threat Management">
+      <sub-task id="TASK3.1" title="Mark Threat as False Positive/Confirmed">
+        <detail>Add UI controls (e.g., buttons in ThreatPanel.tsx or PacketDetailView.tsx) to allow users to mark threats as "False Positive" or "Confirmed" (per AC6).</detail>
+        <detail>Implement logic to update the ThreatAlert status and potentially hide/filter marked threats.</detail>
+      </sub-task>
+    </task>
+    <task id="TASK4" title="Testing">
+      <sub-task id="TASK4.1" title="Unit Tests for Detection Logic">
+        <detail>Write comprehensive unit tests for detectSqlInjection covering all defined SQL injection patterns (classic, encoded, time-based, boolean-based) (per AC3).</detail>
+        <detail>Include tests for edge cases (e.g., false positives, partial patterns).</detail>
+      </sub-task>
+      <sub-task id="TASK4.2" title="Integration Tests">
+        <detail>Write integration tests to verify that detected threats are correctly displayed in the UI (ThreatPanel.tsx) and that highlighting functions in PacketDetailView.tsx.</detail>
+      </sub-task>
+      <sub-task id="TASK4.3" title="Performance Tests">
+        <detail>Verify that SQL Injection detection does not significantly impact overall packet processing performance, adhering to NFR-P3 and NFR-P4 (per architectural guidance).</detail>
+      </sub-task>
+      <sub-task id="TASK4.4" title="Code Quality">
+        <detail>Ensure full ESLint and TypeScript strict mode compliance for all new and modified code.</detail>
+      </sub-task>
+    </task>
+  </tasks>
+  <artifacts>
+    <docs>
+      <entry path="docs/prd.md" title="Product Requirements Document" section="Threat Detection &amp; Security Analysis" snippet="FR33: System automatically scans packets for SQL injection patterns. Domain: Cybersecurity / Network Forensics &amp; Performance. Security patterns (SQL injection, XSS, command injection)."/>
+      <entry path="docs/architecture.md" title="Architecture" section="Epic to Architecture Mapping" snippet="Epic 3: Threat Detection &amp; Security. client/src/utils/threatDetection.ts. YARA Engine: yara-js (WebAssembly). Security Architecture section is directly relevant."/>
+      <entry path="docs/epics.md" title="Network Traffic Parser - Epic Breakdown" section="Epic 3: Threat Detection &amp; Security Analysis" snippet="Goal: Enable automated threat detection with MITRE ATT&amp;CK mapping and IOC matching. Story 3.1: SQL Injection Pattern Detection directly relates to this story."/>
+      <entry path="docs/ux-design-specification.md" title="Network Traffic Parser UX Design Specification" section="Visual Foundation" snippet="Semantic Colors: Critical/Malware: Rose-500. Design System: shadcn/ui. Consistency Rules: High Density, High Clarity. Terminology: Use standard industry terms."/>
+    </docs>
+    <code-references>
+      <entry path="client/src/utils/threatDetection.ts" kind="utility" reason="Primary location for threat detection logic; SQL injection patterns will be integrated here or in a new sibling utility."/>
+      <entry path="client/src/components/ThreatPanel.tsx" kind="component" reason="UI component responsible for displaying threat alerts, will need enhancement for SQL injection threats and user interaction (AC4, AC6)."/>
+      <entry path="client/src/components/PacketDetailView.tsx" kind="component" reason="UI component for detailed packet inspection, will need adaptation for highlighting SQL injection patterns in hex dump and ASCII views (AC4)."/>
+      <entry path="client/src/types/threat.ts" kind="type-definition" reason="Defines the ThreatAlert interface, which will be used for all detected SQL injection threats (AC4)."/>
+      <entry path="client/src/utils/multiCriteriaSearch.ts" kind="utility" symbol="getMatchDetails" reason="Contains reusable highlighting logic (getMatchDetails function) from Story 2.3 that can be adapted for SQL injection pattern highlighting."/>
+      <entry path="client/src/utils/sqlInjectionDetector.test.ts" kind="test-file" reason="New test file for unit tests of the SQL injection detection logic (TASK4.1)."/>
+    </code-references>
+    <interfaces>
+      <entry name="ThreatAlert" kind="interface" signature="interface ThreatAlert { id: string; packetId: string; severity: 'critical' | 'high' | 'medium' | 'low' | 'info'; type: string; description: string; mitreAttack: string[]; timestamp: number; falsePositive: boolean; confirmed: boolean; }" path="client/src/types/threat.ts"/>
+      <entry name="detectSqlInjection" kind="function-signature" signature="detectSqlInjection(packet: Packet): ThreatAlert[]" path="client/src/utils/threatDetection.ts"/>
+      <entry name="getMatchDetails" kind="function-signature" signature="getMatchDetails(payload: string, pattern: RegExp): { index: number; length: number; }[]" path="client/src/utils/multiCriteriaSearch.ts"/>
+    </interfaces>
+    <constraints>
+      <constraint type="architectural-pattern" description="Implement regex patterns for common SQL injection signatures."/>
+      <constraint type="architectural-pattern" description="Check HTTP query strings, POST data, Cookie headers, User-Agent headers for SQL injection."/>
+      <constraint type="architectural-pattern" description="Decode URL encoding before pattern matching for SQL injection detection."/>
+      <constraint type="architectural-pattern" description="MITRE ATT&CK mapping: T1190 (Exploit Public-Facing Application) for SQL injection threats."/>
+      <constraint type="architectural-pattern" description="Threat Severity: CRITICAL for SQL injection threats."/>
+      <constraint type="architectural-pattern" description="ThreatAlert interface in client/src/types/threat.ts must be used."/>
+      <constraint type="architectural-pattern" description="Centralized matching logic to avoid code duplication in PacketDetailView.tsx (learning from Story 2.3)."/>
+      <constraint type="coding-standard" description="New utilities should follow camelCase naming conventions."/>
+      <constraint type="coding-standard" description="Components should follow PascalCase."/>
+      <constraint type="coding-standard" description="Absolute imports with @/ alias should be used."/>
+      <constraint type="testing-requirement" description="Comprehensive unit and integration tests are required."/>
+      <constraint type="testing-requirement" description="Performance considerations should be validated against NFRs NFR-P3 and NFR-P4."/>
+      <constraint type="code-quality" description="Full ESLint and TypeScript strict mode compliance."/>
+    </constraints>
+    <dependencies>
+      <npm>
+        <package name="@radix-ui/react-alert-dialog" version="^1.1.15"/>
+        <package name="@radix-ui/react-checkbox" version="^1.3.3"/>
+        <package name="@radix-ui/react-collapsible" version="^1.1.12"/>
+        <package name="@radix-ui/react-dialog" version="^1.1.15"/>
+        <package name="@radix-ui/react-dropdown-menu" version="^2.1.16"/>
+        <package name="@radix-ui/react-label" version="^2.1.8"/>
+        <package name="@radix-ui/react-progress" version="^1.1.8"/>
+        <package name="@radix-ui/react-radio-group" version="^1.3.8"/>
+        <package name="@radix-ui/react-select" version="^2.2.6"/>
+        <package name="@radix-ui/react-slot" version="^1.2.4"/>
+        <package name="@radix-ui/react-tabs" version="^1.1.13"/>
+        <package name="@radix-ui/react-toast" version="^1.2.15"/>
+        <package name="@radix-ui/react-tooltip" version="^1.2.8"/>
+        <package name="class-variance-authority" version="^0.7.1"/>
+        <package name="clsx" version="^2.1.1"/>
+        <package name="crypto-js" version="^4.2.0"/>
+        <package name="lucide-react" version="^0.554.0"/>
+        <package name="pcap-decoder" version="^1.0.3"/>
+        <package name="react" version="^19.2.0"/>
+        <package name="react-dom" version="^19.2.0"/>
+        <package name="recharts" version="^3.5.0"/>
+        <package name="tailwind-merge" version="^3.4.0"/>
+        <package name="tailwindcss-animate" version="^1.0.7"/>
+      </npm>
+      <npm-dev>
+        <package name="@eslint/js" version="^9.39.1"/>
+        <package name="@shadcn/ui" version="^0.0.4"/>
+        <package name="@tailwindcss/postcss" version="^4.1.17"/>
+        <package name="@testing-library/jest-dom" version="^6.9.1"/>
+        <package name="@testing-library/react" version="^16.3.0"/>
+        <package name="@testing-library/user-event" version="^14.6.1"/>
+        <package name="@types/crypto-js" version="^4.2.1"/>
+        <package name="@types/node" version="^24.10.1"/>
+        <package name="@types/react" version="^19.2.5"/>
+        <package name="@types/react-dom" version="^19.2.3"/>
+        <package name="@typescript-eslint/eslint-plugin" version="^8.47.0"/>
+        <package name="@typescript-eslint/parser" version="^8.47.0"/>
+        <package name="@vitejs/plugin-react" version="^5.1.1"/>
+        <package name="autoprefixer" version="^10.4.22"/>
+        <package name="eslint" version="^9.39.1"/>
+        <package name="eslint-config-prettier" version="^10.1.8"/>
+        <package name="eslint-plugin-prettier" version="^5.5.4"/>
+        <package name="eslint-plugin-react-hooks" version="^7.0.1"/>
+        <package name="eslint-plugin-react-refresh" version="^0.4.24"/>
+        <package name="globals" version="^16.5.0"/>
+        <package name="jsdom" version="^27.2.0"/>
+        <package name="postcss" version="^8.5.6"/>
+        <package name="prettier" version="^3.6.2"/>
+        <package name="tailwindcss" version="^4.1.17"/>
+        <package name="typescript" version="~5.9.3"/>
+        <package name="typescript-eslint" version="^8.46.4"/>
+        <package name="vite" version="^7.2.4"/>
+        <package name="vitest" version="^4.0.13"/>
+      </npm-dev>
+    </dependencies>
+  </artifacts>
+      <tests>
+        <standards>
+          Comprehensive unit and integration tests are required, utilizing Vitest for unit testing and React Testing Library for component-level integration tests. All new and modified code must adhere to full ESLint and TypeScript strict mode compliance. Performance considerations related to threat detection should be validated against NFR-P3 (search queries within 500ms for 10,000 packets) and NFR-P4 (UI interactions within 100ms).
+        </standards>
+        <locations>
+          <location type="unit" path="client/src/utils/sqlInjectionDetector.test.ts"/>
+          <location type="integration-component" path="client/src/components/ThreatPanel.test.tsx"/>
+          <location type="integration-component" path="client/src/components/PacketDetailView.test.tsx"/>
+          <location type="general" glob="client/src/**/*.test.ts"/>
+          <location type="general" glob="client/src/**/*.test.tsx"/>
+        </locations>
+        <ideas>
+          <idea ac-id="AC3" task-id="TASK4.1">Unit tests for `detectSqlInjection` covering classic, encoded, time-based, and boolean-based SQL injection patterns, including edge cases like partial matches and false positives.</idea>
+          <idea ac-id="AC4" task-id="TASK4.2">Integration tests to verify that detected SQL Injection threats are correctly displayed in `ThreatPanel.tsx` with CRITICAL severity, 'SQL Injection' type, description, and MITRE ATT&CK mapping.</idea>
+          <idea ac-id="AC4" task-id="TASK4.2">Integration tests for `PacketDetailView.tsx` to confirm that matched SQL injection patterns are highlighted in both hex dump and ASCII views.</idea>
+          <idea ac-id="AC5" task-id="TASK4.2">Integration test to ensure clicking a threat in the `ThreatPanel.tsx` correctly navigates to and displays the full packet details in `PacketDetailView.tsx`.</idea>
+          <idea ac-id="AC6" task-id="TASK4.2">Integration tests for user interaction controls in `ThreatPanel.tsx` or `PacketDetailView.tsx` to mark threats as false positive or confirmed, and verify state updates.</idea>
+          <idea ac-id="NFR-P3, NFR-P4" task-id="TASK4.3">Performance tests to measure the impact of SQL injection detection on overall packet processing time and UI responsiveness, ensuring adherence to NFRs.</idea>
+          <idea task-id="TASK4.4">Code quality checks for ESLint and TypeScript strict mode compliance on all new and modified files.</idea>
+        </ideas>
+      </tests></story-context>

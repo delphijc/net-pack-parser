@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { ParsedPacket } from '@/types';
 import type { Packet } from '@/types/packet';
-import { type MultiSearchCriteria, getMatchDetails } from '@/utils/multiCriteriaSearch'; // Import getMatchDetails
+import {
+  type MultiSearchCriteria,
+  getMatchDetails,
+} from '@/utils/multiCriteriaSearch';
 import {
   Sheet,
   SheetContent,
@@ -9,25 +12,45 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button'; // Import Button component
+import { Button } from '@/components/ui/button';
 import { decodePacketHeaders } from '@/utils/packetDecoder';
-import HexDumpViewer, { generateHexDump } from '@/components/HexDumpViewer'; // Import HexDumpViewer and generateHexDump
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'; // Import Tabs components
-import ExtractedStringsTab from '@/components/ExtractedStringsTab'; // Import ExtractedStringsTab
-import FilesTab from '@/components/FilesTab'; // Import FilesTab
-import { cn } from '@/lib/utils'; // Import cn for conditional classnames
+import HexDumpViewer, { generateHexDump } from '@/components/HexDumpViewer';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import ExtractedStringsTab from '@/components/ExtractedStringsTab';
+import FilesTab from '@/components/FilesTab';
+import { cn } from '@/lib/utils';
+import type { ThreatAlert } from '../types/threat'; // Import ThreatAlert
+import { getThreatHighlightRanges } from '../utils/threatDetectionUtils'; // Import getThreatHighlightRanges
+import { ThreatPanel } from './ThreatPanel'; // Import ThreatPanel
 
 interface PacketDetailViewProps {
   packet: ParsedPacket | null;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  searchCriteria?: MultiSearchCriteria | null; // Add searchCriteria prop
+  searchCriteria?: MultiSearchCriteria | null;
+  threats?: ThreatAlert[]; // Add threats prop
+  onUpdateThreatStatus: (
+    threatId: string,
+    statusType: 'falsePositive' | 'confirmed',
+  ) => void;
 }
 
-const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onOpenChange, searchCriteria }) => {
-  const [highlightRanges, setHighlightRanges] = useState<{ offset: number; length: number }[]>([]); // New state for highlight ranges
-  const [payloadSearchString, setPayloadSearchString] = useState<string | null>(null);
-  const [payloadCaseSensitive, setPayloadCaseSensitive] = useState<boolean>(false);
+const PacketDetailView: React.FC<PacketDetailViewProps> = ({
+  packet,
+  isOpen,
+  onOpenChange,
+  searchCriteria,
+  threats,
+  onUpdateThreatStatus,
+}) => {
+  const [highlightRanges, setHighlightRanges] = useState<
+    { offset: number; length: number }[]
+  >([]);
+  const [payloadSearchString, setPayloadSearchString] = useState<string | null>(
+    null,
+  );
+  const [payloadCaseSensitive, setPayloadCaseSensitive] =
+    useState<boolean>(false);
 
   useEffect(() => {
     if (searchCriteria?.payload) {
@@ -39,16 +62,9 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
     }
   }, [searchCriteria]);
 
-  // Calculate match details for highlighting
   const matchDetails = useMemo(() => {
     if (!packet || !searchCriteria) return null;
 
-    // Construct a temporary Packet object for the matcher if needed, 
-    // but ParsedPacket is compatible with Packet for the fields we check
-    // except rawData which might be string or ArrayBuffer in ParsedPacket
-    // but Packet expects ArrayBuffer.
-
-    // We need to ensure rawData is ArrayBuffer for getMatchDetails if it checks payload
     let rawDataBuffer: ArrayBuffer;
     if (packet.rawData instanceof ArrayBuffer) {
       rawDataBuffer = packet.rawData;
@@ -65,29 +81,27 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
       rawData: rawDataBuffer,
       sourcePort: packet.sourcePort || 0,
       destPort: packet.destPort || 0,
-      detectedProtocols: packet.detectedProtocols || []
+      detectedProtocols: packet.detectedProtocols || [],
     };
 
     return getMatchDetails(tempPacketForMatch, searchCriteria);
   }, [packet, searchCriteria]);
 
-  // Combine manual highlight ranges (from ExtractedStrings) with search matches
+  // Combine manual highlight ranges (from ExtractedStrings) with search matches and threat matches
   const combinedHighlightRanges = useMemo(() => {
     const searchMatches = matchDetails?.payloadMatches || [];
-    return [...highlightRanges, ...searchMatches];
-  }, [highlightRanges, matchDetails]);
-
+    const threatMatches = threats ? getThreatHighlightRanges(threats) : []; // Get threat highlight ranges
+    return [...highlightRanges, ...searchMatches, ...threatMatches];
+  }, [highlightRanges, matchDetails, threats]);
 
   if (!packet) {
     return null;
   }
 
-  // Helper to format timestamp
   const formatTimestamp = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
   };
 
-  // Convert ParsedPacket to Packet-like structure for decoder
   const getRawDataBuffer = (data: string | ArrayBuffer): ArrayBuffer => {
     if (data instanceof ArrayBuffer) {
       return data;
@@ -101,7 +115,6 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
 
   const rawDataBuffer = getRawDataBuffer(packet.rawData);
 
-  // Construct a temporary Packet object for the decoder
   const tempPacket: Packet = {
     id: packet.id,
     timestamp: packet.timestamp,
@@ -112,7 +125,7 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
     protocol: packet.protocol,
     length: rawDataBuffer.byteLength,
     rawData: rawDataBuffer,
-    detectedProtocols: packet.detectedProtocols || []
+    detectedProtocols: packet.detectedProtocols || [],
   };
 
   const decodedHeaders = decodePacketHeaders(tempPacket);
@@ -121,7 +134,11 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
     if (rawDataBuffer && rawDataBuffer.byteLength > 0) {
       const hexDump = generateHexDump(rawDataBuffer);
       try {
-        await navigator.clipboard.writeText(hexDump.lines.map(l => `${l.offset} ${l.hexBytes} ${l.asciiChars}`).join('\n'));
+        await navigator.clipboard.writeText(
+          hexDump.lines
+            .map((l) => `${l.offset} ${l.hexBytes} ${l.asciiChars}`)
+            .join('\n'),
+        );
         console.log('Hex dump copied to clipboard!');
       } catch (err) {
         console.error('Failed to copy hex dump: ', err);
@@ -143,7 +160,9 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
 
   const handleDownloadPacket = () => {
     if (rawDataBuffer && rawDataBuffer.byteLength > 0) {
-      const blob = new Blob([rawDataBuffer], { type: 'application/octet-stream' });
+      const blob = new Blob([rawDataBuffer], {
+        type: 'application/octet-stream',
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -156,18 +175,30 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
     }
   };
 
-  // Callback for ExtractedStringsTab to set highlight ranges
   const handleHighlightString = (offset: number, length: number) => {
     setHighlightRanges([{ offset, length }]);
   };
 
+  const handleThreatClick = (packetId: string) => {
+    // This function will be called when a threat is clicked in the ThreatPanel.
+    // It should ideally close the current PacketDetailView and open another for the specified packetId.
+    // For now, we'll just log it.
+    console.log(`Threat clicked for packet ID: ${packetId}`);
+    // You might want to trigger a callback to the parent component here to change the displayed packet
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full max-w-2xl flex flex-col bg-background/95 backdrop-blur-md border-l border-white/10 p-0 sm:max-w-2xl">
+      <SheetContent
+        side="right"
+        className="w-full max-w-2xl flex flex-col bg-background/95 backdrop-blur-md border-l border-white/10 p-0 sm:max-w-2xl"
+      >
         <SheetHeader className="p-6 border-b border-white/10">
           <SheetTitle className="text-xl font-bold text-foreground flex items-center gap-2">
             Packet Details
-            <span className="text-sm font-normal text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded">ID: {packet.id}</span>
+            <span className="text-sm font-normal text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded">
+              ID: {packet.id}
+            </span>
           </SheetTitle>
           <SheetDescription className="text-muted-foreground">
             Detailed view of the selected network packet.
@@ -182,40 +213,75 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
             </h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="space-y-1">
-                <p className="text-muted-foreground text-xs uppercase tracking-wider">Timestamp</p>
-                <p className="font-mono text-foreground">{formatTimestamp(packet.timestamp)}</p>
+                <p className="text-muted-foreground text-xs uppercase tracking-wider">
+                  Timestamp
+                </p>
+                <p className="font-mono text-foreground">
+                  {formatTimestamp(packet.timestamp)}
+                </p>
               </div>
               <div className="space-y-1">
-                <p className="text-muted-foreground text-xs uppercase tracking-wider">Protocol</p>
-                <p className={cn("font-mono text-foreground", matchDetails?.protocol && "bg-yellow-300 text-black")}>
+                <p className="text-muted-foreground text-xs uppercase tracking-wider">
+                  Protocol
+                </p>
+                <p
+                  className={cn(
+                    'font-mono text-foreground',
+                    matchDetails?.protocol && 'bg-yellow-300 text-black',
+                  )}
+                >
                   {packet.protocol}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-muted-foreground text-xs uppercase tracking-wider">Source</p>
+                <p className="text-muted-foreground text-xs uppercase tracking-wider">
+                  Source
+                </p>
                 <p className="font-mono text-foreground">
-                  <span className={cn(matchDetails?.sourceIp && "bg-yellow-300 text-black")}>
+                  <span
+                    className={cn(
+                      matchDetails?.sourceIp && 'bg-yellow-300 text-black',
+                    )}
+                  >
                     {packet.sourceIP}
                   </span>
-                  <span className={cn(matchDetails?.sourcePort && "bg-yellow-300 text-black")}>
+                  <span
+                    className={cn(
+                      matchDetails?.sourcePort && 'bg-yellow-300 text-black',
+                    )}
+                  >
                     {packet.sourcePort ? `:${packet.sourcePort}` : ''}
                   </span>
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-muted-foreground text-xs uppercase tracking-wider">Destination</p>
+                <p className="text-muted-foreground text-xs uppercase tracking-wider">
+                  Destination
+                </p>
                 <p className="font-mono text-foreground">
-                  <span className={cn(matchDetails?.destIp && "bg-yellow-300 text-black")}>
+                  <span
+                    className={cn(
+                      matchDetails?.destIp && 'bg-yellow-300 text-black',
+                    )}
+                  >
                     {packet.destIP}
                   </span>
-                  <span className={cn(matchDetails?.destPort && "bg-yellow-300 text-black")}>
+                  <span
+                    className={cn(
+                      matchDetails?.destPort && 'bg-yellow-300 text-black',
+                    )}
+                  >
                     {packet.destPort ? `:${packet.destPort}` : ''}
                   </span>
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-muted-foreground text-xs uppercase tracking-wider">Length</p>
-                <p className="font-mono text-foreground">{rawDataBuffer.byteLength} bytes</p>
+                <p className="text-muted-foreground text-xs uppercase tracking-wider">
+                  Length
+                </p>
+                <p className="font-mono text-foreground">
+                  {rawDataBuffer.byteLength} bytes
+                </p>
               </div>
             </div>
           </div>
@@ -228,22 +294,38 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
             </h3>
             <div className="space-y-2 text-sm">
               {decodedHeaders.map((header, index) => (
-                <div key={index} className="flex flex-col sm:flex-row sm:justify-between border-b border-white/5 pb-2 last:border-0 last:pb-0">
-                  <span className="text-muted-foreground font-medium">{header.name}</span>
+                <div
+                  key={index}
+                  className="flex flex-col sm:flex-row sm:justify-between border-b border-white/5 pb-2 last:border-0 last:pb-0"
+                >
+                  <span className="text-muted-foreground font-medium">
+                    {header.name}
+                  </span>
                   <span className="font-mono text-foreground text-right">
-                    {header.value} {header.description && <span className="text-muted-foreground/70 ml-1">({header.description})</span>}
+                    {header.value}{' '}
+                    {header.description && (
+                      <span className="text-muted-foreground/70 ml-1">
+                        ({header.description})
+                      </span>
+                    )}
                   </span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Tabs for Hex Dump and Extracted Strings */}
+          {/* Tabs for Hex Dump, Extracted Strings, Files and Threats */}
           <Tabs defaultValue="hex-dump" className="w-full">
-            <TabsList className="grid w-full grid-cols-3"> {/* Changed grid-cols-2 to grid-cols-3 */}
+            <TabsList className="grid w-full grid-cols-4">
+              {' '}
+              {/* Changed grid-cols-3 to grid-cols-4 */}
               <TabsTrigger value="hex-dump">Hex Dump / ASCII</TabsTrigger>
-              <TabsTrigger value="extracted-strings">Extracted Strings</TabsTrigger>
-              <TabsTrigger value="files">Files</TabsTrigger> {/* New tab trigger */}
+              <TabsTrigger value="extracted-strings">
+                Extracted Strings
+              </TabsTrigger>
+              <TabsTrigger value="files">Files</TabsTrigger>
+              <TabsTrigger value="threats">Threats</TabsTrigger>{' '}
+              {/* New tab trigger */}
             </TabsList>
             <TabsContent value="hex-dump">
               <div className="bg-card border border-white/10 p-4 rounded-lg shadow-sm mt-4">
@@ -260,7 +342,9 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
                       caseSensitive={payloadCaseSensitive}
                     />
                   ) : (
-                    <p className="text-muted-foreground text-sm p-4 text-center">No payload data available.</p>
+                    <p className="text-muted-foreground text-sm p-4 text-center">
+                      No payload data available.
+                    </p>
                   )}
                 </div>
               </div>
@@ -269,27 +353,61 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({ packet, isOpen, onO
               <div className="bg-card border border-white/10 p-4 rounded-lg shadow-sm mt-4">
                 <ExtractedStringsTab
                   extractedStrings={packet.extractedStrings || []}
-                  onHighlight={handleHighlightString} // Pass the callback
+                  onHighlight={handleHighlightString}
                 />
               </div>
             </TabsContent>
-            {/* New TabsContent for Files */}
             <TabsContent value="files">
               <div className="bg-card border border-white/10 p-4 rounded-lg shadow-sm mt-4">
                 <FilesTab packet={packet} />
+              </div>
+            </TabsContent>
+            <TabsContent value="threats">
+              {' '}
+              {/* New TabsContent for Threats */}
+              <div className="bg-card border border-white/10 p-4 rounded-lg shadow-sm mt-4">
+                {threats && threats.length > 0 ? (
+                  <ThreatPanel
+                    threats={threats}
+                    onThreatClick={handleThreatClick}
+                    onUpdateThreatStatus={onUpdateThreatStatus}
+                  />
+                ) : (
+                  <p className="text-muted-foreground text-sm p-4 text-center">
+                    No threats detected for this packet.
+                  </p>
+                )}
               </div>
             </TabsContent>
           </Tabs>
 
           {/* Copy/Download buttons */}
           <div className="flex gap-3 pt-2">
-            <Button variant="outline" size="sm" onClick={handleCopyHex} disabled={!rawDataBuffer || rawDataBuffer.byteLength === 0} className="flex-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyHex}
+              disabled={!rawDataBuffer || rawDataBuffer.byteLength === 0}
+              className="flex-1"
+            >
               Copy Hex
             </Button>
-            <Button variant="outline" size="sm" onClick={handleCopyAscii} disabled={!rawDataBuffer || rawDataBuffer.byteLength === 0} className="flex-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyAscii}
+              disabled={!rawDataBuffer || rawDataBuffer.byteLength === 0}
+              className="flex-1"
+            >
               Copy ASCII
             </Button>
-            <Button variant="default" size="sm" onClick={handleDownloadPacket} disabled={!rawDataBuffer || rawDataBuffer.byteLength === 0} className="flex-1">
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleDownloadPacket}
+              disabled={!rawDataBuffer || rawDataBuffer.byteLength === 0}
+              className="flex-1"
+            >
               Download
             </Button>
           </div>

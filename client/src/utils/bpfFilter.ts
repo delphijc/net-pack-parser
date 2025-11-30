@@ -15,12 +15,24 @@ function tokenizeBpfExpression(expression: string): BpfToken[] {
   const tokens: BpfToken[] = [];
   let i = 0;
 
-  const keywords = ['tcp', 'udp', 'icmp', 'host', 'net', 'port', 'src', 'dst', 'and', 'or', 'not'];
+  const keywords = [
+    'tcp',
+    'udp',
+    'icmp',
+    'host',
+    'net',
+    'port',
+    'src',
+    'dst',
+    'and',
+    'or',
+    'not',
+  ];
   const ipPattern = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/;
   const cidrPattern = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2}/;
 
   while (i < expression.length) {
-    let char = expression[i];
+    const char = expression[i];
 
     // Skip whitespace
     if (/\s/.test(char)) {
@@ -80,7 +92,10 @@ function tokenizeBpfExpression(expression: string): BpfToken[] {
  * This is a very simplified parser, implementing a basic recursive descent approach.
  */
 export function parseBpfFilter(expression: string | BpfToken[]): BpfAST | null {
-  const tokens = typeof expression === 'string' ? tokenizeBpfExpression(expression) : expression;
+  const tokens =
+    typeof expression === 'string'
+      ? tokenizeBpfExpression(expression)
+      : expression;
 
   let current = 0;
 
@@ -94,14 +109,19 @@ export function parseBpfFilter(expression: string | BpfToken[]): BpfAST | null {
       current++;
       return token;
     }
-    throw new Error(`Unexpected token: expected ${type} (value: ${value || 'any'}), got ${token.type} (value: ${token.value})`);
+    throw new Error(
+      `Unexpected token: expected ${type} (value: ${value || 'any'}), got ${token.type} (value: ${token.value})`,
+    );
   }
 
   // Expression -> Term (("and" | "or") Term)*
   function parseExpression(): BpfExpression {
     let left = parseTerm();
 
-    while (peek().type === 'KEYWORD' && (peek().value === 'and' || peek().value === 'or')) {
+    while (
+      peek().type === 'KEYWORD' &&
+      (peek().value === 'and' || peek().value === 'or')
+    ) {
       const operator = consume('KEYWORD');
       const right = parseTerm();
       if (operator.value === 'and') {
@@ -115,7 +135,7 @@ export function parseBpfFilter(expression: string | BpfToken[]): BpfAST | null {
 
   // Term -> "not" Term | Primitive | "(" Expression ")"
   function parseTerm(): BpfExpression {
-    if (peek().type === 'KEYWORD' && (peek().value === 'not')) {
+    if (peek().type === 'KEYWORD' && peek().value === 'not') {
       consume('KEYWORD', 'not');
       const expr = parseTerm();
       return { type: 'not', expression: expr };
@@ -134,7 +154,10 @@ export function parseBpfFilter(expression: string | BpfToken[]): BpfAST | null {
   // Primitive -> "tcp" | "udp" | "icmp" | "host" IP | "net" CIDR | "port" NUMBER | DIRECTION Primitive
   function parsePrimitive(): BpfExpression {
     let direction: 'src' | 'dst' | undefined;
-    if (peek().type === 'KEYWORD' && (peek().value === 'src' || peek().value === 'dst')) {
+    if (
+      peek().type === 'KEYWORD' &&
+      (peek().value === 'src' || peek().value === 'dst')
+    ) {
       direction = consume('KEYWORD').value as 'src' | 'dst';
     }
 
@@ -146,7 +169,9 @@ export function parseBpfFilter(expression: string | BpfToken[]): BpfAST | null {
       case 'udp':
       case 'icmp':
         if (direction) {
-          throw new Error(`Direction not applicable to protocol keyword: ${keyword}`);
+          throw new Error(
+            `Direction not applicable to protocol keyword: ${keyword}`,
+          );
         }
         return { type: 'protocol', value: keyword };
       case 'host':
@@ -181,7 +206,11 @@ export function parseBpfFilter(expression: string | BpfToken[]): BpfAST | null {
  * @param expression The BPF filter string.
  * @returns An object indicating validity and an error message if invalid.
  */
-export function validateBpfFilter(expression: string): { isValid: boolean, error?: string, ast?: BpfAST } {
+export function validateBpfFilter(expression: string): {
+  isValid: boolean;
+  error?: string;
+  ast?: BpfAST;
+} {
   if (expression.trim() === '') {
     return { isValid: true };
   }
@@ -223,12 +252,15 @@ export function matchBpfFilter(packet: Packet, ast: BpfAST): boolean {
         // Simplified CIDR match (e.g., "192.168.1.0/24")
         const [ip, mask] = node.value.split('/');
         const maskNum = parseInt(mask, 10);
-        const ipToNum = (ipAddr: string) => ipAddr.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0);
+        const ipToNum = (ipAddr: string) =>
+          ipAddr
+            .split('.')
+            .reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0);
         const filterNetwork = ipToNum(ip) >>> (32 - maskNum);
 
         const checkIp = (ipAddr: string) => {
           const packetIp = ipToNum(ipAddr);
-          return (packetIp >>> (32 - maskNum)) === filterNetwork;
+          return packetIp >>> (32 - maskNum) === filterNetwork;
         };
 
         const isSrcNet = checkIp(packet.sourceIP);
@@ -268,5 +300,3 @@ export function matchBpfFilter(packet: Packet, ast: BpfAST): boolean {
 
   return evaluate(ast);
 }
-
-

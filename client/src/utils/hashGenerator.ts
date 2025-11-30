@@ -15,10 +15,11 @@ import CryptoJS from 'crypto-js';
 export async function generateSha256Hash(data: ArrayBuffer): Promise<string> {
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const sha256Hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const sha256Hash = hashArray
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
   return sha256Hash;
 }
-
 
 export async function generateMd5Hash(data: ArrayBuffer): Promise<string> {
   const uint8Array = new Uint8Array(data);

@@ -9,7 +9,7 @@ describe('detectProtocols', () => {
     sourcePort: number,
     destPort: number,
     protocol: string,
-    payload: Uint8Array = new Uint8Array()
+    payload: Uint8Array = new Uint8Array(),
   ): Packet => ({
     id: 'test-id',
     timestamp: Date.now(),
@@ -105,8 +105,8 @@ describe('detectProtocols', () => {
     const packet = createTestPacket(12345, 80, 'TCP', payload);
     const detected = detectProtocols(packet, payload);
     // Should contain TCP and HTTP once, even though 80 is HTTP and payload is HTTP
-    expect(detected.filter(p => p === 'HTTP').length).toBe(1);
-    expect(detected.filter(p => p === 'TCP').length).toBe(1);
+    expect(detected.filter((p) => p === 'HTTP').length).toBe(1);
+    expect(detected.filter((p) => p === 'TCP').length).toBe(1);
   });
 
   it('should handle empty payload gracefully', () => {
@@ -120,5 +120,4 @@ describe('detectProtocols', () => {
     expect(detectProtocols(packet, payload)).not.toContain('HTTP');
     expect(detectProtocols(packet, payload)).toContain('TCP'); // Still detects TCP from IP header
   });
-
 });

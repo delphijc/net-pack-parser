@@ -11,7 +11,11 @@ const SAVED_SEARCHES_KEY = 'savedSearches';
 
 class SavedSearchService {
   private getSavedSearches(): Record<string, SavedSearch> {
-    return localStorageService.getValue<Record<string, SavedSearch>>(SAVED_SEARCHES_KEY) || {};
+    return (
+      localStorageService.getValue<Record<string, SavedSearch>>(
+        SAVED_SEARCHES_KEY,
+      ) || {}
+    );
   }
 
   private setSavedSearches(searches: Record<string, SavedSearch>): void {

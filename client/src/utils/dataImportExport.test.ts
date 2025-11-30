@@ -50,7 +50,6 @@ vi.mock('@/services/localStorage', () => {
 });
 
 describe('dataImportExport', () => {
-
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -69,11 +68,13 @@ describe('dataImportExport', () => {
       };
 
       // 2. Mock localStorageService.getValue to return the data
-      (localStorageService.getValue as Mock).mockImplementation((key: string) => {
-        if (key === 'settings') return settingsData;
-        if (key === 'filters') return filtersData;
-        return null;
-      });
+      (localStorageService.getValue as Mock).mockImplementation(
+        (key: string) => {
+          if (key === 'settings') return settingsData;
+          if (key === 'filters') return filtersData;
+          return null;
+        },
+      );
 
       // Act
       const jsonString = generateExportJson();
@@ -97,7 +98,9 @@ describe('dataImportExport', () => {
       // Verify mocks were called as expected
       expect(localStorageService.getValue).toHaveBeenCalledWith('settings');
       expect(localStorageService.getValue).toHaveBeenCalledWith('filters');
-      expect(localStorageService.getValue).not.toHaveBeenCalledWith('other.data');
+      expect(localStorageService.getValue).not.toHaveBeenCalledWith(
+        'other.data',
+      );
     });
   });
 
@@ -125,8 +128,12 @@ describe('dataImportExport', () => {
       expect(result.success).toBe(true);
       expect(result.importedCount).toBe(2);
       expect(localStorageService.clearAll).toHaveBeenCalledTimes(1);
-      expect(localStorageService.setValue).toHaveBeenCalledWith('settings', { theme: 'light' });
-      expect(localStorageService.setValue).toHaveBeenCalledWith('packets', [{ id: 'pkt1' }]);
+      expect(localStorageService.setValue).toHaveBeenCalledWith('settings', {
+        theme: 'light',
+      });
+      expect(localStorageService.setValue).toHaveBeenCalledWith('packets', [
+        { id: 'pkt1' },
+      ]);
     });
 
     it('should successfully import data in "merge" mode', () => {
@@ -140,8 +147,12 @@ describe('dataImportExport', () => {
       expect(result.success).toBe(true);
       expect(result.importedCount).toBe(2);
       expect(localStorageService.clearAll).not.toHaveBeenCalled();
-      expect(localStorageService.setValue).toHaveBeenCalledWith('settings', { theme: 'light' });
-      expect(localStorageService.setValue).toHaveBeenCalledWith('packets', [{ id: 'pkt1' }]);
+      expect(localStorageService.setValue).toHaveBeenCalledWith('settings', {
+        theme: 'light',
+      });
+      expect(localStorageService.setValue).toHaveBeenCalledWith('packets', [
+        { id: 'pkt1' },
+      ]);
     });
 
     it('should fail if the file format is invalid', () => {
@@ -159,7 +170,10 @@ describe('dataImportExport', () => {
 
     it('should fail if the schema version is different', () => {
       // Arrange
-      const wrongVersionExport = { ...mockExport, metadata: { ...mockExport.metadata, data_schema_version: '0.9' } };
+      const wrongVersionExport = {
+        ...mockExport,
+        metadata: { ...mockExport.metadata, data_schema_version: '0.9' },
+      };
       const jsonString = JSON.stringify(wrongVersionExport);
 
       // Act

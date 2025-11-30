@@ -1,0 +1,14 @@
+
+> client@0.0.0 test
+> vitest run src/utils/sqlInjectionDetector.test.ts
+
+
+ RUN  v4.0.14 /home/jaysoncavendish/Projects/net-pack-parser/client
+
+ ✓ src/utils/sqlInjectionDetector.test.ts (17 tests) 22ms
+
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+   Start at  12:17:53
+   Duration  2.73s (transform 213ms, setup 234ms, import 169ms, tests 22ms, environment 1.04s)
+

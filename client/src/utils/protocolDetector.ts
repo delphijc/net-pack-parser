@@ -7,7 +7,7 @@ import type { Packet } from '../types/packet';
  * 1. Port-based heuristics (Fastest, common protocols)
  * 2. IP Header analysis (Network layer protocols)
  * 3. Deep Packet Inspection (DPI) (Content-based verification)
- * 
+ *
  * @param packet The packet object containing metadata like ports and protocol ID.
  * @param payload The raw payload data of the packet as a Uint8Array.
  * @returns An array of detected protocol strings (e.g., ['TCP', 'HTTP']).
@@ -25,13 +25,23 @@ export function detectProtocols(packet: Packet, payload: Uint8Array): string[] {
   // Identify common application protocols based on well-known IANA port numbers.
   // This is the primary and fastest method for initial classification but can be
   // spoofed if services run on non-standard ports.
-  if (sourcePort === 80 || destPort === 80 || sourcePort === 8080 || destPort === 8080) {
+  if (
+    sourcePort === 80 ||
+    destPort === 80 ||
+    sourcePort === 8080 ||
+    destPort === 8080
+  ) {
     portBasedProtocol = 'HTTP';
   } else if (sourcePort === 443 || destPort === 443) {
     portBasedProtocol = 'HTTPS';
   } else if (sourcePort === 53 || destPort === 53) {
     portBasedProtocol = 'DNS';
-  } else if (sourcePort === 20 || destPort === 20 || sourcePort === 21 || destPort === 21) {
+  } else if (
+    sourcePort === 20 ||
+    destPort === 20 ||
+    sourcePort === 21 ||
+    destPort === 21
+  ) {
     portBasedProtocol = 'FTP';
   } else if (sourcePort === 22 || destPort === 22) {
     portBasedProtocol = 'SSH';
@@ -57,7 +67,10 @@ export function detectProtocols(packet: Packet, payload: Uint8Array): string[] {
   // Classify network-layer protocols (TCP, UDP, ICMP) derived from the IP header.
   // This provides the transport layer context.
   const networkProtocol = packet.protocol.toUpperCase();
-  if (['TCP', 'UDP', 'ICMP'].includes(networkProtocol) && !detected.includes(networkProtocol)) {
+  if (
+    ['TCP', 'UDP', 'ICMP'].includes(networkProtocol) &&
+    !detected.includes(networkProtocol)
+  ) {
     detected.push(networkProtocol);
   }
 

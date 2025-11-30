@@ -9,7 +9,7 @@ import { exportDataAsJson, importDataFromJson } from '@/utils/dataImportExport';
 vi.mock('@/services/localStorage', () => ({
   localStorageService: {
     getUsagePercentage: vi.fn(() => 0),
-    onQuotaExceeded: vi.fn(() => () => { }),
+    onQuotaExceeded: vi.fn(() => () => {}),
     clearAll: vi.fn(),
   },
 }));
@@ -46,7 +46,9 @@ describe('SettingsPage', () => {
     render(<SettingsPage />);
 
     const user = userEvent.setup();
-    const clearButton = screen.getByRole('button', { name: /Clear All Local Data/i });
+    const clearButton = screen.getByRole('button', {
+      name: /Clear All Local Data/i,
+    });
     await user.click(clearButton);
 
     expect(screen.getByText('Are you absolutely sure?')).toBeInTheDocument();
@@ -55,17 +57,21 @@ describe('SettingsPage', () => {
   it('calls clearAll when confirmation is accepted', async () => {
     render(<SettingsPage />);
     const user = userEvent.setup();
-    const clearButton = screen.getByRole('button', { name: /Clear All Local Data/i });
+    const clearButton = screen.getByRole('button', {
+      name: /Clear All Local Data/i,
+    });
     await user.click(clearButton);
 
     const continueButton = screen.getByRole('button', { name: /Continue/i });
     await user.click(continueButton);
 
     expect(localStorageService.clearAll).toHaveBeenCalled();
-    expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({
-      title: 'Success',
-      description: 'All local data cleared successfully.',
-    }));
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Success',
+        description: 'All local data cleared successfully.',
+      }),
+    );
   });
 
   it('triggers export when "Export Data" is clicked', async () => {
@@ -76,17 +82,23 @@ describe('SettingsPage', () => {
     await user.click(exportButton);
 
     expect(exportDataAsJson).toHaveBeenCalled();
-    expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({
-      title: 'Export Started',
-    }));
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Export Started',
+      }),
+    );
   });
 
   it('opens confirmation dialog when a file is selected for import', async () => {
     const { container } = render(<SettingsPage />);
     const user = userEvent.setup();
 
-    const file = new File(['{"metadata":{},"data":{}}'], 'backup.json', { type: 'application/json' });
-    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['{"metadata":{},"data":{}}'], 'backup.json', {
+      type: 'application/json',
+    });
+    const input = container.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
 
     await user.upload(input, file);
 
@@ -94,59 +106,97 @@ describe('SettingsPage', () => {
   });
 
   it('calls importDataFromJson with "merge" mode when Merge is clicked', async () => {
-    (importDataFromJson as Mock).mockReturnValue({ success: true, message: 'Imported 5 items', importedCount: 5 });
+    (importDataFromJson as Mock).mockReturnValue({
+      success: true,
+      message: 'Imported 5 items',
+      importedCount: 5,
+    });
     const { container } = render(<SettingsPage />);
     const user = userEvent.setup();
 
-    const file = new File(['{"metadata":{},"data":{}}'], 'backup.json', { type: 'application/json' });
-    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['{"metadata":{},"data":{}}'], 'backup.json', {
+      type: 'application/json',
+    });
+    const input = container.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
     await user.upload(input, file);
 
     const mergeButton = await screen.findByRole('button', { name: /Merge/i });
     await user.click(mergeButton);
 
-    expect(importDataFromJson).toHaveBeenCalledWith(expect.any(String), 'merge');
-    expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({
-      title: 'Import Successful',
-      description: 'Imported 5 items',
-    }));
+    expect(importDataFromJson).toHaveBeenCalledWith(
+      expect.any(String),
+      'merge',
+    );
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Import Successful',
+        description: 'Imported 5 items',
+      }),
+    );
   });
 
   it('calls importDataFromJson with "replace" mode when Replace is clicked', async () => {
-    (importDataFromJson as Mock).mockReturnValue({ success: true, message: 'Replaced all data', importedCount: 10 });
+    (importDataFromJson as Mock).mockReturnValue({
+      success: true,
+      message: 'Replaced all data',
+      importedCount: 10,
+    });
     const { container } = render(<SettingsPage />);
     const user = userEvent.setup();
 
-    const file = new File(['{"metadata":{},"data":{}}'], 'backup.json', { type: 'application/json' });
-    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['{"metadata":{},"data":{}}'], 'backup.json', {
+      type: 'application/json',
+    });
+    const input = container.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
     await user.upload(input, file);
 
-    const replaceButton = await screen.findByRole('button', { name: /Replace/i });
+    const replaceButton = await screen.findByRole('button', {
+      name: /Replace/i,
+    });
     await user.click(replaceButton);
 
-    expect(importDataFromJson).toHaveBeenCalledWith(expect.any(String), 'replace');
-    expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({
-      title: 'Import Successful',
-      description: 'Replaced all data',
-    }));
+    expect(importDataFromJson).toHaveBeenCalledWith(
+      expect.any(String),
+      'replace',
+    );
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Import Successful',
+        description: 'Replaced all data',
+      }),
+    );
   });
 
   it('displays error toast when import fails', async () => {
-    (importDataFromJson as Mock).mockReturnValue({ success: false, message: 'Invalid format', importedCount: 0 });
+    (importDataFromJson as Mock).mockReturnValue({
+      success: false,
+      message: 'Invalid format',
+      importedCount: 0,
+    });
     const { container } = render(<SettingsPage />);
     const user = userEvent.setup();
 
-    const file = new File(['invalid'], 'backup.json', { type: 'application/json' });
-    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['invalid'], 'backup.json', {
+      type: 'application/json',
+    });
+    const input = container.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
     await user.upload(input, file);
 
     const mergeButton = await screen.findByRole('button', { name: /Merge/i });
     await user.click(mergeButton);
 
-    expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({
-      title: 'Import Failed',
-      description: 'Invalid format',
-      variant: 'destructive',
-    }));
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Import Failed',
+        description: 'Invalid format',
+        variant: 'destructive',
+      }),
+    );
   });
 });

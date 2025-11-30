@@ -8,11 +8,17 @@ import { ProtocolFilter } from './ProtocolFilter';
 // We only need to mock the `Select` and `SelectItem` behavior for these tests.
 vitest.mock('@/components/ui/select', () => ({
   Select: ({ children, onValueChange, value }: any) => (
-    <select data-testid="select-protocol-filter" onChange={(e) => onValueChange(e.target.value)} value={value}>
+    <select
+      data-testid="select-protocol-filter"
+      onChange={(e) => onValueChange(e.target.value)}
+      value={value}
+    >
       {children}
     </select>
   ),
-  SelectItem: ({ value, children }: any) => <option value={value}>{children}</option>,
+  SelectItem: ({ value, children }: any) => (
+    <option value={value}>{children}</option>
+  ),
   // Mock other components just to avoid errors if they are used but not tested directly
   SelectTrigger: () => null, // Hide trigger to keep select valid
   SelectValue: () => null,
@@ -32,7 +38,7 @@ describe('ProtocolFilter', () => {
         protocols={[]}
         selectedProtocol={undefined}
         onProtocolChange={mockOnProtocolChange}
-      />
+      />,
     );
 
     expect(screen.getByTestId('select-protocol-filter')).toBeInTheDocument();
@@ -47,7 +53,7 @@ describe('ProtocolFilter', () => {
         protocols={testProtocols}
         selectedProtocol={undefined}
         onProtocolChange={mockOnProtocolChange}
-      />
+      />,
     );
 
     expect(screen.getByText('All Protocols')).toBeInTheDocument();
@@ -63,7 +69,7 @@ describe('ProtocolFilter', () => {
         protocols={testProtocols}
         selectedProtocol="HTTPS"
         onProtocolChange={mockOnProtocolChange}
-      />
+      />,
     );
 
     expect(screen.getByTestId('select-protocol-filter')).toHaveValue('HTTPS');
@@ -76,7 +82,7 @@ describe('ProtocolFilter', () => {
         protocols={testProtocols}
         selectedProtocol={undefined}
         onProtocolChange={mockOnProtocolChange}
-      />
+      />,
     );
 
     const selectElement = screen.getByTestId('select-protocol-filter');
@@ -93,7 +99,7 @@ describe('ProtocolFilter', () => {
         protocols={testProtocols}
         selectedProtocol="HTTP"
         onProtocolChange={mockOnProtocolChange}
-      />
+      />,
     );
 
     const selectElement = screen.getByTestId('select-protocol-filter');

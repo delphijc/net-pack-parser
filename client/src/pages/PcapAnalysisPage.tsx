@@ -1,33 +1,50 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import type { ParsedPacket } from '@/types'; // Changed ParsedPacket to Packet as per bpfFilter.ts import
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import type { ParsedPacket } from '@/types';
 import PacketList from '@/components/PacketList';
 import PacketDetailView from '@/components/PacketDetailView';
 import { ProtocolFilter } from '@/components/ProtocolFilter';
-import { ProtocolDistributionChart } from '@/components/ProtocolDistributionChart'; // Import ProtocolDistributionChart
-import database from '@/services/database'; // Import database service
-import { FilterBar } from '@/components/FilterBar'; // Import FilterBar
-import { matchBpfFilter, validateBpfFilter } from '@/utils/bpfFilter'; // Import BPF filter utilities
+import { ProtocolDistributionChart } from '@/components/ProtocolDistributionChart';
+import database from '@/services/database';
+import { FilterBar } from '@/components/FilterBar';
+import { matchBpfFilter, validateBpfFilter } from '@/utils/bpfFilter';
 import type { BpfAST } from '@/utils/bpfFilter';
-import AdvancedSearchPanel from '@/components/AdvancedSearchPanel'; // Import AdvancedSearchPanel
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'; // Import Collapsible components
-import { Button } from '@/components/ui/button'; // Import Button for the trigger
-import { ChevronDownIcon } from 'lucide-react'; // Import an icon for the trigger
-import { multiCriteriaSearch, type MultiSearchCriteria } from '@/utils/multiCriteriaSearch'; // Import multiCriteriaSearch utilities
+import AdvancedSearchPanel from '@/components/AdvancedSearchPanel';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
+import { ChevronDownIcon } from 'lucide-react';
+import {
+  multiCriteriaSearch,
+  type MultiSearchCriteria,
+} from '@/utils/multiCriteriaSearch';
 import { cn } from '@/lib/utils';
+import type { ThreatAlert } from '@/types/threat'; // Import ThreatAlert type
+import { runThreatDetection } from '@/utils/threatDetection'; // Import threat detection utility
 
 const PcapAnalysisPage: React.FC = () => {
-  const [allPackets, setAllPackets] = useState<ParsedPacket[]>([]); // All packets loaded from DB
-  const [displayedPackets, setDisplayedPackets] = useState<ParsedPacket[]>([]); // Packets after filtering
-  const [selectedPacket, setSelectedPacket] = useState<ParsedPacket | null>(null);
+  const [allPackets, setAllPackets] = useState<ParsedPacket[]>([]);
+  const [displayedPackets, setDisplayedPackets] = useState<ParsedPacket[]>([]);
+  const [selectedPacket, setSelectedPacket] = useState<ParsedPacket | null>(
+    null,
+  );
   const [isDetailViewOpen, setIsDetailViewOpen] = useState(false);
-  const [selectedProtocol, setSelectedProtocol] = useState<string | undefined>(undefined);
+  const [selectedProtocol, setSelectedProtocol] = useState<string | undefined>(
+    undefined,
+  );
   const [availableProtocols, setAvailableProtocols] = useState<string[]>([]);
-  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false); // State for Advanced Search Panel visibility
-  const [multiSearchCriteria, setMultiSearchCriteria] = useState<MultiSearchCriteria | null>(null); // State for advanced search criteria
+  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
+  const [multiSearchCriteria, setMultiSearchCriteria] =
+    useState<MultiSearchCriteria | null>(null);
 
-  // BPF Filter State
+  const [allThreats, setAllThreats] = useState<ThreatAlert[]>([]); // New state for all threats
+
   const [bpfFilterAst, setBpfFilterAst] = useState<BpfAST | null>(null);
-  const [bpfFilterError, setBpfFilterError] = useState<string | undefined>(undefined);
+  const [bpfFilterError, setBpfFilterError] = useState<string | undefined>(
+    undefined,
+  );
 
   // Polling for packets from the database
   useEffect(() => {
@@ -35,9 +52,15 @@ const PcapAnalysisPage: React.FC = () => {
       const packetsFromDb = await database.getAllPackets();
       setAllPackets(packetsFromDb);
 
+      // Run threat detection for all packets and collect all threats
+      const detectedThreats: ThreatAlert[] = packetsFromDb.flatMap((packet) =>
+        runThreatDetection(packet),
+      );
+      setAllThreats(detectedThreats);
+
       // Extract unique protocols for the filter
       const uniqueProtocols = Array.from(
-        new Set(packetsFromDb.flatMap((p) => p.detectedProtocols || []))
+        new Set(packetsFromDb.flatMap((p) => p.detectedProtocols || [])),
       );
       setAvailableProtocols(uniqueProtocols);
     };
@@ -57,22 +80,27 @@ const PcapAnalysisPage: React.FC = () => {
 
     // Apply protocol filter first
     if (selectedProtocol && selectedProtocol !== 'ALL') {
-      filtered = filtered.filter((p) => p.detectedProtocols?.includes(selectedProtocol));
+      filtered = filtered.filter((p) =>
+        p.detectedProtocols?.includes(selectedProtocol),
+      );
     }
 
     // Apply BPF filter
     if (bpfFilterAst) {
-      filtered = filtered.filter((packet) => matchBpfFilter(packet, bpfFilterAst));
+      filtered = filtered.filter((packet) =>
+        matchBpfFilter(packet, bpfFilterAst),
+      );
     }
 
     // Apply multi-criteria search filter
     if (multiSearchCriteria) {
-      filtered = filtered.filter((packet) => multiCriteriaSearch(packet, multiSearchCriteria));
+      filtered = filtered.filter((packet) =>
+        multiCriteriaSearch(packet, multiSearchCriteria),
+      );
     }
 
     setDisplayedPackets(filtered);
   }, [allPackets, selectedProtocol, bpfFilterAst, multiSearchCriteria]);
-
 
   const handlePacketSelect = (packet: ParsedPacket | null) => {
     setSelectedPacket(packet);
@@ -127,6 +155,27 @@ const PcapAnalysisPage: React.FC = () => {
     setMultiSearchCriteria(null);
   }, []);
 
+  const handleUpdateThreatStatus = useCallback(
+    (threatId: string, statusType: 'falsePositive' | 'confirmed') => {
+      setAllThreats((prevThreats) =>
+        prevThreats.map((threat) =>
+          threat.id === threatId
+            ? {
+                ...threat,
+                [statusType]: true, // Set falsePositive or confirmed to true
+              }
+            : threat,
+        ),
+      );
+    },
+    [],
+  );
+
+  const selectedPacketThreats = useMemo(() => {
+    if (!selectedPacket) return [];
+    return allThreats.filter((threat) => threat.packetId === selectedPacket.id);
+  }, [allThreats, selectedPacket]);
+
   const selectedPacketId = selectedPacket ? selectedPacket.id : null;
 
   return (
@@ -144,47 +193,52 @@ const PcapAnalysisPage: React.FC = () => {
           selectedProtocol={selectedProtocol}
           onProtocolChange={setSelectedProtocol}
         />
-
         <Collapsible
           open={isAdvancedSearchOpen}
           onOpenChange={setIsAdvancedSearchOpen}
           className="w-full space-y-2"
         >
           <div className="flex items-center justify-between space-x-4 px-4">
-            <h4 className="text-sm font-semibold">
-              Advanced Search
-            </h4>
+            <h4 className="text-sm font-semibold">Advanced Search</h4>
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm" className="w-9 p-0">
-                <ChevronDownIcon className={cn("h-4 w-4", isAdvancedSearchOpen ? "rotate-180" : "")} />
+                <ChevronDownIcon
+                  className={cn(
+                    'h-4 w-4',
+                    isAdvancedSearchOpen ? 'rotate-180' : '',
+                  )}
+                />
                 <span className="sr-only">Toggle Advanced Search</span>
               </Button>
             </CollapsibleTrigger>
           </div>
           <CollapsibleContent>
-            <AdvancedSearchPanel onSearch={handleAdvancedSearch} onClear={handleClearAdvancedSearch} />
-          </CollapsibleContent>                  </Collapsible>
-
+            <AdvancedSearchPanel
+              onSearch={handleAdvancedSearch}
+              onClear={handleClearAdvancedSearch}
+            />
+          </CollapsibleContent>{' '}
+        </Collapsible>
         <PacketList
-
           packets={displayedPackets} // Pass filtered packets to PacketList
-
           onPacketSelect={handlePacketSelect}
-
           selectedPacketId={selectedPacketId}
-
           onClearAllPackets={handleClearAllPackets} // Pass clear function
-
           searchCriteria={multiSearchCriteria} // Pass multiSearchCriteria for highlighting
-
-        />      </div>
-      <div className="lg:col-span-2 flex flex-col space-y-6"> {/* Added a div for the charts and detail view */}
-        <ProtocolDistributionChart packets={allPackets} /> {/* Pass all packets to the chart */}
+        />{' '}
+      </div>
+      <div className="lg:col-span-2 flex flex-col space-y-6">
+        {' '}
+        {/* Added a div for the charts and detail view */}
+        <ProtocolDistributionChart packets={allPackets} />{' '}
+        {/* Pass all packets to the chart */}
         <PacketDetailView
           packet={selectedPacket}
           isOpen={isDetailViewOpen}
           onOpenChange={handleDetailViewClose}
           searchCriteria={multiSearchCriteria} // Pass multiSearchCriteria for highlighting
+          threats={selectedPacketThreats} // Pass filtered threats
+          onUpdateThreatStatus={handleUpdateThreatStatus}
         />
       </div>
     </div>

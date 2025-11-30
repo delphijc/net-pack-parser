@@ -16,7 +16,7 @@ import { Progress } from '@/components/ui/progress';
 import { localStorageService } from '@/services/localStorage';
 import { exportDataAsJson, importDataFromJson } from '@/utils/dataImportExport';
 // We will need a toast component for notifications. Let's assume we have one.
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from '@/components/ui/use-toast';
 
 type ImportMode = 'merge' | 'replace';
 
@@ -26,13 +26,15 @@ const SettingsPage: React.FC = () => {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
 
-  const [importedFileContent, setImportedFileContent] = useState<string | null>(null);
+  const [importedFileContent, setImportedFileContent] = useState<string | null>(
+    null,
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setUsage(localStorageService.getUsagePercentage());
 
-    const unsubscribe = localStorageService.onQuotaExceeded(currentUsage => {
+    const unsubscribe = localStorageService.onQuotaExceeded((currentUsage) => {
       toast({
         title: 'Storage Warning',
         description: `Storage approaching limit (${Math.round(currentUsage)}% used)`,
@@ -59,13 +61,15 @@ const SettingsPage: React.FC = () => {
       exportDataAsJson();
       toast({
         title: 'Export Started',
-        description: 'Your data export has started and will be downloaded shortly.',
+        description:
+          'Your data export has started and will be downloaded shortly.',
       });
     } catch (error) {
       console.error('Export failed:', error);
       toast({
         title: 'Export Failed',
-        description: 'Could not export your data. Check the console for details.',
+        description:
+          'Could not export your data. Check the console for details.',
         variant: 'destructive',
       });
     }
@@ -80,7 +84,7 @@ const SettingsPage: React.FC = () => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = e => {
+    reader.onload = (e) => {
       const content = e.target?.result as string;
       setImportedFileContent(content);
       setShowImportConfirm(true);
@@ -120,7 +124,6 @@ const SettingsPage: React.FC = () => {
     setImportedFileContent(null);
   };
 
-
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Settings</h2>
@@ -134,7 +137,9 @@ const SettingsPage: React.FC = () => {
         <div className="space-y-2">
           <label htmlFor="storage-usage">Storage Usage</label>
           <Progress value={usage} id="storage-usage" />
-          <p className="text-sm text-muted-foreground">{usage.toFixed(2)}% used</p>
+          <p className="text-sm text-muted-foreground">
+            {usage.toFixed(2)}% used
+          </p>
         </div>
 
         <div className="flex space-x-2">
@@ -147,7 +152,10 @@ const SettingsPage: React.FC = () => {
             className="hidden"
           />
           <Button onClick={handleExportData}>Export Data</Button>
-          <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+          <AlertDialog
+            open={showClearConfirm}
+            onOpenChange={setShowClearConfirm}
+          >
             <AlertDialogTrigger asChild>
               <Button variant="destructive">Clear All Local Data</Button>
             </AlertDialogTrigger>
@@ -155,13 +163,16 @@ const SettingsPage: React.FC = () => {
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete all your
-                  analysis data, settings, and other cached information from your browser.
+                  This action cannot be undone. This will permanently delete all
+                  your analysis data, settings, and other cached information
+                  from your browser.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleClearData}>Continue</AlertDialogAction>
+                <AlertDialogAction onClick={handleClearData}>
+                  Continue
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -174,13 +185,20 @@ const SettingsPage: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Choose Import Mode</AlertDialogTitle>
             <AlertDialogDescription>
-              Would you like to merge the imported data with your existing data, or replace everything with the new data?
+              Would you like to merge the imported data with your existing data,
+              or replace everything with the new data?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setImportedFileContent(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => processImport('merge')}>Merge</AlertDialogAction>
-            <AlertDialogAction onClick={() => processImport('replace')}>Replace</AlertDialogAction>
+            <AlertDialogCancel onClick={() => setImportedFileContent(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => processImport('merge')}>
+              Merge
+            </AlertDialogAction>
+            <AlertDialogAction onClick={() => processImport('replace')}>
+              Replace
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

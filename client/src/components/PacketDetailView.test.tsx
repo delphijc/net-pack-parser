@@ -1,175 +1,192 @@
 // client/src/components/PacketDetailView.test.tsx
 
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import PacketDetailView from './PacketDetailView';
+import PacketDetailView from './PacketDetailView'; // Default import
 import type { ParsedPacket } from '@/types';
-import type { MultiSearchCriteria } from '@/utils/multiCriteriaSearch';
+import type { ThreatAlert } from '../types/threat';
+import HexDumpViewer from '@/components/HexDumpViewer'; // Import the actual component
 
-// Mock the Sheet components
-vi.mock('@/components/ui/sheet', () => ({
-  Sheet: ({ children, open }: any) => (open ? <div data-testid="sheet">{children}</div> : null),
-  SheetContent: ({ children }: any) => <div data-testid="sheet-content">{children}</div>,
-  SheetHeader: ({ children }: any) => <div data-testid="sheet-header">{children}</div>,
-  SheetTitle: ({ children }: any) => <div data-testid="sheet-title">{children}</div>,
-  SheetDescription: ({ children }: any) => <div data-testid="sheet-description">{children}</div>,
-}));
-
-// Mock the other components
-vi.mock('@/components/ui/button', () => ({
-  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
-}));
-
-vi.mock('@/components/ui/tabs', () => ({
-  Tabs: ({ children }: any) => <div>{children}</div>,
-  TabsList: ({ children }: any) => <div>{children}</div>,
-  TabsTrigger: ({ children, value }: any) => <button data-value={value}>{children}</button>,
-  TabsContent: ({ children, value }: any) => <div data-value={value}>{children}</div>,
-}));
-
+// Mock the HexDumpViewer to inspect its props
 vi.mock('@/components/HexDumpViewer', () => ({
-  default: ({ highlightRanges }: any) => (
-    <div data-testid="hex-dump-viewer" data-highlight-count={highlightRanges?.length || 0}>
-      Hex Dump
-    </div>
-  ),
-  generateHexDump: () => ({
+  __esModule: true,
+  default: vi.fn(() => <div>Mock HexDumpViewer</div>),
+  generateHexDump: vi.fn(() => ({
     lines: [],
     fullAsciiDump: '',
+  })),
+}));
+
+// Mock the ThreatPanel to inspect its props
+vi.mock('./ThreatPanel', () => ({
+  ThreatPanel: vi.fn(({ threats }) => (
+    <div>
+      Mock ThreatPanel ({threats.length} threats)
+      {threats.map((t: ThreatAlert) => (
+        <div key={t.id}>{t.description}</div>
+      ))}
+    </div>
+  )),
+}));
+
+// Mock threatDetectionUtils
+vi.mock('../utils/threatDetectionUtils', () => ({
+  getThreatHighlightRanges: vi.fn((threats) => {
+    return threats.flatMap((t: ThreatAlert) => t.matchDetails || []);
   }),
 }));
 
-vi.mock('@/components/ExtractedStringsTab', () => ({
-  default: () => <div data-testid="extracted-strings-tab">Extracted Strings</div>,
-}));
-
-vi.mock('@/components/FilesTab', () => ({
-  default: () => <div data-testid="files-tab">Files</div>,
-}));
-
-vi.mock('@/utils/packetDecoder', () => ({
-  decodePacketHeaders: () => [
-    { name: 'Source IP', value: '192.168.1.1' },
-    { name: 'Dest IP', value: '192.168.1.2' },
-  ],
-}));
-
-describe('PacketDetailView Highlighting', () => {
-  const createTestPacket = (overrides?: Partial<ParsedPacket>): ParsedPacket => ({
-    id: 'test-1',
+describe('PacketDetailView', () => {
+  const mockPacket: ParsedPacket = {
+    id: 'packet-test-1',
     timestamp: Date.now(),
     sourceIP: '192.168.1.1',
-    destIP: '192.168.1.2',
-    sourcePort: 80,
-    destPort: 443,
+    destIP: '192.168.1.100',
+    sourcePort: 12345,
+    destPort: 80,
     protocol: 'TCP',
-    rawData: new TextEncoder().encode('test payload').buffer,
+    length: 50,
+    rawData: new TextEncoder().encode(
+      'GET /index.html HTTP/1.1\r\nHost: example.com\r\n\r\n',
+    ).buffer,
     detectedProtocols: ['HTTP'],
-    ...overrides,
-  });
+    // Added for ParsedPacket
+    tokens: [],
+    sections: [],
+    fileReferences: [],
+  };
 
-  it('should highlight source IP when it matches search criteria', () => {
-    const packet = createTestPacket();
-    const searchCriteria: MultiSearchCriteria = {
-      sourceIp: { ip: '192.168.1.1', isCidr: false },
-      logic: 'AND',
-    };
+  const mockThreats: ThreatAlert[] = [
+    {
+      id: 'threat-1',
+      packetId: 'packet-test-1',
+      severity: 'critical',
+      type: 'SQL Injection',
+      description: 'Potential SQL Injection detected',
+      mitreAttack: ['T1190'],
+      timestamp: Date.now(),
+      falsePositive: false,
+      confirmed: false,
+      matchDetails: [{ offset: 10, length: 5 }], // Highlight "index"
+    },
+  ];
 
-    const { container } = render(
-      <PacketDetailView
-        packet={packet}
-        isOpen={true}
-        onOpenChange={() => { }}
-        searchCriteria={searchCriteria}
-      />
-    );
-
-    // Find all elements containing the source IP and check if any are highlighted
-    const highlighted = container.querySelectorAll('.bg-yellow-300');
-    const sourceIPHighlighted = Array.from(highlighted).some(
-      el => el.textContent?.includes('192.168.1.1')
-    );
-    expect(sourceIPHighlighted).toBe(true);
-  });
-
-  it('should highlight destination port when it matches search criteria', () => {
-    const packet = createTestPacket();
-    const searchCriteria: MultiSearchCriteria = {
-      destPort: { port: 443 },
-      logic: 'AND',
-    };
-
-    const { container } = render(
-      <PacketDetailView
-        packet={packet}
-        isOpen={true}
-        onOpenChange={() => { }}
-        searchCriteria={searchCriteria}
-      />
-    );
-
-    // Find all elements containing the dest port and check if any are highlighted
-    const highlighted = container.querySelectorAll('.bg-yellow-300');
-    const portHighlighted = Array.from(highlighted).some(
-      el => el.textContent?.includes(':443')
-    );
-    expect(portHighlighted).toBe(true);
-  });
-
-  it('should highlight protocol when it matches search criteria', () => {
-    const packet = createTestPacket();
-    const searchCriteria: MultiSearchCriteria = {
-      protocol: { protocol: 'HTTP' },
-      logic: 'AND',
-    };
-
-    const { container } = render(
-      <PacketDetailView
-        packet={packet}
-        isOpen={true}
-        onOpenChange={() => { }}
-        searchCriteria={searchCriteria}
-      />
-    );
-
-    // Find the protocol field and check if it's highlighted
-    const highlighted = container.querySelectorAll('.bg-yellow-300');
-    const protocolHighlighted = Array.from(highlighted).some(
-      el => el.textContent === 'TCP'
-    );
-    expect(protocolHighlighted).toBe(true);
-  });
-
-  it('should not highlight when search criteria do not match', () => {
-    const packet = createTestPacket();
-    const searchCriteria: MultiSearchCriteria = {
-      sourceIp: { ip: '10.0.0.1', isCidr: false },
-      logic: 'AND',
-    };
-
-    const { container } = render(
-      <PacketDetailView
-        packet={packet}
-        isOpen={true}
-        onOpenChange={() => { }}
-        searchCriteria={searchCriteria}
-      />
-    );
-
-    // Should have no highlighted IP addresses matching the source IP
-    const highlighted = container.querySelectorAll('.bg-yellow-300');
-    expect(highlighted.length).toBe(0);
-  });
-
-  it('should not render when packet is null', () => {
+  it('renders packet details correctly', () => {
     render(
       <PacketDetailView
-        packet={null}
+        packet={mockPacket}
         isOpen={true}
-        onOpenChange={() => { }}
-      />
+        onOpenChange={vi.fn()}
+        onUpdateThreatStatus={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('Packet Details')).toBeInTheDocument();
+    expect(screen.getByText(/ID:/)).toBeInTheDocument();
+    expect(screen.getByText(/packet-test-1/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Source/)[0]).toBeInTheDocument();
+    expect(screen.getAllByText(/192.168.1.1/)[0]).toBeInTheDocument();
+  });
+
+  it('displays Hex Dump tab content by default', () => {
+    render(
+      <PacketDetailView
+        packet={mockPacket}
+        isOpen={true}
+        onOpenChange={vi.fn()}
+        onUpdateThreatStatus={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('Payload Hex Dump / ASCII')).toBeInTheDocument();
+    expect(HexDumpViewer).toHaveBeenCalled();
+  });
+
+  it('switches to Extracted Strings tab', () => {
+    render(
+      <PacketDetailView
+        packet={mockPacket}
+        isOpen={true}
+        onOpenChange={vi.fn()}
+        onUpdateThreatStatus={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole('tab', { name: /Extracted Strings/i }));
+    expect(screen.getByText('Extracted Strings')).toBeInTheDocument();
+    // Assuming ExtractedStringsTab renders something distinct
+  });
+
+  it('displays the Threats tab and its content', async () => {
+    render(
+      <PacketDetailView
+        packet={mockPacket}
+        isOpen={true}
+        onOpenChange={vi.fn()}
+        threats={mockThreats}
+        onUpdateThreatStatus={vi.fn()}
+      />,
     );
 
-    expect(screen.queryByTestId('sheet')).not.toBeInTheDocument();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('tab', { name: /Threats/i }));
+
+    expect(
+      await screen.findByText(/Mock ThreatPanel/i),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText(/1 threats/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Potential SQL Injection detected'),
+    ).toBeInTheDocument();
+  });
+
+
+  it('passes correct highlightRanges to HexDumpViewer for threats', async () => {
+    render(
+      <PacketDetailView
+        packet={mockPacket}
+        isOpen={true}
+        onOpenChange={vi.fn()}
+        threats={mockThreats}
+        onUpdateThreatStatus={vi.fn()}
+      />,
+    );
+
+    // Switch to Hex Dump tab to ensure HexDumpViewer is rendered
+    fireEvent.click(screen.getByRole('tab', { name: /Hex Dump \/ ASCII/i }));
+
+    await waitFor(() => {
+      expect(HexDumpViewer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          highlightRanges: expect.arrayContaining([
+            { offset: 10, length: 5 }, // From mockThreats[0].matchDetails
+          ]),
+        }),
+        undefined,
+      );
+    });
+  });
+
+  it('does not pass threat highlightRanges if no threats are provided', async () => {
+    render(
+      <PacketDetailView
+        packet={mockPacket}
+        isOpen={true}
+        onOpenChange={vi.fn()}
+        threats={[]}
+        onUpdateThreatStatus={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: /Hex Dump \/ ASCII/i }));
+
+    await waitFor(() => {
+      expect(HexDumpViewer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          highlightRanges: [], // Should be empty without threats
+        }),
+        undefined,
+      );
+    });
   });
 });

@@ -44,7 +44,10 @@ class LocalStorageService {
       const item = window.localStorage.getItem(this.getNamespacedKey(key));
       return item ? JSON.parse(item) : null;
     } catch (error) {
-      console.error(`Error getting value for key "${key}" from localStorage`, error);
+      console.error(
+        `Error getting value for key "${key}" from localStorage`,
+        error,
+      );
       return null;
     }
   }
@@ -59,7 +62,10 @@ class LocalStorageService {
       if (this.isQuotaExceededError(error)) {
         this.notifyQuotaExceeded();
       } else {
-        console.error(`Error setting value for key "${key}" in localStorage`, error);
+        console.error(
+          `Error setting value for key "${key}" in localStorage`,
+          error,
+        );
       }
     }
   }
@@ -77,12 +83,19 @@ class LocalStorageService {
       // Iterate backwards to safely remove items
       for (let i = window.localStorage.length - 1; i >= 0; i--) {
         const key = window.localStorage.key(i);
-        if (key && key.startsWith(`${NAMESPACE}.`) && !key.endsWith('.data-version')) {
+        if (
+          key &&
+          key.startsWith(`${NAMESPACE}.`) &&
+          !key.endsWith('.data-version')
+        ) {
           window.localStorage.removeItem(key);
         }
       }
     } catch (error) {
-      console.error('Error clearing all namespaced data from localStorage', error);
+      console.error(
+        'Error clearing all namespaced data from localStorage',
+        error,
+      );
     }
   }
 
@@ -95,7 +108,7 @@ class LocalStorageService {
 
   private notifyQuotaExceeded(usage?: number): void {
     const currentUsage = usage ?? this.getUsagePercentage();
-    this.listeners.forEach(callback => callback(currentUsage));
+    this.listeners.forEach((callback) => callback(currentUsage));
   }
 
   getUsagePercentage(): number {
@@ -117,7 +130,7 @@ class LocalStorageService {
   onQuotaExceeded(callback: (usage: number) => void): () => void {
     this.listeners.push(callback);
     return () => {
-      this.listeners = this.listeners.filter(cb => cb !== callback);
+      this.listeners = this.listeners.filter((cb) => cb !== callback);
     };
   }
 }

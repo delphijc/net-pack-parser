@@ -9,7 +9,7 @@ export interface DecodedHeader {
 // Helper to format MAC addresses
 function formatMacAddress(bytes: Uint8Array): string {
   return Array.from(bytes)
-    .map(b => b.toString(16).padStart(2, '0'))
+    .map((b) => b.toString(16).padStart(2, '0'))
     .join(':');
 }
 
@@ -52,9 +52,19 @@ export function decodePacketHeaders(packet: Packet): DecodedHeader[] {
     etherType = dataView.getUint16(offset, false); // Network byte order (big-endian)
     offset += 2;
 
-    headers.push({ name: 'Ethernet - Destination MAC', value: formatMacAddress(destMac) });
-    headers.push({ name: 'Ethernet - Source MAC', value: formatMacAddress(srcMac) });
-    headers.push({ name: 'Ethernet - EtherType', value: `0x${etherType.toString(16).padStart(4, '0')}`, description: getEtherTypeDescription(etherType) });
+    headers.push({
+      name: 'Ethernet - Destination MAC',
+      value: formatMacAddress(destMac),
+    });
+    headers.push({
+      name: 'Ethernet - Source MAC',
+      value: formatMacAddress(srcMac),
+    });
+    headers.push({
+      name: 'Ethernet - EtherType',
+      value: `0x${etherType.toString(16).padStart(4, '0')}`,
+      description: getEtherTypeDescription(etherType),
+    });
   } else {
     headers.push({ name: 'Ethernet Header', value: 'Incomplete or missing' });
     return headers; // Cannot proceed without full Ethernet header
@@ -64,12 +74,16 @@ export function decodePacketHeaders(packet: Packet): DecodedHeader[] {
   // https://en.wikipedia.org/wiki/IPv4#Header
   // EtherType for IPv4 is 0x0800
   const ETHERTYPE_IPV4 = 0x0800;
-  if (etherType === ETHERTYPE_IPV4 && packet.rawData.byteLength >= offset + 20) {
+  if (
+    etherType === ETHERTYPE_IPV4 &&
+    packet.rawData.byteLength >= offset + 20
+  ) {
     const ipVersionIhl = dataView.getUint8(offset);
-    const ipVersion = (ipVersionIhl >> 4) & 0x0F;
-    const ipHeaderLength = (ipVersionIhl & 0x0F) * 4; // In bytes
+    const ipVersion = (ipVersionIhl >> 4) & 0x0f;
+    const ipHeaderLength = (ipVersionIhl & 0x0f) * 4; // In bytes
 
-    if (ipVersion === 4) { // Only handle IPv4 for now
+    if (ipVersion === 4) {
+      // Only handle IPv4 for now
       // const dscpEcn = dataView.getUint8(offset + 1); // Unused
       const totalLength = dataView.getUint16(offset + 2, false);
       const identification = dataView.getUint16(offset + 4, false);
@@ -81,14 +95,33 @@ export function decodePacketHeaders(packet: Packet): DecodedHeader[] {
       const destIp = new Uint8Array(packet.rawData, offset + 16, 4);
 
       headers.push({ name: 'IP - Version', value: ipVersion });
-      headers.push({ name: 'IP - Header Length', value: `${ipHeaderLength} bytes` });
-      headers.push({ name: 'IP - Total Length', value: `${totalLength} bytes` });
-      headers.push({ name: 'IP - Identification', value: `0x${identification.toString(16).padStart(4, '0')}` });
+      headers.push({
+        name: 'IP - Header Length',
+        value: `${ipHeaderLength} bytes`,
+      });
+      headers.push({
+        name: 'IP - Total Length',
+        value: `${totalLength} bytes`,
+      });
+      headers.push({
+        name: 'IP - Identification',
+        value: `0x${identification.toString(16).padStart(4, '0')}`,
+      });
       headers.push({ name: 'IP - TTL', value: ttl });
-      headers.push({ name: 'IP - Protocol', value: `${ipProtocol}`, description: getIpProtocolDescription(ipProtocol) });
-      headers.push({ name: 'IP - Header Checksum', value: `0x${headerChecksum.toString(16).padStart(4, '0')}` });
+      headers.push({
+        name: 'IP - Protocol',
+        value: `${ipProtocol}`,
+        description: getIpProtocolDescription(ipProtocol),
+      });
+      headers.push({
+        name: 'IP - Header Checksum',
+        value: `0x${headerChecksum.toString(16).padStart(4, '0')}`,
+      });
       headers.push({ name: 'IP - Source IP', value: formatIPv4Address(srcIp) });
-      headers.push({ name: 'IP - Destination IP', value: formatIPv4Address(destIp) });
+      headers.push({
+        name: 'IP - Destination IP',
+        value: formatIPv4Address(destIp),
+      });
 
       offset += ipHeaderLength; // Move offset past IP header
 
@@ -96,33 +129,63 @@ export function decodePacketHeaders(packet: Packet): DecodedHeader[] {
       if (packet.rawData.byteLength >= offset) {
         switch (ipProtocol) {
           case 6: // TCP
-            if (packet.rawData.byteLength >= offset + 20) { // Minimum TCP header length
+            if (packet.rawData.byteLength >= offset + 20) {
+              // Minimum TCP header length
               const srcPort = dataView.getUint16(offset, false);
               const destPort = dataView.getUint16(offset + 2, false);
               const sequenceNumber = dataView.getUint32(offset + 4, false);
-              const acknowledgmentNumber = dataView.getUint32(offset + 8, false);
-              const dataOffsetReservedFlags = dataView.getUint16(offset + 12, false);
-              const tcpHeaderLength = ((dataOffsetReservedFlags >> 12) & 0x0F) * 4; // In bytes
-              const flags = getTcpFlags(dataOffsetReservedFlags & 0x1FF); // Last 9 bits are flags
+              const acknowledgmentNumber = dataView.getUint32(
+                offset + 8,
+                false,
+              );
+              const dataOffsetReservedFlags = dataView.getUint16(
+                offset + 12,
+                false,
+              );
+              const tcpHeaderLength =
+                ((dataOffsetReservedFlags >> 12) & 0x0f) * 4; // In bytes
+              const flags = getTcpFlags(dataOffsetReservedFlags & 0x1ff); // Last 9 bits are flags
               const windowSize = dataView.getUint16(offset + 14, false);
               const checksum = dataView.getUint16(offset + 16, false);
               const urgentPointer = dataView.getUint16(offset + 18, false);
 
               headers.push({ name: 'TCP - Source Port', value: srcPort });
               headers.push({ name: 'TCP - Destination Port', value: destPort });
-              headers.push({ name: 'TCP - Sequence Number', value: sequenceNumber });
-              headers.push({ name: 'TCP - Acknowledgment Number', value: acknowledgmentNumber });
-              headers.push({ name: 'TCP - Header Length', value: `${tcpHeaderLength} bytes` });
-              headers.push({ name: 'TCP - Flags', value: flags.join(', ') || 'None' });
+              headers.push({
+                name: 'TCP - Sequence Number',
+                value: sequenceNumber,
+              });
+              headers.push({
+                name: 'TCP - Acknowledgment Number',
+                value: acknowledgmentNumber,
+              });
+              headers.push({
+                name: 'TCP - Header Length',
+                value: `${tcpHeaderLength} bytes`,
+              });
+              headers.push({
+                name: 'TCP - Flags',
+                value: flags.join(', ') || 'None',
+              });
               headers.push({ name: 'TCP - Window Size', value: windowSize });
-              headers.push({ name: 'TCP - Checksum', value: `0x${checksum.toString(16).padStart(4, '0')}` });
-              headers.push({ name: 'TCP - Urgent Pointer', value: urgentPointer });
+              headers.push({
+                name: 'TCP - Checksum',
+                value: `0x${checksum.toString(16).padStart(4, '0')}`,
+              });
+              headers.push({
+                name: 'TCP - Urgent Pointer',
+                value: urgentPointer,
+              });
             } else {
-              headers.push({ name: 'TCP Header', value: 'Incomplete or missing' });
+              headers.push({
+                name: 'TCP Header',
+                value: 'Incomplete or missing',
+              });
             }
             break;
           case 17: // UDP
-            if (packet.rawData.byteLength >= offset + 8) { // UDP header length
+            if (packet.rawData.byteLength >= offset + 8) {
+              // UDP header length
               const srcPort = dataView.getUint16(offset, false);
               const destPort = dataView.getUint16(offset + 2, false);
               const length = dataView.getUint16(offset + 4, false);
@@ -131,21 +194,37 @@ export function decodePacketHeaders(packet: Packet): DecodedHeader[] {
               headers.push({ name: 'UDP - Source Port', value: srcPort });
               headers.push({ name: 'UDP - Destination Port', value: destPort });
               headers.push({ name: 'UDP - Length', value: `${length} bytes` });
-              headers.push({ name: 'UDP - Checksum', value: `0x${checksum.toString(16).padStart(4, '0')}` });
+              headers.push({
+                name: 'UDP - Checksum',
+                value: `0x${checksum.toString(16).padStart(4, '0')}`,
+              });
             } else {
-              headers.push({ name: 'UDP Header', value: 'Incomplete or missing' });
+              headers.push({
+                name: 'UDP Header',
+                value: 'Incomplete or missing',
+              });
             }
             break;
           case 1: // ICMP
-            headers.push({ name: 'ICMP', value: 'Decoded (basic)', description: 'Further ICMP decoding to be implemented' });
+            headers.push({
+              name: 'ICMP',
+              value: 'Decoded (basic)',
+              description: 'Further ICMP decoding to be implemented',
+            });
             break;
           default:
-            headers.push({ name: 'Transport Layer', value: `Unknown Protocol (${ipProtocol})` });
+            headers.push({
+              name: 'Transport Layer',
+              value: `Unknown Protocol (${ipProtocol})`,
+            });
             break;
         }
       }
     } else {
-      headers.push({ name: 'IP Header', value: `Unsupported IP Version ${ipVersion}` });
+      headers.push({
+        name: 'IP Header',
+        value: `Unsupported IP Version ${ipVersion}`,
+      });
     }
   } else if (etherType === ETHERTYPE_IPV4) {
     headers.push({ name: 'IP Header', value: 'Incomplete or missing' });
@@ -157,20 +236,30 @@ export function decodePacketHeaders(packet: Packet): DecodedHeader[] {
 // Helper functions for descriptions
 function getEtherTypeDescription(etherType: number): string {
   switch (etherType) {
-    case 0x0800: return 'IPv4';
-    case 0x0806: return 'ARP';
-    case 0x86DD: return 'IPv6';
-    default: return 'Unknown';
+    case 0x0800:
+      return 'IPv4';
+    case 0x0806:
+      return 'ARP';
+    case 0x86dd:
+      return 'IPv6';
+    default:
+      return 'Unknown';
   }
 }
 
 function getIpProtocolDescription(ipProtocol: number): string {
   switch (ipProtocol) {
-    case 1: return 'ICMP';
-    case 6: return 'TCP';
-    case 17: return 'UDP';
-    case 50: return 'ESP (IPsec)';
-    case 51: return 'AH (IPsec)';
-    default: return 'Unknown';
+    case 1:
+      return 'ICMP';
+    case 6:
+      return 'TCP';
+    case 17:
+      return 'UDP';
+    case 50:
+      return 'ESP (IPsec)';
+    case 51:
+      return 'AH (IPsec)';
+    default:
+      return 'Unknown';
   }
 }

@@ -1,0 +1,62 @@
+
+> client@0.0.0 test
+> vitest run src/utils/sqlInjectionDetector.test.ts
+
+
+ RUN  v4.0.14 /home/jaysoncavendish/Projects/net-pack-parser/client
+
+ ❯ src/utils/sqlInjectionDetector.test.ts (17 tests | 1 failed) 37ms
+     ✓ should return an empty array if no SQL injection is detected 4ms
+     ✓ should return an empty array if the packet is not HTTP(S) 1ms
+     × should detect classic SQL injection in GET query parameter (URL-encoded) 20ms
+     ✓ should detect classic SQL injection in POST body (URL-encoded) 1ms
+     ✓ should detect UNION SELECT (none encoded) 1ms
+     ✓ should detect URL-encoded SQL injection 1ms
+     ✓ should detect hex-encoded SQL injection 1ms
+     ✓ should detect doubly encoded SQL injection (URL then Hex) 1ms
+     ✓ should detect WAITFOR DELAY (none encoded) 1ms
+     ✓ should detect BENCHMARK (none encoded) 1ms
+     ✓ should detect boolean-based AND 1=1 (none encoded) 0ms
+     ✓ should detect boolean-based OR 1=2 (none encoded) 0ms
+     ✓ should correctly identify matches within a larger string 0ms
+     ✓ should handle multiple unique threats in different fields of the payload 1ms
+     ✓ should detect SQLi in User-Agent header 0ms
+     ✓ should detect SQLi in Cookie header 0ms
+     ✓ should handle multiple matches within the same field and encoding, aggregating matchDetails 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/utils/sqlInjectionDetector.test.ts > SQL Injection Detector > should detect classic SQL injection in GET query parameter (URL-encoded)
+AssertionError: expected [ { offset: 6, length: 11 }, …(1) ] to deeply equal [ { offset: 6, length: 14 } ]
+
+- Expected
++ Received
+
+  [
+    {
+-     "length": 14,
++     "length": 11,
+      "offset": 6,
++   },
++   {
++     "length": 9,
++     "offset": 8,
+    },
+  ]
+
+ ❯ src/utils/sqlInjectionDetector.test.ts:53:37
+     51|     expect(threats[0].mitreAttack).toEqual(['T1190']);
+     52|     expect(threats[0].description).toContain('query string (encoding: …
+     53|     expect(threats[0].matchDetails).toEqual([{ offset: 6, length: 14 }…
+       |                                     ^
+     54|   });
+     55| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 passed (17)
+   Start at  12:17:30
+   Duration  2.42s (transform 237ms, setup 235ms, import 169ms, tests 37ms, environment 1.42s)
+

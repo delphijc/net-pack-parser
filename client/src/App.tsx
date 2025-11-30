@@ -2,7 +2,6 @@
 import Dashboard from './components/dashboard/Dashboard';
 import { Toaster } from '@/components/ui/toaster';
 
-
 function App() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20 selection:text-primary">
@@ -10,7 +9,9 @@ function App() {
         <div className="container flex h-14 max-w-screen-2xl items-center">
           <div className="mr-4 flex">
             <a className="mr-6 flex items-center space-x-2" href="/">
-              <span className="font-bold sm:inline-block text-primary">NetPack Parser</span>
+              <span className="font-bold sm:inline-block text-primary">
+                NetPack Parser
+              </span>
             </a>
           </div>
         </div>

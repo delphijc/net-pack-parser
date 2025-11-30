@@ -1,0 +1,686 @@
+
+> client@0.0.0 test
+> vitest run src/components/ThreatPanel.test.tsx
+
+
+ RUN  v4.0.14 /home/jaysoncavendish/Projects/net-pack-parser/client
+
+stdout | src/components/ThreatPanel.test.tsx > ThreatPanel > renders "No threats detected." when no threats are provided
+ThreatPanel threats: []
+
+stdout | src/components/ThreatPanel.test.tsx > ThreatPanel > renders a list of threats when provided
+ThreatPanel threats: [
+  {
+    id: 'threat-1',
+    packetId: 'packet-1',
+    severity: 'critical',
+    type: 'SQL Injection',
+    description: 'Potential SQL Injection detected in HTTP request (encoding: none)',
+    mitreAttack: [ 'T1190' ],
+    timestamp: 1678886400000,
+    falsePositive: false,
+    confirmed: false,
+    matchDetails: [ [Object] ]
+  },
+  {
+    id: 'threat-2',
+    packetId: 'packet-2',
+    severity: 'critical',
+    type: 'SQL Injection',
+    description: 'Potential SQL Injection detected in HTTP request (encoding: url)',
+    mitreAttack: [ 'T1190' ],
+    timestamp: 1678886460000,
+    falsePositive: true,
+    confirmed: false,
+    matchDetails: [ [Object] ]
+  }
+]
+
+stdout | src/components/ThreatPanel.test.tsx > ThreatPanel > calls onThreatClick when a threat item is clicked
+ThreatPanel threats: [
+  {
+    id: 'threat-1',
+    packetId: 'packet-1',
+    severity: 'critical',
+    type: 'SQL Injection',
+    description: 'Potential SQL Injection detected in HTTP request (encoding: none)',
+    mitreAttack: [ 'T1190' ],
+    timestamp: 1678886400000,
+    falsePositive: false,
+    confirmed: false,
+    matchDetails: [ [Object] ]
+  },
+  {
+    id: 'threat-2',
+    packetId: 'packet-2',
+    severity: 'critical',
+    type: 'SQL Injection',
+    description: 'Potential SQL Injection detected in HTTP request (encoding: url)',
+    mitreAttack: [ 'T1190' ],
+    timestamp: 1678886460000,
+    falsePositive: true,
+    confirmed: false,
+    matchDetails: [ [Object] ]
+  }
+]
+
+stdout | src/components/ThreatPanel.test.tsx > ThreatPanel > calls onUpdateThreatStatus with "falsePositive" when "Mark as False Positive" button is clicked
+ThreatPanel threats: [
+  {
+    id: 'threat-1',
+    packetId: 'packet-1',
+    severity: 'critical',
+    type: 'SQL Injection',
+    description: 'Potential SQL Injection detected in HTTP request (encoding: none)',
+    mitreAttack: [ 'T1190' ],
+    timestamp: 1678886400000,
+    falsePositive: false,
+    confirmed: false,
+    matchDetails: [ [Object] ]
+  },
+  {
+    id: 'threat-2',
+    packetId: 'packet-2',
+    severity: 'critical',
+    type: 'SQL Injection',
+    description: 'Potential SQL Injection detected in HTTP request (encoding: url)',
+    mitreAttack: [ 'T1190' ],
+    timestamp: 1678886460000,
+    falsePositive: true,
+    confirmed: false,
+    matchDetails: [ [Object] ]
+  }
+]
+
+stdout | src/components/ThreatPanel.test.tsx > ThreatPanel > calls onUpdateThreatStatus with "confirmed" when "Mark as Confirmed" button is clicked
+ThreatPanel threats: [
+  {
+    id: 'threat-1',
+    packetId: 'packet-1',
+    severity: 'critical',
+    type: 'SQL Injection',
+    description: 'Potential SQL Injection detected in HTTP request (encoding: none)',
+    mitreAttack: [ 'T1190' ],
+    timestamp: 1678886400000,
+    falsePositive: false,
+    confirmed: false,
+    matchDetails: [ [Object] ]
+  },
+  {
+    id: 'threat-2',
+    packetId: 'packet-2',
+    severity: 'critical',
+    type: 'SQL Injection',
+    description: 'Potential SQL Injection detected in HTTP request (encoding: url)',
+    mitreAttack: [ 'T1190' ],
+    timestamp: 1678886460000,
+    falsePositive: true,
+    confirmed: false,
+    matchDetails: [ [Object] ]
+  }
+]
+
+stdout | src/components/ThreatPanel.test.tsx > ThreatPanel > disables "Mark as False Positive" button if threat is already falsePositive
+ThreatPanel threats: [
+  {
+    id: 'threat-1',
+    packetId: 'packet-1',
+    severity: 'critical',
+    type: 'SQL Injection',
+    description: 'Potential SQL Injection detected in HTTP request (encoding: none)',
+    mitreAttack: [ 'T1190' ],
+    timestamp: 1678886400000,
+    falsePositive: false,
+    confirmed: false,
+    matchDetails: [ [Object] ]
+  },
+  {
+    id: 'threat-2',
+    packetId: 'packet-2',
+    severity: 'critical',
+    type: 'SQL Injection',
+    description: 'Potential SQL Injection detected in HTTP request (encoding: url)',
+    mitreAttack: [ 'T1190' ],
+    timestamp: 1678886460000,
+    falsePositive: true,
+    confirmed: false,
+    matchDetails: [ [Object] ]
+  }
+]
+
+stdout | src/components/ThreatPanel.test.tsx > ThreatPanel > disables "Mark as Confirmed" button if threat is already confirmed
+ThreatPanel threats: [
+  {
+    id: 'threat-1',
+    packetId: 'packet-1',
+    severity: 'critical',
+    type: 'SQL Injection',
+    description: 'Potential SQL Injection detected in HTTP request (encoding: none)',
+    mitreAttack: [ 'T1190' ],
+    timestamp: 1678886400000,
+    falsePositive: false,
+    confirmed: true,
+    matchDetails: [ [Object] ]
+  },
+  {
+    id: 'threat-2',
+    packetId: 'packet-2',
+    severity: 'critical',
+    type: 'SQL Injection',
+    description: 'Potential SQL Injection detected in HTTP request (encoding: url)',
+    mitreAttack: [ 'T1190' ],
+    timestamp: 1678886460000,
+    falsePositive: true,
+    confirmed: false,
+    matchDetails: [ [Object] ]
+  }
+]
+
+ ❯ src/components/ThreatPanel.test.tsx (7 tests | 3 failed) 853ms
+     ✓ renders "No threats detected." when no threats are provided 55ms
+     × renders a list of threats when provided 83ms
+     × calls onThreatClick when a threat item is clicked 14ms
+     ✓ calls onUpdateThreatStatus with "falsePositive" when "Mark as False Positive" button is clicked  382ms
+     × calls onUpdateThreatStatus with "confirmed" when "Mark as Confirmed" button is clicked 136ms
+     ✓ disables "Mark as False Positive" button if threat is already falsePositive 110ms
+     ✓ disables "Mark as Confirmed" button if threat is already confirmed 68ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/ThreatPanel.test.tsx > ThreatPanel > renders a list of threats when provided
+TestingLibraryElementError: Found multiple elements with the text: /SQL Injection/i
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<span[39m
+  [33mclass[39m=[32m"font-medium text-red-700"[39m
+[36m>[39m
+  [0mSQL Injection[0m
+  [0m ([0m
+  [0mcritical[0m
+  [0m)[0m
+[36m</span>[39m
+
+Ignored nodes: comments, script, style
+[36m<p[39m
+  [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
+[36m>[39m
+  [0mPotential SQL Injection detected in HTTP request (encoding: none)[0m
+[36m</p>[39m
+
+Ignored nodes: comments, script, style
+[36m<span[39m
+  [33mclass[39m=[32m"font-medium text-red-700"[39m
+[36m>[39m
+  [0mSQL Injection[0m
+  [0m ([0m
+  [0mcritical[0m
+  [0m)[0m
+[36m</span>[39m
+
+Ignored nodes: comments, script, style
+[36m<p[39m
+  [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
+[36m>[39m
+  [0mPotential SQL Injection detected in HTTP request (encoding: url)[0m
+[36m</p>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"threat-panel p-4 border rounded-lg shadow-md bg-white"[39m
+    [36m>[39m
+      [36m<h2[39m
+        [33mclass[39m=[32m"text-lg font-semibold mb-4"[39m
+      [36m>[39m
+        [0mDetected Threats[0m
+      [36m</h2>[39m
+      [36m<ul[39m
+        [33mclass[39m=[32m"space-y-2"[39m
+      [36m>[39m
+        [36m<li[39m
+          [33mclass[39m=[32m"p-3 border rounded-md bg-red-50 hover:bg-red-100"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cursor-pointer"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex justify-between items-center"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-medium text-red-700"[39m
+              [36m>[39m
+                [0mSQL Injection[0m
+                [0m ([0m
+                [0mcritical[0m
+                [0m)[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-sm text-gray-500"[39m
+              [36m>[39m
+                [0m3/15/2023, 9:20:00 AM[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
+            [36m>[39m
+              [0mPotential SQL Injection detected in HTTP request (encoding: none)[0m
+            [36m</p>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-gray-400 mt-1"[39m
+            [36m>[39m
+              [0mMITRE ATT&CK: [0m
+              [0mT1190[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex justify-end gap-2 mt-2"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"[39m
+            [36m>[39m
+              [0mMark as False Positive[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
+            [36m>[39m
+              [0mMark as Confirmed[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</li>[39m
+        [36m<li[39m
+          [33mclass[39m=[32m"p-3 border rounded-md bg-red-50 hover:bg-red-100"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cursor-pointer"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex justify-between items-center"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-medium text-red-700"[39m
+              [36m>[39m
+                [0mSQL Injection[0m
+                [0m ([0m
+                [0mcritical[0m
+                [0m)[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-sm text-gray-500"[39m
+              [36m>[39m
+                [0m3/15/2023, 9:21:00 AM[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
+            [36m>[39m
+              [0mPotential SQL Injection detected in HTTP request (encoding: url)[0m
+            [36m</p>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-gray-400 mt-1"[39m
+            [36m>[39m
+              [0mMITRE ATT&CK: [0m
+              [0mT1190[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex justify-end gap-2 mt-2"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"[39m
+              [33mdisabled[39m=[32m""[39m
+            [36m>[39m
+              [0mFalse Positive (Marked)[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
+            [36m>[39m
+              [0mMark as Confirmed[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/components/ThreatPanel.test.tsx:61:19
+     59|     expect(noThreats).not.toBeInTheDocument();
+     60| 
+     61|     expect(screen.getByText(/SQL Injection/i)).toBeInTheDocument();
+       |                   ^
+     62|     expect(screen.getByText(/critical/i)).toBeInTheDocument();
+     63|     expect(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/components/ThreatPanel.test.tsx > ThreatPanel > calls onThreatClick when a threat item is clicked
+TestingLibraryElementError: Found multiple elements with the text: /SQL Injection \(critical\)/i
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<span[39m
+  [33mclass[39m=[32m"font-medium text-red-700"[39m
+[36m>[39m
+  [0mSQL Injection[0m
+  [0m ([0m
+  [0mcritical[0m
+  [0m)[0m
+[36m</span>[39m
+
+Ignored nodes: comments, script, style
+[36m<span[39m
+  [33mclass[39m=[32m"font-medium text-red-700"[39m
+[36m>[39m
+  [0mSQL Injection[0m
+  [0m ([0m
+  [0mcritical[0m
+  [0m)[0m
+[36m</span>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"threat-panel p-4 border rounded-lg shadow-md bg-white"[39m
+    [36m>[39m
+      [36m<h2[39m
+        [33mclass[39m=[32m"text-lg font-semibold mb-4"[39m
+      [36m>[39m
+        [0mDetected Threats[0m
+      [36m</h2>[39m
+      [36m<ul[39m
+        [33mclass[39m=[32m"space-y-2"[39m
+      [36m>[39m
+        [36m<li[39m
+          [33mclass[39m=[32m"p-3 border rounded-md bg-red-50 hover:bg-red-100"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cursor-pointer"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex justify-between items-center"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-medium text-red-700"[39m
+              [36m>[39m
+                [0mSQL Injection[0m
+                [0m ([0m
+                [0mcritical[0m
+                [0m)[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-sm text-gray-500"[39m
+              [36m>[39m
+                [0m3/15/2023, 9:20:00 AM[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
+            [36m>[39m
+              [0mPotential SQL Injection detected in HTTP request (encoding: none)[0m
+            [36m</p>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-gray-400 mt-1"[39m
+            [36m>[39m
+              [0mMITRE ATT&CK: [0m
+              [0mT1190[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex justify-end gap-2 mt-2"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"[39m
+            [36m>[39m
+              [0mMark as False Positive[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
+            [36m>[39m
+              [0mMark as Confirmed[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</li>[39m
+        [36m<li[39m
+          [33mclass[39m=[32m"p-3 border rounded-md bg-red-50 hover:bg-red-100"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cursor-pointer"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex justify-between items-center"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-medium text-red-700"[39m
+              [36m>[39m
+                [0mSQL Injection[0m
+                [0m ([0m
+                [0mcritical[0m
+                [0m)[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-sm text-gray-500"[39m
+              [36m>[39m
+                [0m3/15/2023, 9:21:00 AM[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
+            [36m>[39m
+              [0mPotential SQL Injection detected in HTTP request (encoding: url)[0m
+            [36m</p>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-gray-400 mt-1"[39m
+            [36m>[39m
+              [0mMITRE ATT&CK: [0m
+              [0mT1190[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex justify-end gap-2 mt-2"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"[39m
+              [33mdisabled[39m=[32m""[39m
+            [36m>[39m
+              [0mFalse Positive (Marked)[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
+            [36m>[39m
+              [0mMark as Confirmed[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/components/ThreatPanel.test.tsx:79:28
+     77|       />,
+     78|     );
+     79|     fireEvent.click(screen.getByText(/SQL Injection \(critical\)/i));
+       |                            ^
+     80|     expect(handleThreatClick).toHaveBeenCalledWith('packet-1');
+     81|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/components/ThreatPanel.test.tsx > ThreatPanel > calls onUpdateThreatStatus with "confirmed" when "Mark as Confirmed" button is clicked
+TestingLibraryElementError: Found multiple elements with the role "button" and name `/Mark as Confirmed/i`
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
+[36m>[39m
+  [0mMark as Confirmed[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
+[36m>[39m
+  [0mMark as Confirmed[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"threat-panel p-4 border rounded-lg shadow-md bg-white"[39m
+    [36m>[39m
+      [36m<h2[39m
+        [33mclass[39m=[32m"text-lg font-semibold mb-4"[39m
+      [36m>[39m
+        [0mDetected Threats[0m
+      [36m</h2>[39m
+      [36m<ul[39m
+        [33mclass[39m=[32m"space-y-2"[39m
+      [36m>[39m
+        [36m<li[39m
+          [33mclass[39m=[32m"p-3 border rounded-md bg-red-50 hover:bg-red-100"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cursor-pointer"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex justify-between items-center"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-medium text-red-700"[39m
+              [36m>[39m
+                [0mSQL Injection[0m
+                [0m ([0m
+                [0mcritical[0m
+                [0m)[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-sm text-gray-500"[39m
+              [36m>[39m
+                [0m3/15/2023, 9:20:00 AM[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
+            [36m>[39m
+              [0mPotential SQL Injection detected in HTTP request (encoding: none)[0m
+            [36m</p>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-gray-400 mt-1"[39m
+            [36m>[39m
+              [0mMITRE ATT&CK: [0m
+              [0mT1190[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex justify-end gap-2 mt-2"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"[39m
+            [36m>[39m
+              [0mMark as False Positive[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
+            [36m>[39m
+              [0mMark as Confirmed[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</li>[39m
+        [36m<li[39m
+          [33mclass[39m=[32m"p-3 border rounded-md bg-red-50 hover:bg-red-100"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cursor-pointer"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex justify-between items-center"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"font-medium text-red-700"[39m
+              [36m>[39m
+                [0mSQL Injection[0m
+                [0m ([0m
+                [0mcritical[0m
+                [0m)[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-sm text-gray-500"[39m
+              [36m>[39m
+                [0m3/15/2023, 9:21:00 AM[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
+            [36m>[39m
+              [0mPotential SQL Injection detected in HTTP request (encoding: url)[0m
+            [36m</p>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs text-gray-400 mt-1"[39m
+            [36m>[39m
+              [0mMITRE ATT&CK: [0m
+              [0mT1190[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex justify-end gap-2 mt-2"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"[39m
+              [33mdisabled[39m=[32m""[39m
+            [36m>[39m
+              [0mFalse Positive (Marked)[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
+            [36m>[39m
+              [0mMark as Confirmed[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</li>[39m
+      [36m</ul>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/components/ThreatPanel.test.tsx:111:36
+    109|       />,
+    110|     );
+    111|     const confirmedButton = screen.getByRole('button', {
+       |                                    ^
+    112|       name: /Mark as Confirmed/i,
+    113|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 4 passed (7)
+   Start at  12:16:21
+   Duration  2.91s (transform 247ms, setup 233ms, import 378ms, tests 853ms, environment 1.12s)
+

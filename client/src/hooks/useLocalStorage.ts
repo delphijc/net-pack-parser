@@ -4,7 +4,7 @@ import { localStorageService } from '@/services/localStorage';
 
 export function useLocalStorage<T>(
   key: string,
-  initialValue: T
+  initialValue: T,
 ): [T, (value: T | ((val: T) => T)) => void] {
   const [storedValue, setStoredValue] = useState<T>(() => {
     const item = localStorageService.getValue<T>(key);
@@ -24,7 +24,7 @@ export function useLocalStorage<T>(
         setStoredValue(JSON.parse(event.newValue));
       }
     },
-    [key]
+    [key],
   );
 
   useEffect(() => {
@@ -33,7 +33,6 @@ export function useLocalStorage<T>(
       window.removeEventListener('storage', handleStorageChange);
     };
   }, [handleStorageChange]);
-
 
   return [storedValue, setValue];
 }

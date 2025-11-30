@@ -14,7 +14,7 @@ interface HexDumpLine {
  */
 export const generateHexDump = (
   rawData: ArrayBuffer,
-  highlightRanges: Array<{ offset: number; length: number }> = []
+  highlightRanges: Array<{ offset: number; length: number }> = [],
 ) => {
   const bytes = new Uint8Array(rawData);
   const hexDumpLines: HexDumpLine[] = [];
@@ -32,11 +32,14 @@ export const generateHexDump = (
       const byteOffset = i + j;
       const byte = chunk[j];
       const isHighlighted = highlightRanges.some(
-        (range) => byteOffset >= range.offset && byteOffset < range.offset + range.length
+        (range) =>
+          byteOffset >= range.offset &&
+          byteOffset < range.offset + range.length,
       );
 
       const hexChar = byte.toString(16).padStart(2, '0');
-      const asciiChar = (byte >= 32 && byte <= 126) ? String.fromCharCode(byte) : '.';
+      const asciiChar =
+        byte >= 32 && byte <= 126 ? String.fromCharCode(byte) : '.';
 
       hexBytes.push({ char: hexChar, highlighted: isHighlighted });
       asciiChars.push({ char: asciiChar, highlighted: isHighlighted });
@@ -60,8 +63,14 @@ interface HexDumpViewerProps {
   caseSensitive?: boolean;
 }
 
-const HexDumpViewer: React.FC<HexDumpViewerProps> = ({ rawData, highlightRanges = [] }) => {
-  const { lines } = useMemo(() => generateHexDump(rawData, highlightRanges), [rawData, highlightRanges]);
+const HexDumpViewer: React.FC<HexDumpViewerProps> = ({
+  rawData,
+  highlightRanges = [],
+}) => {
+  const { lines } = useMemo(
+    () => generateHexDump(rawData, highlightRanges),
+    [rawData, highlightRanges],
+  );
 
   if (rawData.byteLength === 0) {
     return null; // Render nothing for empty data
@@ -75,7 +84,9 @@ const HexDumpViewer: React.FC<HexDumpViewerProps> = ({ rawData, highlightRanges 
           <span className="font-mono hex-part">
             {line.hexBytes.map((byte, byteIndex) => (
               <React.Fragment key={`hex-${lineIndex}-${byteIndex}`}>
-                <span className={byte.highlighted ? 'bg-yellow-500 text-black' : ''}>
+                <span
+                  className={byte.highlighted ? 'bg-yellow-500 text-black' : ''}
+                >
                   {byte.char}
                 </span>
                 {byteIndex < line.hexBytes.length - 1 ? ' ' : ''}
@@ -86,7 +97,10 @@ const HexDumpViewer: React.FC<HexDumpViewerProps> = ({ rawData, highlightRanges 
           </span>
           <span className="font-mono ml-2 ascii-part">
             {line.asciiChars.map((char, charIndex) => (
-              <span key={`ascii-${lineIndex}-${charIndex}`} className={char.highlighted ? 'bg-yellow-500 text-black' : ''}>
+              <span
+                key={`ascii-${lineIndex}-${charIndex}`}
+                className={char.highlighted ? 'bg-yellow-500 text-black' : ''}
+              >
                 {char.char}
               </span>
             ))}

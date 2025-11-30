@@ -1,6 +1,12 @@
 // client/src/types/extractedStrings.ts
 
-export type ExtractedStringType = 'IP' | 'URL' | 'Email' | 'Credential' | 'FilePath' | 'Other';
+export type ExtractedStringType =
+  | 'IP'
+  | 'URL'
+  | 'Email'
+  | 'Credential'
+  | 'FilePath'
+  | 'Other';
 
 export interface ExtractedString {
   id: string;

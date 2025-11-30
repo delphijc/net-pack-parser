@@ -31,15 +31,20 @@ const ChainOfCustodyLog: React.FC = () => {
       </h3>
       <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
         {logEntries.map((entry) => (
-          <div key={entry.id} className="border-b border-gray-700 pb-3 last:border-b-0">
+          <div
+            key={entry.id}
+            className="border-b border-gray-700 pb-3 last:border-b-0"
+          >
             <p className="text-sm font-medium text-gray-300">
               <span className="text-gray-500">Action:</span> {entry.action}
             </p>
             <p className="text-xs text-gray-400">
-              <span className="text-gray-600">Timestamp:</span> {new Date(entry.timestamp).toLocaleString()}
+              <span className="text-gray-600">Timestamp:</span>{' '}
+              {new Date(entry.timestamp).toLocaleString()}
             </p>
             <p className="text-xs text-gray-400">
-              <span className="text-gray-600">Filename:</span> {entry.filename} (Size: {entry.fileSize} bytes)
+              <span className="text-gray-600">Filename:</span> {entry.filename}{' '}
+              (Size: {entry.fileSize} bytes)
             </p>
             <p className="text-xs text-gray-400 break-all">
               <span className="text-gray-600">SHA-256:</span> {entry.sha256Hash}
@@ -48,7 +53,8 @@ const ChainOfCustodyLog: React.FC = () => {
               <span className="text-gray-600">MD5:</span> {entry.md5Hash}
             </p>
             <p className="text-xs text-gray-400 break-all">
-              <span className="text-gray-600">User Agent:</span> {entry.userAgent}
+              <span className="text-gray-600">User Agent:</span>{' '}
+              {entry.userAgent}
             </p>
           </div>
         ))}

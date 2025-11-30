@@ -21,7 +21,7 @@ export interface ProtocolCriterion {
 
 export interface TimeRangeCriterion {
   start: number; // Unix timestamp in milliseconds
-  end: number;   // Unix timestamp in milliseconds
+  end: number; // Unix timestamp in milliseconds
 }
 
 export interface PayloadCriterion {
@@ -51,7 +51,11 @@ export interface MultiSearchCriteria {
  * Supports exact match and CIDR notation.
  */
 function ipToLong(ip: string): number {
-  return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
+  return (
+    ip
+      .split('.')
+      .reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0
+  );
 }
 
 export function matchIp(packetIp: string, criterion: IpCriterion): boolean {
@@ -82,14 +86,23 @@ export function matchIp(packetIp: string, criterion: IpCriterion): boolean {
  * Matches a port number against a criterion.
  * Supports exact match and range (e.g., 80-443).
  */
-export function matchPort(packetPort: number, criterion: PortCriterion): boolean {
+export function matchPort(
+  packetPort: number,
+  criterion: PortCriterion,
+): boolean {
   // If no criterion or criterion.port is undefined/null, it matches everything
-  if (!criterion || criterion.port === undefined || criterion.port === null) return true;
+  if (!criterion || criterion.port === undefined || criterion.port === null)
+    return true;
 
   if (typeof criterion.port === 'number') {
     return packetPort === criterion.port;
-  } else if (criterion.port.start !== undefined && criterion.port.end !== undefined) {
-    return packetPort >= criterion.port.start && packetPort <= criterion.port.end;
+  } else if (
+    criterion.port.start !== undefined &&
+    criterion.port.end !== undefined
+  ) {
+    return (
+      packetPort >= criterion.port.start && packetPort <= criterion.port.end
+    );
   }
   // If criterion.port is an object but doesn't have both start and end, it's an invalid range
   return false;
@@ -98,16 +111,22 @@ export function matchPort(packetPort: number, criterion: PortCriterion): boolean
 /**
  * Matches a protocol type against a criterion.
  */
-export function matchProtocol(protocols: string[], criterion: ProtocolCriterion): boolean {
+export function matchProtocol(
+  protocols: string[],
+  criterion: ProtocolCriterion,
+): boolean {
   if (!criterion || !criterion.protocol) return true;
   const searchProto = criterion.protocol.toLowerCase();
-  return protocols.some(p => p.toLowerCase() === searchProto);
+  return protocols.some((p) => p.toLowerCase() === searchProto);
 }
 
 /**
  * Matches a packet timestamp against a time range criterion.
  */
-export function matchTime(packetTimestamp: number, criterion: TimeRangeCriterion): boolean {
+export function matchTime(
+  packetTimestamp: number,
+  criterion: TimeRangeCriterion,
+): boolean {
   if (!criterion || (!criterion.start && !criterion.end)) return true;
   if (criterion.start && packetTimestamp < criterion.start) return false;
   if (criterion.end && packetTimestamp > criterion.end) return false;
@@ -118,7 +137,10 @@ export function matchTime(packetTimestamp: number, criterion: TimeRangeCriterion
  * Matches packet payload content against a search string.
  * Supports case-sensitive and case-insensitive search.
  */
-export function matchPayload(packetPayload: ArrayBuffer, criterion: PayloadCriterion): boolean {
+export function matchPayload(
+  packetPayload: ArrayBuffer,
+  criterion: PayloadCriterion,
+): boolean {
   if (!criterion || !criterion.content) return true;
 
   const payloadString = new TextDecoder().decode(packetPayload);
@@ -147,14 +169,17 @@ export interface MatchDetails {
 /**
  * Returns detailed match information for highlighting.
  */
-export function getMatchDetails(packet: Packet, criteria: MultiSearchCriteria): MatchDetails {
+export function getMatchDetails(
+  packet: Packet,
+  criteria: MultiSearchCriteria,
+): MatchDetails {
   const details: MatchDetails = {
     sourceIp: false,
     destIp: false,
     sourcePort: false,
     destPort: false,
     protocol: false,
-    payloadMatches: []
+    payloadMatches: [],
   };
 
   if (!criteria) return details;
@@ -180,8 +205,12 @@ export function getMatchDetails(packet: Packet, criteria: MultiSearchCriteria): 
     const payloadString = new TextDecoder().decode(packet.rawData);
     const searchContent = criteria.payload.content;
     if (searchContent) {
-      const haystack = criteria.payload.caseSensitive ? payloadString : payloadString.toLowerCase();
-      const needle = criteria.payload.caseSensitive ? searchContent : searchContent.toLowerCase();
+      const haystack = criteria.payload.caseSensitive
+        ? payloadString
+        : payloadString.toLowerCase();
+      const needle = criteria.payload.caseSensitive
+        ? searchContent
+        : searchContent.toLowerCase();
 
       let startIndex = 0;
       let index;
@@ -195,7 +224,10 @@ export function getMatchDetails(packet: Packet, criteria: MultiSearchCriteria): 
   return details;
 }
 
-export function multiCriteriaSearch(packet: Packet, criteria: MultiSearchCriteria): boolean {
+export function multiCriteriaSearch(
+  packet: Packet,
+  criteria: MultiSearchCriteria,
+): boolean {
   const matches: boolean[] = [];
 
   // Evaluate each criterion
@@ -219,7 +251,8 @@ export function multiCriteriaSearch(packet: Packet, criteria: MultiSearchCriteri
   if (criteria.timeRange) {
     matches.push(matchTime(packet.timestamp, criteria.timeRange));
   }
-  if (criteria.payload && packet.rawData) { // Ensure rawData exists for payload search
+  if (criteria.payload && packet.rawData) {
+    // Ensure rawData exists for payload search
     matches.push(matchPayload(packet.rawData, criteria.payload));
   }
 
@@ -229,15 +262,19 @@ export function multiCriteriaSearch(packet: Packet, criteria: MultiSearchCriteri
   }
 
   if (criteria.logic === 'AND') {
-    return matches.every(m => m === true);
-  } else { // OR logic
-    return matches.some(m => m === true);
+    return matches.every((m) => m === true);
+  } else {
+    // OR logic
+    return matches.some((m) => m === true);
   }
 }
 
-export function filterPackets(packets: Packet[], criteria: MultiSearchCriteria): Packet[] {
+export function filterPackets(
+  packets: Packet[],
+  criteria: MultiSearchCriteria,
+): Packet[] {
   if (!criteria || Object.keys(criteria).length === 0) {
     return packets; // No criteria, return all packets
   }
-  return packets.filter(packet => multiCriteriaSearch(packet, criteria));
+  return packets.filter((packet) => multiCriteriaSearch(packet, criteria));
 }
