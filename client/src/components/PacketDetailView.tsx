@@ -71,7 +71,7 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({
     } else {
       try {
         rawDataBuffer = new TextEncoder().encode(packet.rawData).buffer;
-      } catch (e) {
+      } catch {
         rawDataBuffer = new ArrayBuffer(0);
       }
     }
@@ -108,7 +108,7 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({
     }
     try {
       return new TextEncoder().encode(data).buffer;
-    } catch (e) {
+    } catch {
       return new ArrayBuffer(0);
     }
   };
@@ -179,12 +179,12 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({
     setHighlightRanges([{ offset, length }]);
   };
 
+  const [activeTab, setActiveTab] = useState('hex-dump');
+
   const handleThreatClick = (packetId: string) => {
-    // This function will be called when a threat is clicked in the ThreatPanel.
-    // It should ideally close the current PacketDetailView and open another for the specified packetId.
-    // For now, we'll just log it.
-    console.log(`Threat clicked for packet ID: ${packetId}`);
-    // You might want to trigger a callback to the parent component here to change the displayed packet
+    // Switch to hex-dump view to show the highlighted threat
+    setActiveTab('hex-dump');
+    console.log(`Threat clicked for packet ID: ${packetId}. Switched to hex-dump view.`);
   };
 
   return (
@@ -315,7 +315,7 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({
           </div>
 
           {/* Tabs for Hex Dump, Extracted Strings, Files and Threats */}
-          <Tabs defaultValue="hex-dump" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-4">
               {' '}
               {/* Changed grid-cols-3 to grid-cols-4 */}

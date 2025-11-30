@@ -44,18 +44,24 @@ vi.mock('../services/database', () => ({
 
 // Mock PacketDetailView and other UI components
 vi.mock('./PacketDetailView', () => ({
-  default: vi.fn(({ packet, isOpen, onOpenChange, onUpdateThreatStatus = vi.fn() }) => {
-    if (!isOpen) return null;
-    return (
-      <div data-testid="mock-packet-detail-view">
-        <h2 data-testid="detail-view-title">
-          Packet Details - ID: {packet?.id}
-        </h2>
-        <button onClick={() => onOpenChange(false)}>Close Detail View</button>
-        <button onClick={() => onUpdateThreatStatus('mock-threat-id', 'confirmed')}>Confirm Threat</button>
-      </div>
-    );
-  }),
+  default: vi.fn(
+    ({ packet, isOpen, onOpenChange, onUpdateThreatStatus = vi.fn() }) => {
+      if (!isOpen) return null;
+      return (
+        <div data-testid="mock-packet-detail-view">
+          <h2 data-testid="detail-view-title">
+            Packet Details - ID: {packet?.id}
+          </h2>
+          <button onClick={() => onOpenChange(false)}>Close Detail View</button>
+          <button
+            onClick={() => onUpdateThreatStatus('mock-threat-id', 'confirmed')}
+          >
+            Confirm Threat
+          </button>
+        </div>
+      );
+    },
+  ),
 }));
 
 // Mock the shadcn/ui Select component for ProtocolFilter

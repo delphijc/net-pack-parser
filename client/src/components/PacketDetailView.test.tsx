@@ -129,17 +129,12 @@ describe('PacketDetailView', () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole('tab', { name: /Threats/i }));
 
-    expect(
-      await screen.findByText(/Mock ThreatPanel/i),
-    ).toBeInTheDocument();
-    expect(
-      await screen.findByText(/1 threats/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/Mock ThreatPanel/i)).toBeInTheDocument();
+    expect(await screen.findByText(/1 threats/i)).toBeInTheDocument();
     expect(
       screen.getByText('Potential SQL Injection detected'),
     ).toBeInTheDocument();
   });
-
 
   it('passes correct highlightRanges to HexDumpViewer for threats', async () => {
     render(

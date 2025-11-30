@@ -44,7 +44,11 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
                 <p className="text-sm text-red-600 mt-1">
                   {threat.description}
                 </p>
-
+                {threat.sourceIp && threat.destIp && (
+                  <p className="text-xs text-gray-500 mt-1 font-mono">
+                    {threat.sourceIp} → {threat.destIp}
+                  </p>
+                )}
                 <p className="text-xs text-gray-400 mt-1">
                   MITRE ATT&CK: {threat.mitreAttack.join(', ')}
                 </p>

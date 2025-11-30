@@ -23,9 +23,9 @@ vi.mock('@/components/ui/use-toast', () => ({
 
 // Mock ResizeObserver for Radix UI
 class ResizeObserver {
-  observe() { }
-  unobserve() { }
-  disconnect() { }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
 }
 window.ResizeObserver = ResizeObserver;
 

@@ -58,9 +58,37 @@ const PcapAnalysisPage: React.FC = () => {
       );
       setAllThreats(detectedThreats);
 
+      // Map threats to suspiciousIndicators for the packets
+      const packetsWithThreats = packetsFromDb.map((packet) => {
+        const packetThreats = detectedThreats.filter(
+          (t) => t.packetId === packet.id,
+        );
+        if (packetThreats.length > 0) {
+          return {
+            ...packet,
+            suspiciousIndicators: packetThreats.map((threat) => ({
+              id: threat.id,
+              type:
+                (threat.type === 'SQL Injection'
+                  ? 'sql_injection'
+                  : 'suspicious_pattern') as any, // Cast to any to avoid complex type matching for now, or import SuspiciousIndicator type
+              severity:
+                threat.severity === 'info' ? 'low' : (threat.severity as any), // Map 'info' to 'low' or cast
+              description: threat.description,
+              evidence: 'See threat details', // Placeholder as ThreatAlert doesn't have raw evidence string
+              confidence: 100,
+              mitreTactic: threat.mitreAttack[0], // Take the first one
+            })),
+          };
+        }
+        return packet;
+      });
+
+      setAllPackets(packetsWithThreats);
+
       // Extract unique protocols for the filter
       const uniqueProtocols = Array.from(
-        new Set(packetsFromDb.flatMap((p) => p.detectedProtocols || [])),
+        new Set(packetsWithThreats.flatMap((p) => p.detectedProtocols || [])),
       );
       setAvailableProtocols(uniqueProtocols);
     };
@@ -161,9 +189,9 @@ const PcapAnalysisPage: React.FC = () => {
         prevThreats.map((threat) =>
           threat.id === threatId
             ? {
-                ...threat,
-                [statusType]: true, // Set falsePositive or confirmed to true
-              }
+              ...threat,
+              [statusType]: true, // Set falsePositive or confirmed to true
+            }
             : threat,
         ),
       );

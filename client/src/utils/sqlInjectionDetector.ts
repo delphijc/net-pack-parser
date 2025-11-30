@@ -159,10 +159,12 @@ export function detectSqlInjection(packet: Packet): ThreatAlert[] {
           for (const hexMatch of urlHexMatches) {
             const decodedUrlThenHex = decodeHex(hexMatch);
             if (decodedUrlThenHex !== hexMatch) {
-              const urlHexScanMatches = findSqlInjectionMatches(decodedUrlThenHex);
+              const urlHexScanMatches =
+                findSqlInjectionMatches(decodedUrlThenHex);
               if (urlHexScanMatches.length > 0) {
                 allMatchDetails.push(...urlHexScanMatches);
-                if (detectionEncoding === 'none' || detectionEncoding === 'url') detectionEncoding = 'url+hex';
+                if (detectionEncoding === 'none' || detectionEncoding === 'url')
+                  detectionEncoding = 'url+hex';
               }
             }
           }
@@ -207,6 +209,8 @@ export function detectSqlInjection(packet: Packet): ThreatAlert[] {
         falsePositive: false,
         confirmed: false,
         matchDetails: uniqueMatches,
+        sourceIp: packet.sourceIP,
+        destIp: packet.destIP,
       });
     }
   }
