@@ -1,0 +1,94 @@
+<story-context id="3-4-sensitive-data-exposure-detection" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.4</storyId>
+    <title>Sensitive Data Exposure Detection</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-04</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-4-sensitive-data-exposure-detection.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>security analyst</asA>
+    <iWant>detection of sensitive data (credentials, credit cards, SSNs, API keys) in network traffic</iWant>
+    <soThat>I can identify potential data leakage</soThat>
+    <tasks>
+      - Implement Sensitive Data Detection Logic (Define Patterns, Luhn Algorithm, Utility)
+      - UI Integration &amp; Redaction (Redact by default, Show toggle)
+      - Testing (Unit, Integration)
+      - Code Quality (Linting)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Detect sensitive data patterns (Credit Cards, SSNs, API Keys, Passwords, Emails, Private Keys)
+    2. Threats appear with CRITICAL (credentials/keys) or HIGH (PII) severity
+    3. Type: Sensitive Data Exposure, MITRE T1552.001
+    4. Sensitive data is redacted in UI by default
+    5. Full data available via "Show Sensitive Data" confirmation
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/tech-spec-epic-3.md</path>
+        <title>Epic 3 Tech Spec</title>
+        <section>Story 3.4: Sensitive Data Exposure Detection</section>
+        <snippet>Requirements for detecting PII and credentials. Specifies Luhn algorithm for CCs and regex for others. Mandates redaction.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR37, FR39</section>
+        <snippet>FR37: Sensitive data scanning (CC, SSN, Keys). FR39: MITRE mapping.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>client/src/utils/sqlInjectionDetector.ts</path>
+        <kind>reference</kind>
+        <symbol>detectSqlInjection</symbol>
+        <reason>Reference implementation for pattern-based detection utility structure.</reason>
+      </item>
+      <item>
+        <path>client/src/types/threat.ts</path>
+        <kind>interface</kind>
+        <symbol>ThreatAlert</symbol>
+        <reason>Core interface for threat objects.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>uuid</dep>
+      <dep>vitest</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must reuse ThreatAlert interface.
+    - Must implement Luhn algorithm for Credit Card validation.
+    - Must redact sensitive data in UI (or in alert description if stored raw).
+    - Client-side only.
+    - Security: Do not log sensitive data in console/tests.
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>detectSensitiveData</name>
+      <signature>detectSensitiveData(packet: Packet): ThreatAlert[]</signature>
+      <path>client/src/utils/sensitiveDataDetector.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests for regex patterns and Luhn algorithm. Integration tests for UI redaction.</standards>
+    <locations>client/src/utils/sensitiveDataDetector.test.ts</locations>
+    <ideas>
+      - Test valid/invalid Credit Card numbers (Luhn check).
+      - Test SSN formats.
+      - Test API key patterns (AWS, etc.).
+      - Test redaction logic (ensure output is masked).
+      - Test false positives (random numbers vs CCs).
+    </ideas>
+  </tests>
+</story-context>

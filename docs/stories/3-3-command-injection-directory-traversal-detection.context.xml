@@ -1,0 +1,98 @@
+<story-context id="3-3-command-injection-directory-traversal-detection" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.3</storyId>
+    <title>Command Injection &amp; Directory Traversal Detection</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-04</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-3-command-injection-directory-traversal-detection.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>security analyst</asA>
+    <iWant>detection of command injection and directory traversal attempts</iWant>
+    <soThat>I can identify attempts to execute commands or access unauthorized files</soThat>
+    <tasks>
+      - Implement Command Injection Detection (Define patterns, Develop utility, Integrate)
+      - Implement Directory Traversal Detection (Define patterns, Develop utility, Integrate)
+      - UI Integration &amp; Verification (Threat Panel, Highlighting)
+      - Testing (Unit, Integration)
+      - Code Quality (Linting)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Detect command injection patterns (Shell, PowerShell)
+    2. Detect directory traversal patterns (Path traversal, encoded, absolute paths)
+    3. Command Injection: CRITICAL severity, T1059
+    4. Directory Traversal: HIGH severity, T1083
+    5. Threats appear with correct severity and mapping
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/tech-spec-epic-3.md</path>
+        <title>Epic 3 Tech Spec</title>
+        <section>Story 3.3: Command Injection &amp; Directory Traversal Detection</section>
+        <snippet>Requirements for detecting shell commands, PowerShell, and path traversal. Specifies severities and MITRE mappings.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR35, FR36, FR39</section>
+        <snippet>FR35: Command injection scanning. FR36: Directory traversal scanning. FR39: MITRE mapping.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>client/src/utils/sqlInjectionDetector.ts</path>
+        <kind>reference</kind>
+        <symbol>detectSqlInjection</symbol>
+        <reason>Reference implementation for pattern-based detection utility structure.</reason>
+      </item>
+      <item>
+        <path>client/src/types/threat.ts</path>
+        <kind>interface</kind>
+        <symbol>ThreatAlert</symbol>
+        <reason>Core interface for threat objects.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>uuid</dep>
+      <dep>vitest</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must reuse ThreatAlert interface.
+    - Separate utilities for Command Injection and Directory Traversal.
+    - Handle encoding (URL, Unicode) before matching.
+    - Client-side only.
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>detectCommandInjection</name>
+      <signature>detectCommandInjection(packet: Packet): ThreatAlert[]</signature>
+      <path>client/src/utils/commandInjectionDetector.ts</path>
+    </interface>
+    <interface>
+      <name>detectDirectoryTraversal</name>
+      <signature>detectDirectoryTraversal(packet: Packet): ThreatAlert[]</signature>
+      <path>client/src/utils/directoryTraversalDetector.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests for regex patterns and edge cases. Integration tests for UI.</standards>
+    <locations>client/src/utils/commandInjectionDetector.test.ts, client/src/utils/directoryTraversalDetector.test.ts</locations>
+    <ideas>
+      - Test common shell commands (; ls, | whoami).
+      - Test directory traversal (../, ..%2f).
+      - Test false positives (e.g., normal text containing 'cat' or 'ls').
+      - Test encoded payloads.
+    </ideas>
+  </tests>
+</story-context>

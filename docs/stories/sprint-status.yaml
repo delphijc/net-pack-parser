@@ -22,10 +22,10 @@ development_status:
   epic-2-retrospective: completed
   epic-3: contexted
   3-1-sql-injection-pattern-detection: done 
-  3-2-xss-pattern-detection: backlog
-  3-3-command-injection-directory-traversal-detection: backlog
-  3-4-sensitive-data-exposure-detection: backlog
-  3-5-yara-signature-scanning: backlog
+  3-2-xss-pattern-detection: done
+  3-3-command-injection-directory-traversal-detection: done
+  3-4-sensitive-data-exposure-detection: done
+  3-5-yara-signature-scanning: done
   3-6-mitre-attck-framework-mapping: backlog
   3-7-threat-intelligence-ioc-database: backlog
   3-8-threat-severity-classification-alert-management: backlog

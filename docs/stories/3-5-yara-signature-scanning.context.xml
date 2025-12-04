@@ -1,0 +1,99 @@
+<story-context id="3-5-yara-signature-scanning" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.5</storyId>
+    <title>YARA Signature Scanning</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-04</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-5-yara-signature-scanning.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>security analyst</asA>
+    <iWant>to apply YARA signatures to packet payloads and extracted files</iWant>
+    <soThat>I can detect known malware and indicators based on community rules</soThat>
+    <tasks>
+      - Implement YARA Engine Integration (Setup yara-js, Compilation, Scanning)
+      - Implement Rule Management (Store, UI)
+      - Integrate with Threat Pipeline (Update threatDetection.ts)
+      - Testing (Unit, Performance)
+      - Code Quality (Linting)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Compile YARA rules using JavaScript engine
+    2. Scan packet payloads against compiled rules
+    3. Create threat alert on match (Severity, Type, Rule Name, Strings, MITRE)
+    4. Manage YARA rules (Upload, Enable/Disable, View)
+    5. Scanning completes in &lt;10 seconds for 1000 packets
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/tech-spec-epic-3.md</path>
+        <title>Epic 3 Tech Spec</title>
+        <section>Story 3.5: YARA Signature Scanning</section>
+        <snippet>Requirements for YARA integration using yara-js (WASM). Specifies performance targets and alert details.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR38, FR39</section>
+        <snippet>FR38: YARA signature scans. FR39: MITRE mapping.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>client/src/utils/threatDetection.ts</path>
+        <kind>reference</kind>
+        <symbol>detectThreats</symbol>
+        <reason>Main entry point for threat detection where YARA scanning must be integrated.</reason>
+      </item>
+      <item>
+        <path>client/src/types/threat.ts</path>
+        <kind>interface</kind>
+        <symbol>ThreatAlert</symbol>
+        <reason>Core interface for threat objects.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>yara-js</dep>
+      <dep>idb</dep>
+      <dep>zustand</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must use yara-js (WebAssembly).
+    - Scanning must run off-main-thread (Web Worker).
+    - Rules must be stored in IndexedDB (size constraints).
+    - Must reuse ThreatAlert interface.
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>compileRules</name>
+      <signature>compileRules(rules: string[]): Promise&lt;YaraScanner&gt;</signature>
+      <path>client/src/services/yaraEngine.ts</path>
+    </interface>
+    <interface>
+      <name>scanPayload</name>
+      <signature>scanPayload(scanner: YaraScanner, payload: Uint8Array): Promise&lt;YaraMatch[]&gt;</signature>
+      <path>client/src/services/yaraEngine.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests for engine wrapper. Performance tests for scanning speed.</standards>
+    <locations>client/src/services/yaraEngine.test.ts</locations>
+    <ideas>
+      - Test rule compilation with valid/invalid rules.
+      - Test scanning with matching/non-matching payloads.
+      - Test performance with large rule sets.
+      - Test Web Worker integration.
+    </ideas>
+  </tests>
+</story-context>

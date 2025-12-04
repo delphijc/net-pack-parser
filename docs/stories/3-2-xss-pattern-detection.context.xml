@@ -1,0 +1,91 @@
+<story-context id="3-2-xss-pattern-detection" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.2</storyId>
+    <title>XSS Pattern Detection</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-04</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-2-xss-pattern-detection.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>security analyst</asA>
+    <iWant>automatic detection of Cross-Site Scripting (XSS) attempts</iWant>
+    <soThat>I can identify potential client-side injection attacks</soThat>
+    <tasks>
+      - Implement XSS Pattern Detection Logic (Define patterns, Develop utility, Integrate)
+      - UI Integration &amp; Verification (Threat Panel, Highlighting)
+      - Testing (Unit, Integration, Performance)
+      - Code Quality (Linting)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Detect XSS patterns (script, events, encoded, data URIs, polyglot)
+    2. Threats appear with HIGH severity, Type XSS, MITRE T1059.007
+    3. Threats are highlighted in packet payload view
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/tech-spec-epic-3.md</path>
+        <title>Epic 3 Tech Spec</title>
+        <section>Story 3.2: XSS Pattern Detection</section>
+        <snippet>Detailed requirements for XSS detection including specific patterns (script tags, event handlers, encoded) and integration steps.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR34, FR39</section>
+        <snippet>FR34: System automatically scans packets for XSS patterns. FR39: Maps threats to MITRE ATT&amp;CK.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>client/src/utils/sqlInjectionDetector.ts</path>
+        <kind>reference</kind>
+        <symbol>detectSqlInjection</symbol>
+        <reason>Reference implementation for pattern-based detection utility structure.</reason>
+      </item>
+      <item>
+        <path>client/src/types/threat.ts</path>
+        <kind>interface</kind>
+        <symbol>ThreatAlert</symbol>
+        <reason>Core interface for threat objects. Must populate sourceIp, destIp, and matchDetails.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>uuid</dep>
+      <dep>vitest</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must reuse ThreatAlert interface.
+    - Must follow sqlInjectionDetector pattern (extract HTTP data, scan fields).
+    - Must handle URL and HTML entity decoding before regex matching.
+    - Client-side only (browser-compatible regex).
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>detectXss</name>
+      <signature>detectXss(packet: Packet): ThreatAlert[]</signature>
+      <path>client/src/utils/xssDetector.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests using Vitest for logic. Component tests for UI integration.</standards>
+    <locations>client/src/utils/xssDetector.test.ts</locations>
+    <ideas>
+      - Test simple script tags.
+      - Test event handlers (onclick).
+      - Test encoded vectors (URL encoded script).
+      - Test polyglots.
+      - Test false positives (normal text).
+    </ideas>
+  </tests>
+</story-context>
