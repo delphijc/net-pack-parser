@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import PcapUpload from '../parser/PcapUpload';
 import PcapAnalysisPage from '../../pages/PcapAnalysisPage';
+import YaraRuleManager from '../YaraRuleManager';
 
 interface DashboardProps {
   onNavigate?: (tab: string) => void;
@@ -187,12 +188,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
                   className="flex items-start pb-3 border-b border-white/5 last:border-0 last:pb-0"
                 >
                   <div
-                    className={`mt-1 w-2 h-2 rounded-full mr-3 ${
-                      packet.suspiciousIndicators &&
+                    className={`mt-1 w-2 h-2 rounded-full mr-3 ${packet.suspiciousIndicators &&
                       packet.suspiciousIndicators.length > 0
-                        ? 'bg-destructive'
-                        : 'bg-emerald-500'
-                    }`}
+                      ? 'bg-destructive'
+                      : 'bg-emerald-500'
+                      }`}
                   ></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate text-foreground">
@@ -221,33 +221,39 @@ const Dashboard: React.FC<DashboardProps> = () => {
       <div className="flex border-b border-white/10 mb-6">
         <button
           onClick={() => setActiveTab('overview')}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
-            activeTab === 'overview'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          }`}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'overview'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+            }`}
         >
           Overview
         </button>
         <button
           onClick={() => setActiveTab('parser')}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
-            activeTab === 'parser'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          }`}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'parser'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+            }`}
         >
           Parser & Upload
         </button>
         <button
           onClick={() => setActiveTab('packets')}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
-            activeTab === 'packets'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          }`}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'packets'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+            }`}
         >
           Packet Inspector
+        </button>
+        <button
+          onClick={() => setActiveTab('yara')}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'yara'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+            }`}
+        >
+          YARA Rules
         </button>
       </div>
 
@@ -256,6 +262,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'parser' && <PcapUpload />}
         {activeTab === 'packets' && <PcapAnalysisPage />}
+        {activeTab === 'yara' && (
+          <div className="p-6">
+            <YaraRuleManager />
+          </div>
+        )}
       </div>
     </div>
   );

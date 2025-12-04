@@ -53,9 +53,9 @@ const PcapAnalysisPage: React.FC = () => {
       setAllPackets(packetsFromDb);
 
       // Run threat detection for all packets and collect all threats
-      const detectedThreats: ThreatAlert[] = packetsFromDb.flatMap((packet) =>
-        runThreatDetection(packet),
-      );
+      const threatPromises = packetsFromDb.map(packet => runThreatDetection(packet));
+      const threatsResults = await Promise.all(threatPromises);
+      const detectedThreats: ThreatAlert[] = threatsResults.flat();
       setAllThreats(detectedThreats);
 
       // Map threats to suspiciousIndicators for the packets

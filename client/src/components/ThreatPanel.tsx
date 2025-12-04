@@ -52,6 +52,30 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
                 <p className="text-xs text-gray-400 mt-1">
                   MITRE ATT&CK: {threat.mitreAttack.join(', ')}
                 </p>
+                {threat.sensitiveData && (
+                  <div className="mt-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs h-6 px-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Toggle reveal logic would go here, but for now we'll just alert or console log
+                        // In a real app, we'd use local state to toggle visibility of a pre-rendered hidden element
+                        // or use a dialog. Let's use a simple alert for this MVP confirmation step as per AC6.
+                        if (
+                          window.confirm(
+                            'Are you sure you want to reveal this sensitive data? Ensure you are in a secure environment.',
+                          )
+                        ) {
+                          alert(threat.sensitiveData);
+                        }
+                      }}
+                    >
+                      Show Sensitive Data
+                    </Button>
+                  </div>
+                )}
               </div>
               <div className="flex justify-end gap-2 mt-2">
                 <Button

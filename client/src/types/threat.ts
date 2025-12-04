@@ -9,6 +9,7 @@ export interface ThreatAlert {
   falsePositive: boolean;
   confirmed: boolean;
   matchDetails?: { offset: number; length: number }[]; // Added for highlighting
+  sensitiveData?: string; // Raw sensitive data for reveal functionality
   sourceIp?: string;
   destIp?: string;
 }
