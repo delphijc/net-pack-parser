@@ -15,7 +15,7 @@ vi.mock('./database', () => ({
 vi.mock('pcap-decoder', () => {
   return {
     default: class {
-      constructor() {}
+      constructor() { }
       decode() {
         // Simulate a TCP packet with sourcePort 12345, destPort 80, and TCP protocol
         const mockPacketData = new Uint8Array([
@@ -98,19 +98,12 @@ vi.mock('pcap-decoder', () => {
         return [
           {
             header: {
-              timestampSeconds: 1620000000,
-              timestampMicroseconds: 0,
-              capturedLength: mockPacketData.length,
-              originalLength: mockPacketData.length,
+              ts_sec: 1620000000,
+              ts_usec: 0,
+              incl_len: mockPacketData.length,
+              orig_len: mockPacketData.length,
             },
-            data: mockPacketData,
-            transport: {
-              sourcePort: 12345,
-              destPort: 80,
-            },
-            network: {
-              protocol: 'TCP',
-            },
+            body: mockPacketData,
           },
         ];
       }

@@ -40,23 +40,63 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
   const packets: ParsedPacket[] = [];
 
   try {
-    const decoder = new (PcapDecoder as any)(data);
-    const decodedPackets = decoder.decode();
+    const decoder = new (PcapDecoder as any)();
+    const decodedPackets = decoder.decode(new Uint8Array(data));
 
     for (const packet of decodedPackets) {
       const packetId = uuidv4();
-      const tokens: Token[] = [];
+      const tokens: Token[] = []
       const sections: ParsedSection[] = [];
       let index = 0;
 
-      // `packet.data` is a Uint8Array, which is a view on an ArrayBuffer.
-      // We need the underlying ArrayBuffer for string extraction.
-      const rawPacketDataBuffer = packet.data.buffer as ArrayBuffer;
+      // packet.body is the raw packet data (Ethernet frame)
+      const rawPacketData = packet.body;
+      const rawPacketDataBuffer = rawPacketData.buffer.slice(
+        rawPacketData.byteOffset,
+        rawPacketData.byteOffset + rawPacketData.byteLength
+      );
+
+      // Parse Ethernet header (14 bytes)
+      // Skip for now, start at IP layer (offset 14)
+      const ipStart = 14;
+
+      // Parse IP header
+      let sourceIP = '0.0.0.0';
+      let destIP = '0.0.0.0';
+      let protocol = 'unknown';
+      let sourcePort = 0;
+      let destPort = 0;
+
+      if (rawPacketData.length > ipStart + 20) {
+        // Extract source and dest IP (bytes 12-19 of IP header)
+        sourceIP = `${rawPacketData[ipStart + 12]}.${rawPacketData[ipStart + 13]}.${rawPacketData[ipStart + 14]}.${rawPacketData[ipStart + 15]}`;
+        destIP = `${rawPacketData[ipStart + 16]}.${rawPacketData[ipStart + 17]}.${rawPacketData[ipStart + 18]}.${rawPacketData[ipStart + 19]}`;
+
+        // Get protocol number (byte 9 of IP header)
+        const protocolNum = rawPacketData[ipStart + 9];
+
+        // Calculate IP header length (first nibble of first byte * 4)
+        const ipHeaderLength = (rawPacketData[ipStart] & 0x0f) * 4;
+        const transportStart = ipStart + ipHeaderLength;
+
+        // Parse transport layer
+        if (protocolNum === 6 && rawPacketData.length > transportStart + 4) {
+          // TCP
+          protocol = 'TCP';
+          sourcePort = (rawPacketData[transportStart] << 8) | rawPacketData[transportStart + 1];
+          destPort = (rawPacketData[transportStart + 2] << 8) | rawPacketData[transportStart + 3];
+        } else if (protocolNum === 17 && rawPacketData.length > transportStart + 4) {
+          // UDP
+          protocol = 'UDP';
+          sourcePort = (rawPacketData[transportStart] << 8) | rawPacketData[transportStart + 1];
+          destPort = (rawPacketData[transportStart + 2] << 8) | rawPacketData[transportStart + 3];
+        } else {
+          protocol = `IP-${protocolNum}`;
+        }
+      }
 
       // Convert packet data to hex string for tokens and sections
-      const packetDataHexString = Array.from(
-        new Uint8Array(rawPacketDataBuffer),
-      )
+      const packetDataHexString = Array.from(rawPacketData)
         .map((b: any) => b.toString(16).padStart(2, '0'))
         .join('');
 
@@ -82,15 +122,15 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
       const parsedPacket: ParsedPacket = {
         id: packetId,
         timestamp: new Date(
-          packet.header.timestampSeconds * 1000 +
-            packet.header.timestampMicroseconds / 1000,
+          packet.header.ts_sec * 1000 +
+          packet.header.ts_usec / 1000,
         ).getTime(),
-        sourceIP: '127.0.0.1', // Placeholder for now, needs proper IP header decoding for actual IPs
-        destIP: '127.0.0.1', // Placeholder for now, needs proper IP header decoding for actual IPs
-        sourcePort: packet.transport.sourcePort,
-        destPort: packet.transport.destPort,
-        protocol: packet.network.protocol, // From pcap-decoder's network layer
-        length: packet.header.captureLength,
+        sourceIP,
+        destIP,
+        sourcePort,
+        destPort,
+        protocol,
+        length: packet.header.incl_len,
         rawData: rawPacketDataBuffer, // Assign raw ArrayBuffer
         // Initialize new fields
         detectedProtocols: [], // Will be populated by detectProtocols

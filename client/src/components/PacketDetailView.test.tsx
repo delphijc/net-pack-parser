@@ -69,6 +69,7 @@ describe('PacketDetailView', () => {
       falsePositive: false,
       confirmed: false,
       matchDetails: [{ offset: 10, length: 5 }], // Highlight "index"
+      destPort: 80,
     },
   ];
 
@@ -78,7 +79,6 @@ describe('PacketDetailView', () => {
         packet={mockPacket}
         isOpen={true}
         onOpenChange={vi.fn()}
-        onUpdateThreatStatus={vi.fn()}
       />,
     );
     expect(screen.getByText('Packet Details')).toBeInTheDocument();
@@ -94,7 +94,6 @@ describe('PacketDetailView', () => {
         packet={mockPacket}
         isOpen={true}
         onOpenChange={vi.fn()}
-        onUpdateThreatStatus={vi.fn()}
       />,
     );
     expect(screen.getByText('Payload Hex Dump / ASCII')).toBeInTheDocument();
@@ -107,7 +106,6 @@ describe('PacketDetailView', () => {
         packet={mockPacket}
         isOpen={true}
         onOpenChange={vi.fn()}
-        onUpdateThreatStatus={vi.fn()}
       />,
     );
     fireEvent.click(screen.getByRole('tab', { name: /Extracted Strings/i }));
@@ -122,7 +120,6 @@ describe('PacketDetailView', () => {
         isOpen={true}
         onOpenChange={vi.fn()}
         threats={mockThreats}
-        onUpdateThreatStatus={vi.fn()}
       />,
     );
 
@@ -143,7 +140,6 @@ describe('PacketDetailView', () => {
         isOpen={true}
         onOpenChange={vi.fn()}
         threats={mockThreats}
-        onUpdateThreatStatus={vi.fn()}
       />,
     );
 
@@ -169,7 +165,6 @@ describe('PacketDetailView', () => {
         isOpen={true}
         onOpenChange={vi.fn()}
         threats={[]}
-        onUpdateThreatStatus={vi.fn()}
       />,
     );
 

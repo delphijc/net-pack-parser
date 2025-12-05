@@ -26,10 +26,10 @@ development_status:
   3-3-command-injection-directory-traversal-detection: done
   3-4-sensitive-data-exposure-detection: done
   3-5-yara-signature-scanning: done
-  3-6-mitre-attck-framework-mapping: backlog
-  3-7-threat-intelligence-ioc-database: backlog
-  3-8-threat-severity-classification-alert-management: backlog
-  epic-3-retrospective: optional
+  3-6-mitre-attck-framework-mapping: done
+  3-7-threat-intelligence-ioc-database: done
+  3-8-threat-severity-classification-alert-management: done
+  epic-3-retrospective: completed
   epic-4: backlog
   4-1-core-web-vitals-monitoring-lcp-fcp-cls-fid-ttfb: backlog
   4-2-navigation-timing-page-load-tracking: backlog

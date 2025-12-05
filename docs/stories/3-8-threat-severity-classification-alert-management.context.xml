@@ -1,0 +1,99 @@
+<story-context id="3-8-threat-severity-classification-alert-management" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.8</storyId>
+    <title>Threat Severity Classification &amp; Alert Management</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-04</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-8-threat-severity-classification-alert-management.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>security analyst</asA>
+    <iWant>threats classified by severity (Critical, High, Medium, Low, Info)</iWant>
+    <soThat>I can prioritize investigation and response efforts</soThat>
+    <tasks>
+      - Implement Severity Logic (Utils, Detector Updates)
+      - Implement Alert Management (Store, Actions)
+      - UI Integration (Badges, Actions, Filtering, False Positives Tab)
+      - Testing (Unit, Component)
+      - Code Quality (Linting)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Display color-coded severity badges (CRITICAL, HIGH, MEDIUM, LOW, INFO)
+    2. Filter threats by severity
+    3. Sort threats by severity, timestamp, source IP
+    4. Mark threats as "False Positive" or "Confirmed Threat"
+    5. Add notes/comments to threats
+    6. Review false positives in separate tab
+    7. Export confirmed threats
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/tech-spec-epic-3.md</path>
+        <title>Epic 3 Tech Spec</title>
+        <section>Story 3.8: Threat Severity Classification &amp; Alert Management</section>
+        <snippet>Requirements for severity levels, colors, and management actions (FP, Confirm, Notes). Specifies persistence and deduplication.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR40-FR42</section>
+        <snippet>FR40-FR42: Severity classification and alert management requirements.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>client/src/components/ThreatPanel.tsx</path>
+        <kind>component</kind>
+        <symbol>ThreatPanel</symbol>
+        <reason>Main component to update with severity badges and management actions.</reason>
+      </item>
+      <item>
+        <path>client/src/types/threat.ts</path>
+        <kind>interface</kind>
+        <symbol>ThreatAlert</symbol>
+        <reason>Core interface to extend with management state (status, notes).</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>zustand</dep>
+      <dep>lucide-react</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Persistence via localStorage/IndexedDB (using Zustand persist).
+    - Deduplication of threats.
+    - Semantic colors for severity.
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>markFalsePositive</name>
+      <signature>markFalsePositive(id: string): void</signature>
+      <path>client/src/store/alertStore.ts</path>
+    </interface>
+    <interface>
+      <name>confirmThreat</name>
+      <signature>confirmThreat(id: string): void</signature>
+      <path>client/src/store/alertStore.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests for store actions. Component tests for UI interactions.</standards>
+    <locations>client/src/store/alertStore.test.ts, client/src/components/ThreatPanel.test.tsx</locations>
+    <ideas>
+      - Test marking a threat as FP and verifying it moves to FP tab.
+      - Test adding notes and persisting them.
+      - Test filtering by severity.
+      - Test sorting logic.
+    </ideas>
+  </tests>
+</story-context>

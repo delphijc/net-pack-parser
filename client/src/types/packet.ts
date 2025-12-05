@@ -21,3 +21,10 @@ export interface Packet {
   portBasedProtocol?: string; // Protocol detected via port heuristics
   deepInspectionProtocol?: string; // Protocol detected via deep packet inspection
 }
+
+export interface ParsedPacket extends Packet {
+  dnsQuery?: string;
+  httpHost?: string;
+  fileHash?: string;
+  suspiciousIndicators?: string[];
+}

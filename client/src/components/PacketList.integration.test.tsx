@@ -45,7 +45,7 @@ vi.mock('../services/database', () => ({
 // Mock PacketDetailView and other UI components
 vi.mock('./PacketDetailView', () => ({
   default: vi.fn(
-    ({ packet, isOpen, onOpenChange, onUpdateThreatStatus = vi.fn() }) => {
+    ({ packet, isOpen, onOpenChange }) => {
       if (!isOpen) return null;
       return (
         <div data-testid="mock-packet-detail-view">
@@ -53,11 +53,6 @@ vi.mock('./PacketDetailView', () => ({
             Packet Details - ID: {packet?.id}
           </h2>
           <button onClick={() => onOpenChange(false)}>Close Detail View</button>
-          <button
-            onClick={() => onUpdateThreatStatus('mock-threat-id', 'confirmed')}
-          >
-            Confirm Threat
-          </button>
         </div>
       );
     },
@@ -283,7 +278,6 @@ describe('PacketList Integration with ProtocolFilter, PacketDetailView and Proto
             packet={selectedPacket}
             isOpen={isDetailViewOpen}
             onOpenChange={handleDetailViewClose}
-            onUpdateThreatStatus={vi.fn()}
           />
         </div>
       </div>
@@ -294,7 +288,7 @@ describe('PacketList Integration with ProtocolFilter, PacketDetailView and Proto
     vi.clearAllMocks();
     (database.getAllPackets as Mock).mockReturnValue(mockPackets);
     // Suppress console errors from TextDecoder if rawData is malformed or very short
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => { });
   });
 
   afterEach(() => {

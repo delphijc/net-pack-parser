@@ -1,5 +1,6 @@
 // src/utils/dataImportExport.ts
 import { localStorageService } from '@/services/localStorage';
+import type { ThreatAlert } from '@/types/threat';
 
 const DATA_SCHEMA_VERSION = '1.0';
 const APP_VERSION = __APP_VERSION__;
@@ -9,6 +10,7 @@ const APP_VERSION = __APP_VERSION__;
  * @returns {string} A stringified JSON object ready for export.
  */
 export function generateExportJson(): string {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const exportData: { [key: string]: any } = {};
 
   // 1. Gather all data from localStorage under our namespace
@@ -114,12 +116,50 @@ export function importDataFromJson(
       message: `Successfully imported ${importedCount} items.`,
       importedCount,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Import failed:', error);
     return {
       success: false,
-      message: error.message || 'An unknown error occurred during import.',
+      message:
+        error instanceof Error
+          ? error.message
+          : 'An unknown error occurred during import.',
       importedCount: 0,
     };
   }
+}
+
+/**
+ * Exports the provided list of threats as a JSON report.
+ * @param {ThreatAlert[]} threats The list of threats to export.
+ */
+export function exportThreatReport(threats: ThreatAlert[]) {
+  const metadata = {
+    export_date: new Date().toISOString(),
+    app_version: APP_VERSION,
+    report_type: 'threat_intelligence_report',
+    threat_count: threats.length,
+  };
+
+  const report = {
+    metadata,
+    threats,
+  };
+
+  const jsonString = JSON.stringify(report, null, 2);
+
+  const blob = new Blob([jsonString], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  const timestamp = new Date().toISOString().replace(/:/g, '-');
+  link.download = `threat-report-${timestamp}.json`;
+
+  document.body.appendChild(link);
+  link.click();
+
+  // Clean up
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }

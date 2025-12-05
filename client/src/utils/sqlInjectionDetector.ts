@@ -211,6 +211,8 @@ export function detectSqlInjection(packet: Packet): ThreatAlert[] {
         matchDetails: uniqueMatches,
         sourceIp: packet.sourceIP,
         destIp: packet.destIP,
+        sourcePort: packet.sourcePort,
+        destPort: packet.destPort,
       });
     }
   }

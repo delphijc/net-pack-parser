@@ -1,0 +1,60 @@
+{
+    "techniques": [
+        {
+            "id": "T1190",
+            "name": "Exploit Public-Facing Application",
+            "tactic": "Initial Access",
+            "url": "https://attack.mitre.org/techniques/T1190/",
+            "description": "Adversaries may attempt to take advantage of a weakness in an Internet-facing computer or program using software, data, or commands in order to cause unintended or unanticipated behavior."
+        },
+        {
+            "id": "T1059.007",
+            "name": "Command and Scripting Interpreter: JavaScript",
+            "tactic": "Execution",
+            "url": "https://attack.mitre.org/techniques/T1059/007/",
+            "description": "Adversaries may abuse JavaScript to execute various behaviors."
+        },
+        {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "tactic": "Execution",
+            "url": "https://attack.mitre.org/techniques/T1059/",
+            "description": "Adversaries may abuse command and script interpreters to execute commands, scripts, or binaries."
+        },
+        {
+            "id": "T1505.003",
+            "name": "Server Software Component: Web Shell",
+            "tactic": "Persistence",
+            "url": "https://attack.mitre.org/techniques/T1505/003/",
+            "description": "Adversaries may backdoor web servers with web shells to establish persistent access to systems."
+        },
+        {
+            "id": "T1041",
+            "name": "Exfiltration Over C2 Channel",
+            "tactic": "Exfiltration",
+            "url": "https://attack.mitre.org/techniques/T1041/",
+            "description": "Adversaries may steal data by exfiltrating it over an existing command and control channel."
+        },
+        {
+            "id": "T1005",
+            "name": "Data from Local System",
+            "tactic": "Collection",
+            "url": "https://attack.mitre.org/techniques/T1005/",
+            "description": "Adversaries may search for and collect sensitive data from local system sources."
+        },
+        {
+            "id": "T1110",
+            "name": "Brute Force",
+            "tactic": "Credential Access",
+            "url": "https://attack.mitre.org/techniques/T1110/",
+            "description": "Adversaries may use brute force techniques to gain access to accounts."
+        },
+        {
+            "id": "T1083",
+            "name": "File and Directory Discovery",
+            "tactic": "Discovery",
+            "url": "https://attack.mitre.org/techniques/T1083/",
+            "description": "Adversaries may enumerate files and directories or may search in specific locations of a host or network share for certain information within a file system."
+        }
+    ]
+}

@@ -8,10 +8,23 @@ import {
   FileText,
   Clock,
   AlertTriangle,
+  Download,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { exportThreatReport } from '../../utils/dataImportExport';
 import PcapUpload from '../parser/PcapUpload';
 import PcapAnalysisPage from '../../pages/PcapAnalysisPage';
 import YaraRuleManager from '../YaraRuleManager';
+import { MitreTacticsChart } from './MitreTacticsChart';
+import { TopTechniquesTable } from './TopTechniquesTable';
+import { KillChainViz } from './KillChainViz';
+import { IOCManager } from '../IOCManager';
+import { FalsePositivesTab } from '../FalsePositivesTab';
+import { ThreatPanel } from '../ThreatPanel';
+// import { useQuery } from '@tanstack/react-query'; // Removed
+import { useAlertStore } from '../../store/alertStore';
+import { runThreatDetection } from '../../utils/threatDetection';
+import type { ThreatAlert } from '../../types/threat';
 
 interface DashboardProps {
   onNavigate?: (tab: string) => void;
@@ -28,6 +41,8 @@ const Dashboard: React.FC<DashboardProps> = () => {
   });
   const [recentActivity, setRecentActivity] = useState<ParsedPacket[]>([]);
 
+  const [allThreats, setAllThreats] = useState<ThreatAlert[]>([]);
+
   useEffect(() => {
     updateStats();
 
@@ -39,7 +54,19 @@ const Dashboard: React.FC<DashboardProps> = () => {
   const updateStats = async () => {
     const packets = await database.getAllPackets();
     const files = await database.getAllFiles();
-    const threats = await database.getAllThreatIntelligence();
+    // const threats = await database.getAllThreatIntelligence(); // Remove this as it returns wrong type
+
+    // Run threat detection
+    const threatPromises = packets.map((packet) => runThreatDetection(packet));
+    const threatsResults = await Promise.all(threatPromises);
+    const detectedThreats = threatsResults.flat();
+    setAllThreats(detectedThreats);
+
+    // Filter out false positives for stats
+    const alertStates = useAlertStore.getState().alertStates;
+    const activeThreats = detectedThreats.filter(
+      (t) => alertStates[t.id]?.status !== 'false_positive'
+    );
 
     // Calculate protocol distribution
     const protocols: Record<string, number> = {};
@@ -56,13 +83,22 @@ const Dashboard: React.FC<DashboardProps> = () => {
     setStats({
       totalPackets: packets.length,
       totalFiles: files.length,
-      threatsDetected: threats.length,
+      threatsDetected: activeThreats.length,
       suspiciousActivities: suspiciousCount,
       protocols,
     });
 
     // Get recent activity (last 5 packets)
     setRecentActivity(packets.slice(-5).reverse());
+  };
+
+  const handleExportThreats = () => {
+    const alertStates = useAlertStore.getState().alertStates;
+    const enrichedThreats = allThreats.map((threat) => ({
+      ...threat,
+      ...alertStates[threat.id],
+    }));
+    exportThreatReport(enrichedThreats);
   };
 
   const renderOverview = () => (
@@ -255,6 +291,33 @@ const Dashboard: React.FC<DashboardProps> = () => {
         >
           YARA Rules
         </button>
+        <button
+          onClick={() => setActiveTab('threat-intel')}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'threat-intel'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+            }`}
+        >
+          Threat Intel
+        </button>
+        <button
+          onClick={() => setActiveTab('ioc-manager')}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'ioc-manager'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+            }`}
+        >
+          IOC Manager
+        </button>
+        <button
+          onClick={() => setActiveTab('false-positives')}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'false-positives'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+            }`}
+        >
+          False Positives
+        </button>
       </div>
 
       {/* Content Area */}
@@ -267,6 +330,36 @@ const Dashboard: React.FC<DashboardProps> = () => {
             <YaraRuleManager />
           </div>
         )}
+        {activeTab === 'threat-intel' && (
+          <div className="p-6 space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">
+                MITRE ATT&CK Intelligence
+              </h2>
+              <Button
+                variant="outline"
+                onClick={handleExportThreats}
+                disabled={allThreats.length === 0}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Export Report
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <MitreTacticsChart threats={allThreats} />
+              <TopTechniquesTable threats={allThreats} />
+            </div>
+            <KillChainViz threats={allThreats} />
+
+            {/* Threat Panel Integration */}
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold mb-4">Threat Detection Log</h3>
+              <ThreatPanel threats={allThreats} onThreatClick={() => { }} />
+            </div>
+          </div>
+        )}
+        {activeTab === 'ioc-manager' && <IOCManager />}
+        {activeTab === 'false-positives' && <FalsePositivesTab threats={allThreats} />}
       </div>
     </div>
   );

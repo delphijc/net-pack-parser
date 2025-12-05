@@ -53,7 +53,9 @@ const PcapAnalysisPage: React.FC = () => {
       setAllPackets(packetsFromDb);
 
       // Run threat detection for all packets and collect all threats
-      const threatPromises = packetsFromDb.map(packet => runThreatDetection(packet));
+      const threatPromises = packetsFromDb.map((packet) =>
+        runThreatDetection(packet),
+      );
       const threatsResults = await Promise.all(threatPromises);
       const detectedThreats: ThreatAlert[] = threatsResults.flat();
       setAllThreats(detectedThreats);
@@ -68,10 +70,9 @@ const PcapAnalysisPage: React.FC = () => {
             ...packet,
             suspiciousIndicators: packetThreats.map((threat) => ({
               id: threat.id,
-              type:
-                (threat.type === 'SQL Injection'
-                  ? 'sql_injection'
-                  : 'suspicious_pattern') as any, // Cast to any to avoid complex type matching for now, or import SuspiciousIndicator type
+              type: (threat.type === 'SQL Injection'
+                ? 'sql_injection'
+                : 'suspicious_pattern') as any, // Cast to any to avoid complex type matching for now, or import SuspiciousIndicator type
               severity:
                 threat.severity === 'info' ? 'low' : (threat.severity as any), // Map 'info' to 'low' or cast
               description: threat.description,
@@ -152,6 +153,53 @@ const PcapAnalysisPage: React.FC = () => {
     setBpfFilterError(undefined);
   };
 
+  const handlePacketDeleted = useCallback(async () => {
+    // Force an immediate reload when a packet is deleted
+    const packetsFromDb = await database.getAllPackets();
+    setAllPackets(packetsFromDb);
+
+    // Run threat detection for all packets
+    const threatPromises = packetsFromDb.map((packet) =>
+      runThreatDetection(packet),
+    );
+    const threatsResults = await Promise.all(threatPromises);
+    const detectedThreats: ThreatAlert[] = threatsResults.flat();
+    setAllThreats(detectedThreats);
+
+    // Map threats to suspiciousIndicators
+    const packetsWithThreats = packetsFromDb.map((packet) => {
+      const packetThreats = detectedThreats.filter(
+        (t) => t.packetId === packet.id,
+      );
+      if (packetThreats.length > 0) {
+        return {
+          ...packet,
+          suspiciousIndicators: packetThreats.map((threat) => ({
+            id: threat.id,
+            type: (threat.type === 'SQL Injection'
+              ? 'sql_injection'
+              : 'suspicious_pattern') as any,
+            severity:
+              threat.severity === 'info' ? 'low' : (threat.severity as any),
+            description: threat.description,
+            evidence: 'See threat details',
+            confidence: 100,
+            mitreTactic: threat.mitreAttack[0],
+          })),
+        };
+      }
+      return packet;
+    });
+
+    setAllPackets(packetsWithThreats);
+
+    // Extract unique protocols
+    const uniqueProtocols = Array.from(
+      new Set(packetsWithThreats.flatMap((p) => p.detectedProtocols || [])),
+    );
+    setAvailableProtocols(uniqueProtocols);
+  }, []);
+
   const handleBpfFilterChange = useCallback((filter: string) => {
     if (filter.trim() === '') {
       setBpfFilterAst(null);
@@ -182,22 +230,6 @@ const PcapAnalysisPage: React.FC = () => {
   const handleClearAdvancedSearch = useCallback(() => {
     setMultiSearchCriteria(null);
   }, []);
-
-  const handleUpdateThreatStatus = useCallback(
-    (threatId: string, statusType: 'falsePositive' | 'confirmed') => {
-      setAllThreats((prevThreats) =>
-        prevThreats.map((threat) =>
-          threat.id === threatId
-            ? {
-              ...threat,
-              [statusType]: true, // Set falsePositive or confirmed to true
-            }
-            : threat,
-        ),
-      );
-    },
-    [],
-  );
 
   const selectedPacketThreats = useMemo(() => {
     if (!selectedPacket) return [];
@@ -252,6 +284,7 @@ const PcapAnalysisPage: React.FC = () => {
           onPacketSelect={handlePacketSelect}
           selectedPacketId={selectedPacketId}
           onClearAllPackets={handleClearAllPackets} // Pass clear function
+          onPacketDeleted={handlePacketDeleted} // Add immediate refresh callback
           searchCriteria={multiSearchCriteria} // Pass multiSearchCriteria for highlighting
         />{' '}
       </div>
@@ -266,7 +299,6 @@ const PcapAnalysisPage: React.FC = () => {
           onOpenChange={handleDetailViewClose}
           searchCriteria={multiSearchCriteria} // Pass multiSearchCriteria for highlighting
           threats={selectedPacketThreats} // Pass filtered threats
-          onUpdateThreatStatus={handleUpdateThreatStatus}
         />
       </div>
     </div>

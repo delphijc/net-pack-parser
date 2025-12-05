@@ -6,36 +6,31 @@
  * and encoded payloads.
  */
 export const xssPatterns = {
-    // Script tags: <script>...</script>, <script src=...>
-    scriptTags: [
-        /<script\b[^>]*>([\s\S]*?)<\/script>/gim,
-        /<script\b[^>]*>/gim,
-        /<\/script>/gim,
-    ],
+  // Script tags: <script>...</script>, <script src=...>
+  scriptTags: [
+    /<script\b[^>]*>([\s\S]*?)<\/script>/gim,
+    /<script\b[^>]*>/gim,
+    /<\/script>/gim,
+  ],
 
-    // Event handlers: onclick=, onmouseover=, onerror=, etc.
-    // Matches on\w+= pattern, often used in HTML attributes
-    eventHandlers: [
-        /on\w+\s*=/gim,
-        /on(?:click|load|error|mouseover|mouseout|mousedown|mouseup|mousemove|keydown|keyup|keypress|change|submit|focus|blur)\s*=/gim,
-    ],
+  // Event handlers: onclick=, onmouseover=, onerror=, etc.
+  // Matches on\w+= pattern, often used in HTML attributes
+  eventHandlers: [
+    /on\w+\s*=/gim,
+    /on(?:click|load|error|mouseover|mouseout|mousedown|mouseup|mousemove|keydown|keyup|keypress|change|submit|focus|blur)\s*=/gim,
+  ],
 
-    // JavaScript URIs: javascript:alert(1)
-    javascriptUris: [
-        /javascript:[^"']*/gim,
-    ],
+  // JavaScript URIs: javascript:alert(1)
+  javascriptUris: [/javascript:[^"']*/gim],
 
-    // Data URIs: data:text/html,<script>...
-    dataUris: [
-        /data:text\/html;base64,[^"']*/gim,
-        /data:text\/html,[^"']*/gim,
-    ],
+  // Data URIs: data:text/html,<script>...
+  dataUris: [/data:text\/html;base64,[^"']*/gim, /data:text\/html,[^"']*/gim],
 
-    // Polyglot patterns (often used to break out of contexts)
-    polyglots: [
-        /javascript:\/\*.*\*\//gim, // Comment injection
-        /expression\s*\(/gim, // IE CSS expression
-    ],
+  // Polyglot patterns (often used to break out of contexts)
+  polyglots: [
+    /javascript:\/\*.*\*\//gim, // Comment injection
+    /expression\s*\(/gim, // IE CSS expression
+  ],
 };
 
 /**
@@ -44,11 +39,11 @@ export const xssPatterns = {
  * @returns The decoded text.
  */
 export function decodeUrl(text: string): string {
-    try {
-        return decodeURIComponent(text);
-    } catch (e) {
-        return text;
-    }
+  try {
+    return decodeURIComponent(text);
+  } catch (e) {
+    return text;
+  }
 }
 
 /**
@@ -57,11 +52,14 @@ export function decodeUrl(text: string): string {
  * @returns The decoded text.
  */
 export function decodeHtmlEntities(text: string): string {
-    return text.replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
-        .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&apos;/g, "'")
-        .replace(/&amp;/g, '&');
+  return text
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) =>
+      String.fromCharCode(parseInt(hex, 16)),
+    )
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&');
 }

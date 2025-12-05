@@ -1,0 +1,92 @@
+<story-context id="3-6-mitre-attck-framework-mapping" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.6</storyId>
+    <title>MITRE ATT&amp;CK Framework Mapping</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-04</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-6-mitre-attck-framework-mapping.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>security analyst</asA>
+    <iWant>all detected threats mapped to MITRE ATT&amp;CK tactics and techniques</iWant>
+    <soThat>I can understand attack patterns and communicate using a standard framework</soThat>
+    <tasks>
+      - Implement MITRE Data Service (Import JSON, Service Utility)
+      - UI Integration (Threat Panel Update, Filtering)
+      - Dashboard Visualization (Tactics Chart, Top Techniques, Kill Chain)
+      - Testing (Unit, Component)
+      - Code Quality (Linting)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Threats display MITRE ATT&amp;CK mapping (Tactic, Technique ID, Name)
+    2. Click technique ID to view details (MITRE website/modal)
+    3. Dashboard shows Tactics Distribution (bar chart)
+    4. Dashboard shows Top 10 Techniques (table)
+    5. Dashboard shows Kill Chain visualization
+    6. Filter threats by Tactic/Technique
+    7. Exported reports include mappings
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/tech-spec-epic-3.md</path>
+        <title>Epic 3 Tech Spec</title>
+        <section>Story 3.6: MITRE ATT&amp;CK Framework Mapping</section>
+        <snippet>Requirements for mapping threats to MITRE ATT&amp;CK. Specifies dashboard visualizations and filtering.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR39</section>
+        <snippet>FR39: System maps threats to MITRE ATT&amp;CK framework.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>client/src/types/threat.ts</path>
+        <kind>interface</kind>
+        <symbol>ThreatAlert</symbol>
+        <reason>Core interface containing the `mitreAttack` field to be visualized.</reason>
+      </item>
+      <item>
+        <path>client/src/components/ThreatPanel.tsx</path>
+        <kind>component</kind>
+        <symbol>ThreatPanel</symbol>
+        <reason>Main component to update with MITRE details and filtering.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>recharts</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Must use existing `mitreAttack` field in `ThreatAlert`.
+    - Dashboard visualizations should use `recharts` (standard for project).
+    - MITRE data should be handled efficiently (lazy load or subset).
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>getTechniqueDetails</name>
+      <signature>getTechniqueDetails(id: string): MitreTechnique | undefined</signature>
+      <path>client/src/services/mitreService.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests for service lookups. Component tests for dashboard widgets.</standards>
+    <locations>client/src/services/mitreService.test.ts, client/src/components/dashboard/MitreDashboard.test.tsx</locations>
+    <ideas>
+      - Test looking up valid/invalid technique IDs.
+      - Test dashboard rendering with empty/populated threat data.
+      - Test filtering logic in ThreatPanel.
+    </ideas>
+  </tests>
+</story-context>

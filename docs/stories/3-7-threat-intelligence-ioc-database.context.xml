@@ -1,0 +1,96 @@
+<story-context id="3-7-threat-intelligence-ioc-database" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.7</storyId>
+    <title>Threat Intelligence IOC Database</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-04</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/3-7-threat-intelligence-ioc-database.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>security analyst</asA>
+    <iWant>a built-in database of Indicators of Compromise (IOCs)</iWant>
+    <soThat>I can detect known malicious IPs, domains, and file hashes automatically</soThat>
+    <tasks>
+      - Implement IOC Database Service (Data Structure, Management API)
+      - Implement IOC Detection Logic (Detector Utility, Integration)
+      - UI Integration (IOC Manager)
+      - Testing (Unit, Performance)
+      - Code Quality (Linting)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    1. Check packets against IOCs (IPs, Domains, Hashes, URLs)
+    2. Create threat alert on match (Severity, Type, Description, Source, MITRE)
+    3. Manage IOCs (View, Add, Import, Export)
+    4. Hot-reload IOC database updates
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/tech-spec-epic-3.md</path>
+        <title>Epic 3 Tech Spec</title>
+        <section>Story 3.7: Threat Intelligence IOC Database</section>
+        <snippet>Requirements for built-in IOC database, detection logic, and management features. Specifies supported IOC types and import formats.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR43-FR48</section>
+        <snippet>FR43-FR48: IOC database requirements including import/export and detection.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>client/src/utils/threatDetection.ts</path>
+        <kind>reference</kind>
+        <symbol>detectThreats</symbol>
+        <reason>Main entry point for threat detection where IOC scanning must be integrated.</reason>
+      </item>
+      <item>
+        <path>client/src/types/threat.ts</path>
+        <kind>interface</kind>
+        <symbol>ThreatAlert</symbol>
+        <reason>Core interface for threat objects.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <dep>idb</dep>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    - Efficient data structures (Set/Map) for O(1) lookup.
+    - Support STIX 2.x basic parsing.
+    - Persistence via IndexedDB.
+    - Client-side only.
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>detectIOCs</name>
+      <signature>detectIOCs(packet: Packet): ThreatAlert[]</signature>
+      <path>client/src/utils/iocDetector.ts</path>
+    </interface>
+    <interface>
+      <name>addIOC</name>
+      <signature>addIOC(ioc: IOC): void</signature>
+      <path>client/src/services/iocService.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests for CRUD operations and detection logic. Performance tests for large datasets.</standards>
+    <locations>client/src/services/iocService.test.ts, client/src/utils/iocDetector.test.ts</locations>
+    <ideas>
+      - Test adding/removing IOCs.
+      - Test importing CSV/JSON/STIX.
+      - Test matching IPs, Domains, Hashes against packet data.
+      - Test performance with 10k+ indicators.
+    </ideas>
+  </tests>
+</story-context>

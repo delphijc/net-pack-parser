@@ -1,12 +1,13 @@
 // client/src/utils/threatDetection.ts
 
-import type { Packet } from '../types/packet';
+import type { Packet, ParsedPacket } from '../types/packet';
 import type { ThreatAlert } from '../types/threat';
 import { detectSqlInjection } from './sqlInjectionDetector';
 import { detectXss } from './xssDetector';
 import { detectCommandInjection } from './commandInjectionDetector';
 import { detectDirectoryTraversal } from './directoryTraversalDetector';
 import { detectSensitiveData } from './sensitiveDataDetector';
+import { detectIOCs } from './iocDetector';
 
 /**
  * Orchestrates various threat detection mechanisms.
@@ -23,7 +24,9 @@ import { v4 as uuidv4 } from 'uuid';
  * @param packet The packet to analyze for threats.
  * @returns An array of detected ThreatAlerts.
  */
-export async function runThreatDetection(packet: Packet): Promise<ThreatAlert[]> {
+export async function runThreatDetection(
+  packet: Packet,
+): Promise<ThreatAlert[]> {
   let allThreats: ThreatAlert[] = [];
 
   // 1. SQL Injection Detection
@@ -45,10 +48,17 @@ export async function runThreatDetection(packet: Packet): Promise<ThreatAlert[]>
 
   // YARA Scanning (Async)
   try {
-    const { matches } = await yaraEngine.scanPayload(new Uint8Array(packet.rawData));
+    const { matches } = await yaraEngine.scanPayload(
+      new Uint8Array(packet.rawData),
+    );
     if (matches && matches.length > 0) {
-      const yaraThreats: ThreatAlert[] = matches.map(match => {
-        const severity = (match.meta.severity?.toLowerCase() as 'low' | 'medium' | 'high' | 'critical') || 'high';
+      const yaraThreats: ThreatAlert[] = matches.map((match) => {
+        const severity =
+          (match.meta.severity?.toLowerCase() as
+            | 'low'
+            | 'medium'
+            | 'high'
+            | 'critical') || 'high';
         const mitre = match.meta.mitre ? [match.meta.mitre] : [];
 
         return {
@@ -61,15 +71,29 @@ export async function runThreatDetection(packet: Packet): Promise<ThreatAlert[]>
           timestamp: packet.timestamp,
           falsePositive: false,
           confirmed: false,
-          matchDetails: match.matches.map(m => ({ offset: m.offset, length: m.length })),
+          matchDetails: match.matches.map((m) => ({
+            offset: m.offset,
+            length: m.length,
+          })),
           sourceIp: packet.sourceIP,
           destIp: packet.destIP,
+          sourcePort: packet.sourcePort,
+          destPort: packet.destPort,
         };
       });
       allThreats = allThreats.concat(yaraThreats);
+      allThreats = allThreats.concat(yaraThreats);
     }
   } catch (error) {
-    console.error("YARA Scan failed:", error);
+    console.error('YARA Scan failed:', error);
+  }
+
+  // IOC Detection (Async)
+  try {
+    const iocThreats = await detectIOCs(packet as ParsedPacket);
+    allThreats = allThreats.concat(iocThreats);
+  } catch (error) {
+    console.error('IOC Detection failed:', error);
   }
 
   return allThreats;

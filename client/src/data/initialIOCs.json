@@ -1,0 +1,44 @@
+[
+    {
+        "id": "ioc-1",
+        "type": "ip",
+        "value": "192.0.2.1",
+        "description": "Known Botnet C2",
+        "source": "AlienVault OTX",
+        "severity": "critical",
+        "mitreAttack": [
+            "T1071"
+        ],
+        "enabled": true,
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "lastUpdated": "2024-01-01T00:00:00.000Z"
+    },
+    {
+        "id": "ioc-2",
+        "type": "domain",
+        "value": "malicious-example.com",
+        "description": "Phishing Domain",
+        "source": "PhishTank",
+        "severity": "high",
+        "mitreAttack": [
+            "T1566"
+        ],
+        "enabled": true,
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "lastUpdated": "2024-01-01T00:00:00.000Z"
+    },
+    {
+        "id": "ioc-3",
+        "type": "hash",
+        "value": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+        "description": "Ransomware Sample (SHA256)",
+        "source": "Abuse.ch",
+        "severity": "critical",
+        "mitreAttack": [
+            "T1486"
+        ],
+        "enabled": true,
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "lastUpdated": "2024-01-01T00:00:00.000Z"
+    }
+]

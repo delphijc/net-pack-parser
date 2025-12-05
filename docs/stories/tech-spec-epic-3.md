@@ -403,3 +403,9 @@ The testing strategy for Epic 3 will focus on ensuring high accuracy of threat d
 -   **E2E Flows**: 100% E2E coverage for all P0 (Critical) threat detection scenarios.
 
 ## Development Environment
+
+### Post-Review Follow-ups
+
+- [ ] [Medium] Update `Dashboard.tsx` to merge `alertStore` state (status, notes) into threats before passing to `exportThreatReport` (AC8) (Story 3.8)
+- [ ] [Low] Implement "Sort by Source IP" in `ThreatPanel.tsx` (AC5) (Story 3.8)
+- [ ] [Low] Update `Dashboard.tsx` stats calculation to exclude False Positives from "Threats Detected" count (Story 3.8)

@@ -12,4 +12,9 @@ export interface ThreatAlert {
   sensitiveData?: string; // Raw sensitive data for reveal functionality
   sourceIp?: string;
   destIp?: string;
+  source?: string; // IOC Source
+  sourcePort?: number;
+  destPort: number;
+  status?: 'active' | 'false_positive' | 'confirmed';
+  notes?: string[];
 }
