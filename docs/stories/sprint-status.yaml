@@ -32,8 +32,8 @@ development_status:
   epic-3-retrospective: completed
   epic-4: contexted
   4-1-core-web-vitals-monitoring-lcp-fcp-cls-fid-ttfb: done
-  4-2-navigation-timing-page-load-tracking: ready-for-dev
-  4-3-long-task-detection-50ms: backlog
+  4-2-navigation-timing-page-load-tracking: done
+  4-3-long-task-detection-50ms: done
   4-4-resource-timing-capture-waterfall-visualization: backlog
   4-5-performance-dashboard-real-time-metrics: backlog
   4-6-historical-performance-trends-with-time-filters: backlog

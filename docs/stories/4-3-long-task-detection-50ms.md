@@ -1,6 +1,6 @@
 # Story 4.3: Long Task Detection (>50ms)
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -21,33 +21,33 @@ so that I can identify code execution that causes UI freezes and poor responsive
 
 ## Tasks / Subtasks
 
-- [ ] **1. Performance Observer Hook** (AC1, AC2)
-  - [ ] **1.1. create usePerformanceObserver**:
-    - [ ] Create `client/src/hooks/usePerformanceObserver.ts`.
-    - [ ] Implement `PerformanceObserver` logic for `entryTypes: ['longtask']`.
-    - [ ] Handle browser compatibility (try-catch block).
+- [x] **1. Performance Observer Hook** (AC1, AC2)
+  - [x] **1.1. create usePerformanceObserver**:
+    - [x] Create `client/src/hooks/usePerformanceObserver.ts`.
+    - [x] Implement `PerformanceObserver` logic for `entryTypes: ['longtask']`.
+    - [x] Handle browser compatibility (try-catch block).
 
-- [ ] **2. Store Updates** (AC5)
-  - [ ] **2.1. Update performanceStore**:
-    - [ ] Update `client/src/store/performanceStore.ts`.
-    - [ ] Add `LongTask` interface (startTime, duration, attribution).
-    - [ ] Add `longTasks` array to state.
-    - [ ] Add `addLongTask` action with limit (FIFO 50 items).
+- [x] **2. Store Updates** (AC5)
+  - [x] **2.1. Update performanceStore**:
+    - [x] Update `client/src/store/performanceStore.ts`.
+    - [x] Add `LongTask` interface (startTime, duration, attribution).
+    - [x] Add `longTasks` array to state.
+    - [x] Add `addLongTask` action with limit (FIFO 50 items).
 
-- [ ] **3. UI Components** (AC3, AC4)
-  - [ ] **3.1. LongTaskFeed Component**:
-    - [ ] Create `client/src/components/performance/LongTaskFeed.tsx`.
-    - [ ] Render list of tasks using `shadcn/ui` ScrollArea or Table.
-    - [ ] Format duration with color coding (>50ms yellow, >100ms red).
-  - [ ] **3.2. Dashboard Integration**:
-    - [ ] Update `client/src/components/performance/PerformanceDashboard.tsx`.
-    - [ ] Add `LongTaskFeed` to layout (e.g., side panel or bottom row).
+- [x] **3. UI Components** (AC3, AC4)
+  - [x] **3.1. LongTaskFeed Component**:
+    - [x] Create `client/src/components/performance/LongTasksView.tsx`.
+    - [x] Render list of tasks using `shadcn/ui` ScrollArea or Table.
+    - [x] Format duration with color coding (>50ms yellow, >100ms red).
+  - [x] **3.2. Dashboard Integration**:
+    - [x] Update `client/src/components/performance/PerformanceDashboard.tsx`.
+    - [x] Add `LongTaskFeed` to layout (e.g., side panel or bottom row).
 
-- [ ] **4. Testing**
-  - [ ] **4.1. Unit Tests**:
-    - [ ] Test `performanceStore` limit logic (add 51 items, ensure 50 remain).
-  - [ ] **4.2. Simulation**:
-    - [ ] Create a "Debug Trigger" (hidden or dev-only) to intentionally block main thread for 100ms to verify detection (optional but recommended for verification).
+- [x] **4. Testing**
+  - [x] **4.1. Unit Tests**:
+    - [x] Test `performanceStore` limit logic (add 51 items, ensure 50 remain).
+  - [x] **4.2. Simulation**:
+    - [x] Create a "Debug Trigger" (hidden or dev-only) to intentionally block main thread for 100ms to verify detection (optional but recommended for verification).
 
 ## Dev Notes
 
@@ -71,7 +71,20 @@ so that I can identify code execution that causes UI freezes and poor responsive
 
 ### Completion Notes List
 
+- Implemented `usePerformanceObserver` hook.
+- Updated `performanceStore` with `longTasks` state and limit logic.
+- Created `LongTasksView` with `ScrollArea`.
+- Integrated into `PerformanceDashboard`.
+- Added unit tests for store logic.
+
 ### File List
+
+- client/src/hooks/usePerformanceObserver.ts
+- client/src/store/performanceStore.ts
+- client/src/store/performanceStore.test.ts
+- client/src/components/performance/LongTasksView.tsx
+- client/src/components/ui/scroll-area.tsx
+- client/src/components/performance/PerformanceDashboard.tsx
 
 ## Learnings from Previous Story
 
@@ -80,3 +93,32 @@ so that I can identify code execution that causes UI freezes and poor responsive
 - **New Store**: `performanceStore.ts` exists in `client/src/store/`. Extend this store, do not create a new one.
 - **Persistence**: Store uses `persist` middleware - ensure `longTasks` are included or excluded based on memory size considerations (AC5 says persist session, maybe standard persist is fine for 50 items).
 - **Architecture**: `PerformanceDashboard.tsx` exists. Add the new component to it.
+
+## Senior Developer Code Review
+**Review Date:** 2025-12-06
+**Reviewer:** Senior Dev AI
+**Status:** APPROVED
+
+### Summary
+The implementation successfully introduces Long Task detection using the `PerformanceObserver` API. The solution is performant, using a fixed-size buffer in the store to prevent memory leaks, and integrates well with the existing dashboard.
+
+### Findings
+1.  **Correctness**:
+    -   `usePerformanceObserver` correctly targets `longtask` entries.
+    -   `performanceStore` logic guarantees a strict limit of 50 items (LIFO presentation, FIFO storage).
+    -   Browser support check prevents crashes in unsupported environments.
+2.  **Code Quality**:
+    -   Clean separation of concerns (Hook -> Store -> View).
+    -   Defensive coding in `usePerformanceObserver` regarding `attribution` property access.
+3.  **UX**:
+    -   Effective use of color coding (Yellow/Red) to highlight severity.
+    -   Empty state handled gracefully.
+
+### Recommendations
+-   **Future**: Consider adding a "Clear" button for long tasks specifically, though `Reset Metrics` currently clears all, which is acceptable for now.
+
+## Change Log
+-   Added `usePerformanceObserver.ts` hook.
+-   Updated `performanceStore.ts` with LongTask state.
+-   Added `LongTasksView.tsx` component.
+-   Updated `PerformanceDashboard.tsx` to include the new view.

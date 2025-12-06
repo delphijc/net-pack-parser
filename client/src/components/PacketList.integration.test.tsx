@@ -302,7 +302,7 @@ describe('PacketList Integration with ProtocolFilter, PacketDetailView and Proto
     vi.clearAllMocks();
     (database.getAllPackets as Mock).mockReturnValue(mockPackets);
     // Suppress console errors from TextDecoder if rawData is malformed or very short
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => { });
   });
 
   afterEach(() => {
@@ -328,9 +328,11 @@ describe('PacketList Integration with ProtocolFilter, PacketDetailView and Proto
     });
 
     // Initially all packets are displayed
-    expect(screen.getAllByTestId(/packet-item-/)).toHaveLength(
-      mockPackets.length,
-    );
+    await waitFor(() => {
+      expect(screen.getAllByTestId(/packet-item-/)).toHaveLength(
+        mockPackets.length,
+      );
+    });
 
     const selectElement = screen.getByTestId('select-protocol-filter');
 

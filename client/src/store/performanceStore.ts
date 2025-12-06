@@ -11,10 +11,20 @@ export interface Metric {
   id: string;
 }
 
+export interface LongTask {
+  id: string;
+  startTime: number;
+  duration: number;
+  attribution: string;
+  timestamp: number;
+}
+
 interface PerformanceState {
   metrics: Record<string, Metric>;
+  longTasks: LongTask[];
   score: number;
   updateMetric: (metric: Metric) => void;
+  addLongTask: (task: LongTask) => void;
   resetMetrics: () => void;
 }
 
@@ -22,6 +32,7 @@ export const usePerformanceStore = create<PerformanceState>()(
   persist(
     (set) => ({
       metrics: {},
+      longTasks: [],
       score: 100, // Default optimistic score
 
       updateMetric: (metric) => {
@@ -63,10 +74,19 @@ export const usePerformanceStore = create<PerformanceState>()(
         });
       },
 
-      resetMetrics: () => set({ metrics: {}, score: 100 }),
+      addLongTask: (task) => {
+        set((state) => {
+          // Add new task and keep only the last 50 entries
+          const updatedTasks = [task, ...state.longTasks].slice(0, 50);
+          return { longTasks: updatedTasks };
+        });
+      },
+
+      resetMetrics: () => set({ metrics: {}, score: 100, longTasks: [] }),
     }),
     {
       name: 'performance-storage',
+      partialize: (state) => ({ metrics: state.metrics, score: state.score, longTasks: state.longTasks }),
     },
   ),
 );

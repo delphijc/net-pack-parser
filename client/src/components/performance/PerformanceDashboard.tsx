@@ -1,11 +1,17 @@
 import { usePerformanceStore } from '../../store/performanceStore';
 import { ScoreGauge } from './ScoreGauge';
 import { VitalsCard } from './VitalsCard';
+import { NavigationTimingView } from './NavigationTimingView';
+import { LongTasksView } from './LongTasksView';
+import { usePerformanceObserver } from '../../hooks/usePerformanceObserver';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 
 export const PerformanceDashboard = () => {
   const { metrics, score, resetMetrics } = usePerformanceStore();
+
+  // Initialize observers
+  usePerformanceObserver();
 
   const getMetric = (name: string) =>
     metrics[name] || { name, value: 0, rating: 'good', delta: 0, id: '' };
@@ -30,6 +36,7 @@ export const PerformanceDashboard = () => {
         </Button>
       </div>
 
+      {/* Main Metrics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <div className="col-span-2">
           <div className="rounded-xl border bg-card text-card-foreground shadow h-full p-6 flex items-center justify-center">
@@ -57,6 +64,16 @@ export const PerformanceDashboard = () => {
             metric={getMetric('TTFB')}
             description={definitions['TTFB']}
           />
+        </div>
+      </div>
+
+      {/* Navigation Timing and Long Tasks Grid */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="md:col-span-2">
+          <NavigationTimingView />
+        </div>
+        <div className="md:col-span-1">
+          <LongTasksView />
         </div>
       </div>
     </div>
