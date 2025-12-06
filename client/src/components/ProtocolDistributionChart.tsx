@@ -10,8 +10,10 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+import type { ParsedPacket } from '../types';
+
 interface ProtocolDistributionChartProps {
-  packets: any[]; // Expecting an array of packets with detectedProtocols
+  packets: ParsedPacket[]; // Expecting an array of packets with detectedProtocols
 }
 
 const COLORS = [
@@ -28,12 +30,15 @@ const COLORS = [
 export const ProtocolDistributionChart: React.FC<
   ProtocolDistributionChartProps
 > = ({ packets }) => {
-  const protocolCounts = packets.reduce((acc, packet) => {
-    packet.detectedProtocols.forEach((protocol: string) => {
-      acc[protocol] = (acc[protocol] || 0) + 1;
-    });
-    return acc;
-  }, {});
+  const protocolCounts = packets.reduce(
+    (acc, packet) => {
+      packet.detectedProtocols.forEach((protocol: string) => {
+        acc[protocol] = (acc[protocol] || 0) + 1;
+      });
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   const data = Object.entries(protocolCounts).map(([name, value]) => ({
     name,

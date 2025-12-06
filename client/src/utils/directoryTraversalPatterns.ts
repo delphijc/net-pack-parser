@@ -5,7 +5,7 @@
  */
 export const directoryTraversalPatterns = {
   // Standard traversal: ../, ..\
-  standardTraversal: [/\.\.[\/\\]/g],
+  standardTraversal: [/\.\.[/\\]/g],
 
   // Encoded traversal: %2e%2e%2f, %2e%2e%5c, etc.
   encodedTraversal: [

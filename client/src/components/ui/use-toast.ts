@@ -4,7 +4,7 @@ type ToasterToast = ToastProps & {
   id: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
-  action?: React.ReactElement<ToastActionElement>;
+  action?: React.ReactElement;
 };
 
 const TOAST_LIMIT = 10;
@@ -13,11 +13,15 @@ const TOAST_REMOVE_DELAY = 1000000;
 type ToastProps = {
   // props for the toast component
   variant?: 'default' | 'destructive';
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
-type ToastActionElement = React.ReactElement<{
-  // props for the toast action element
-}>;
+type Action =
+  | { type: 'ADD_TOAST'; toast: ToasterToast }
+  | { type: 'UPDATE_TOAST'; toast: Partial<ToasterToast> }
+  | { type: 'DISMISS_TOAST'; toastId?: string }
+  | { type: 'REMOVE_TOAST'; toastId?: string };
 
 type State = {
   toasts: ToasterToast[];
@@ -41,7 +45,7 @@ export const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout);
 };
 
-export const reducer = (state: State, action: any): State => {
+export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'ADD_TOAST':
       return {
@@ -62,14 +66,24 @@ export const reducer = (state: State, action: any): State => {
 
       // ! Side effects ! - This could be extracted into a dismissToast() action,
       // but I'll keep it here for simplicity
-      if (toastTimeouts.has(toastId)) {
-        clearTimeout(toastTimeouts.get(toastId));
-        toastTimeouts.delete(toastId);
+      if (toastId) {
+        addToRemoveQueue(toastId);
+      } else {
+        state.toasts.forEach((toast) => {
+          addToRemoveQueue(toast.id);
+        });
       }
 
       return {
         ...state,
-        toasts: state.toasts.filter((t) => t.id !== toastId),
+        toasts: state.toasts.map((t) =>
+          t.id === toastId || toastId === undefined
+            ? {
+                ...t,
+                open: false,
+              }
+            : t,
+        ),
       };
     }
     case 'REMOVE_TOAST':
@@ -84,8 +98,6 @@ export const reducer = (state: State, action: any): State => {
           toasts: state.toasts.slice(1),
         };
       }
-    default:
-      return state;
   }
 };
 
@@ -93,7 +105,7 @@ const listeners: Array<(state: State) => void> = [];
 
 let memoryState: State = { toasts: [] };
 
-function dispatch(action: any) {
+function dispatch(action: Action) {
   memoryState = reducer(memoryState, action);
   listeners.forEach((listener) => {
     listener(memoryState);

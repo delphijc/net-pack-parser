@@ -192,7 +192,7 @@ describe('dataImportExport', () => {
       const threats = [
         { id: 't1', type: 'SQL Injection', severity: 'high' },
         { id: 't2', type: 'XSS', severity: 'medium' },
-      ] as any[]; // Cast to any[] or ThreatAlert[] to bypass type check for mock data
+      ] as unknown as { id: string; type: string; severity: string }[];
 
       // Mock URL.createObjectURL and URL.revokeObjectURL
       const createObjectURLMock = vi.fn(() => 'blob:url');

@@ -24,7 +24,10 @@ describe('getMatchDetails', () => {
 
   it('should return empty match details when no criteria provided', () => {
     const packet = createTestPacket();
-    const details = getMatchDetails(packet, null as any);
+    const details = getMatchDetails(
+      packet,
+      null as unknown as MultiSearchCriteria,
+    );
 
     expect(details.sourceIp).toBe(false);
     expect(details.destIp).toBe(false);

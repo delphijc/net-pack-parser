@@ -109,7 +109,7 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
 
       // Convert packet data to hex string for tokens and sections
       const packetDataHexString = Array.from(rawPacketData)
-        .map((b: any) => b.toString(16).padStart(2, '0'))
+        .map((b: number) => b.toString(16).padStart(2, '0'))
         .join('');
 
       // Add packet data tokens (in 2-byte chunks)
@@ -182,7 +182,8 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
           timeoutPromise,
         ]);
 
-        parsedPacket.extractedStrings = extracted as any; // Type cast if needed, or refine types
+        parsedPacket.extractedStrings =
+          extracted as import('../types/extractedStrings').ExtractedString[];
       } catch (strExtractError) {
         console.warn(
           `Error extracting strings for packet ${packetId}:`,
@@ -232,6 +233,7 @@ const parseStringData = (data: string): ParsedPacket => {
     const packetId = uuidv4();
 
     // Parse tokens (non-alphanumeric characters excluding spaces and some symbols)
+
     const tokenRegex = /[^\w\s]/g;
     const tokens: Token[] = [];
     const sections: ParsedSection[] = [];
@@ -317,7 +319,7 @@ const parseStringData = (data: string): ParsedPacket => {
     });
 
     // Detect file references from URLs in the string data
-    const urlRegex = /(?:https?|ftp):\/\/[^\s\/$.?#].[^\s]*/gi;
+    const urlRegex = /(?:https?|ftp):\/\/[^\s/$.?#].[^\s]*/gi;
     let urlMatch;
     while ((urlMatch = urlRegex.exec(data)) !== null) {
       const url = urlMatch[0];

@@ -234,7 +234,7 @@ export class FileExtractor {
       }
     }
 
-    const fileBlob = new Blob(chunks as any[], {
+    const fileBlob = new Blob(chunks as BlobPart[], {
       type: fileReference.mimeType,
     });
     const sha256Hash = await this.calculateSha256(fileBlob);

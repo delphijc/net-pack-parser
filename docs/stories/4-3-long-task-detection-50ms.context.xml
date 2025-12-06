@@ -1,0 +1,107 @@
+<story-context id="docs/stories/4-3-long-task-detection-50ms.context.xml" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.3</storyId>
+    <title>Long Task Detection (>50ms)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-3-long-task-detection-50ms.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>detect and log tasks that block the main thread for more than 50ms</iWant>
+    <soThat>I can identify code execution that causes UI freezes and poor responsiveness</soThat>
+    <tasks>
+- [ ] **1. Performance Observer Hook** (AC1, AC2)
+  - [ ] **1.1. create usePerformanceObserver**: Create `client/src/hooks/usePerformanceObserver.ts`. Implement `PerformanceObserver` logic for `entryTypes: ['longtask']`.
+
+- [ ] **2. Store Updates** (AC5)
+  - [ ] **2.1. Update performanceStore**: Update `client/src/store/performanceStore.ts` (existing). Add `LongTask` interface and `longTasks` array. Add `addLongTask` action with limit (FIFO 50 items).
+
+- [ ] **3. UI Components** (AC3, AC4)
+  - [ ] **3.1. LongTaskFeed Component**: Create `client/src/components/performance/LongTaskFeed.tsx`. Render list of tasks using `shadcn/ui` based list/table.
+  - [ ] **3.2. Dashboard Integration**: Update `client/src/components/performance/PerformanceDashboard.tsx` to include `LongTaskFeed`.
+
+- [ ] **4. Testing**
+  - [ ] **4.1. Unit Tests**: Test `performanceStore` limit logic.
+  - [ ] **4.2. Simulation**: Create a debug trigger to block main thread for verification.
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1.  **Detection**: The system listens for `longtask` PerformanceEntries using a specific observer.
+2.  **Threshold**: Any task taking >50ms (the browser standard for long tasks) is captured.
+3.  **Visualization**: A "Main Thread Blocking" feed (list) displays detected long tasks.
+4.  **Details**: Each entry shows: Duration (ms), Start Time, Attribution.
+5.  **Persistence**: Long tasks are stored in the session performance store (max 50 entries).
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/tech-spec-epic-4.md</path>
+        <title>Epic 4 Tech Spec</title>
+        <section>Detailed Design</section>
+        <snippet>Defines `LongTaskFeed` component and `usePerformanceObserver` hook requirements specifically for Long Tasks.</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>PRD</title>
+        <section>Real-Time Performance Monitoring</section>
+        <snippet>FR9 Detect Long Tasks: Monitor and flag main thread blocking tasks > 50ms.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>client/src/store/performanceStore.ts</path>
+        <kind>store</kind>
+        <symbol>usePerformanceStore</symbol>
+        <reason>Existing store to be extended with `longTasks` state and actions.</reason>
+      </item>
+      <item>
+        <path>client/src/components/performance/PerformanceDashboard.tsx</path>
+        <kind>component</kind>
+        <symbol>PerformanceDashboard</symbol>
+        <reason>Container component where `LongTaskFeed` will be mounted.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <item>
+        <ecosystem>npm</ecosystem>
+        <package>zustand</package>
+        <version>^5.0.0</version>
+      </item>
+      <item>
+        <ecosystem>npm</ecosystem>
+        <package>lucide-react</package>
+        <version>^0.454.0</version>
+      </item>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Browser-Only: Detection must happen in-browser using `PerformanceObserver`.</constraint>
+    <constraint>Components must use `shadcn/ui` based design system.</constraint>
+    <constraint>Memory Management: Limit stored long tasks to 50 entries FIFO to prevent memory leaks.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>LongTask</name>
+      <kind>TypeScript Interface</kind>
+      <signature>interface LongTask { startTime: number; duration: number; attribution: TaskAttributionTiming[]; }</signature>
+      <path>client/src/store/performanceStore.ts (Proposed)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests for store logic (limit enforcement). Component snapshot/render tests for `LongTaskFeed`.</standards>
+    <locations>client/src/store/__tests__, client/src/components/performance/__tests__</locations>
+    <ideas>
+      <idea>Unit: Add 55 long tasks to store, verify only last 50 persist.</idea>
+      <idea>Manual: Use `while(Date.now() < start + 100);` to block thread and verify detection.</idea>
+    </ideas>
+  </tests>
+</story-context>

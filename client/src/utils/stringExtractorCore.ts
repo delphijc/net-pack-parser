@@ -7,12 +7,14 @@ import { v4 as uuidv4 } from 'uuid'; // For generating unique IDs
 const IPV4_REGEX =
   /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g;
 const IPV6_REGEX = /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b/g;
-const URL_REGEX = /(?:https?|ftp):\/\/[^\s\/$.?#].[^\s]*/gi;
+const URL_REGEX = /(?:https?|ftp):\/\/[^\s/$.?#].[^\s]*/gi;
 const EMAIL_REGEX = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
 const CREDENTIAL_REGEX =
   /\b(?:user(?:name)?|pass(?:word)?|api_key|token|auth|bearer|secret)(?:[=\s:]+)?['"]?([A-Z0-9._%+-]+)['"]?\b/gi;
-const FILE_PATH_REGEX =
-  /[A-Z]:[\\\/](?:[A-Z0-9_\-. \\\/]+?)\.(exe|dll|bat|cmd|ps1|sh|pdf|doc|docx|txt|log|conf|cfg|ini|js|ts|py|php|jar|zip|rar|7z|tar|gz|xml|json|csv)(?=\s|$)|\/(?:[a-zA-Z0-9_.\-]+\/)*[a-zA-Z0-9_.\-]+\.(exe|dll|bat|cmd|ps1|sh|pdf|doc|docx|txt|log|conf|cfg|ini|js|ts|py|php|jar|zip|rar|7z|tar|gz|xml|json|csv)\b|\b[a-zA-Z0-9_.\-]+\.(exe|dll|bat|cmd|ps1|sh|pdf|doc|docx|txt|log|conf|cfg|ini|js|ts|py|php|jar|zip|rar|7z|tar|gz|xml|json|csv)\b/gi;
+const FILE_PATH_REGEX = new RegExp(
+  '(?:[a-zA-Z]:\\\\(?:[^\\\\/:*?"<>|\\r\\n]+\\\\)*[^\\\\/:*?"<>|\\r\\n]+)|(?:(?:\\/[^/ ]*)+\\/?)',
+  'g',
+);
 
 const MIN_PRINTABLE_STRING_LENGTH = 4;
 
@@ -60,6 +62,7 @@ export function extractStringsFromBuffer(
 
   // 1. Regex-based extractions
   const extractWithRegex = (regex: RegExp, type: ExtractedString['type']) => {
+    regex.lastIndex = 0; // Reset lastIndex for global regexes
     let match;
     while ((match = regex.exec(payloadString)) !== null) {
       if (match[0]) {

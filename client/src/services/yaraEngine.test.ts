@@ -7,7 +7,7 @@ import { yaraEngine } from './yaraEngine';
 class MockWorker {
   onmessage: ((e: MessageEvent) => void) | null = null;
 
-  postMessage(data: any) {
+  postMessage(data: { type: string; payload: Uint8Array; id: string }) {
     const { type, payload, id } = data;
 
     // Simulate worker response
@@ -45,11 +45,11 @@ class MockWorker {
 }
 
 // Mock global Worker
-const originalWorker = (globalThis as any).Worker;
+const originalWorker = (globalThis as unknown as { Worker: unknown }).Worker;
 
 describe('YaraEngine', () => {
   beforeEach(() => {
-    (globalThis as any).Worker = MockWorker;
+    (globalThis as unknown as { Worker: unknown }).Worker = MockWorker;
     // Re-instantiate engine to use mock worker (singleton pattern makes this tricky,
     // but for this test we assume we can access the private worker or just test the logic if we could inject it.
     // Since we can't easily re-construct the singleton exported instance, we might need to test the class if exported,
@@ -63,7 +63,7 @@ describe('YaraEngine', () => {
   });
 
   afterEach(() => {
-    (globalThis as any).Worker = originalWorker;
+    (globalThis as unknown as { Worker: unknown }).Worker = originalWorker;
     vi.restoreAllMocks();
   });
 

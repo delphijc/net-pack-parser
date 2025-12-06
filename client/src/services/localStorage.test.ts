@@ -30,7 +30,7 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 describe('LocalStorageService', () => {
-  let localStorageService: any;
+  let localStorageService: import('./localStorage').LocalStorageService;
 
   beforeEach(async () => {
     vi.resetModules();

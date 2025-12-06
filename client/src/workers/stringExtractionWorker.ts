@@ -2,7 +2,11 @@
 
 import { extractStringsFromBuffer } from '../utils/stringExtractorCore';
 
-self.onmessage = (event: MessageEvent) => {
+// Explicitly type `self` as DedicatedWorkerGlobalScope to ensure correct type inference
+// and avoid potential 'any' issues, especially for `onmessage` and `postMessage`.
+const ctx: Worker = self as unknown as Worker;
+
+ctx.onmessage = (event: MessageEvent) => {
   const { requestId, payload, packetId, payloadOffset } = event.data;
   try {
     const extractedStrings = extractStringsFromBuffer(
@@ -11,7 +15,11 @@ self.onmessage = (event: MessageEvent) => {
       payloadOffset,
     );
     self.postMessage({ requestId, status: 'success', extractedStrings });
-  } catch (error: any) {
-    self.postMessage({ requestId, status: 'error', message: error.message });
+  } catch (error: unknown) {
+    self.postMessage({
+      requestId,
+      status: 'error',
+      message: (error as Error).message,
+    });
   }
 };

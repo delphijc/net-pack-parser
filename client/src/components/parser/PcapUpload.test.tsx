@@ -1,12 +1,14 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, it, vi, expect } from 'vitest';
 import PcapUpload from './PcapUpload';
 import * as pcapParser from '../../services/pcapParser';
 import database from '../../services/database';
+import { ParsedPacket } from '../../types';
+import '@testing-library/jest-dom';
 
 // Mock lucide-react components
 vi.mock('lucide-react', async (importOriginal) => {
-  const actual = await importOriginal<any>();
+  const actual = await importOriginal<typeof import('lucide-react')>();
   return {
     ...actual,
     Terminal: vi.fn(() => <svg data-testid="Terminal" />),
@@ -69,9 +71,9 @@ describe('PcapUpload Component', () => {
       sections: [],
       fileReferences: [],
       suspiciousIndicators: [],
-    };
+    } as unknown as ParsedPacket;
 
-    (pcapParser.parseNetworkData as any).mockResolvedValue([mockPacket]);
+    vi.mocked(pcapParser.parseNetworkData).mockResolvedValue([mockPacket]);
 
     render(<PcapUpload />);
 
@@ -104,9 +106,9 @@ describe('PcapUpload Component', () => {
       sections: [],
       fileReferences: [],
       suspiciousIndicators: [],
-    };
+    } as unknown as ParsedPacket;
 
-    (pcapParser.parseNetworkData as any).mockResolvedValue([mockPacket]);
+    vi.mocked(pcapParser.parseNetworkData).mockResolvedValue([mockPacket]);
 
     const { container } = render(<PcapUpload />);
 

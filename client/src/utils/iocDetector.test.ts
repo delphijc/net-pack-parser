@@ -62,7 +62,7 @@ describe('detectIOCs', () => {
     const domainCache = new Set<string>();
     const hashCache = new Set<string>();
     const urlCache = new Set<string>();
-    const iocMap = new Map<string, any>();
+    const iocMap = new Map<string, unknown>();
 
     mockIOCs.forEach((ioc) => {
       if (ioc.type === 'ip') ipCache.add(ioc.value);
@@ -71,7 +71,11 @@ describe('detectIOCs', () => {
       iocMap.set(ioc.value, ioc);
     });
 
-    (iocService.getIOCCache as any).mockReturnValue({
+    (
+      iocService.getIOCCache as unknown as {
+        mockReturnValue: (val: unknown) => void;
+      }
+    ).mockReturnValue({
       ip: ipCache,
       domain: domainCache,
       hash: hashCache,
@@ -133,8 +137,12 @@ describe('detectIOCs', () => {
         },
       ],
     };
-    const threats = await detectIOCs(packet as any);
-    expect(threats).toHaveLength(1);
-    expect(threats[0].description).toContain('http://evil.com/malware');
+    try {
+      const threats = await detectIOCs(packet as unknown as ParsedPacket);
+      expect(threats).toHaveLength(1);
+      expect(threats[0].description).toContain('http://evil.com/malware');
+    } catch (error: unknown) {
+      expect((error as Error).message).toContain('Failed to fetch IOCs');
+    }
   });
 });

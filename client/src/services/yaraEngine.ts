@@ -10,7 +10,7 @@ class YaraEngine {
   private worker: Worker | null = null;
   private pendingRequests: Map<
     string,
-    { resolve: (val: any) => void; reject: (err: any) => void }
+    { resolve: (val: unknown) => void; reject: (err: unknown) => void }
   > = new Map();
 
   constructor() {
@@ -37,7 +37,7 @@ class YaraEngine {
     }
   }
 
-  private sendRequest(type: string, payload: any): Promise<any> {
+  private sendRequest(type: string, payload: unknown): Promise<unknown> {
     return new Promise((resolve, reject) => {
       if (!this.worker) {
         reject(new Error('YARA Worker not initialized'));
@@ -50,11 +50,13 @@ class YaraEngine {
   }
 
   async compileRules(rules: string[]): Promise<{ ruleCount: number }> {
-    return this.sendRequest('compile', rules);
+    return this.sendRequest('compile', rules) as Promise<{ ruleCount: number }>;
   }
 
   async scanPayload(payload: Uint8Array): Promise<{ matches: YaraMatch[] }> {
-    return this.sendRequest('scan', payload);
+    return this.sendRequest('scan', payload) as Promise<{
+      matches: YaraMatch[];
+    }>;
   }
 }
 

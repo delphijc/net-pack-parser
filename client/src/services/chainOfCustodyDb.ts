@@ -59,75 +59,81 @@ class ChainOfCustodyDb {
   public async addFileChainOfCustodyEvent(
     event: FileChainOfCustodyEvent,
   ): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const store = await this.getObjectStore('readwrite');
-        const request = store.add(event);
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          const store = await this.getObjectStore('readwrite');
+          const request = store.add(event);
 
-        request.onsuccess = () => {
-          console.log('File Chain of Custody event added:', event);
-          resolve();
-        };
+          request.onsuccess = () => {
+            console.log('File Chain of Custody event added:', event);
+            resolve();
+          };
 
-        request.onerror = (event) => {
-          console.error(
-            'Error adding file chain of custody event:',
-            (event.target as IDBRequest).error,
-          );
-          reject((event.target as IDBRequest).error);
-        };
-      } catch (error) {
-        reject(error);
-      }
+          request.onerror = (event) => {
+            console.error(
+              'Error adding file chain of custody event:',
+              (event.target as IDBRequest).error,
+            );
+            reject((event.target as IDBRequest).error);
+          };
+        } catch (error) {
+          reject(error);
+        }
+      })();
     });
   }
 
   public async getAllFileChainOfCustodyEvents(): Promise<
     FileChainOfCustodyEvent[]
   > {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const store = await this.getObjectStore('readonly');
-        const request = store.getAll();
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          const store = await this.getObjectStore('readonly');
+          const request = store.getAll();
 
-        request.onsuccess = () => {
-          resolve(request.result as FileChainOfCustodyEvent[]);
-        };
+          request.onsuccess = () => {
+            resolve(request.result as FileChainOfCustodyEvent[]);
+          };
 
-        request.onerror = (event) => {
-          console.error(
-            'Error getting all file chain of custody events:',
-            (event.target as IDBRequest).error,
-          );
-          reject((event.target as IDBRequest).error);
-        };
-      } catch (error) {
-        reject(error);
-      }
+          request.onerror = (event) => {
+            console.error(
+              'Error getting all file chain of custody events:',
+              (event.target as IDBRequest).error,
+            );
+            reject((event.target as IDBRequest).error);
+          };
+        } catch (error) {
+          reject(error);
+        }
+      })();
     });
   }
 
   public async clearAll(): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const store = await this.getObjectStore('readwrite');
-        const request = store.clear();
+    return new Promise((resolve, reject) => {
+      (async () => {
+        try {
+          const store = await this.getObjectStore('readwrite');
+          const request = store.clear();
 
-        request.onsuccess = () => {
-          console.log('All File Chain of Custody events cleared.');
-          resolve();
-        };
+          request.onsuccess = () => {
+            console.log('All File Chain of Custody events cleared.');
+            resolve();
+          };
 
-        request.onerror = (event) => {
-          console.error(
-            'Error clearing all file chain of custody events:',
-            (event.target as IDBRequest).error,
-          );
-          reject((event.target as IDBRequest).error);
-        };
-      } catch (error) {
-        reject(error);
-      }
+          request.onerror = (event) => {
+            console.error(
+              'Error clearing all file chain of custody events:',
+              (event.target as IDBRequest).error,
+            );
+            reject((event.target as IDBRequest).error);
+          };
+        } catch (error) {
+          reject(error);
+        }
+      })();
     });
   }
 }

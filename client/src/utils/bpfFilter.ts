@@ -54,8 +54,8 @@ function tokenizeBpfExpression(expression: string): BpfToken[] {
 
     // Handle keywords, IP addresses, CIDR blocks, numbers
     let value = '';
-    if (/[a-zA-Z0-9.\/]/.test(char)) {
-      while (i < expression.length && /[a-zA-Z0-9.\/]/.test(expression[i])) {
+    if (/[a-zA-Z0-9./]/.test(char)) {
+      while (i < expression.length && /[a-zA-Z0-9./]/.test(expression[i])) {
         value += expression[i];
         i++;
       }
@@ -174,31 +174,28 @@ export function parseBpfFilter(expression: string | BpfToken[]): BpfAST | null {
           );
         }
         return { type: 'protocol', value: keyword };
-      case 'host':
+      case 'host': {
         const hostToken = consume('IP_ADDRESS');
         return { type: 'host', value: hostToken.value, direction };
-      case 'net':
+      }
+      case 'net': {
         const netToken = consume('CIDR_BLOCK');
         return { type: 'net', value: netToken.value, direction };
-      case 'port':
+      }
+      case 'port': {
         const portToken = consume('NUMBER');
         return { type: 'port', value: Number(portToken.value), direction };
+      }
       default:
         throw new Error(`Unknown primitive: ${keyword}`);
     }
   }
 
-  try {
-    const ast = parseExpression();
-    if (peek().type !== 'EOS') {
-      throw new Error('Unexpected tokens at the end of the expression.');
-    }
-    return ast;
-  } catch (error: any) {
-    // Only log if we are not just validating (validation handles errors gracefully)
-    // console.error('BPF Parsing Error:', error.message);
-    throw error; // Re-throw to let caller handle or validateBpfFilter catch it
+  const ast = parseExpression();
+  if (peek().type !== 'EOS') {
+    throw new Error('Unexpected tokens at the end of the expression.');
   }
+  return ast;
 }
 
 /**
@@ -217,8 +214,8 @@ export function validateBpfFilter(expression: string): {
   try {
     const ast = parseBpfFilter(expression);
     return { isValid: true, ast: ast || undefined };
-  } catch (error: any) {
-    return { isValid: false, error: error.message };
+  } catch (err: unknown) {
+    return { isValid: false, error: (err as Error).message };
   }
 }
 
@@ -235,10 +232,11 @@ export function matchBpfFilter(packet: Packet, ast: BpfAST): boolean {
 
   function evaluate(node: BpfExpression): boolean {
     switch (node.type) {
-      case 'protocol':
+      case 'protocol': {
         const protocol = packet.protocol.toLowerCase();
         return protocol === node.value;
-      case 'host':
+      }
+      case 'host': {
         const isSrcHost = packet.sourceIP === node.value;
         const isDstHost = packet.destIP === node.value;
         if (node.direction === 'src') {
@@ -248,7 +246,8 @@ export function matchBpfFilter(packet: Packet, ast: BpfAST): boolean {
           return isDstHost;
         }
         return isSrcHost || isDstHost;
-      case 'net':
+      }
+      case 'net': {
         // Simplified CIDR match (e.g., "192.168.1.0/24")
         const [ip, mask] = node.value.split('/');
         const maskNum = parseInt(mask, 10);
@@ -273,7 +272,8 @@ export function matchBpfFilter(packet: Packet, ast: BpfAST): boolean {
           return isDstNet;
         }
         return isSrcNet || isDstNet;
-      case 'port':
+      }
+      case 'port': {
         const isSrcPort = packet.sourcePort === node.value;
         const isDstPort = packet.destPort === node.value;
         if (node.direction === 'src') {
@@ -283,6 +283,7 @@ export function matchBpfFilter(packet: Packet, ast: BpfAST): boolean {
           return isDstPort;
         }
         return isSrcPort || isDstPort;
+      }
       case 'and':
         return evaluate(node.left) && evaluate(node.right);
       case 'or':

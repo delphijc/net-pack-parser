@@ -1,0 +1,129 @@
+<story-context id="docs/stories/4-1-core-web-vitals-monitoring-lcp-fcp-cls-fid-ttfb.context.xml" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.1</storyId>
+    <title>Core Web Vitals Monitoring</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-1-core-web-vitals-monitoring-lcp-fcp-cls-fid-ttfb.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>monitor Core Web Vitals (LCP, FCP, CLS, FID, TTFB) in real-time</iWant>
+    <soThat>I can identify performance bottlenecks in the application user experience</soThat>
+    <tasks>
+- [ ] **1. Core Performance Infrastructure** (AC3)
+  - [ ] **1.1. Install Dependencies**: `npm install web-vitals`
+  - [ ] **1.2. Performance Store**: Create `client/src/store/performanceStore.ts` (Zustand). Define `Metric` interface and store state (`metrics`, `score`). persistence.
+
+- [ ] **2. Vitals Hooks** (AC1, AC3)
+  - [ ] **2.1. useWebVitals Hook**: Create `client/src/hooks/useWebVitals.ts`. Wrap `web-vitals` callbacks. Dispatch to store.
+
+- [ ] **3. UI Components** (AC1, AC2, AC4)
+  - [ ] **3.1. VitalsCard Component**: Create `client/src/components/performance/VitalsCard.tsx`. Radial/badge viz with color thresholds.
+  - [ ] **3.2. ScoreGauge Component**: Create `client/src/components/performance/ScoreGauge.tsx`. 0-100 score.
+  - [ ] **3.3. PerformanceDashboard View**: Create `client/src/components/performance/PerformanceDashboard.tsx`. Card grid.
+
+- [ ] **4. Integration & Routing**
+  - [ ] **4.1. App Integration**: Add route `/performance` in `App.tsx`.
+
+- [ ] **5. Testing**
+  - [ ] **5.1. Unit Tests**: Test `performanceStore` logic. Test `ScoreGauge` thresholds.
+  - [ ] **5.2. Component Tests**: Verify `VitalsCard` rendering.
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1.  **Dashboard Display**: The Performance Dashboard displays individual cards for: LCP, FCP, CLS, FID, TTFB.
+2.  **Color Coding**: Metrics are visualized with standard color thresholds (Good/Needs Improvement/Poor).
+3.  **Real-time Updates**: Values update immediately as new performance entries are observed.
+4.  **Performance Score**: A composite 0-100 Performance Score is calculated and displayed prominently.
+5.  **Persistence**: Current session metrics are persisted to localStorage so they survive page reloads.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/tech-spec-epic-4.md</path>
+        <title>Epic 4 Tech Spec</title>
+        <section>Detailed Design</section>
+        <snippet>Defines components (PerformanceDashboard, VitalsCard), hooks (useWebVitals), and data models for metrics.</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>PRD</title>
+        <section>Real-Time Performance Monitoring</section>
+        <snippet>FR7-FR11 define requirements for Core Web Vitals tracking and dashboard.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture</title>
+        <section>Component Structure</section>
+        <snippet>Lists `PerformanceDashboard.tsx` under `client/src/components`.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>client/src/App.tsx</path>
+        <kind>component</kind>
+        <symbol>App</symbol>
+        <reason>Integration point for the new /performance route.</reason>
+      </item>
+      <item>
+        <path>client/package.json</path>
+        <kind>config</kind>
+        <symbol>dependencies</symbol>
+        <reason>Need to add `web-vitals` dependency.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <item>
+        <ecosystem>npm</ecosystem>
+        <package>web-vitals</package>
+        <version>latest</version>
+      </item>
+      <item>
+        <ecosystem>npm</ecosystem>
+        <package>zustand</package>
+        <version>^5.0.0</version>
+      </item>
+      <item>
+        <ecosystem>npm</ecosystem>
+        <package>recharts</package>
+        <version>^3.5.0</version>
+      </item>
+      <item>
+        <ecosystem>npm</ecosystem>
+        <package>lucide-react</package>
+        <version>^0.454.0</version>
+      </item>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Browser-Only: All performance data processing and storage must happen client-side (Project Architecture).</constraint>
+    <constraint>Use `web-vitals` library for standardized metric measurement.</constraint>
+    <constraint>Components must use `shadcn/ui` based design system.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Metric</name>
+      <kind>TypeScript Interface</kind>
+      <signature>interface Metric { name: 'LCP' | 'FCP' | 'CLS' | 'FID' | 'TTFB'; value: number; rating: 'good' | 'needs-improvement' | 'poor'; delta?: number; id: string; }</signature>
+      <path>client/src/store/performanceStore.ts (Proposed)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Use Vitest for unit tests and React Testing Library for component tests. Mock `performance` API and `web-vitals` callbacks where necessary.</standards>
+    <locations>client/src/store/__tests__, client/src/components/performance/__tests__</locations>
+    <ideas>
+      <idea>Unit: Mock `onLCP` callback and verify store updates metric value.</idea>
+      <idea>Unit: Verify score calculation logic with mixed good/bad metrics.</idea>
+      <idea>Component: Render `VitalsCard` with "poor" value and verify red style.</idea>
+    </ideas>
+  </tests>
+</story-context>

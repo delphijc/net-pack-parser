@@ -30,14 +30,14 @@ export const IOCManager: React.FC = () => {
     enabled: true,
   });
 
-  useEffect(() => {
-    loadIOCs();
-  }, []);
-
   const loadIOCs = async () => {
     const data = await iocService.getAllIOCs();
     setIocs(data);
   };
+
+  useEffect(() => {
+    loadIOCs();
+  }, []);
 
   const handleAddIOC = async () => {
     if (!newIOC.value) return;

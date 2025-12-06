@@ -3,8 +3,8 @@ import { useAlertStore } from './alertStore';
 
 // Mock persist middleware to bypass storage
 vi.mock('zustand/middleware', () => ({
-  persist: (config: any) => (set: any, get: any, api: any) =>
-    config(set, get, api),
+  persist: (config: unknown) => (set: unknown, get: unknown, api: unknown) =>
+    (config as (...args: unknown[]) => unknown)(set, get, api),
 }));
 
 describe('useAlertStore', () => {

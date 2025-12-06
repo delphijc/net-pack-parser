@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { ParsedPacket } from '@/types';
 import type { Packet } from '@/types/packet';
 import {
@@ -41,21 +41,8 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({
   const [highlightRanges, setHighlightRanges] = useState<
     { offset: number; length: number }[]
   >([]);
-  const [payloadSearchString, setPayloadSearchString] = useState<string | null>(
-    null,
-  );
-  const [payloadCaseSensitive, setPayloadCaseSensitive] =
-    useState<boolean>(false);
-
-  useEffect(() => {
-    if (searchCriteria?.payload) {
-      setPayloadSearchString(searchCriteria.payload.content);
-      setPayloadCaseSensitive(searchCriteria.payload.caseSensitive);
-    } else {
-      setPayloadSearchString(null);
-      setPayloadCaseSensitive(false);
-    }
-  }, [searchCriteria]);
+  const payloadSearchString = searchCriteria?.payload?.content || null;
+  const payloadCaseSensitive = searchCriteria?.payload?.caseSensitive || false;
 
   const matchDetails = useMemo(() => {
     if (!packet || !searchCriteria) return null;

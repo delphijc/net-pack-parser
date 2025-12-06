@@ -6,6 +6,7 @@ import {
   act,
   within,
 } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { useState, useEffect } from 'react';
 import {
   describe,
@@ -57,27 +58,34 @@ vi.mock('./PacketDetailView', () => ({
   }),
 }));
 
+// Mock the shadcn/ui Resizable components
+vi.mock('@/components/ui/resizable', () => ({
+  ResizablePanelGroup: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="mock-resize-group">{children}</div>
+  ),
+  ResizablePanel: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="mock-resize-panel">{children}</div>
+  ),
+  ResizableHandle: () => <div data-testid="mock-resize-handle" />,
+}));
+
 // Mock the shadcn/ui Select component for ProtocolFilter
 vi.mock('@/components/ui/select', () => ({
-  Select: ({ children, onValueChange, value }: any) => (
+  Select: ({ children, onValueChange, value, ...props }: any) => (
     <select
-      data-testid="select-protocol-filter"
       onChange={(e) => onValueChange(e.target.value)}
       value={value}
+      {...props}
     >
       {children}
     </select>
   ),
-  SelectTrigger: ({ children }: any) => (
-    <div data-testid="select-trigger">{children}</div>
-  ),
+  SelectTrigger: ({ children }: any) => <>{children}</>,
   SelectValue: ({ placeholder }: any) => (
-    <span data-testid="select-value">{placeholder}</span>
+    <option value="">{placeholder}</option>
   ),
-  SelectContent: ({ children }: any) => (
-    <div data-testid="select-content">{children}</div>
-  ),
-  SelectItem: ({ value, children }: any) => (
+  SelectContent: ({ children }: any) => <>{children}</>,
+  SelectItem: ({ children, value }: any) => (
     <option value={value}>{children}</option>
   ),
 }));
@@ -108,14 +116,16 @@ vi.mock('recharts', () => ({
 
 // Mock the Card components from shadcn/ui
 vi.mock('@/components/ui/card', () => ({
-  Card: ({ children }: any) => <div data-testid="mock-card">{children}</div>,
-  CardHeader: ({ children }: any) => (
+  Card: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="mock-card">{children}</div>
+  ),
+  CardHeader: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="mock-card-header">{children}</div>
   ),
-  CardTitle: ({ children }: any) => (
+  CardTitle: ({ children }: { children: React.ReactNode }) => (
     <h3 data-testid="mock-card-title">{children}</h3>
   ),
-  CardContent: ({ children }: any) => (
+  CardContent: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="mock-card-content">{children}</div>
   ),
 }));
@@ -210,27 +220,33 @@ describe('PacketList Integration with ProtocolFilter, PacketDetailView and Proto
     const [refreshKey, setRefreshKey] = useState(0);
 
     useEffect(() => {
-      const packetsFromDb = (
-        database.getAllPackets as Mock
-      )() as ParsedPacket[];
-      setAllPackets(packetsFromDb);
+      setTimeout(() => {
+        const packetsFromDb = (
+          database.getAllPackets as Mock
+        )() as ParsedPacket[];
+        setAllPackets(packetsFromDb);
 
-      const uniqueProtocols = Array.from(
-        new Set(
-          packetsFromDb.flatMap((p: ParsedPacket) => p.detectedProtocols || []),
-        ),
-      );
-      setAvailableProtocols(uniqueProtocols);
+        const uniqueProtocols = Array.from(
+          new Set(
+            packetsFromDb.flatMap(
+              (p: ParsedPacket) => p.detectedProtocols || [],
+            ),
+          ),
+        );
+        setAvailableProtocols(uniqueProtocols);
+      }, 0);
     }, [refreshKey]); // Refresh when key changes
 
     useEffect(() => {
-      let filtered = allPackets;
-      if (selectedProtocol && selectedProtocol !== 'ALL') {
-        filtered = allPackets.filter((p) =>
-          p.detectedProtocols?.includes(selectedProtocol),
-        );
-      }
-      setDisplayedPackets(filtered);
+      setTimeout(() => {
+        let filtered = allPackets;
+        if (selectedProtocol && selectedProtocol !== 'ALL') {
+          filtered = allPackets.filter((p) =>
+            p.detectedProtocols?.includes(selectedProtocol),
+          );
+        }
+        setDisplayedPackets(filtered);
+      }, 0);
     }, [allPackets, selectedProtocol]);
 
     const handlePacketSelect = (packet: ParsedPacket | null) => {
@@ -286,7 +302,7 @@ describe('PacketList Integration with ProtocolFilter, PacketDetailView and Proto
     vi.clearAllMocks();
     (database.getAllPackets as Mock).mockReturnValue(mockPackets);
     // Suppress console errors from TextDecoder if rawData is malformed or very short
-    vi.spyOn(console, 'error').mockImplementation(() => { });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -359,7 +375,7 @@ describe('PacketList Integration with ProtocolFilter, PacketDetailView and Proto
     });
 
     // Check packet-1 badges
-    const packetItem1 = screen.getByTestId('packet-item-packet-1');
+    const packetItem1 = await screen.findByTestId('packet-item-packet-1');
     expect(within(packetItem1).getByText('TCP')).toBeInTheDocument();
     expect(within(packetItem1).getByText('HTTP')).toBeInTheDocument();
 
@@ -377,7 +393,7 @@ describe('PacketList Integration with ProtocolFilter, PacketDetailView and Proto
 
     // Initial chart data
     expect(screen.getByText('Protocol Distribution')).toBeInTheDocument();
-    expect(screen.getByTestId('mock-pie')).toBeInTheDocument();
+    expect(await screen.findByTestId('mock-pie')).toBeInTheDocument();
     expect(screen.getByTestId('pie-slice-TCP')).toHaveTextContent(/TCP:\s*3/); // packet-1, packet-3, packet-4
     expect(screen.getByTestId('pie-slice-HTTP')).toHaveTextContent(/HTTP:\s*1/);
     expect(screen.getByTestId('pie-slice-UDP')).toHaveTextContent(/UDP:\s*1/);
@@ -405,7 +421,10 @@ describe('PacketList Integration with ProtocolFilter, PacketDetailView and Proto
       render(<TestWrapper />);
     });
 
-    fireEvent.click(screen.getByTestId(`packet-item-${mockPackets[0].id}`));
+    const packetItem = await screen.findByTestId(
+      `packet-item-${mockPackets[0].id}`,
+    );
+    fireEvent.click(packetItem);
 
     await waitFor(() => {
       expect(screen.getByTestId('mock-packet-detail-view')).toBeInTheDocument();
@@ -421,7 +440,10 @@ describe('PacketList Integration with ProtocolFilter, PacketDetailView and Proto
       render(<TestWrapper />);
     });
 
-    fireEvent.click(screen.getByTestId(`packet-item-${mockPackets[0].id}`));
+    const packetItem = await screen.findByTestId(
+      `packet-item-${mockPackets[0].id}`,
+    );
+    fireEvent.click(packetItem);
     await waitFor(() =>
       expect(screen.getByTestId('mock-packet-detail-view')).toBeInTheDocument(),
     );
@@ -455,16 +477,24 @@ describe('PacketList Integration with ProtocolFilter, PacketDetailView and Proto
       render(<TestWrapper />);
     });
 
-    fireEvent.click(screen.getByTestId(`packet-item-${mockPackets[0].id}`));
+    const packetToClick = await screen.findByTestId(
+      `packet-item-${mockPackets[0].id}`,
+    );
+    fireEvent.click(packetToClick);
+
     await waitFor(() =>
       expect(screen.getByTestId('mock-packet-detail-view')).toBeInTheDocument(),
     );
 
-    const packetItem1 = screen.getByTestId(`packet-item-${mockPackets[0].id}`);
+    const packetItem1 = await screen.findByTestId(
+      `packet-item-${mockPackets[0].id}`,
+    );
     fireEvent.click(within(packetItem1).getByTitle('Delete packet'));
 
     // Wait for and click the confirmation button in the dialog
-    const confirmButton = await screen.findByText('Delete', { selector: 'button' });
+    const confirmButton = await screen.findByText('Delete', {
+      selector: 'button',
+    });
     fireEvent.click(confirmButton);
 
     await waitFor(() => {

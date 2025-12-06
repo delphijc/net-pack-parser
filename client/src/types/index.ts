@@ -151,7 +151,7 @@ export interface PerformanceEntryData {
     decodedBodySize?: number;
 
     // Long task details
-    attribution?: any[];
+    attribution?: unknown[];
 
     // Largest Contentful Paint details
     renderTime?: number;
@@ -169,10 +169,10 @@ export interface PerformanceEntryData {
     // Layout shift details
     value?: number;
     hadRecentInput?: boolean;
-    sources?: any[];
+    sources?: unknown[];
 
     // Additional custom fields
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

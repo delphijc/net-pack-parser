@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parsePcap } from './pcapUtils';
+// @ts-expect-error fs module is available in test environment but not typed for browser build
 import fs from 'fs';
-import path from 'path';
 
 describe('PCAP Parsing Verification', () => {
   it('should correctly parse the demo.pcap file', () => {

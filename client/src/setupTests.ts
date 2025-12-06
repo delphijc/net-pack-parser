@@ -26,22 +26,27 @@ import 'fake-indexeddb/auto';
 
 class Worker {
   url: string;
-  onmessage: ((this: Worker, ev: MessageEvent) => any) | null = null;
-  onerror: ((this: Worker, ev: ErrorEvent) => any) | null = null;
+  onmessage: ((this: Worker, ev: MessageEvent) => unknown) | null = null;
+  onerror: ((this: Worker, ev: ErrorEvent) => unknown) | null = null;
   constructor(stringUrl: string) {
     this.url = stringUrl;
   }
-  postMessage(msg: any) {
+  postMessage() {
     // Default implementation does nothing
   }
-  terminate() { }
-  addEventListener() { }
-  removeEventListener() { }
-  dispatchEvent() { return true; }
+  terminate() {}
+  addEventListener() {}
+  removeEventListener() {}
+  dispatchEvent() {
+    return true;
+  }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 window.Worker = Worker as any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const globalAny: any = globalThis;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 globalAny.Worker = Worker as any;
 
 if (!window.URL.createObjectURL) {

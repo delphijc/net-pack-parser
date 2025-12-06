@@ -16,7 +16,7 @@ const pendingRequests = new Map<
   string,
   {
     resolve: (value: ExtractedString[]) => void;
-    reject: (reason?: any) => void;
+    reject: (reason?: unknown) => void;
   }
 >();
 

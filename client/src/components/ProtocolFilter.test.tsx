@@ -7,7 +7,15 @@ import { ProtocolFilter } from './ProtocolFilter';
 // Mock the shadcn/ui components used by ProtocolFilter
 // We only need to mock the `Select` and `SelectItem` behavior for these tests.
 vitest.mock('@/components/ui/select', () => ({
-  Select: ({ children, onValueChange, value }: any) => (
+  Select: ({
+    children,
+    onValueChange,
+    value,
+  }: {
+    children: React.ReactNode;
+    onValueChange: (val: string) => void;
+    value?: string;
+  }) => (
     <select
       data-testid="select-protocol-filter"
       onChange={(e) => onValueChange(e.target.value)}
@@ -16,13 +24,19 @@ vitest.mock('@/components/ui/select', () => ({
       {children}
     </select>
   ),
-  SelectItem: ({ value, children }: any) => (
-    <option value={value}>{children}</option>
-  ),
+  SelectItem: ({
+    value,
+    children,
+  }: {
+    value: string;
+    children: React.ReactNode;
+  }) => <option value={value}>{children}</option>,
   // Mock other components just to avoid errors if they are used but not tested directly
   SelectTrigger: () => null, // Hide trigger to keep select valid
   SelectValue: () => null,
-  SelectContent: ({ children }: any) => <>{children}</>, // Render children directly (options)
+  SelectContent: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ), // Render children directly (options)
 }));
 
 describe('ProtocolFilter', () => {

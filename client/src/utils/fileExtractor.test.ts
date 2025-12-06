@@ -12,7 +12,6 @@ let mockBlobIdCounter = 0;
 class MockBlob {
   private id: string;
   private data: Uint8Array;
-  // @ts-ignore
   private type: string;
 
   constructor(parts: BlobPart[] = [], options?: BlobPropertyBag) {
@@ -101,13 +100,12 @@ describe('FileExtractor', () => {
       instance: FileExtractor,
       httpResponseString: string,
     ) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error Accessing private method for testing
       return instance.parseHttpHeaders(httpResponseString);
     };
 
     it('should parse standard HTTP headers correctly', () => {
-      const httpResponse = `HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 123\r\n\r\n{\"key\": \"value\"}`;
+      const httpResponse = `HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 123\r\n\r\n{"key": "value"}`;
       const headers = callParseHttpHeaders(fileExtractor, httpResponse);
       expect(headers).toEqual({
         'content-type': 'application/json',
@@ -163,7 +161,6 @@ describe('FileExtractor', () => {
     sessionId = 'session-1',
   ): ParsedPacket => ({
     id,
-    // @ts-ignore
     sessionId,
     protocol,
     sourceIP: '192.168.1.1',
@@ -368,8 +365,7 @@ describe('FileExtractor', () => {
       instance: FileExtractor,
       data: Blob | ArrayBuffer,
     ) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error Accessing private method for testing
       return instance.calculateSha256(data);
     };
 
@@ -471,8 +467,8 @@ describe('FileExtractor', () => {
         .spyOn(console, 'error')
         .mockImplementation(() => {});
 
-      const mockFileRef: any = {
-        // Cast to any to allow missing sourcePacketId
+      const mockFileRef = {
+        // Cast to unknown then FileReference to allow missing sourcePacketId for test
         id: 'mock-uuid-0',
         filename: 'test.txt',
         size: 0,
@@ -480,7 +476,7 @@ describe('FileExtractor', () => {
         // sourcePacketId is missing
         data: new Blob(),
         sha256Hash: '',
-      };
+      } as unknown as FileReference;
 
       const reassembledFile = await fileExtractor.reassembleFile(
         [],
@@ -501,7 +497,7 @@ describe('FileExtractor', () => {
       const fullFileContent =
         fileContentPart1 + fileContentPart2 + fileContentPart3;
 
-      const httpResponse1 = `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Disposition: attachment; filename=\"sorted.txt\"\r\nContent-Length: ${fullFileContent.length}\r\n\r\n${fileContentPart1}`;
+      const httpResponse1 = `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Disposition: attachment; filename="sorted.txt"\r\nContent-Length: ${fullFileContent.length}\r\n\r\n${fileContentPart1}`;
       const rawData1 = new TextEncoder().encode(httpResponse1);
       const packet1 = createMockPacket('HTTP', rawData1, 'p1', 's2');
       packet1.timestamp = 1000;

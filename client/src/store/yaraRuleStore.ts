@@ -45,8 +45,8 @@ export const useYaraRuleStore = create<YaraRuleState>((set, get) => ({
       const rules = await db.getAll(STORE_NAME);
       set({ rules });
       await get().compileActiveRules();
-    } catch (err: any) {
-      set({ error: err.message });
+    } catch (error: unknown) {
+      set({ error: (error as Error).message });
     } finally {
       set({ isLoading: false });
     }

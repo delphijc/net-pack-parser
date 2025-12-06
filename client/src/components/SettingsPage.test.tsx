@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SettingsPage from './SettingsPage';
 import { localStorageService } from '@/services/localStorage';
@@ -9,7 +9,7 @@ import { exportDataAsJson, importDataFromJson } from '@/utils/dataImportExport';
 vi.mock('@/services/localStorage', () => ({
   localStorageService: {
     getUsagePercentage: vi.fn(() => 0),
-    onQuotaExceeded: vi.fn(() => () => { }),
+    onQuotaExceeded: vi.fn(() => () => {}),
     clearAll: vi.fn(),
   },
 }));
@@ -65,11 +65,14 @@ describe('SettingsPage', () => {
     const continueButton = screen.getByRole('button', { name: /Continue/i });
     await user.click(continueButton);
 
-    expect(localStorageService.clearAll).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(localStorageService.clearAll).toHaveBeenCalled();
+    });
     expect(mockToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Success',
-        description: 'All local data (packets, files, logs, settings) cleared successfully.',
+        description:
+          'All local data (packets, files, logs, settings) cleared successfully.',
       }),
     );
   });

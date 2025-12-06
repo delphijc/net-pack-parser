@@ -106,8 +106,8 @@ export const analyzeSuspiciousIndicators = (
     if (matches) {
       indicators.push({
         id: uuidv4(),
-        type: type as any,
-        severity: severity as any,
+        type: type as SuspiciousIndicator['type'],
+        severity: severity as SuspiciousIndicator['severity'],
         description: `Detected ${type.replace('_', ' ')} pattern: ${matches[0]}`,
         evidence: matches[0],
         confidence: 85,
@@ -167,9 +167,9 @@ export const checkThreatIntelligence = (
     if (threat.domain && rawDataString.includes(threat.domain)) {
       threats.push({
         id: uuidv4(),
-        type: threat.type as any,
+        type: threat.type as ThreatIntelligence['type'],
         value: threat.domain,
-        severity: threat.severity as any,
+        severity: threat.severity as ThreatIntelligence['severity'],
         source: 'Internal Database',
         description: `Known malicious domain detected: ${threat.domain}`,
         lastUpdated: new Date().toISOString(),
@@ -182,9 +182,9 @@ export const checkThreatIntelligence = (
     ) {
       threats.push({
         id: uuidv4(),
-        type: threat.type as any,
+        type: threat.type as ThreatIntelligence['type'],
         value: threat.ip,
-        severity: threat.severity as any,
+        severity: threat.severity as ThreatIntelligence['severity'],
         source: 'Internal Database',
         description: `Known malicious IP detected: ${threat.ip}`,
         lastUpdated: new Date().toISOString(),

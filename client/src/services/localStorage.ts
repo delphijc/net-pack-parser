@@ -4,7 +4,7 @@ const NAMESPACE = 'npp';
 const DATA_VERSION = '1.0';
 const QUOTA_EXCEEDED_WARNING_THRESHOLD = 80; // 80%
 
-class LocalStorageService {
+export class LocalStorageService {
   private listeners: ((usage: number) => void)[] = [];
 
   constructor() {
@@ -31,7 +31,7 @@ class LocalStorageService {
     }
   }
 
-  private isQuotaExceededError(e: any): boolean {
+  private isQuotaExceededError(e: unknown): boolean {
     return (
       e instanceof DOMException &&
       (e.name === 'QuotaExceededError' ||

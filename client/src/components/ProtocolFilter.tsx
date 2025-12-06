@@ -25,6 +25,7 @@ export const ProtocolFilter: React.FC<ProtocolFilterProps> = ({
         onProtocolChange(value === 'all' ? undefined : value)
       }
       value={selectedProtocol || 'all'}
+      data-testid="select-protocol-filter"
     >
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Filter by Protocol" />

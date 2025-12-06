@@ -1,15 +1,55 @@
-// client/src/workers/yaraWorker.ts
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import libyara from 'libyara-wasm';
 
-let yaraModule: any = null;
+interface YaraMeta {
+  identifier: string;
+  data: unknown;
+}
+
+interface YaraStringMatch {
+  stringIdentifier?: string;
+  string_identifier?: string;
+  location: number;
+  matchLength?: number;
+  match_length?: number;
+  data: string;
+}
+
+interface YaraRuleMatch {
+  ruleName?: string;
+  rule_name?: string;
+  resolvedMatches?: {
+    size: () => number;
+    get: (index: number) => YaraStringMatch;
+  };
+  metadata?: {
+    size: () => number;
+    get: (index: number) => YaraMeta;
+  };
+}
+
+interface YaraResult {
+  matchedRules: {
+    size: () => number;
+    get: (index: number) => YaraRuleMatch;
+  };
+  delete?: () => void;
+}
+
+interface YaraModule {
+  run: (payload: string, rules: string) => YaraResult;
+}
+
+let yaraModule: YaraModule | null = null;
 
 // Initialize the WASM module
 const initPromise = libyara()
-  .then((Module: any) => {
+  .then((Module: YaraModule) => {
     yaraModule = Module;
     console.log('YARA WASM module initialized');
   })
-  .catch((err: any) => {
+  .catch((err: unknown) => {
     console.error('Failed to initialize YARA WASM:', err);
   });
 
@@ -31,7 +71,7 @@ self.onmessage = async (e: MessageEvent) => {
       // For now, we'll just store the rules string to be used in scan.
       // The 'payload' here is the rules string array.
       const rules = (payload as string[]).join('\n');
-      (self as any).activeRules = rules;
+      (self as unknown as { activeRules: string }).activeRules = rules;
 
       self.postMessage({
         type: 'compileResult',
@@ -40,7 +80,8 @@ self.onmessage = async (e: MessageEvent) => {
         ruleCount: payload.length,
       });
     } else if (type === 'scan') {
-      const rules = (self as any).activeRules || '';
+      const rules =
+        (self as unknown as { activeRules: string }).activeRules || '';
       if (!rules) {
         self.postMessage({
           type: 'scanResult',
@@ -66,18 +107,18 @@ self.onmessage = async (e: MessageEvent) => {
       for (let i = 0; i < payload.length; i += chunkSize) {
         payloadStr += String.fromCharCode.apply(
           null,
-          payload.subarray(i, i + chunkSize) as any,
+          payload.subarray(i, i + chunkSize) as unknown as number[],
         );
       }
 
       const result = yaraModule.run(payloadStr, rules);
 
-      const matches: any[] = [];
+      const matches: unknown[] = [];
 
       if (result.matchedRules) {
         for (let i = 0; i < result.matchedRules.size(); i++) {
           const match = result.matchedRules.get(i);
-          const resolvedMatches: any[] = [];
+          const resolvedMatches: unknown[] = [];
 
           if (match.resolvedMatches) {
             for (let j = 0; j < match.resolvedMatches.size(); j++) {
@@ -92,7 +133,7 @@ self.onmessage = async (e: MessageEvent) => {
           }
 
           // Metadata extraction
-          const meta: Record<string, any> = {};
+          const meta: Record<string, unknown> = {};
           if (match.metadata) {
             for (let k = 0; k < match.metadata.size(); k++) {
               const m = match.metadata.get(k);
@@ -113,8 +154,12 @@ self.onmessage = async (e: MessageEvent) => {
 
       self.postMessage({ type: 'scanResult', id, success: true, matches });
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('YARA Worker Error:', err);
-    self.postMessage({ type: 'error', id, error: err.message });
+    self.postMessage({
+      type: 'error',
+      id,
+      error: err instanceof Error ? err.message : String(err),
+    });
   }
 };

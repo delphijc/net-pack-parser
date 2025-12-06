@@ -31,7 +31,7 @@ const createPerformanceEntryData = (
 
   // Handle different entry types with specific details
   switch (entry.entryType) {
-    case 'navigation':
+    case 'navigation': {
       const navEntry = entry as PerformanceNavigationTiming;
       performanceEntry.details = {
         domainLookupStart: navEntry.domainLookupStart,
@@ -52,8 +52,9 @@ const createPerformanceEntryData = (
         decodedBodySize: navEntry.decodedBodySize,
       };
       break;
+    }
 
-    case 'resource':
+    case 'resource': {
       const resourceEntry = entry as PerformanceResourceTiming;
       performanceEntry.details = {
         initiatorType: resourceEntry.initiatorType,
@@ -69,6 +70,7 @@ const createPerformanceEntryData = (
         responseEnd: resourceEntry.responseEnd,
       };
       break;
+    }
 
     default:
       // Store any additional properties
@@ -84,7 +86,7 @@ const createPerformanceEntryData = (
  */
 const createPacketFromPerformanceEntry = (
   entry: PerformanceEntry,
-  rawData: any,
+  rawData: unknown,
 ): ParsedPacket => {
   const packetId = uuidv4();
   const tokens: Token[] = [];
@@ -191,7 +193,7 @@ export const startNetworkCapture = async (
           const initiatorType = resourceEntry.initiatorType;
           const startTime = entry.startTime;
           const duration = entry.duration;
-          const size = (entry as any).transferSize || 0;
+          const size = resourceEntry.transferSize || 0;
 
           const rawData = {
             url,
@@ -247,7 +249,7 @@ export const startNetworkCapture = async (
     fetch('https://jsonplaceholder.typicode.com/posts/1')
       .then((response) => response.json())
       .catch((err) => console.error('Error making test request:', err));
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error setting up network capture:', error);
     throw error;
   }

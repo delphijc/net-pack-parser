@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import database from '../../services/database';
 import type { ParsedPacket } from '../../types';
 import {
@@ -45,15 +45,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
   const [allThreats, setAllThreats] = useState<ThreatAlert[]>([]);
 
-  useEffect(() => {
-    updateStats();
-
-    // Set up polling for real-time updates
-    const intervalId = setInterval(updateStats, 2000);
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const updateStats = async () => {
+  const updateStats = useCallback(async () => {
     const packets = await database.getAllPackets();
     const files = await database.getAllFiles();
     // const threats = await database.getAllThreatIntelligence(); // Remove this as it returns wrong type
@@ -92,7 +84,15 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
     // Get recent activity (last 5 packets)
     setRecentActivity(packets.slice(-5).reverse());
-  };
+  }, []);
+
+  useEffect(() => {
+    updateStats();
+
+    // Set up polling for real-time updates
+    const intervalId = setInterval(updateStats, 2000);
+    return () => clearInterval(intervalId);
+  }, [updateStats]);
 
   const handleExportThreats = () => {
     const alertStates = useAlertStore.getState().alertStates;
@@ -198,7 +198,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                       <div
                         className="bg-primary h-2 rounded-full transition-all duration-500"
                         style={{
-                          width: `${(count / stats.totalPackets) * 100}%`,
+                          width: `${(count / stats.totalPackets) * 100}% `,
                         }}
                       ></div>
                     </div>
@@ -226,12 +226,12 @@ const Dashboard: React.FC<DashboardProps> = () => {
                   className="flex items-start pb-3 border-b border-white/5 last:border-0 last:pb-0"
                 >
                   <div
-                    className={`mt-1 w-2 h-2 rounded-full mr-3 ${
+                    className={`mt - 1 w - 2 h - 2 rounded - full mr - 3 ${
                       packet.suspiciousIndicators &&
                       packet.suspiciousIndicators.length > 0
                         ? 'bg-destructive'
                         : 'bg-emerald-500'
-                    }`}
+                    } `}
                   ></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate text-foreground">
@@ -256,95 +256,95 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
   return (
     <div
-      className={`flex flex-col h-full ${isGlobalParsing ? 'cursor-wait' : ''}`}
+      className={`flex flex - col h - full ${isGlobalParsing ? 'cursor-wait' : ''} `}
     >
       {/* Navigation Tabs */}
       <div className="flex border-b border-white/10 mb-6">
         <button
           onClick={() => !isGlobalParsing && setActiveTab('overview')}
           disabled={isGlobalParsing}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
             activeTab === 'overview'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
         >
           Overview
         </button>
         <button
           onClick={() => !isGlobalParsing && setActiveTab('parser')}
           disabled={isGlobalParsing}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
             activeTab === 'parser'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
         >
           Parser & Upload
         </button>
         <button
           onClick={() => !isGlobalParsing && setActiveTab('packets')}
           disabled={isGlobalParsing}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
             activeTab === 'packets'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
         >
           Packet Inspector
         </button>
         <button
           onClick={() => !isGlobalParsing && setActiveTab('yara')}
           disabled={isGlobalParsing}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
             activeTab === 'yara'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
         >
           YARA Rules
         </button>
         <button
           onClick={() => !isGlobalParsing && setActiveTab('threat-intel')}
           disabled={isGlobalParsing}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
             activeTab === 'threat-intel'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
         >
           Threat Intel
         </button>
         <button
           onClick={() => !isGlobalParsing && setActiveTab('ioc-manager')}
           disabled={isGlobalParsing}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
             activeTab === 'ioc-manager'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
         >
           IOC Manager
         </button>
         <button
           onClick={() => !isGlobalParsing && setActiveTab('false-positives')}
           disabled={isGlobalParsing}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
             activeTab === 'false-positives'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
         >
           False Positives
         </button>
         <button
           onClick={() => !isGlobalParsing && setActiveTab('settings')}
           disabled={isGlobalParsing}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
             activeTab === 'settings'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
         >
           Settings
         </button>

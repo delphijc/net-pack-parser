@@ -30,9 +30,9 @@ development_status:
   3-7-threat-intelligence-ioc-database: done
   3-8-threat-severity-classification-alert-management: done
   epic-3-retrospective: completed
-  epic-4: backlog
-  4-1-core-web-vitals-monitoring-lcp-fcp-cls-fid-ttfb: backlog
-  4-2-navigation-timing-page-load-tracking: backlog
+  epic-4: contexted
+  4-1-core-web-vitals-monitoring-lcp-fcp-cls-fid-ttfb: done
+  4-2-navigation-timing-page-load-tracking: ready-for-dev
   4-3-long-task-detection-50ms: backlog
   4-4-resource-timing-capture-waterfall-visualization: backlog
   4-5-performance-dashboard-real-time-metrics: backlog

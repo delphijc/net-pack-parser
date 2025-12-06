@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { ParsedPacket } from '../types'; // Updated import path
 import {
   multiCriteriaSearch,
@@ -50,11 +50,7 @@ const PacketList: React.FC<PacketListProps> = ({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [packetToDelete, setPacketToDelete] = useState<string | null>(null);
 
-  useEffect(() => {
-    filterPackets();
-  }, [packets, searchTerm, selectedProtocol, sortOrder, searchCriteria]);
-
-  const filterPackets = () => {
+  const filterPackets = useCallback(() => {
     let result = packets.map((p) => ({ ...p, matchesSearch: false })); // Initialize matchesSearch
 
     // Apply search (existing text search)
@@ -99,7 +95,11 @@ const PacketList: React.FC<PacketListProps> = ({
     });
 
     setFilteredPackets(result);
-  };
+  }, [packets, searchTerm, selectedProtocol, searchCriteria, sortOrder]);
+
+  useEffect(() => {
+    filterPackets();
+  }, [filterPackets]);
 
   const handleDeleteClick = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();

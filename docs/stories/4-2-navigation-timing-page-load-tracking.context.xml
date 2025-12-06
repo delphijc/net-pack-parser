@@ -1,0 +1,99 @@
+<story-context id="docs/stories/4-2-navigation-timing-page-load-tracking.context.xml" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.2</storyId>
+    <title>Navigation Timing &amp; Page Load Tracking</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/4-2-navigation-timing-page-load-tracking.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>visualize the page load timing phases (DNS, TCP, Request, Response, DOM Processing, Load)</iWant>
+    <soThat>I can identify which stage of the network/loading process is slowing down the application or analyzed traffic</soThat>
+    <tasks>
+- [ ] **1. Navigation Hook** (AC1)
+  - [ ] **1.1. create useNavigationTiming**: Create `client/src/hooks/useNavigationTiming.ts`. Use `performance.getEntriesByType('navigation')`.
+
+- [ ] **2. UI Visualization** (AC2, AC3)
+  - [ ] **2.1. NavigationTimingView Component**: Create `client/src/components/performance/NavigationTimingView.tsx`. Stacked BarChart or Timeline.
+  - [ ] **2.2. Metric Chips**: Display summary metrics (Load Time, DNS Time).
+
+- [ ] **3. Dashboard Integration** (AC4)
+  - [ ] **3.1. Update Dashboard**: Add `NavigationTimingView` to `PerformanceDashboard.tsx`.
+
+- [ ] **4. Testing**
+  - [ ] **4.1. Unit Tests**: Test metric calculation helpers.
+  - [ ] **4.2. Component Tests**: Mock `performance` API and verify rendering.
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+1.  **Capture Timing**: The system captures `PerformanceNavigationTiming` data on page load.
+2.  **Phase Visualization**: A horizontal bar chart (or timeline) displays the distinct phases: DNS, TCP, Request/Response, DOM, Load.
+3.  **Metrics Display**: Key timestamps are displayed numerically.
+4.  **Integration**: The component is embedded in the Performance Dashboard.
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/tech-spec-epic-4.md</path>
+        <title>Epic 4 Tech Spec</title>
+        <section>Detailed Design</section>
+        <snippet>Defines `NavigationTimingView` component and `PerformanceNavigationTiming` usage.</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>PRD</title>
+        <section>Real-Time Performance Monitoring</section>
+        <snippet>FR8 Track Page Load &amp; Nav Timing: Visualize page load phases.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <item>
+        <path>client/src/components/performance/PerformanceDashboard.tsx</path>
+        <kind>component</kind>
+        <symbol>PerformanceDashboard</symbol>
+        <reason>Container component where `NavigationTimingView` will be mounted.</reason>
+      </item>
+    </code>
+    <dependencies>
+      <item>
+        <ecosystem>npm</ecosystem>
+        <package>recharts</package>
+        <version>^3.5.0</version>
+      </item>
+      <item>
+        <ecosystem>npm</ecosystem>
+        <package>lucide-react</package>
+        <version>^0.454.0</version>
+      </item>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Browser-Only: Use `window.performance` API.</constraint>
+    <constraint>Visualization: Must be intuitive (e.g., Gantt style) using `recharts` or CSS Grid.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>NavigationTiming</name>
+      <kind>Standard Web API</kind>
+      <signature>interface PerformanceNavigationTiming extends PerformanceResourceTiming { ... }</signature>
+      <path>MDN/lib.dom.d.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Unit tests for any calculation logic. Component tests with mocked Performance API.</standards>
+    <locations>client/src/hooks/__tests__, client/src/components/performance/__tests__</locations>
+    <ideas>
+      <idea>Unit: Calculate phase durations from a mock PerformanceEntry.</idea>
+      <idea>Component: Verify chart renders correct width/positions based on mock data.</idea>
+    </ideas>
+  </tests>
+</story-context>

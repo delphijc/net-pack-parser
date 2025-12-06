@@ -13,7 +13,7 @@ declare module 'libyara-wasm' {
         data: string;
       };
     };
-    resolved_matches?: any; // Alias for resolvedMatches if needed
+    resolved_matches?: unknown; // Alias for resolvedMatches if needed
     metadata: {
       size(): number;
       get(index: number): {
@@ -28,7 +28,7 @@ declare module 'libyara-wasm' {
       size(): number;
       get(index: number): YaraMatch;
     };
-    matched_rules?: any;
+    matched_rules?: unknown;
     compileErrors: {
       size(): number;
       get(index: number): {

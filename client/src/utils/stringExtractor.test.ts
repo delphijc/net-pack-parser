@@ -9,22 +9,24 @@ let lastCreatedWorker: MockWorker | null = null;
 class MockWorker {
   onmessage: ((event: MessageEvent) => void) | null = null;
   onerror: ((event: ErrorEvent) => void) | null = null;
-  postMessage: (message: any, transfer: Transferable[]) => void;
+  postMessage: (message: unknown, transfer: Transferable[]) => void;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   constructor(_scriptURL: string | URL, _options?: WorkerOptions) {
     this.postMessage = vi.fn();
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     lastCreatedWorker = this;
   }
 
   // Helper to simulate receiving a message from the worker (worker -> main)
-  emitMessage(data: any) {
+  emitMessage(data: unknown) {
     if (this.onmessage) {
       this.onmessage({ data } as MessageEvent);
     }
   }
 
   // Helper to simulate an error from the worker
-  emitError(error: any) {
+  emitError(error: unknown) {
     if (this.onerror) {
       this.onerror(error as ErrorEvent);
     }
@@ -46,9 +48,10 @@ describe('stringExtractor', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    vi.resetModules(); // Ensure we get a fresh module instance (and pendingRequests map)
+
     // We need to re-import or ensure the module uses the mocked Worker.
-    // Since it's a singleton, we only import it once.
-    // But we need to ensure the import happens AFTER the stub.
+    // Since we reset modules, this import triggers new Worker creation and new pendingRequests map.
     const mod = await import('./stringExtractor');
     extractStrings = mod.extractStrings;
   });
@@ -93,7 +96,11 @@ describe('stringExtractor', () => {
     const promise = extractStrings(mockPayload, mockPacketId, mockOffset);
 
     // Simulate worker success response
-    const lastCall = (lastCreatedWorker?.postMessage as any).mock.lastCall[0];
+    const lastCall = (
+      lastCreatedWorker?.postMessage as unknown as {
+        mock: { lastCall: unknown[] };
+      }
+    ).mock.lastCall[0] as { requestId: string };
     const requestId = lastCall.requestId;
 
     lastCreatedWorker?.emitMessage({
@@ -111,7 +118,11 @@ describe('stringExtractor', () => {
     const promise = extractStrings(mockPayload, 'packet-1', 0);
 
     // Simulate worker error response
-    const lastCall = (lastCreatedWorker?.postMessage as any).mock.lastCall[0];
+    const lastCall = (
+      lastCreatedWorker?.postMessage as unknown as {
+        mock: { lastCall: unknown[] };
+      }
+    ).mock.lastCall[0] as { requestId: string };
     const requestId = lastCall.requestId;
 
     lastCreatedWorker?.emitMessage({
@@ -128,7 +139,11 @@ describe('stringExtractor', () => {
     const promise = extractStrings(mockPayload, 'packet-1', 0);
 
     // Simulate worker error response without message
-    const lastCall = (lastCreatedWorker?.postMessage as any).mock.lastCall[0];
+    const lastCall = (
+      lastCreatedWorker?.postMessage as unknown as {
+        mock: { lastCall: unknown[] };
+      }
+    ).mock.lastCall[0] as { requestId: string };
     const requestId = lastCall.requestId;
 
     lastCreatedWorker?.emitMessage({

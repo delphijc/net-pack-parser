@@ -41,7 +41,7 @@ export const xssPatterns = {
 export function decodeUrl(text: string): string {
   try {
     return decodeURIComponent(text);
-  } catch (e) {
+  } catch {
     return text;
   }
 }

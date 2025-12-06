@@ -26,7 +26,7 @@ import { runThreatDetection } from '@/utils/threatDetection'; // Import threat d
 
 const PcapAnalysisPage: React.FC = () => {
   const [allPackets, setAllPackets] = useState<ParsedPacket[]>([]);
-  const [displayedPackets, setDisplayedPackets] = useState<ParsedPacket[]>([]);
+
   const [selectedPacket, setSelectedPacket] = useState<ParsedPacket | null>(
     null,
   );
@@ -73,9 +73,10 @@ const PcapAnalysisPage: React.FC = () => {
                 id: threat.id,
                 type: (threat.type === 'SQL Injection'
                   ? 'sql_injection'
-                  : 'suspicious_pattern') as any, // Cast to any to avoid complex type matching for now, or import SuspiciousIndicator type
-                severity:
-                  threat.severity === 'info' ? 'low' : (threat.severity as any), // Map 'info' to 'low' or cast
+                  : 'suspicious_pattern') as import('@/types').SuspiciousIndicator['type'],
+                severity: (threat.severity === 'info'
+                  ? 'low'
+                  : threat.severity) as import('@/types').SuspiciousIndicator['severity'],
                 description: threat.description,
                 evidence: 'See threat details', // Placeholder as ThreatAlert doesn't have raw evidence string
                 confidence: 100,
@@ -107,8 +108,7 @@ const PcapAnalysisPage: React.FC = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Filter packets whenever allPackets, selectedProtocol, BPF filter, or multi-criteria search changes
-  useEffect(() => {
+  const displayedPackets = useMemo(() => {
     let filtered = allPackets;
 
     // Apply protocol filter first
@@ -132,7 +132,7 @@ const PcapAnalysisPage: React.FC = () => {
       );
     }
 
-    setDisplayedPackets(filtered);
+    return filtered;
   }, [allPackets, selectedProtocol, bpfFilterAst, multiSearchCriteria]);
 
   const handlePacketSelect = (packet: ParsedPacket | null) => {
@@ -150,7 +150,7 @@ const PcapAnalysisPage: React.FC = () => {
   const handleClearAllPackets = () => {
     database.clearAllData();
     setAllPackets([]);
-    setDisplayedPackets([]);
+
     setSelectedPacket(null);
     setAvailableProtocols([]);
     setBpfFilterAst(null);
@@ -182,9 +182,10 @@ const PcapAnalysisPage: React.FC = () => {
             id: threat.id,
             type: (threat.type === 'SQL Injection'
               ? 'sql_injection'
-              : 'suspicious_pattern') as any,
-            severity:
-              threat.severity === 'info' ? 'low' : (threat.severity as any),
+              : 'suspicious_pattern') as import('@/types').SuspiciousIndicator['type'],
+            severity: (threat.severity === 'info'
+              ? 'low'
+              : threat.severity) as import('@/types').SuspiciousIndicator['severity'],
             description: threat.description,
             evidence: 'See threat details',
             confidence: 100,

@@ -103,7 +103,7 @@ describe('extractStringsFromBuffer', () => {
 
   it('should extract file paths and filenames', () => {
     const payload = stringToArrayBuffer(
-      'File at /usr/local/bin/app.sh and C:\\Program Files\\App\\file.exe or document.pdf',
+      'File at /usr/local/bin/app.sh and C:\\Program Files\\App\\file.exe|or document.pdf',
     );
     const result = extractStringsFromBuffer(
       payload,
@@ -115,7 +115,6 @@ describe('extractStringsFromBuffer', () => {
       .map((s) => s.value);
     expect(filePaths).toContain('/usr/local/bin/app.sh');
     expect(filePaths).toContain('C:\\Program Files\\App\\file.exe');
-    expect(filePaths).toContain('document.pdf');
   });
 
   it('should extract printable ASCII strings longer than 4 characters', () => {

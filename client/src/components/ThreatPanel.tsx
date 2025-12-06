@@ -177,7 +177,12 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
           </SelectContent>
         </Select>
 
-        <Select value={sortBy} onValueChange={(val: any) => setSortBy(val)}>
+        <Select
+          value={sortBy}
+          onValueChange={(val: 'timestamp' | 'severity' | 'sourceIp') =>
+            setSortBy(val)
+          }
+        >
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>

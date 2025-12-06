@@ -46,11 +46,21 @@ describe('ThreatPanel', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useAlertStore as any).mockReturnValue({
+    vi.mocked(useAlertStore).mockReturnValue({
       markFalsePositive: mockMarkFalsePositive,
       confirmThreat: mockConfirmThreat,
       addNote: mockAddNote,
       getAlertState: mockGetAlertState,
+      alertStates: {},
+      restoreAlert: vi.fn(),
+      persist: {
+        onFinishHydration: vi.fn(),
+        hasHydrated: vi.fn(),
+        rehydrate: vi.fn(),
+        setOptions: vi.fn(),
+        clearStorage: vi.fn(),
+        getOptions: vi.fn(),
+      },
     });
   });
 
