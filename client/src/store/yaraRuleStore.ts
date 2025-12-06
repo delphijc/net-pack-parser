@@ -39,8 +39,6 @@ export const useYaraRuleStore = create<YaraRuleState>((set, get) => ({
   isLoading: false,
   error: null,
 
-
-
   // ... existing code ...
 
   loadRules: async () => {
@@ -52,15 +50,15 @@ export const useYaraRuleStore = create<YaraRuleState>((set, get) => ({
       // Seed default rules if empty
       if (rules.length === 0) {
         // Generate IDs for default rules
-        const rulesToSeed = defaultYaraRules.map(r => ({
+        const rulesToSeed = defaultYaraRules.map((r) => ({
           id: crypto.randomUUID(),
           name: r.name,
           content: r.content,
-          enabled: true
+          enabled: true,
         }));
 
         const tx = db.transaction(STORE_NAME, 'readwrite');
-        await Promise.all(rulesToSeed.map(r => tx.store.put(r)));
+        await Promise.all(rulesToSeed.map((r) => tx.store.put(r)));
         await tx.done;
 
         rules = await db.getAll(STORE_NAME);

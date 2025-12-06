@@ -13,18 +13,18 @@ So that I can see the application's health at a glance.
 ## Acceptance Criteria
 
 ### AC 1: Dashboard Layout
-- [ ] `PerformanceDashboard` is the main container for the Monitoring tab.
-- [ ] Layout uses a grid system to organize Vitals cards, Waterfall chart, and Trend graphs.
-- [ ] Includes a header with "Reset Metrics" and "Export Performance Data" controls.
+- [x] `PerformanceDashboard` is the main container for the Monitoring tab.
+- [x] Layout uses a grid system to organize Vitals cards, Waterfall chart, and Trend graphs.
+- [x] Includes a header with "Reset Metrics" and "Export Performance Data" controls.
 
 ### AC 2: Real-time Metric Updates
-- [ ] The dashboard subscribes to real-time performance events (via `usePerformanceObserver`).
-- [ ] When a new metric entry (e.g., LCP update, new Long Task) is verified, the UI updates immediately.
-- [ ] Metric cards (created in Story 4.1) are integrated into this dashboard.
+- [x] The dashboard subscribes to real-time performance events (via `usePerformanceObserver`).
+- [x] When a new metric entry (e.g., LCP update, new Long Task) is verified, the UI updates immediately.
+- [x] Metric cards (created in Story 4.1) are integrated into this dashboard.
 
 ### AC 3: Performance Score Integration
-- [ ] The proprietary Performance Score (from Story 4.7, placeholder if not ready) is displayed prominently.
-- [ ] A "Health" badge (Good/Fair/Poor) summarizes the overall state.
+- [x] The proprietary Performance Score (from Story 4.7, placeholder if not ready) is displayed prominently.
+- [x] A "Health" badge (Good/Fair/Poor) summarizes the overall state.
 
 ### AC 4: Session Persistence (Optional)
 - [ ] Metric data persists across tab reloads (stored in localStorage) so history isn't lost on refresh (optional, MVP can be session-only).

@@ -44,7 +44,12 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
     console.log(`Parsed ${pcapPackets.length} raw packets from PCAP.`);
 
     // Helper function to process a single packet
-    const processPacket = async (packet: import('../utils/pcapUtils').PcapPacket): Promise<{ parsedPacket: ParsedPacket, timelineEvent: import('../types').TimelineEvent }> => {
+    const processPacket = async (
+      packet: import('../utils/pcapUtils').PcapPacket,
+    ): Promise<{
+      parsedPacket: ParsedPacket;
+      timelineEvent: import('../types').TimelineEvent;
+    }> => {
       const packetId = uuidv4();
       const tokens: Token[] = [];
       const sections: ParsedSection[] = [];
@@ -171,7 +176,7 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
         });
 
         // Pass the ArrayBuffer to the worker
-        // console.time('extractStrings'); 
+        // console.time('extractStrings');
         const extractionPromise = extractStrings(
           rawPacketDataBuffer.slice(0) as ArrayBuffer, // Pass a copy to avoid detachment
           packetId,
@@ -226,14 +231,14 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
       if (i % 500 === 0) {
         // console.log(`Processing batch starting at ${i}/${pcapPackets.length}`);
         // Yield to main thread briefly to update UI/logs
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
       }
 
       const batchResults = await Promise.all(batch.map(processPacket));
 
       // Extract packets and timeline events
-      const batchPackets = batchResults.map(r => r.parsedPacket);
-      const batchTimelineEvents = batchResults.map(r => r.timelineEvent);
+      const batchPackets = batchResults.map((r) => r.parsedPacket);
+      const batchTimelineEvents = batchResults.map((r) => r.timelineEvent);
 
       // Bulk store timeline events
       await database.storeTimelineEvents(batchTimelineEvents);

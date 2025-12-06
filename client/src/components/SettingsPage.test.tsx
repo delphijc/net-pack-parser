@@ -12,7 +12,7 @@ import chainOfCustodyDb from '@/services/chainOfCustodyDb';
 vi.mock('@/services/localStorage', () => ({
   localStorageService: {
     getUsagePercentage: vi.fn(() => 0),
-    onQuotaExceeded: vi.fn(() => () => { }),
+    onQuotaExceeded: vi.fn(() => () => {}),
     clearAll: vi.fn(),
     getValue: vi.fn(() => null),
     setValue: vi.fn(),
@@ -55,7 +55,6 @@ vi.mock('@/store/performanceStore', () => ({
     }),
   },
 }));
-
 
 describe('SettingsPage', () => {
   beforeEach(() => {
@@ -101,7 +100,8 @@ describe('SettingsPage', () => {
     expect(mockToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Success',
-        description: 'Analysis data (Packets, Files, Logs) cleared successfully.',
+        description:
+          'Analysis data (Packets, Files, Logs) cleared successfully.',
       }),
     );
   });

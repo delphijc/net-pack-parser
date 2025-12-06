@@ -126,27 +126,29 @@ describe('PcapUpload Component', () => {
       sessionId: 'test-session',
       status: 'processing', // "pending" is invalid
       originalName: 'test.pcap',
-      size: 1024
+      size: 1024,
     });
     vi.mocked(api.getStatus).mockResolvedValue({
       status: 'complete',
       progress: 100,
-      packetCount: 1
+      packetCount: 1,
     });
     vi.mocked(api.getResults).mockResolvedValue({
       sessionId: 'test-session',
       status: 'complete',
       summary: { packetCount: 1, totalBytes: 100 }, // removed duration/protocolBreakdown
-      packets: [{
-        id: '456',
-        timestamp: mockPacket.timestamp, // Ensure timestamp matches expected adapted packet
-        sourceIp: '10.0.0.1',
-        destIp: '10.0.0.2',
-        protocol: 'TCP',
-        length: 100,
-        info: 'Test packet',
-        raw: 'Binary Data'
-      }]
+      packets: [
+        {
+          id: '456',
+          timestamp: mockPacket.timestamp, // Ensure timestamp matches expected adapted packet
+          sourceIp: '10.0.0.1',
+          destIp: '10.0.0.2',
+          protocol: 'TCP',
+          length: 100,
+          info: 'Test packet',
+          raw: 'Binary Data',
+        },
+      ],
     });
 
     const { container } = render(<PcapUpload />);
@@ -161,13 +163,18 @@ describe('PcapUpload Component', () => {
     if (fileInput) {
       fireEvent.change(fileInput, { target: { files: [file] } });
 
-      await waitFor(() => {
-        // Correct expectation: Local parser is NOT called for file upload anymore
-        expect(pcapParser.parseNetworkData).not.toHaveBeenCalled();
-        // Database storage IS called with adapted packets
-        expect(database.storePackets).toHaveBeenCalled();
-        expect(screen.getByText('Successfully Parsed Packet')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          // Correct expectation: Local parser is NOT called for file upload anymore
+          expect(pcapParser.parseNetworkData).not.toHaveBeenCalled();
+          // Database storage IS called with adapted packets
+          expect(database.storePackets).toHaveBeenCalled();
+          expect(
+            screen.getByText('Successfully Parsed Packet'),
+          ).toBeInTheDocument();
+        },
+        { timeout: 3000 },
+      );
     } else {
       throw new Error('File input not found');
     }

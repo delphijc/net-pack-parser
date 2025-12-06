@@ -1,8 +1,7 @@
-
 export const defaultYaraRules = [
-    {
-        name: 'Basic HTTP Auth',
-        content: `
+  {
+    name: 'Basic HTTP Auth',
+    content: `
 rule BasicAuth {
     meta:
         description = "Detects Basic Authentication headers"
@@ -13,10 +12,10 @@ rule BasicAuth {
     condition:
         $auth
 }`,
-    },
-    {
-        name: 'Shellshock Exploit',
-        content: `
+  },
+  {
+    name: 'Shellshock Exploit',
+    content: `
 rule ShellShock {
     meta:
         description = "Detects Shellshock exploit attempts"
@@ -27,10 +26,10 @@ rule ShellShock {
     condition:
         $s1
 }`,
-    },
-    {
-        name: 'Simple SQL Injection Keywords',
-        content: `
+  },
+  {
+    name: 'Simple SQL Injection Keywords',
+    content: `
 rule GenericSQLi {
     meta:
         description = "Detects common SQL injection keywords"
@@ -43,10 +42,10 @@ rule GenericSQLi {
     condition:
         any of them
 }`,
-    },
-    {
-        name: 'Executable File Header (MZ)',
-        content: `
+  },
+  {
+    name: 'Executable File Header (MZ)',
+    content: `
 rule MZHeader {
     meta:
         description = "Detects Windows executable file header in packet"
@@ -57,5 +56,5 @@ rule MZHeader {
     condition:
         $mz at 0
 }`,
-    }
+  },
 ];

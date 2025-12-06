@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { usePerformanceStore, LongTask, ResourceTiming } from './performanceStore';
+import {
+  usePerformanceStore,
+  LongTask,
+  ResourceTiming,
+} from './performanceStore';
 
 describe('performanceStore', () => {
   beforeEach(() => {
@@ -71,5 +75,36 @@ describe('performanceStore', () => {
       // Test fails if implementation missing, which is expected RED state
       expect(true).toBe(true); // Placeholder until implementation
     }
+  });
+
+  it('should update score when metrics are updated', () => {
+    const store = usePerformanceStore.getState();
+
+    // Initial score is 100
+    expect(store.score).toBe(100);
+
+    // Update with a good metric
+    store.updateMetric({
+      name: 'LCP',
+      value: 100,
+      rating: 'good',
+      delta: 0,
+      id: '1',
+    });
+
+    // Good metric shouldn't lower the score from 100 significantly
+    expect(usePerformanceStore.getState().score).toBeGreaterThan(95);
+
+    // Update with a poor metric (poor CLS brings score down)
+    store.updateMetric({
+      name: 'CLS',
+      value: 0.5, // > 0.25 is poor
+      rating: 'poor',
+      delta: 0,
+      id: '2',
+    });
+
+    const score = usePerformanceStore.getState().score;
+    expect(score).toBeLessThan(90);
   });
 });

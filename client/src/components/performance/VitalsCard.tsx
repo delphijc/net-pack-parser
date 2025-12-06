@@ -21,7 +21,7 @@ export const VitalsCard = ({ metric, description }: VitalsCardProps) => {
   }
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col justify-between">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{metric.name}</CardTitle>
         <Badge className={clsx(colorClass)}>{metric.rating}</Badge>

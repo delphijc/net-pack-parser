@@ -1,5 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { usePerformanceStore, type LongTask, type ResourceTiming } from '../store/performanceStore';
+import {
+  usePerformanceStore,
+  type LongTask,
+  type ResourceTiming,
+} from '../store/performanceStore';
 
 export const usePerformanceObserver = () => {
   const addLongTask = usePerformanceStore((state) => state.addLongTask);
@@ -55,7 +59,7 @@ export const usePerformanceObserver = () => {
           if (entry.entryType === 'resource') {
             const resourceEntry = entry as PerformanceResourceTiming;
 
-            // Basic filtering: ignore own API calls if checking performance of external stuff, 
+            // Basic filtering: ignore own API calls if checking performance of external stuff,
             // but for a parser tool, we likely want to see everything including chunk loads.
             // We can filter extremely fast internal things if needed, but for now capture all.
 
@@ -67,10 +71,13 @@ export const usePerformanceObserver = () => {
               duration: resourceEntry.duration,
               transferSize: resourceEntry.transferSize,
               breakdown: {
-                dns: resourceEntry.domainLookupEnd - resourceEntry.domainLookupStart,
+                dns:
+                  resourceEntry.domainLookupEnd -
+                  resourceEntry.domainLookupStart,
                 tcp: resourceEntry.connectEnd - resourceEntry.connectStart,
                 ttfb: resourceEntry.responseStart - resourceEntry.requestStart,
-                download: resourceEntry.responseEnd - resourceEntry.responseStart,
+                download:
+                  resourceEntry.responseEnd - resourceEntry.responseStart,
               },
             };
 

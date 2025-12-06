@@ -41,7 +41,6 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
 
   // Client-side hashing variables removed for performance
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -110,24 +109,28 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
 
           if (resultsData.packets && resultsData.packets.length > 0) {
             // Transform server packets to client ParsedPacket format
-            const adaptedPackets: ParsedPacket[] = resultsData.packets.map((p: any) => ({
-              id: p.id,
-              timestamp: p.timestamp,
-              protocol: p.protocol,
-              sourceIP: p.sourceIp,
-              destIP: p.destIp,
-              sourcePort: 0,
-              destPort: 0,
-              length: p.length,
-              info: p.info,
-              originalLength: p.length,
-              rawData: p.raw ? new TextEncoder().encode(p.raw).buffer : new ArrayBuffer(0),
-              detectedProtocols: [p.protocol],
-              tokens: [],
-              sections: [],
-              fileReferences: [],
-              sessionId: sessionId
-            }));
+            const adaptedPackets: ParsedPacket[] = resultsData.packets.map(
+              (p: any) => ({
+                id: p.id,
+                timestamp: p.timestamp,
+                protocol: p.protocol,
+                sourceIP: p.sourceIp,
+                destIP: p.destIp,
+                sourcePort: 0,
+                destPort: 0,
+                length: p.length,
+                info: p.info,
+                originalLength: p.length,
+                rawData: p.raw
+                  ? new TextEncoder().encode(p.raw).buffer
+                  : new ArrayBuffer(0),
+                detectedProtocols: [p.protocol],
+                tokens: [],
+                sections: [],
+                fileReferences: [],
+                sessionId: sessionId,
+              }),
+            );
 
             await database.storePackets(adaptedPackets);
 
@@ -136,7 +139,7 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
               id: sessionId,
               name: uploadedFileName || 'Unknown Session',
               timestamp: Date.now(),
-              packetCount: adaptedPackets.length
+              packetCount: adaptedPackets.length,
             });
 
             setLastParsedPacket(adaptedPackets[adaptedPackets.length - 1]);
@@ -188,11 +191,10 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
 
       // Start polling
       pollServerStatus(sessionId);
-
     } catch (error) {
       console.error('Error uploading file:', error);
       setErrorMessage(
-        "Failed to upload PCAP file. Please check server connection.",
+        'Failed to upload PCAP file. Please check server connection.',
       );
       setParsing(false);
       onParsingStatusChange?.(false);
@@ -300,10 +302,11 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
               <div className="flex space-x-2">
                 <button
                   onClick={handleCaptureToggle}
-                  className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${capturing
-                    ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
-                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                    }`}
+                  className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${
+                    capturing
+                      ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
+                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  }`}
                 >
                   {capturing ? (
                     <>
@@ -442,10 +445,11 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                 <button
                   type="submit"
                   disabled={parsing}
-                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center transition-colors ${parsing
-                    ? 'bg-primary/50 cursor-not-allowed'
-                    : 'bg-primary hover:bg-primary/90'
-                    }`}
+                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center transition-colors ${
+                    parsing
+                      ? 'bg-primary/50 cursor-not-allowed'
+                      : 'bg-primary hover:bg-primary/90'
+                  }`}
                 >
                   {parsing ? (
                     <>

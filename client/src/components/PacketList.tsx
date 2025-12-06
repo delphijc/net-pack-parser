@@ -67,7 +67,10 @@ const PacketList: React.FC<PacketListProps> = ({
   const [viewMode, setViewMode] = useState<'packets' | 'flows'>('packets');
   // Initialize preferences lazily
   const [showThreatsOnly, setShowThreatsOnly] = useState(() => {
-    return localStorageService.getValue<string>('preferences.defaultView') === 'threats';
+    return (
+      localStorageService.getValue<string>('preferences.defaultView') ===
+      'threats'
+    );
   });
   const { toast } = useToast();
 
@@ -83,14 +86,30 @@ const PacketList: React.FC<PacketListProps> = ({
   // Large file warning
   useEffect(() => {
     // Determine if large file suggestion needed
-    if (packets.length > 10000 && viewMode === 'packets' && !localStorageService.getValue<boolean>('preferences.suppressLargeFileWarning')) {
+    if (
+      packets.length > 10000 &&
+      viewMode === 'packets' &&
+      !localStorageService.getValue<boolean>(
+        'preferences.suppressLargeFileWarning',
+      )
+    ) {
       toast({
-        title: "Large File Detected",
-        description: "For better performance, consider switching to Flow View.",
-        action: <div onClick={() => setViewMode('flows')} className="font-bold cursor-pointer hover:underline">Switch to Flows</div>
+        title: 'Large File Detected',
+        description: 'For better performance, consider switching to Flow View.',
+        action: (
+          <div
+            onClick={() => setViewMode('flows')}
+            className="font-bold cursor-pointer hover:underline"
+          >
+            Switch to Flows
+          </div>
+        ),
       });
       // Avoid spamming
-      localStorageService.setValue('preferences.suppressLargeFileWarning', true);
+      localStorageService.setValue(
+        'preferences.suppressLargeFileWarning',
+        true,
+      );
     }
   }, [packets.length, viewMode, toast]);
 
@@ -125,9 +144,10 @@ const PacketList: React.FC<PacketListProps> = ({
 
     // Apply "Show Threats Only" filter
     if (showThreatsOnly) {
-      result = result.filter(p =>
-        (p.suspiciousIndicators && p.suspiciousIndicators.length > 0) ||
-        (p.threatIntelligence && p.threatIntelligence.length > 0)
+      result = result.filter(
+        (p) =>
+          (p.suspiciousIndicators && p.suspiciousIndicators.length > 0) ||
+          (p.threatIntelligence && p.threatIntelligence.length > 0),
       );
     }
 
@@ -147,7 +167,14 @@ const PacketList: React.FC<PacketListProps> = ({
     });
 
     return result;
-  }, [packets, searchTerm, selectedProtocol, searchCriteria, sortOrder, showThreatsOnly]);
+  }, [
+    packets,
+    searchTerm,
+    selectedProtocol,
+    searchCriteria,
+    sortOrder,
+    showThreatsOnly,
+  ]);
 
   const handleDeleteClick = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -333,10 +360,11 @@ const PacketList: React.FC<PacketListProps> = ({
               key={packet.id}
               data-testid={`packet-item-${packet.id}`}
               onClick={() => onPacketSelect(packet)}
-              className={`group p-2 rounded-md cursor-pointer border transition-all duration-200 ${selectedPacketId === packet.id
-                ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
-                : 'bg-card/30 border-transparent hover:bg-secondary/50 hover:border-white/5'
-                } ${packet.matchesSearch ? 'bg-yellow-200/20 border-yellow-300' : ''}`}
+              className={`group p-2 rounded-md cursor-pointer border transition-all duration-200 ${
+                selectedPacketId === packet.id
+                  ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
+                  : 'bg-card/30 border-transparent hover:bg-secondary/50 hover:border-white/5'
+              } ${packet.matchesSearch ? 'bg-yellow-200/20 border-yellow-300' : ''}`}
             >
               <div className="flex justify-between items-center mb-1">
                 <div className="flex items-center gap-2">
@@ -344,16 +372,17 @@ const PacketList: React.FC<PacketListProps> = ({
                     <Badge
                       key={proto}
                       variant="outline"
-                      className={`text-[10px] font-bold px-1.5 py-0.5 ${proto === 'HTTP' || proto === 'HTTPS'
-                        ? 'bg-emerald-500/10 text-emerald-500'
-                        : proto === 'TCP'
-                          ? 'bg-blue-500/10 text-blue-500'
-                          : proto === 'UDP'
-                            ? 'bg-orange-500/10 text-orange-500'
-                            : proto === 'DNS'
-                              ? 'bg-purple-500/10 text-purple-500'
-                              : 'bg-gray-500/10 text-gray-400'
-                        }`}
+                      className={`text-[10px] font-bold px-1.5 py-0.5 ${
+                        proto === 'HTTP' || proto === 'HTTPS'
+                          ? 'bg-emerald-500/10 text-emerald-500'
+                          : proto === 'TCP'
+                            ? 'bg-blue-500/10 text-blue-500'
+                            : proto === 'UDP'
+                              ? 'bg-orange-500/10 text-orange-500'
+                              : proto === 'DNS'
+                                ? 'bg-purple-500/10 text-purple-500'
+                                : 'bg-gray-500/10 text-gray-400'
+                      }`}
                     >
                       {proto}
                     </Badge>

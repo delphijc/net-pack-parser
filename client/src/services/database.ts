@@ -95,14 +95,18 @@ class DatabaseService {
           db.createObjectStore('fileReferences', { keyPath: 'id' });
         }
         if (!db.objectStoreNames.contains('packets')) {
-          const packetStore = db.createObjectStore('packets', { keyPath: 'id' });
+          const packetStore = db.createObjectStore('packets', {
+            keyPath: 'id',
+          });
           packetStore.createIndex('sessionId', 'sessionId', { unique: false });
         } else {
           // Migration for existing DB
           const tx = (event.target as IDBOpenDBRequest).transaction!;
           const packetStore = tx.objectStore('packets');
           if (!packetStore.indexNames.contains('sessionId')) {
-            packetStore.createIndex('sessionId', 'sessionId', { unique: false });
+            packetStore.createIndex('sessionId', 'sessionId', {
+              unique: false,
+            });
           }
         }
         if (!db.objectStoreNames.contains('timelineEvents')) {
@@ -379,9 +383,9 @@ class DatabaseService {
   public async getAllSessions(): Promise<string[]> {
     // In a real app we'd have a separate 'sessions' store.
     // For now, scan all packets and get unique session IDs.
-    // Or better, assume we track sessions in localStorage via SessionStore, 
+    // Or better, assume we track sessions in localStorage via SessionStore,
     // but let's provide a DB way to scan if needed.
-    // Actually, scanning ALL packets is slow. Let's rely on SessionStore/localStorage 
+    // Actually, scanning ALL packets is slow. Let's rely on SessionStore/localStorage
     // for list of sessions, but if we need to recover, we can scan.
     // Use cursor to scan unique values? IDB doesn't support 'distinct' easily.
     // Minimal implementation:
@@ -480,7 +484,9 @@ class DatabaseService {
         tx.objectStore('timelineEvents').add(event);
         // We don't await transaction complete here to avoid blocking UI too much for single events,
         // but we suppress errors.
-      } catch (e) { console.error('Failed to store timeline event', e); }
+      } catch (e) {
+        console.error('Failed to store timeline event', e);
+      }
     }
 
     // this.saveNonFileDataToStorage(); // Removed

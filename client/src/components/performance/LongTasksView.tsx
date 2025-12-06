@@ -1,4 +1,4 @@
-import { usePerformanceStore } from '../../store/performanceStore';
+import { usePerformanceStore, type LongTask } from '../../store/performanceStore';
 import {
   Card,
   CardContent,
@@ -10,10 +10,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-export const LongTasksView = () => {
-  const { longTasks } = usePerformanceStore();
+interface LongTasksViewProps {
+  tasks?: LongTask[];
+}
 
-  if (!longTasks || longTasks.length === 0) {
+export const LongTasksView = ({ tasks }: LongTasksViewProps) => {
+  const storeTasks = usePerformanceStore((state) => state.longTasks) || [];
+
+  const displayTasks = tasks || storeTasks;
+
+  if (!displayTasks || displayTasks.length === 0) {
     return (
       <Card className="h-full">
         <CardHeader>
@@ -42,14 +48,14 @@ export const LongTasksView = () => {
             <Clock className="h-5 w-5" />
             Long Tasks
           </div>
-          <Badge variant="outline">{longTasks.length} Detected</Badge>
+          <Badge variant="outline">{displayTasks.length} Detected</Badge>
         </CardTitle>
         <CardDescription>Recent main thread blocking tasks</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 min-h-0 p-0">
         <ScrollArea className="h-[300px] md:h-[400px]">
           <div className="divide-y">
-            {longTasks.map((task) => (
+            {displayTasks.map((task) => (
               <div
                 key={task.id}
                 className="p-4 flex items-start justify-between hover:bg-muted/50 transition-colors"

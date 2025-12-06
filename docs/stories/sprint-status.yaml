@@ -35,12 +35,12 @@ development_status:
   4-1-core-web-vitals-monitoring-lcp-fcp-cls-fid-ttfb: done
   4-2-navigation-timing-page-load-tracking: done
   4-3-long-task-detection-50ms: done
-  4-4-resource-timing-capture-waterfall-visualization: in-progress
-  4-5-performance-dashboard-real-time-metrics: ready-for-dev
-  4-6-historical-performance-trends-with-time-filters: ready-for-dev
-  4-7-performance-score-calculation-0-100: ready-for-dev
-  4-8-performance-data-filtering-analysis: ready-for-dev (done)
-  epic-4-retrospective: optional
+  4-4-resource-timing-capture-waterfall-visualization: done
+  4-5-performance-dashboard-real-time-metrics: done
+  4-6-historical-performance-trends-with-time-filters: done
+  4-7-performance-score-calculation-0-100: done
+  4-8-performance-data-filtering-analysis: done 
+  epic-4-retrospective: completed
   epic-5: contexted
   5-1-chronological-timeline-generation: ready-for-dev
   5-2-interactive-timeline-with-zoom-pan: ready-for-dev

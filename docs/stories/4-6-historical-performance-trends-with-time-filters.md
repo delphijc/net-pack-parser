@@ -13,20 +13,20 @@ So that I can spot memory leaks or accumulated slowness during long sessions.
 ## Acceptance Criteria
 
 ### AC 1: Trend Graph Component
-- [ ] `TrendGraph` component renders a line chart of collected metrics.
-- [ ] X-axis represents time (duration of session).
-- [ ] Y-axis represents metric value (ms, or score).
-- [ ] Supports multiple series (e.g., LCP vs FCP vs Memory).
+- [x] `TrendGraph` component renders a line chart of collected metrics.
+- [x] X-axis represents time (duration of session).
+- [x] Y-axis represents metric value (ms, or score).
+- [x] Supports multiple series (e.g., LCP vs FCP vs Memory).
 
 ### AC 2: Time Window Filtering
-- [ ] Users can filter the view window:
+- [x] Users can filter the view window:
     - Last 5 Minutes
     - Last 15 Minutes
     - Full Session
 
 ### AC 3: Data Collection
-- [ ] The `TrendAnalyzer` service maintains a circular buffer of metric history (e.g., snapshots every 5 seconds).
-- [ ] Data points include timestamp and values for active metrics.
+- [x] The `TrendAnalyzer` service maintains a circular buffer of metric history (e.g., snapshots every 5 seconds).
+- [x] Data points include timestamp and values for active metrics.
 
 ## Design & Implementation
 
