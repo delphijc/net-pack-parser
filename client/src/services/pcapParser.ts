@@ -12,8 +12,7 @@ import {
   createTimelineEvent,
 } from '../utils/analysis';
 
-// @ts-ignore
-import PcapDecoder from 'pcap-decoder';
+import { parsePcap } from '../utils/pcapUtils';
 
 /**
  * Parses network traffic data into tokens and strings
@@ -36,24 +35,26 @@ export const parseNetworkData = async (
 /**
  * Browser-compatible PCAP parser implementation using pcap-decoder
  */
+/**
+ * Browser-compatible PCAP parser implementation using custom parser
+ */
 const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
   const packets: ParsedPacket[] = [];
 
   try {
-    const decoder = new (PcapDecoder as any)();
-    const decodedPackets = decoder.decode(new Uint8Array(data));
+    const { packets: pcapPackets } = parsePcap(data);
 
-    for (const packet of decodedPackets) {
+    for (const packet of pcapPackets) {
       const packetId = uuidv4();
-      const tokens: Token[] = []
+      const tokens: Token[] = [];
       const sections: ParsedSection[] = [];
       let index = 0;
 
-      // packet.body is the raw packet data (Ethernet frame)
-      const rawPacketData = packet.body;
+      // packet.data is the raw packet data (Ethernet frame)
+      const rawPacketData = packet.data;
       const rawPacketDataBuffer = rawPacketData.buffer.slice(
         rawPacketData.byteOffset,
-        rawPacketData.byteOffset + rawPacketData.byteLength
+        rawPacketData.byteOffset + rawPacketData.byteLength,
       );
 
       // Parse Ethernet header (14 bytes)
@@ -67,7 +68,7 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
       let sourcePort = 0;
       let destPort = 0;
 
-      if (rawPacketData.length > ipStart + 20) {
+      if (rawPacketData.length >= ipStart + 20) {
         // Extract source and dest IP (bytes 12-19 of IP header)
         sourceIP = `${rawPacketData[ipStart + 12]}.${rawPacketData[ipStart + 13]}.${rawPacketData[ipStart + 14]}.${rawPacketData[ipStart + 15]}`;
         destIP = `${rawPacketData[ipStart + 16]}.${rawPacketData[ipStart + 17]}.${rawPacketData[ipStart + 18]}.${rawPacketData[ipStart + 19]}`;
@@ -80,16 +81,27 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
         const transportStart = ipStart + ipHeaderLength;
 
         // Parse transport layer
-        if (protocolNum === 6 && rawPacketData.length > transportStart + 4) {
+        if (protocolNum === 6 && rawPacketData.length >= transportStart + 4) {
           // TCP
           protocol = 'TCP';
-          sourcePort = (rawPacketData[transportStart] << 8) | rawPacketData[transportStart + 1];
-          destPort = (rawPacketData[transportStart + 2] << 8) | rawPacketData[transportStart + 3];
-        } else if (protocolNum === 17 && rawPacketData.length > transportStart + 4) {
+          sourcePort =
+            (rawPacketData[transportStart] << 8) |
+            rawPacketData[transportStart + 1];
+          destPort =
+            (rawPacketData[transportStart + 2] << 8) |
+            rawPacketData[transportStart + 3];
+        } else if (
+          protocolNum === 17 &&
+          rawPacketData.length >= transportStart + 4
+        ) {
           // UDP
           protocol = 'UDP';
-          sourcePort = (rawPacketData[transportStart] << 8) | rawPacketData[transportStart + 1];
-          destPort = (rawPacketData[transportStart + 2] << 8) | rawPacketData[transportStart + 3];
+          sourcePort =
+            (rawPacketData[transportStart] << 8) |
+            rawPacketData[transportStart + 1];
+          destPort =
+            (rawPacketData[transportStart + 2] << 8) |
+            rawPacketData[transportStart + 3];
         } else {
           protocol = `IP-${protocolNum}`;
         }
@@ -121,17 +133,15 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
 
       const parsedPacket: ParsedPacket = {
         id: packetId,
-        timestamp: new Date(
-          packet.header.ts_sec * 1000 +
-          packet.header.ts_usec / 1000,
-        ).getTime(),
+        timestamp:
+          packet.header.tsSec * 1000 + Math.floor(packet.header.tsUsec / 1000),
         sourceIP,
         destIP,
         sourcePort,
         destPort,
         protocol,
-        length: packet.header.incl_len,
-        rawData: rawPacketDataBuffer, // Assign raw ArrayBuffer
+        length: packet.header.inclLen,
+        rawData: rawPacketDataBuffer as ArrayBuffer, // Assign raw ArrayBuffer
         // Initialize new fields
         detectedProtocols: [], // Will be populated by detectProtocols
         portBasedProtocol: undefined,
@@ -152,18 +162,34 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
 
       // --- Integrate string extraction here ---
       try {
+        // Create a timeout promise
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(
+            () => reject(new Error('String extraction timed out')),
+            500,
+          );
+        });
+
         // Pass the ArrayBuffer to the worker
-        const extracted = await extractStrings(
-          rawPacketDataBuffer,
+        const extractionPromise = extractStrings(
+          rawPacketDataBuffer.slice(0) as ArrayBuffer, // Pass a copy to avoid detachment
           packetId,
           0,
         ); // Assuming payloadOffset is 0 for the whole packet data
-        parsedPacket.extractedStrings = extracted;
+
+        const extracted = await Promise.race([
+          extractionPromise,
+          timeoutPromise,
+        ]);
+
+        parsedPacket.extractedStrings = extracted as any; // Type cast if needed, or refine types
       } catch (strExtractError) {
-        console.error(
+        console.warn(
           `Error extracting strings for packet ${packetId}:`,
           strExtractError,
         );
+        // Fallback or empty strings on error/timeout
+        parsedPacket.extractedStrings = [];
       }
       // ----------------------------------------
 
@@ -191,7 +217,7 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
       packets.push(parsedPacket);
     }
   } catch (error) {
-    console.warn('Error using pcap-decoder:', error);
+    console.warn('Error parsing PCAP data:', error);
     if (packets.length === 0) {
       console.error('Failed to decode any packets');
     }

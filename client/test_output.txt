@@ -3,102 +3,53 @@
 > vitest run
 
 
- RUN  v4.0.14 /home/jaysoncavendish/Projects/net-pack-parser/client
+[1m[46m RUN [49m[22m [36mv4.0.14 [39m[90m/Users/delphijc/Projects/net-pack-parser/client[39m
 
- ❯ src/components/ThreatPanel.test.tsx (7 tests | 3 failed) 3103ms
-     ✓ renders "No threats detected." when no threats are provided  329ms
-     × renders a list of threats when provided 430ms
-     × calls onThreatClick when a threat item is clicked 72ms
-     ✓ calls onUpdateThreatStatus with "falsePositive" when "Mark as False Positive" button is clicked  1495ms
-     × calls onUpdateThreatStatus with "confirmed" when "Mark as Confirmed" button is clicked 327ms
-     ✓ disables "Mark as False Positive" button if threat is already falsePositive 272ms
-     ✓ disables "Mark as Confirmed" button if threat is already confirmed 157ms
- ❯ src/utils/sqlInjectionDetector.test.ts (17 tests | 3 failed) 124ms
-     ✓ should return an empty array if no SQL injection is detected 8ms
-     ✓ should return an empty array if the packet is not HTTP(S) 1ms
-     × should detect classic SQL injection in GET query parameter (URL-encoded) 64ms
-     ✓ should detect classic SQL injection in POST body (URL-encoded) 4ms
-     ✓ should detect UNION SELECT (none encoded) 3ms
-     ✓ should detect URL-encoded SQL injection 6ms
-     ✓ should detect hex-encoded SQL injection 1ms
-     ✓ should detect doubly encoded SQL injection (URL then Hex) 4ms
-     ✓ should detect WAITFOR DELAY (none encoded) 1ms
-     ✓ should detect BENCHMARK (none encoded) 5ms
-     ✓ should detect boolean-based AND 1=1 (none encoded) 1ms
-     × should detect boolean-based OR 1=2 (none encoded) 7ms
-     ✓ should correctly identify matches within a larger string 1ms
-     ✓ should handle multiple unique threats in different fields of the payload 1ms
-     ✓ should detect SQLi in User-Agent header 0ms
-     ✓ should detect SQLi in Cookie header 0ms
-     × should handle multiple matches within the same field and encoding, aggregating matchDetails 2ms
- ❯ src/components/PacketDetailView.test.tsx (6 tests | 4 failed) 8031ms
-     × renders packet details correctly 1712ms
-     ✓ displays Hex Dump tab content by default  706ms
-     ✓ switches to Extracted Strings tab  660ms
-     × displays the Threats tab and its content 1496ms
-     × passes correct highlightRanges to HexDumpViewer for threats 1917ms
-     × does not pass threat highlightRanges if no threats are provided 1533ms
- ❯ src/utils/sqlInjectionPatterns.test.ts (18 tests | 2 failed) 89ms
-       ✓ should detect basic OR 1=1 8ms
-       ✓ should detect basic OR TRUE 4ms
-       ✓ should detect union select 1ms
-       ✓ should detect stacked queries with DROP TABLE 1ms
-       ✓ should detect comments 4ms
-       ✓ should detect SQL Server WAITFOR DELAY 1ms
-       ✓ should detect PostgreSQL PG_SLEEP 4ms
-       ✓ should detect MySQL SLEEP 1ms
-       ✓ should detect MySQL BENCHMARK 4ms
-       ✓ should detect AND 1=1 5ms
-       × should detect OR 1=2 32ms
-       × should detect AND TRUE/FALSE 5ms
-     ✓ should correctly decode URL-encoded strings 1ms
-     ✓ should handle already decoded strings 0ms
-     ✓ should handle invalid URL encoding gracefully 0ms
-     ✓ should correctly decode hex-encoded strings 6ms
-     ✓ should handle already decoded strings 0ms
-     ✓ should handle invalid hex encoding gracefully 0ms
- ❯ src/components/AdvancedSearchPanel.test.tsx (6 tests | 2 failed) 18374ms
-     ✓ renders all search fields correctly  3278ms
-     × allows entering criteria and submitting search 5070ms
-     × clears all fields when Clear All is clicked 905ms
-     ✓ saves a new search configuration  3635ms
-     ✓ loads a saved search  2097ms
-     ✓ deletes a saved search  3370ms
- ✓ src/components/PacketList.integration.test.tsx (7 tests) 2080ms
-     ✓ should render PacketList, ProtocolFilter, and ProtocolDistributionChart  331ms
-     ✓ should update the ProtocolDistributionChart when packets change  380ms
-     ✓ should clear selected packet and close detail view when selected packet is deleted  472ms
- ✓ src/components/SettingsPage.test.tsx (8 tests) 6256ms
-     ✓ renders the settings page with storage usage  589ms
-     ✓ shows a confirmation dialog when "Clear All Local Data" is clicked  1309ms
-     ✓ calls clearAll when confirmation is accepted  797ms
-     ✓ triggers export when "Export Data" is clicked  324ms
-     ✓ opens confirmation dialog when a file is selected for import  776ms
-     ✓ calls importDataFromJson with "merge" mode when Merge is clicked  863ms
-     ✓ calls importDataFromJson with "replace" mode when Replace is clicked  893ms
-     ✓ displays error toast when import fails  689ms
-stderr | src/components/FileInfo.test.tsx > FileInfo > should display "Verification Error" on API failure
-Error during integrity verification: Error: Test error
-    at /home/jaysoncavendish/Projects/net-pack-parser/client/src/components/FileInfo.test.tsx:89:22
-    at Mock (file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/@vitest/spy/dist/index.js:280:34)
-    at handleVerify (/home/jaysoncavendish/Projects/net-pack-parser/client/src/components/FileInfo.tsx:28:28)
-    at executeDispatch (/home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
-    at runWithFiberInDEV (/home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
-    at processDispatchQueue (/home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
-    at /home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
-    at batchedUpdates$1 (/home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
-    at dispatchEventForPluginEventSystem (/home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
-    at dispatchEvent (/home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+[90mstdout[2m | src/utils/stringExtractor.test.ts[2m > [22m[2mstringExtractor[2m > [22m[2mshould post a message to the worker with the correct payload
+[22m[39m[StringExtractor] Sending request 93707276-2994-408d-aadf-d48c36103ec6 to worker
 
- ✓ src/components/FileInfo.test.tsx (4 tests) 1955ms
-     ✓ should call onVerifyIntegrity when the button is clicked  1100ms
-     ✓ should display "Verification Error" on API failure  316ms
- ✓ src/components/ExtractedStringsTab.test.tsx (6 tests) 3026ms
-     ✓ renders "No strings extracted" when list is empty  330ms
-     ✓ filters strings by type  655ms
-     ✓ sorts strings by column  1560ms
-stderr | src/components/FilesTab.test.tsx > FilesTab > renders detected files
-In HTML, whitespace text nodes cannot be a child of <tr>. Make sure you don't have any extra whitespace between tags on each line of your source code.
+[90mstdout[2m | src/utils/stringExtractor.test.ts[2m > [22m[2mstringExtractor[2m > [22m[2mshould resolve with extracted strings on success
+[22m[39m[StringExtractor] Sending request 319d4ad0-7981-433f-b0b3-a5c3dc49deb9 to worker
+[StringExtractor] Received response for undefined, status: success
+
+ [31m❯[39m src/services/iocService.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m8 failed[39m[2m)[22m[32m 2[2mms[22m[39m
+[31m     [31m×[31m should add and retrieve an IOC[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m should remove an IOC[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m should retrieve IOCs by type[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m should import IOCs (merge mode)[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m should import IOCs (replace mode)[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m should maintain cache consistency[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m should not cache disabled IOCs[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m should clear cache on clearAll[39m[32m 0[2mms[22m[39m
+ [32m✓[39m src/components/ExtractedStringsTab.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 277[2mms[22m[39m
+ [32m✓[39m src/components/ThreatPanel.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 252[2mms[22m[39m
+[90mstderr[2m | src/components/FileInfo.test.tsx[2m > [22m[2mFileInfo[2m > [22m[2mshould display "Verification Error" on API failure
+[22m[39mError during integrity verification: Error: Test error
+    at [90m/Users/delphijc/Projects/net-pack-parser/client/[39msrc/components/FileInfo.test.tsx:89:22
+    at Mock [90m(file:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4m@vitest/spy[24m/dist/index.js:280:34[90m)[39m
+    at handleVerify [90m(/Users/delphijc/Projects/net-pack-parser/client/[39msrc/components/FileInfo.tsx:28:28[90m)[39m
+    at executeDispatch [90m(/Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:19116:9[90m)[39m
+    at runWithFiberInDEV [90m(/Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:874:13[90m)[39m
+    at processDispatchQueue [90m(/Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:19166:19[90m)[39m
+    at [90m/Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:19767:9
+    at batchedUpdates$1 [90m(/Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:3255:40[90m)[39m
+    at dispatchEventForPluginEventSystem [90m(/Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:19320:7[90m)[39m
+    at dispatchEvent [90m(/Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:23585:11[90m)[39m
+
+ [32m✓[39m src/components/FileInfo.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 148[2mms[22m[39m
+ [32m✓[39m src/components/ThreatPanel.xss.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 112[2mms[22m[39m
+ [32m✓[39m src/components/PacketDetailView.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 498[2mms[22m[39m
+ [31m❯[39m src/components/SettingsPage.test.tsx [2m([22m[2m8 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 615[2mms[22m[39m
+     [32m✓[39m renders the settings page with storage usage[32m 39[2mms[22m[39m
+     [32m✓[39m shows a confirmation dialog when "Clear All Local Data" is clicked[32m 143[2mms[22m[39m
+[31m     [31m×[31m calls clearAll when confirmation is accepted[39m[32m 152[2mms[22m[39m
+     [32m✓[39m triggers export when "Export Data" is clicked[32m 20[2mms[22m[39m
+     [32m✓[39m opens confirmation dialog when a file is selected for import[32m 55[2mms[22m[39m
+     [32m✓[39m calls importDataFromJson with "merge" mode when Merge is clicked[32m 61[2mms[22m[39m
+     [32m✓[39m calls importDataFromJson with "replace" mode when Replace is clicked[32m 71[2mms[22m[39m
+     [32m✓[39m displays error toast when import fails[32m 71[2mms[22m[39m
+[90mstderr[2m | src/components/FilesTab.test.tsx[2m > [22m[2mFilesTab[2m > [22m[2mrenders detected files
+[22m[39mIn HTML, whitespace text nodes cannot be a child of <tr>. Make sure you don't have any extra whitespace between tags on each line of your source code.
 This will cause a hydration error.
 
   <FilesTab packet={{id:"packet-1", ...}}>
@@ -120,12 +71,13 @@ This will cause a hydration error.
                     ...
 
 
-stdout | src/components/FilesTab.test.tsx > FilesTab > handles file download
-Downloaded file: test.txt, Hash: hash123
+ [32m✓[39m src/components/ProtocolFilter.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+[90mstdout[2m | src/components/FilesTab.test.tsx[2m > [22m[2mFilesTab[2m > [22m[2mhandles file download
+[22m[39mDownloaded file: test.txt, Hash: hash123
 Chain of Custody event logged
 
-stderr | src/components/FilesTab.test.tsx > FilesTab > displays message when no files detected
-An update to FilesTab inside a test was not wrapped in act(...).
+[90mstderr[2m | src/components/FilesTab.test.tsx[2m > [22m[2mFilesTab[2m > [22m[2mdisplays message when no files detected
+[22m[39mAn update to FilesTab inside a test was not wrapped in act(...).
 
 When testing, code that causes React state updates should be wrapped into act(...):
 
@@ -137,10 +89,38 @@ act(() => {
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
 
 Not implemented: navigation to another Document
- ✓ src/components/FilesTab.test.tsx (3 tests) 553ms
-     ✓ renders detected files  351ms
-stderr | src/components/parser/PcapUpload.test.tsx > PcapUpload Component > renders correctly
-An update to ChainOfCustodyLog inside a test was not wrapped in act(...).
+ [32m✓[39m src/components/FilesTab.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 96[2mms[22m[39m
+ [32m✓[39m src/utils/stringExtractorCore.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/components/FilterBar.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+[90mstderr[2m | src/utils/dataImportExport.test.ts[2m > [22m[2mdataImportExport[2m > [22m[2mimportDataFromJson[2m > [22m[2mshould fail if the file format is invalid
+[22m[39mImport failed: Error: Invalid import file format: missing metadata or data section.
+    at Module.importDataFromJson [90m(/Users/delphijc/Projects/net-pack-parser/client/[39msrc/utils/dataImportExport.ts:86:13[90m)[39m
+    at [90m/Users/delphijc/Projects/net-pack-parser/client/[39msrc/utils/dataImportExport.test.ts:163:22
+    at [90mfile:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:919:26
+    at [90mfile:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1244:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1210:10[90m)[39m
+    at [90mfile:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1654:37
+    at Traces.$ [90m(file:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.U4xDYhzZ.js:115:27[90m)[39m
+    at trace [90m(file:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4mvitest[24m/dist/chunks/test.DqQZzsWf.js:234:21[90m)[39m
+
+[90mstderr[2m | src/utils/dataImportExport.test.ts[2m > [22m[2mdataImportExport[2m > [22m[2mimportDataFromJson[2m > [22m[2mshould fail if the schema version is different
+[22m[39mImport failed: Error: Invalid schema version. Expected 1.0, but file is version 0.9.
+    at Module.importDataFromJson [90m(/Users/delphijc/Projects/net-pack-parser/client/[39msrc/utils/dataImportExport.ts:93:13[90m)[39m
+    at [90m/Users/delphijc/Projects/net-pack-parser/client/[39msrc/utils/dataImportExport.test.ts:180:22
+    at [90mfile:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:919:26
+    at [90mfile:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1244:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1210:10[90m)[39m
+    at [90mfile:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1654:37
+    at Traces.$ [90m(file:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.U4xDYhzZ.js:115:27[90m)[39m
+    at trace [90m(file:///Users/delphijc/Projects/net-pack-parser/client/[39mnode_modules/[4mvitest[24m/dist/chunks/test.DqQZzsWf.js:234:21[90m)[39m
+
+ [32m✓[39m src/utils/dataImportExport.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+[90mstderr[2m | src/components/parser/PcapUpload.test.tsx[2m > [22m[2mPcapUpload Component[2m > [22m[2mrenders correctly
+[22m[39mAn update to ChainOfCustodyLog inside a test was not wrapped in act(...).
 
 When testing, code that causes React state updates should be wrapped into act(...):
 
@@ -151,444 +131,84 @@ act(() => {
 
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
 
- ✓ src/components/FilterBar.test.tsx (5 tests) 639ms
-     ✓ renders correctly  368ms
- ✓ src/components/parser/PcapUpload.test.tsx (3 tests) 819ms
-     ✓ renders correctly  383ms
-     ✓ handles text input parsing  308ms
- ✓ src/components/ProtocolFilter.test.tsx (5 tests) 291ms
- ✓ src/services/localStorage.test.ts (7 tests) 160ms
- ✓ src/utils/fileExtractor.test.ts (20 tests) 79ms
- ✓ src/utils/stringExtractorCore.test.ts (13 tests) 96ms
- ✓ src/utils/stringExtractor.test.ts (6 tests) 134ms
-stderr | src/utils/dataImportExport.test.ts > dataImportExport > importDataFromJson > should fail if the file format is invalid
-Import failed: Error: Invalid import file format: missing metadata or data section.
-    at Module.importDataFromJson (/home/jaysoncavendish/Projects/net-pack-parser/client/src/utils/dataImportExport.ts:84:13)
-    at /home/jaysoncavendish/Projects/net-pack-parser/client/src/utils/dataImportExport.test.ts:163:22
-    at file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/@vitest/runner/dist/index.js:145:11
-    at file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/@vitest/runner/dist/index.js:919:26
-    at file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/@vitest/runner/dist/index.js:1244:20
-    at new Promise (<anonymous>)
-    at runWithTimeout (file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/@vitest/runner/dist/index.js:1210:10)
-    at file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/@vitest/runner/dist/index.js:1654:37
-    at Traces.$ (file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/vitest/dist/chunks/traces.U4xDYhzZ.js:115:27)
-    at trace (file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/vitest/dist/chunks/test.DqQZzsWf.js:234:21)
+ [32m✓[39m src/utils/sqlInjectionDetector.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/components/FalsePositivesTab.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32m✓[39m src/components/parser/PcapUpload.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 70[2mms[22m[39m
+ [31m❯[39m src/components/PacketList.integration.test.tsx [2m([22m[2m7 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1388[2mms[22m[39m
+     [32m✓[39m should render PacketList, ProtocolFilter, and ProtocolDistributionChart[32m 48[2mms[22m[39m
+     [32m✓[39m should filter packets by selected protocol[32m 32[2mms[22m[39m
+     [32m✓[39m should display detected protocols as badges in PacketList[32m 14[2mms[22m[39m
+     [32m✓[39m should update the ProtocolDistributionChart when packets change[32m 44[2mms[22m[39m
+     [32m✓[39m should open PacketDetailView with correct packet data when a packet is clicked[32m 33[2mms[22m[39m
+     [32m✓[39m should clear selected packet and close detail view when "Clear all packets" is confirmed[32m 34[2mms[22m[39m
+[31m     [31m×[31m should clear selected packet and close detail view when selected packet is deleted[39m[33m 1179[2mms[22m[39m
+ [32m✓[39m src/utils/fileExtractor.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/services/localStorage.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/utils/xssDetector.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/utils/sensitiveDataDetector.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/utils/pcapUtils.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m src/utils/sqlInjectionPatterns.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/utils/multiCriteriaSearch.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/components/AdvancedSearchPanel.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 1914[2mms[22m[39m
+     [33m[2m✓[22m[39m allows entering criteria and submitting search [33m 702[2mms[22m[39m
+     [33m[2m✓[22m[39m saves a new search configuration [33m 438[2mms[22m[39m
+ [32m✓[39m src/components/HexDumpViewer.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/utils/hashGenerator.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/store/alertStore.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m src/utils/protocolDetector.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/utils/bpfFilter.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/utils/iocDetector.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/utils/commandInjectionDetector.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/services/mitreService.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m src/utils/directoryTraversalDetector.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m src/services/yaraEngine.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 1[2mms[22m[39m
+ [32m✓[39m src/utils/pcapUtils.verification.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 1[2mms[22m[39m
+[90mstdout[2m | src/utils/stringExtractor.test.ts[2m > [22m[2mstringExtractor[2m > [22m[2mshould reject with an error on failure
+[22m[39m[StringExtractor] Sending request 4ec30724-9778-44f5-a7a4-41e48e86ceae to worker
+[StringExtractor] Received response for undefined, status: error
 
-stderr | src/utils/dataImportExport.test.ts > dataImportExport > importDataFromJson > should fail if the schema version is different
-Import failed: Error: Invalid schema version. Expected 1.0, but file is version 0.9.
-    at Module.importDataFromJson (/home/jaysoncavendish/Projects/net-pack-parser/client/src/utils/dataImportExport.ts:91:13)
-    at /home/jaysoncavendish/Projects/net-pack-parser/client/src/utils/dataImportExport.test.ts:180:22
-    at file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/@vitest/runner/dist/index.js:145:11
-    at file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/@vitest/runner/dist/index.js:919:26
-    at file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/@vitest/runner/dist/index.js:1244:20
-    at new Promise (<anonymous>)
-    at runWithTimeout (file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/@vitest/runner/dist/index.js:1210:10)
-    at file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/@vitest/runner/dist/index.js:1654:37
-    at Traces.$ (file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/vitest/dist/chunks/traces.U4xDYhzZ.js:115:27)
-    at trace (file:///home/jaysoncavendish/Projects/net-pack-parser/client/node_modules/vitest/dist/chunks/test.DqQZzsWf.js:234:21)
+[90mstdout[2m | src/utils/stringExtractor.test.ts[2m > [22m[2mstringExtractor[2m > [22m[2mshould reject with a default error message if none provided on failure
+[22m[39m[StringExtractor] Sending request 99886cdf-0308-4f6c-a6a2-91e7b406e5df to worker
+[StringExtractor] Received response for undefined, status: error
 
- ✓ src/utils/dataImportExport.test.ts (5 tests) 100ms
- ✓ src/utils/multiCriteriaSearch.test.ts (11 tests) 17ms
- ✓ src/services/pcapParser.test.ts (3 tests) 38ms
- ✓ src/utils/bpfFilter.test.ts (8 tests) 40ms
- ✓ src/utils/protocolDetector.test.ts (17 tests) 42ms
- ✓ src/components/HexDumpViewer.test.tsx (7 tests) 10ms
- ✓ src/utils/hashGenerator.test.ts (4 tests) 9ms
+[90mstdout[2m | src/utils/stringExtractor.test.ts[2m > [22m[2mstringExtractor[2m > [22m[2mshould reject when worker throws an error event
+[22m[39m[StringExtractor] Sending request 91f235ea-a4ce-4b66-831d-8245180f539b to worker
 
-⎯⎯⎯⎯⎯⎯ Failed Tests 14 ⎯⎯⎯⎯⎯⎯⎯
+[90mstderr[2m | src/utils/stringExtractor.test.ts[2m > [22m[2mstringExtractor[2m > [22m[2mshould reject when worker throws an error event
+[22m[39mWorker error: { message: [32m'Worker crashed'[39m }
 
- FAIL  src/components/AdvancedSearchPanel.test.tsx > AdvancedSearchPanel > allows entering criteria and submitting search
-Error: Test timed out in 5000ms.
-If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
- ❯ src/components/AdvancedSearchPanel.test.tsx:90:3
-     88|   });
-     89| 
-     90|   it('allows entering criteria and submitting search', async () => {
-       |   ^
-     91|     const user = userEvent.setup();
-     92|     render(
+ [31m❯[39m src/utils/stringExtractor.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 15041[2mms[22m[39m
+     [32m✓[39m should instantiate the worker[32m 22[2mms[22m[39m
+[31m     [31m×[31m should post a message to the worker with the correct payload[39m[32m 6[2mms[22m[39m
+[31m     [31m×[31m should resolve with extracted strings on success[39m[33m 5004[2mms[22m[39m
+[31m     [31m×[31m should reject with an error on failure[39m[33m 5003[2mms[22m[39m
+[31m     [31m×[31m should reject with a default error message if none provided on failure[39m[33m 5001[2mms[22m[39m
+     [32m✓[39m should reject when worker throws an error event[32m 2[2mms[22m[39m
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/14]⎯
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
 
- FAIL  src/components/AdvancedSearchPanel.test.tsx > AdvancedSearchPanel > clears all fields when Clear All is clicked
-Error: expect(element).toHaveValue(10.0.0.1)
+[41m[1m FAIL [22m[49m src/services/pcapParser.test.ts[2m [ src/services/pcapParser.test.ts ][22m
+[31m[1mReferenceError[22m: Worker is not defined[39m
+[36m [2m❯[22m src/utils/stringExtractor.ts:[2m9:32[22m[39m
+    [90m  7| [39m
+    [90m  8| [39m[90m// Create a new Web Worker instance[39m
+    [90m  9| [39m[35mconst[39m stringExtractionWorker [33m=[39m [35mnew[39m [33mWorker[39m(
+    [90m   | [39m                               [31m^[39m
+    [90m 10| [39m  [35mnew[39m [33mURL[39m([32m'../workers/stringExtractionWorker.ts'[39m[33m,[39m [35mimport[39m[33m.[39mmeta[33m.[39murl)[33m,[39m
+    [90m 11| [39m  { type[33m:[39m [32m'module'[39m }[33m,[39m
+[90m [2m❯[22m src/services/pcapParser.ts:[2m1:1[22m[39m
+[90m [2m❯[22m src/services/pcapParser.test.ts:[2m2:1[22m[39m
 
-Expected the element to have value:
-  10.0.0.1
-Received:
-  1
- ❯ src/components/AdvancedSearchPanel.test.tsx:135:49
-    133|     // Enter some data
-    134|     await user.type(screen.getByLabelText(/Source IP/i), '10.0.0.1');
-    135|     expect(screen.getByLabelText(/Source IP/i)).toHaveValue('10.0.0.1'…
-       |                                                 ^
-    136| 
-    137|     // Click Clear
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/15]⎯[22m[39m
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/14]⎯
 
- FAIL  src/components/PacketDetailView.test.tsx > PacketDetailView > renders packet details correctly
-TestingLibraryElementError: Unable to find an element with the text: /Source: 192.168.1.1/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 14 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
 
-Ignored nodes: comments, script, style
-[36m<body[39m
-  [33mdata-scroll-locked[39m=[32m"1"[39m
-  [33mstyle[39m=[32m"pointer-events: none;"[39m
-[36m>[39m
-  [36m<span[39m
-    [33maria-hidden[39m=[32m"true"[39m
-    [33mdata-aria-hidden[39m=[32m"true"[39m
-    [33mdata-radix-focus-guard[39m=[32m""[39m
-    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
-    [33mtabindex[39m=[32m"0"[39m
-  [36m/>[39m
-  [36m<div[39m
-    [33maria-hidden[39m=[32m"true"[39m
-    [33mdata-aria-hidden[39m=[32m"true"[39m
-  [36m/>[39m
-  [36m<div[39m
-    [33maria-hidden[39m=[32m"true"[39m
-    [33mclass[39m=[32m"fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"[39m
-    [33mdata-aria-hidden[39m=[32m"true"[39m
-    [33mdata-state[39m=[32m"open"[39m
-    [33mstyle[39m=[32m"pointer-events: auto;"[39m
-  [36m/>[39m
-  [36m<div[39m
-    [33maria-describedby[39m=[32m"radix-_r_2_"[39m
-    [33maria-labelledby[39m=[32m"radix-_r_1_"[39m
-    [33mclass[39m=[32m"fixed z-50 gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=open]:animate-in data-[state=closed]:animate-out inset-y-0 right-0 h-full data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full max-w-2xl flex flex-col bg-background/95 backdrop-blur-md border-l border-white/10 p-0 sm:max-w-2xl"[39m
-    [33mdata-state[39m=[32m"open"[39m
-    [33mid[39m=[32m"radix-_r_0_"[39m
-    [33mrole[39m=[32m"dialog"[39m
-    [33mstyle[39m=[32m"pointer-events: auto;"[39m
-    [33mtabindex[39m=[32m"-1"[39m
-  [36m>[39m
-    [36m<button[39m
-      [33mclass[39m=[32m"absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"[39m
-      [33mtype[39m=[32m"button"[39m
-    [36m>[39m
-      [36m<svg[39m
-        [33maria-hidden[39m=[32m"true"[39m
-        [33mclass[39m=[32m"lucide lucide-x h-4 w-4"[39m
-        [33mfill[39m=[32m"none"[39m
-        [33mheight[39m=[32m"24"[39m
-        [33mstroke[39m=[32m"currentColor"[39m
-        [33mstroke-linecap[39m=[32m"round"[39m
-        [33mstroke-linejoin[39m=[32m"round"[39m
-        [33mstroke-width[39m=[32m"2"[39m
-        [33mviewBox[39m=[32m"0 0 24 24"[39m
-        [33mwidth[39m=[32m"24"[39m
-        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
-      [36m>[39m
-        [36m<path[39m
-          [33md[39m=[32m"M18 6 6 18"[39m
-        [36m/>[39m
-        [36m<path[39m
-          [33md[39m=[32m"m6 6 12 12"[39m
-        [36m/>[39m
-      [36m</svg>[39m
-      [36m<span[39m
-        [33mclass[39m=[32m"sr-only"[39m
-      [36m>[39m
-        [0mClose[0m
-      [36m</span>[39m
-    [36m</button>[39m
-    [36m<div[39m
-      [33mclass[39m=[32m"flex flex-col space-y-2 text-center sm:text-left p-6 border-b border-white/10"[39m
-    [36m>[39m
-      [36m<h2[39m
-        [33mclass[39m=[32m"text-xl font-bold text-foreground flex items-center gap-2"[39m
-        [33mid[39m=[32m"radix-_r_1_"[39m
-      [36m>[39m
-        [0mPacket Details[0m
-        [36m<span[39m
-          [33mclass[39m=[32m"text-sm font-normal text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded"[39m
-        [36m>[39m
-          [0mID: [0m
-          [0mpacket-test-1[0m
-        [36m</span>[39m
-      [36m</h2>[39m
-      [36m<p[39m
-        [33mclass[39m=[32m"text-sm text-muted-foreground"[39m
-        [33mid[39m=[32m"radix-_r_2_"[39m
-      [36m>[39m
-        [0mDetailed view of the selected network packet.[0m
-      [36m</p>[39m
-    [36m</div>[39m
-    [36m<div[39m
-      [33mclass[39m=[32m"flex-grow overflow-y-auto p-6 space-y-6"[39m
-    [36m>[39m
-      [36m<div[39m
-        [33mclass[39m=[32m"bg-card border border-white/10 p-4 rounded-lg shadow-sm"[39m
-      [36m>[39m
-        [36m<h3[39m
-          [33mclass[39m=[32m"font-semibold text-sm text-foreground mb-3 flex items-center gap-2"[39m
-        [36m>[39m
-          [36m<span[39m
-            [33mclass[39m=[32m"w-1 h-4 bg-primary rounded-full"[39m
-          [36m/>[39m
-          [0mSummary[0m
-        [36m</h3>[39m
-        [36m<div[39m
-          [33mclass[39m=[32m"grid grid-cols-2 gap-4 text-sm"[39m
-        [36m>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"space-y-1"[39m
-          [36m>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-            [36m>[39m
-              [0mTimestamp[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"font-mono text-foreground"[39m
-            [36m>[39m
-              [0m11/30/2025, 12:04:25 PM[0m
-            [36m</p>[39m
-          [36m</div>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"space-y-1"[39m
-          [36m>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-            [36m>[39m
-              [0mProtocol[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"font-mono text-foreground"[39m
-            [36m>[39m
-              [0mTCP[0m
-            [36m</p>[39m
-          [36m</div>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"space-y-1"[39m
-          [36m>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-            [36m>[39m
-              [0mSource[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"font-mono text-foreground"[39m
-            [36m>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m""[39m
-              [36m>[39m
-                [0m192.168.1.1[0m
-              [36m</span>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m""[39m
-              [36m>[39m
-                [0m:12345[0m
-              [36m</span>[39m
-            [36m</p>[39m
-          [36m</div>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"space-y-1"[39m
-          [36m>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-            [36m>[39m
-              [0mDestination[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"font-mono text-foreground"[39m
-            [36m>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m""[39m
-              [36m>[39m
-                [0m192.168.1.100[0m
-              [36m</span>[39m
-              [36m<span[39m
-       ...
- ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
- ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
- ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
- ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
- ❯ src/components/PacketDetailView.test.tsx:78:19
-     76|     expect(screen.getByText('Packet Details')).toBeInTheDocument();
-     77|     expect(screen.getByText(/ID: packet-test-1/)).toBeInTheDocument();
-     78|     expect(screen.getByText(/Source: 192.168.1.1/)).toBeInTheDocument(…
-       |                   ^
-     79|   });
-     80| 
+[41m[1m FAIL [22m[49m src/components/PacketList.integration.test.tsx[2m > [22mPacketList Integration with ProtocolFilter, PacketDetailView and ProtocolDistributionChart[2m > [22mshould clear selected packet and close detail view when selected packet is deleted
+[31m[1mAssertionError[22m[39m: expected "vi.fn()" to be called with arguments: [ 'packet-1' ][90m
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/14]⎯
-
- FAIL  src/components/PacketDetailView.test.tsx > PacketDetailView > displays the Threats tab and its content
-TestingLibraryElementError: Unable to find an element with the text: /Mock ThreatPanel (1 threats)/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
-
-Ignored nodes: comments, script, style
-[36m<body[39m
-  [33mdata-scroll-locked[39m=[32m"1"[39m
-  [33mstyle[39m=[32m"pointer-events: none;"[39m
-[36m>[39m
-  [36m<span[39m
-    [33maria-hidden[39m=[32m"true"[39m
-    [33mdata-aria-hidden[39m=[32m"true"[39m
-    [33mdata-radix-focus-guard[39m=[32m""[39m
-    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
-    [33mtabindex[39m=[32m"0"[39m
-  [36m/>[39m
-  [36m<div[39m
-    [33maria-hidden[39m=[32m"true"[39m
-    [33mdata-aria-hidden[39m=[32m"true"[39m
-  [36m/>[39m
-  [36m<div[39m
-    [33maria-hidden[39m=[32m"true"[39m
-    [33mclass[39m=[32m"fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"[39m
-    [33mdata-aria-hidden[39m=[32m"true"[39m
-    [33mdata-state[39m=[32m"open"[39m
-    [33mstyle[39m=[32m"pointer-events: auto;"[39m
-  [36m/>[39m
-  [36m<div[39m
-    [33maria-describedby[39m=[32m"radix-_r_q_"[39m
-    [33maria-labelledby[39m=[32m"radix-_r_p_"[39m
-    [33mclass[39m=[32m"fixed z-50 gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=open]:animate-in data-[state=closed]:animate-out inset-y-0 right-0 h-full data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full max-w-2xl flex flex-col bg-background/95 backdrop-blur-md border-l border-white/10 p-0 sm:max-w-2xl"[39m
-    [33mdata-state[39m=[32m"open"[39m
-    [33mid[39m=[32m"radix-_r_o_"[39m
-    [33mrole[39m=[32m"dialog"[39m
-    [33mstyle[39m=[32m"pointer-events: auto;"[39m
-    [33mtabindex[39m=[32m"-1"[39m
-  [36m>[39m
-    [36m<button[39m
-      [33mclass[39m=[32m"absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"[39m
-      [33mtype[39m=[32m"button"[39m
-    [36m>[39m
-      [36m<svg[39m
-        [33maria-hidden[39m=[32m"true"[39m
-        [33mclass[39m=[32m"lucide lucide-x h-4 w-4"[39m
-        [33mfill[39m=[32m"none"[39m
-        [33mheight[39m=[32m"24"[39m
-        [33mstroke[39m=[32m"currentColor"[39m
-        [33mstroke-linecap[39m=[32m"round"[39m
-        [33mstroke-linejoin[39m=[32m"round"[39m
-        [33mstroke-width[39m=[32m"2"[39m
-        [33mviewBox[39m=[32m"0 0 24 24"[39m
-        [33mwidth[39m=[32m"24"[39m
-        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
-      [36m>[39m
-        [36m<path[39m
-          [33md[39m=[32m"M18 6 6 18"[39m
-        [36m/>[39m
-        [36m<path[39m
-          [33md[39m=[32m"m6 6 12 12"[39m
-        [36m/>[39m
-      [36m</svg>[39m
-      [36m<span[39m
-        [33mclass[39m=[32m"sr-only"[39m
-      [36m>[39m
-        [0mClose[0m
-      [36m</span>[39m
-    [36m</button>[39m
-    [36m<div[39m
-      [33mclass[39m=[32m"flex flex-col space-y-2 text-center sm:text-left p-6 border-b border-white/10"[39m
-    [36m>[39m
-      [36m<h2[39m
-        [33mclass[39m=[32m"text-xl font-bold text-foreground flex items-center gap-2"[39m
-        [33mid[39m=[32m"radix-_r_p_"[39m
-      [36m>[39m
-        [0mPacket Details[0m
-        [36m<span[39m
-          [33mclass[39m=[32m"text-sm font-normal text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded"[39m
-        [36m>[39m
-          [0mID: [0m
-          [0mpacket-test-1[0m
-        [36m</span>[39m
-      [36m</h2>[39m
-      [36m<p[39m
-        [33mclass[39m=[32m"text-sm text-muted-foreground"[39m
-        [33mid[39m=[32m"radix-_r_q_"[39m
-      [36m>[39m
-        [0mDetailed view of the selected network packet.[0m
-      [36m</p>[39m
-    [36m</div>[39m
-    [36m<div[39m
-      [33mclass[39m=[32m"flex-grow overflow-y-auto p-6 space-y-6"[39m
-    [36m>[39m
-      [36m<div[39m
-        [33mclass[39m=[32m"bg-card border border-white/10 p-4 rounded-lg shadow-sm"[39m
-      [36m>[39m
-        [36m<h3[39m
-          [33mclass[39m=[32m"font-semibold text-sm text-foreground mb-3 flex items-center gap-2"[39m
-        [36m>[39m
-          [36m<span[39m
-            [33mclass[39m=[32m"w-1 h-4 bg-primary rounded-full"[39m
-          [36m/>[39m
-          [0mSummary[0m
-        [36m</h3>[39m
-        [36m<div[39m
-          [33mclass[39m=[32m"grid grid-cols-2 gap-4 text-sm"[39m
-        [36m>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"space-y-1"[39m
-          [36m>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-            [36m>[39m
-              [0mTimestamp[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"font-mono text-foreground"[39m
-            [36m>[39m
-              [0m11/30/2025, 12:04:25 PM[0m
-            [36m</p>[39m
-          [36m</div>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"space-y-1"[39m
-          [36m>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-            [36m>[39m
-              [0mProtocol[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"font-mono text-foreground"[39m
-            [36m>[39m
-              [0mTCP[0m
-            [36m</p>[39m
-          [36m</div>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"space-y-1"[39m
-          [36m>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-            [36m>[39m
-              [0mSource[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"font-mono text-foreground"[39m
-            [36m>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m""[39m
-              [36m>[39m
-                [0m192.168.1.1[0m
-              [36m</span>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m""[39m
-              [36m>[39m
-                [0m:12345[0m
-              [36m</span>[39m
-            [36m</p>[39m
-          [36m</div>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"space-y-1"[39m
-          [36m>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-            [36m>[39m
-              [0mDestination[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"font-mono text-foreground"[39m
-            [36m>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m""[39m
-              [36m>[39m
-                [0m192.168.1.100[0m
-              [36m</span>[39m
-              [36m<span[39m
-       ...
+Number of calls: [1m0[22m
+[39m
 
 Ignored nodes: comments, script, style
 [36m<html>[39m
@@ -607,1303 +227,321 @@ Ignored nodes: comments, script, style
     [36m<div[39m
       [33maria-hidden[39m=[32m"true"[39m
       [33mdata-aria-hidden[39m=[32m"true"[39m
-    [36m/>[39m
-    [36m<div[39m
-      [33maria-hidden[39m=[32m"true"[39m
-      [33mclass[39m=[32m"fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"[39m
-      [33mdata-aria-hidden[39m=[32m"true"[39m
-      [33mdata-state[39m=[32m"open"[39m
-      [33mstyle[39m=[32m"pointer-events: auto;"[39m
-    [36m/>[39m
-    [36m<div[39m
-      [33maria-describedby[39m=[32m"radix-_r_q_"[39m
-      [33maria-labelledby[39m=[32m"radix-_r_p_"[39m
-      [33mclass[39m=[32m"fixed z-50 gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=open]:animate-in data-[state=closed]:animate-out inset-y-0 right-0 h-full data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full max-w-2xl flex flex-col bg-background/95 backdrop-blur-md border-l border-white/10 p-0 sm:max-w-2xl"[39m
-      [33mdata-state[39m=[32m"open"[39m
-      [33mid[39m=[32m"radix-_r_o_"[39m
-      [33mrole[39m=[32m"dialog"[39m
-      [33mstyle[39m=[32m"pointer-events: auto;"[39m
-      [33mtabindex[39m=[32m"-1"[39m
     [36m>[39m
-      [36m<button[39m
-        [33mclass[39m=[32m"absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"[39m
-        [33mtype[39m=[32m"button"[39m
-      [36m>[39m
-        [36m<svg[39m
-          [33maria-hidden[39m=[32m"true"[39m
-          [33mclass[39m=[32m"lucide lucide-x h-4 w-4"[39m
-          [33mfill[39m=[32m"none"[39m
-          [33mheight[39m=[32m"24"[39m
-          [33mstroke[39m=[32m"currentColor"[39m
-          [33mstroke-linecap[39m=[32m"round"[39m
-          [33mstroke-linejoin[39m=[32m"round"[39m
-          [33mstroke-width[39m=[32m"2"[39m
-          [33mviewBox[39m=[32m"0 0 24 24"[39m
-          [33mwidth[39m=[32m"24"[39m
-          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
-        [36m>[39m
-          [36m<path[39m
-            [33md[39m=[32m"M18 6 6 18"[39m
-          [36m/>[39m
-          [36m<path[39m
-            [33md[39m=[32m"m6 6 12 12"[39m
-          [36m/>[39m
-        [36m</svg>[39m
-        [36m<span[39m
-          [33mclass[39m=[32m"sr-only"[39m
-        [36m>[39m
-          [0mClose[0m
-        [36m</span>[39m
-      [36m</button>[39m
       [36m<div[39m
-        [33mclass[39m=[32m"flex flex-col space-y-2 text-center sm:text-left p-6 border-b border-white/10"[39m
-      [36m>[39m
-        [36m<h2[39m
-          [33mclass[39m=[32m"text-xl font-bold text-foreground flex items-center gap-2"[39m
-          [33mid[39m=[32m"radix-_r_p_"[39m
-        [36m>[39m
-          [0mPacket Details[0m
-          [36m<span[39m
-            [33mclass[39m=[32m"text-sm font-normal text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded"[39m
-          [36m>[39m
-            [0mID: [0m
-            [0mpacket-test-1[0m
-          [36m</span>[39m
-        [36m</h2>[39m
-        [36m<p[39m
-          [33mclass[39m=[32m"text-sm text-muted-foreground"[39m
-          [33mid[39m=[32m"radix-_r_q_"[39m
-        [36m>[39m
-          [0mDetailed view of the selected network packet.[0m
-        [36m</p>[39m
-      [36m</div>[39m
-      [36m<div[39m
-        [33mclass[39m=[32m"flex-grow overflow-y-auto p-6 space-y-6"[39m
+        [33mclass[39m=[32m"grid grid-cols-3 gap-6 h-screen"[39m
       [36m>[39m
         [36m<div[39m
-          [33mclass[39m=[32m"bg-card border border-white/10 p-4 rounded-lg shadow-sm"[39m
+          [33mclass[39m=[32m"col-span-1 flex flex-col space-y-4"[39m
         [36m>[39m
-          [36m<h3[39m
-            [33mclass[39m=[32m"font-semibold text-sm text-foreground mb-3 flex items-center gap-2"[39m
-          [36m>[39m
-            [36m<span[39m
-              [33mclass[39m=[32m"w-1 h-4 bg-primary rounded-full"[39m
-            [36m/>[39m
-            [0mSummary[0m
-          [36m</h3>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"grid grid-cols-2 gap-4 text-sm"[39m
+          [36m<select[39m
+            [33mdata-testid[39m=[32m"select-protocol-filter"[39m
           [36m>[39m
             [36m<div[39m
-              [33mclass[39m=[32m"space-y-1"[39m
+              [33mdata-testid[39m=[32m"select-trigger"[39m
             [36m>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
+              [36m<span[39m
+                [33mdata-testid[39m=[32m"select-value"[39m
               [36m>[39m
-                [0mTimestamp[0m
-              [36m</p>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"font-mono text-foreground"[39m
-              [36m>[39m
-                [0m11/30/2025, 12:04:25 PM[0m
-              [36m</p>[39m
+                [0mFilter by Protocol[0m
+              [36m</span>[39m
             [36m</div>[39m
             [36m<div[39m
-              [33mclass[39m=[32m"space-y-1"[39m
+              [33mdata-testid[39m=[32m"select-content"[39m
             [36m>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"all"[39m
               [36m>[39m
-                [0mProtocol[0m
-              [36m</p>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"font-mono text-foreground"[39m
+                [0mAll Protocols[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"TCP"[39m
               [36m>[39m
                 [0mTCP[0m
-              [36m</p>[39m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"HTTP"[39m
+              [36m>[39m
+                [0mHTTP[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"UDP"[39m
+              [36m>[39m
+                [0mUDP[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"DNS"[39m
+              [36m>[39m
+                [0mDNS[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"HTTPS"[39m
+              [36m>[39m
+                [0mHTTPS[0m
+              [36m</option>[39m
+              [36m<option[39m
+                [33mvalue[39m=[32m"SSH"[39m
+              [36m>[39m
+                [0mSSH[0m
+              [36m</option>[39m
             [36m</div>[39m
+          [36m</select>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-card border border-white/10 rounded-lg shadow-sm flex flex-col overflow-hidden backdrop-blur-sm h-full"[39m
+          [36m>[39m
             [36m<div[39m
-              [33mclass[39m=[32m"space-y-1"[39m
+              [33mclass[39m=[32m"p-3 border-b border-white/10 bg-card/50"[39m
             [36m>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex justify-between items-center mb-3"[39m
               [36m>[39m
-                [0mSource[0m
-              [36m</p>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"font-mono text-foreground"[39m
-              [36m>[39m
-                [36m<span[39m
-                  [33mclass[39m=[32m""[39m
+                [36m<h2[39m
+                  [33mclass[39m=[32m"text-sm font-semibold flex items-center text-foreground"[39m
                 [36m>[39m
-                  [0m192.168.1.1[0m
-                [36m</span>[39m
-                [36m<span[39m
-                  [33mclass[39m=[32m""[39m
+                  [0mCaptured Packets[0m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"ml-2 text-xs bg-secondary px-2 py-0.5 rounded-full text-muted-foreground"[39m
+                  [36m>[39m
+                    [0m4[0m
+                  [36m</span>[39m
+                [36m</h2>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"text-xs text-destructive hover:text-destructive/80 flex items-center transition-colors"[39m
+                  [33mtitle[39m=[32m"Clear all packets"[39m
                 [36m>[39m
-                  [0m:12345[0m
-                [36m</span>[39m
-              [36m</p>[39m
-            [36m</div>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"space-y-1"[39m
-            [36m>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-trash2 lucide-trash-2 mr-1"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"14"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"14"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M10 11v6"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M14 11v6"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M3 6h18"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [0mClear[0m
+                [36m</button>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex space-x-2 mb-3"[39m
               [36m>[39m
-                [0mDestination...
- ❯ Proxy.waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
- ❯ src/components/PacketDetailView.test.tsx:121:11
-    119|     fireEvent.click(screen.getByRole('tab', { name: /Threats/i }));
-    120| 
-    121|     await waitFor(() => {
-       |           ^
-    122|       expect(
-    123|         screen.getByText(/Mock ThreatPanel (1 threats)/i),
+                [36m<div[39m
+                  [33mclass[39m=[32m"relative flex-1"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-search absolute left-3 top-2.5 text-muted-foreground"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"14"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"14"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m21 21-4.34-4.34"[39m
+                    [36m/>[39m
+                    [36m<circle[39m
+                      [33mcx[39m=[32m"11"[39m
+                      [33mcy[39m=[32m"11"[39m
+                      [33mr[39m=[32m"8"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<input[39m
+                    [33mclass[39m=[32m"w-full bg-secondary border border-white/10 rounded-md pl-9 pr-3 py-2 text-xs focus:ou...
+[36m [2m❯[22m src/components/PacketList.integration.test.tsx:[2m467:37[22m[39m
+    [90m465| [39m
+    [90m466| [39m    [35mawait[39m [34mwaitFor[39m(() [33m=>[39m {
+    [90m467| [39m      [34mexpect[39m(database[33m.[39mdeletePacket)[33m.[39m[34mtoHaveBeenCalledWith[39m([32m'packet-1'[39m)[33m;[39m
+    [90m   | [39m                                    [31m^[39m
+    [90m468| [39m      [34mexpect[39m(
+    [90m469| [39m        screen[33m.[39m[34mqueryByTestId[39m([32m'mock-packet-detail-view'[39m)[33m,[39m
+[90m [2m❯[22m runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:[2m47:12[22m[39m
+[90m [2m❯[22m checkCallback node_modules/@testing-library/dom/dist/wait-for.js:[2m124:77[22m[39m
+[90m [2m❯[22m Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:[2m118:16[22m[39m
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/14]⎯
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/15]⎯[22m[39m
 
- FAIL  src/components/PacketDetailView.test.tsx > PacketDetailView > passes correct highlightRanges to HexDumpViewer for threats
-AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…}, {} ]
+[41m[1m FAIL [22m[49m src/components/SettingsPage.test.tsx[2m > [22mSettingsPage[2m > [22mcalls clearAll when confirmation is accepted
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called at least once[39m
+[36m [2m❯[22m src/components/SettingsPage.test.tsx:[2m68:42[22m[39m
+    [90m 66| [39m    [35mawait[39m user[33m.[39m[34mclick[39m(continueButton)[33m;[39m
+    [90m 67| [39m
+    [90m 68| [39m    [34mexpect[39m(localStorageService[33m.[39mclearAll)[33m.[39m[34mtoHaveBeenCalled[39m()[33m;[39m
+    [90m   | [39m                                         [31m^[39m
+    [90m 69| [39m    [34mexpect[39m(mockToast)[33m.[39m[34mtoHaveBeenCalledWith[39m(
+    [90m 70| [39m      expect[33m.[39m[34mobjectContaining[39m({
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/iocService.test.ts[2m > [22mIOCService[2m > [22mshould add and retrieve an IOC
+[41m[1m FAIL [22m[49m src/services/iocService.test.ts[2m > [22mIOCService[2m > [22mshould remove an IOC
+[41m[1m FAIL [22m[49m src/services/iocService.test.ts[2m > [22mIOCService[2m > [22mshould retrieve IOCs by type
+[41m[1m FAIL [22m[49m src/services/iocService.test.ts[2m > [22mIOCService[2m > [22mshould import IOCs (merge mode)
+[41m[1m FAIL [22m[49m src/services/iocService.test.ts[2m > [22mIOCService[2m > [22mshould import IOCs (replace mode)
+[41m[1m FAIL [22m[49m src/services/iocService.test.ts[2m > [22mIOCService[2m > [22mshould maintain cache consistency
+[41m[1m FAIL [22m[49m src/services/iocService.test.ts[2m > [22mIOCService[2m > [22mshould not cache disabled IOCs
+[41m[1m FAIL [22m[49m src/services/iocService.test.ts[2m > [22mIOCService[2m > [22mshould clear cache on clearAll
+[31m[1mReferenceError[22m: IDBRequest is not defined[39m
+[90m [2m❯[22m wrap node_modules/idb/build/index.js:[2m143:26[22m[39m
+[90m [2m❯[22m openDB node_modules/idb/build/index.js:[2m169:25[22m[39m
+[36m [2m❯[22m IOCService.initDB src/services/iocService.ts:[2m42:12[22m[39m
+    [90m 40| [39m
+    [90m 41| [39m  [35mprivate[39m [35masync[39m [34minitDB[39m() {
+    [90m 42| [39m    [35mreturn[39m openDB[33m<[39m[33mIOCDB[39m[33m>[39m([33mDB_NAME[39m[33m,[39m [33mDB_VERSION[39m[33m,[39m {
+    [90m   | [39m           [31m^[39m
+    [90m 43| [39m      [34mupgrade[39m(db) {
+    [90m 44| [39m        [35mconst[39m store [33m=[39m db[33m.[39m[34mcreateObjectStore[39m([32m'iocs'[39m[33m,[39m { keyPath[33m:[39m [32m'id'[39m })[33m;[39m
+[90m [2m❯[22m new IOCService src/services/iocService.ts:[2m37:27[22m[39m
+[90m [2m❯[22m src/services/iocService.ts:[2m187:27[22m[39m
+[90m [2m❯[22m src/services/iocService.test.ts:[2m6:1[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/utils/stringExtractor.test.ts[2m > [22mstringExtractor[2m > [22mshould post a message to the worker with the correct payload
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called with arguments: [ { payload: , …(2) }, [  ] ][90m
 
 Received: 
 
-  1st vi.fn() call:
-
-  [
--   ObjectContaining {
--     "highlightRanges": ArrayContaining [
-    {
--         "length": 5,
--         "offset": 10,
-+     "caseSensitive": false,
-+     "highlightRanges": [],
-+     "rawData": ArrayBuffer [],
-+     "searchString": null,
-    },
--     ],
--   },
--   {},
-+   undefined,
-  ]
-
-  2nd vi.fn() call:
-
-  [
--   ObjectContaining {
--     "highlightRanges": ArrayContaining [
-    {
--         "length": 5,
--         "offset": 10,
-+     "caseSensitive": false,
-+     "highlightRanges": [],
-+     "rawData": ArrayBuffer [],
-+     "searchString": null,
-    },
--     ],
--   },
--   {},
-+   undefined,
-  ]
-
-  3rd vi.fn() call:
-
-  [
--   ObjectContaining {
--     "highlightRanges": ArrayContaining [
-    {
--         "length": 5,
--         "offset": 10,
-+     "caseSensitive": false,
-+     "highlightRanges": [],
-+     "rawData": ArrayBuffer [],
-+     "searchString": null,
-    },
--     ],
--   },
--   {},
-+   undefined,
-  ]
-
-  4th vi.fn() call:
-
-  [
--   ObjectContaining {
--     "highlightRanges": ArrayContaining [
-    {
-+     "caseSensitive": false,
-+     "highlightRanges": [
-+       {
-          "length": 5,
-          "offset": 10,
-        },
-      ],
-+     "rawData": ArrayBuffer [],
-+     "searchString": null,
-    },
--   {},
-+   undefined,
-  ]
-
-  5th vi.fn() call:
-
-  [
--   ObjectContaining {
--     "highlightRanges": ArrayContaining [
-    {
-+     "caseSensitive": false,
-+     "highlightRanges": [
-+       {
-          "length": 5,
-          "offset": 10,
-        },
-      ],
-+     "rawData": ArrayBuffer [],
-+     "searchString": null,
-    },
--   {},
-+   undefined,
-  ]
-
-
-Number of calls: 5
-
-
-Ignored nodes: comments, script, style
-[36m<html>[39m
-  [36m<head />[39m
-  [36m<body[39m
-    [33mdata-scroll-locked[39m=[32m"1"[39m
-    [33mstyle[39m=[32m"pointer-events: none;"[39m
-  [36m>[39m
-    [36m<span[39m
-      [33maria-hidden[39m=[32m"true"[39m
-      [33mdata-aria-hidden[39m=[32m"true"[39m
-      [33mdata-radix-focus-guard[39m=[32m""[39m
-      [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
-      [33mtabindex[39m=[32m"0"[39m
-    [36m/>[39m
-    [36m<div[39m
-      [33maria-hidden[39m=[32m"true"[39m
-      [33mdata-aria-hidden[39m=[32m"true"[39m
-    [36m/>[39m
-    [36m<div[39m
-      [33maria-hidden[39m=[32m"true"[39m
-      [33mclass[39m=[32m"fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"[39m
-      [33mdata-aria-hidden[39m=[32m"true"[39m
-      [33mdata-state[39m=[32m"open"[39m
-      [33mstyle[39m=[32m"pointer-events: auto;"[39m
-    [36m/>[39m
-    [36m<div[39m
-      [33maria-describedby[39m=[32m"radix-_r_12_"[39m
-      [33maria-labelledby[39m=[32m"radix-_r_11_"[39m
-      [33mclass[39m=[32m"fixed z-50 gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=open]:animate-in data-[state=closed]:animate-out inset-y-0 right-0 h-full data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full max-w-2xl flex flex-col bg-background/95 backdrop-blur-md border-l border-white/10 p-0 sm:max-w-2xl"[39m
-      [33mdata-state[39m=[32m"open"[39m
-      [33mid[39m=[32m"radix-_r_10_"[39m
-      [33mrole[39m=[32m"dialog"[39m
-      [33mstyle[39m=[32m"pointer-events: auto;"[39m
-      [33mtabindex[39m=[32m"-1"[39m
-    [36m>[39m
-      [36m<button[39m
-        [33mclass[39m=[32m"absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"[39m
-        [33mtype[39m=[32m"button"[39m
-      [36m>[39m
-        [36m<svg[39m
-          [33maria-hidden[39m=[32m"true"[39m
-          [33mclass[39m=[32m"lucide lucide-x h-4 w-4"[39m
-          [33mfill[39m=[32m"none"[39m
-          [33mheight[39m=[32m"24"[39m
-          [33mstroke[39m=[32m"currentColor"[39m
-          [33mstroke-linecap[39m=[32m"round"[39m
-          [33mstroke-linejoin[39m=[32m"round"[39m
-          [33mstroke-width[39m=[32m"2"[39m
-          [33mviewBox[39m=[32m"0 0 24 24"[39m
-          [33mwidth[39m=[32m"24"[39m
-          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
-        [36m>[39m
-          [36m<path[39m
-            [33md[39m=[32m"M18 6 6 18"[39m
-          [36m/>[39m
-          [36m<path[39m
-            [33md[39m=[32m"m6 6 12 12"[39m
-          [36m/>[39m
-        [36m</svg>[39m
-        [36m<span[39m
-          [33mclass[39m=[32m"sr-only"[39m
-        [36m>[39m
-          [0mClose[0m
-        [36m</span>[39m
-      [36m</button>[39m
-      [36m<div[39m
-        [33mclass[39m=[32m"flex flex-col space-y-2 text-center sm:text-left p-6 border-b border-white/10"[39m
-      [36m>[39m
-        [36m<h2[39m
-          [33mclass[39m=[32m"text-xl font-bold text-foreground flex items-center gap-2"[39m
-          [33mid[39m=[32m"radix-_r_11_"[39m
-        [36m>[39m
-          [0mPacket Details[0m
-          [36m<span[39m
-            [33mclass[39m=[32m"text-sm font-normal text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded"[39m
-          [36m>[39m
-            [0mID: [0m
-            [0mpacket-test-1[0m
-          [36m</span>[39m
-        [36m</h2>[39m
-        [36m<p[39m
-          [33mclass[39m=[32m"text-sm text-muted-foreground"[39m
-          [33mid[39m=[32m"radix-_r_12_"[39m
-        [36m>[39m
-          [0mDetailed view of the selected network packet.[0m
-        [36m</p>[39m
-      [36m</div>[39m
-      [36m<div[39m
-        [33mclass[39m=[32m"flex-grow overflow-y-auto p-6 space-y-6"[39m
-      [36m>[39m
-        [36m<div[39m
-          [33mclass[39m=[32m"bg-card border border-white/10 p-4 rounded-lg shadow-sm"[39m
-        [36m>[39m
-          [36m<h3[39m
-            [33mclass[39m=[32m"font-semibold text-sm text-foreground mb-3 flex items-center gap-2"[39m
-          [36m>[39m
-            [36m<span[39m
-              [33mclass[39m=[32m"w-1 h-4 bg-primary rounded-full"[39m
-            [36m/>[39m
-            [0mSummary[0m
-          [36m</h3>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"grid grid-cols-2 gap-4 text-sm"[39m
-          [36m>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"space-y-1"[39m
-            [36m>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-              [36m>[39m
-                [0mTimestamp[0m
-              [36m</p>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"font-mono text-foreground"[39m
-              [36m>[39m
-                [0m11/30/2025, 12:04:25 PM[0m
-              [36m</p>[39m
-            [36m</div>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"space-y-1"[39m
-            [36m>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-              [36m>[39m
-                [0mProtocol[0m
-              [36m</p>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"font-mono text-foreground"[39m
-              [36m>[39m
-                [0mTCP[0m
-              [36m</p>[39m
-            [36m</div>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"space-y-1"[39m
-            [36m>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-              [36m>[39m
-                [0mSource[0m
-              [36m</p>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"font-mono text-foreground"[39m
-              [36m>[39m
-                [36m<span[39m
-                  [33mclass[39m=[32m""[39m
-                [36m>[39m
-                  [0m192.168.1.1[0m
-                [36m</span>[39m
-                [36m<span[39m
-                  [33mclass[39m=[32m""[39m
-                [36m>[39m
-                  [0m:12345[0m
-                [36m</span>[39m
-              [36m</p>[39m
-            [36m</div>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"space-y-1"[39m
-            [36m>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-              [36m>[39m
-                [0mDestina...
- ❯ src/components/PacketDetailView.test.tsx:146:29
-    144| 
-    145|     await waitFor(() => {
-    146|       expect(HexDumpViewer).toHaveBeenCalledWith(
-       |                             ^
-    147|         expect.objectContaining({
-    148|           highlightRanges: expect.arrayContaining([
- ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
- ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
- ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/14]⎯
-
- FAIL  src/components/PacketDetailView.test.tsx > PacketDetailView > does not pass threat highlightRanges if no threats are provided
-AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…}, {} ]
-
-Received: 
-
-  1st vi.fn() call:
-
-  [
--   ObjectContaining {
-+   {
-+     "caseSensitive": false,
-      "highlightRanges": [],
-+     "rawData": ArrayBuffer [],
-+     "searchString": null,
-    },
--   {},
-+   undefined,
-  ]
-
-  2nd vi.fn() call:
-
-  [
--   ObjectContaining {
-+   {
-+     "caseSensitive": false,
-      "highlightRanges": [],
-+     "rawData": ArrayBuffer [],
-+     "searchString": null,
-    },
--   {},
-+   undefined,
-  ]
-
-  3rd vi.fn() call:
-
-  [
--   ObjectContaining {
-+   {
-+     "caseSensitive": false,
-      "highlightRanges": [],
-+     "rawData": ArrayBuffer [],
-+     "searchString": null,
-    },
--   {},
-+   undefined,
-  ]
-
-  4th vi.fn() call:
-
-  [
--   ObjectContaining {
--     "highlightRanges": [],
-+   {
-+     "caseSensitive": false,
-+     "highlightRanges": [
-+       {
-+         "length": 5,
-+         "offset": 10,
-        },
--   {},
-+     ],
-+     "rawData": ArrayBuffer [],
-+     "searchString": null,
-+   },
-+   undefined,
-  ]
-
-  5th vi.fn() call:
-
-  [
--   ObjectContaining {
--     "highlightRanges": [],
-+   {
-+     "caseSensitive": false,
-+     "highlightRanges": [
-+       {
-+         "length": 5,
-+         "offset": 10,
-        },
--   {},
-+     ],
-+     "rawData": ArrayBuffer [],
-+     "searchString": null,
-+   },
-+   undefined,
-  ]
-
-  6th vi.fn() call:
-
-  [
--   ObjectContaining {
-+   {
-+     "caseSensitive": false,
-      "highlightRanges": [],
-+     "rawData": ArrayBuffer [],
-+     "searchString": null,
-    },
--   {},
-+   undefined,
-  ]
-
-
-Number of calls: 6
-
-
-Ignored nodes: comments, script, style
-[36m<html>[39m
-  [36m<head />[39m
-  [36m<body[39m
-    [33mdata-scroll-locked[39m=[32m"1"[39m
-    [33mstyle[39m=[32m"pointer-events: none;"[39m
-  [36m>[39m
-    [36m<span[39m
-      [33maria-hidden[39m=[32m"true"[39m
-      [33mdata-aria-hidden[39m=[32m"true"[39m
-      [33mdata-radix-focus-guard[39m=[32m""[39m
-      [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
-      [33mtabindex[39m=[32m"0"[39m
-    [36m/>[39m
-    [36m<div[39m
-      [33maria-hidden[39m=[32m"true"[39m
-      [33mdata-aria-hidden[39m=[32m"true"[39m
-    [36m/>[39m
-    [36m<div[39m
-      [33maria-hidden[39m=[32m"true"[39m
-      [33mclass[39m=[32m"fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"[39m
-      [33mdata-aria-hidden[39m=[32m"true"[39m
-      [33mdata-state[39m=[32m"open"[39m
-      [33mstyle[39m=[32m"pointer-events: auto;"[39m
-    [36m/>[39m
-    [36m<div[39m
-      [33maria-describedby[39m=[32m"radix-_r_1a_"[39m
-      [33maria-labelledby[39m=[32m"radix-_r_19_"[39m
-      [33mclass[39m=[32m"fixed z-50 gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=open]:animate-in data-[state=closed]:animate-out inset-y-0 right-0 h-full data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right w-full max-w-2xl flex flex-col bg-background/95 backdrop-blur-md border-l border-white/10 p-0 sm:max-w-2xl"[39m
-      [33mdata-state[39m=[32m"open"[39m
-      [33mid[39m=[32m"radix-_r_18_"[39m
-      [33mrole[39m=[32m"dialog"[39m
-      [33mstyle[39m=[32m"pointer-events: auto;"[39m
-      [33mtabindex[39m=[32m"-1"[39m
-    [36m>[39m
-      [36m<button[39m
-        [33mclass[39m=[32m"absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"[39m
-        [33mtype[39m=[32m"button"[39m
-      [36m>[39m
-        [36m<svg[39m
-          [33maria-hidden[39m=[32m"true"[39m
-          [33mclass[39m=[32m"lucide lucide-x h-4 w-4"[39m
-          [33mfill[39m=[32m"none"[39m
-          [33mheight[39m=[32m"24"[39m
-          [33mstroke[39m=[32m"currentColor"[39m
-          [33mstroke-linecap[39m=[32m"round"[39m
-          [33mstroke-linejoin[39m=[32m"round"[39m
-          [33mstroke-width[39m=[32m"2"[39m
-          [33mviewBox[39m=[32m"0 0 24 24"[39m
-          [33mwidth[39m=[32m"24"[39m
-          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
-        [36m>[39m
-          [36m<path[39m
-            [33md[39m=[32m"M18 6 6 18"[39m
-          [36m/>[39m
-          [36m<path[39m
-            [33md[39m=[32m"m6 6 12 12"[39m
-          [36m/>[39m
-        [36m</svg>[39m
-        [36m<span[39m
-          [33mclass[39m=[32m"sr-only"[39m
-        [36m>[39m
-          [0mClose[0m
-        [36m</span>[39m
-      [36m</button>[39m
-      [36m<div[39m
-        [33mclass[39m=[32m"flex flex-col space-y-2 text-center sm:text-left p-6 border-b border-white/10"[39m
-      [36m>[39m
-        [36m<h2[39m
-          [33mclass[39m=[32m"text-xl font-bold text-foreground flex items-center gap-2"[39m
-          [33mid[39m=[32m"radix-_r_19_"[39m
-        [36m>[39m
-          [0mPacket Details[0m
-          [36m<span[39m
-            [33mclass[39m=[32m"text-sm font-normal text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded"[39m
-          [36m>[39m
-            [0mID: [0m
-            [0mpacket-test-1[0m
-          [36m</span>[39m
-        [36m</h2>[39m
-        [36m<p[39m
-          [33mclass[39m=[32m"text-sm text-muted-foreground"[39m
-          [33mid[39m=[32m"radix-_r_1a_"[39m
-        [36m>[39m
-          [0mDetailed view of the selected network packet.[0m
-        [36m</p>[39m
-      [36m</div>[39m
-      [36m<div[39m
-        [33mclass[39m=[32m"flex-grow overflow-y-auto p-6 space-y-6"[39m
-      [36m>[39m
-        [36m<div[39m
-          [33mclass[39m=[32m"bg-card border border-white/10 p-4 rounded-lg shadow-sm"[39m
-        [36m>[39m
-          [36m<h3[39m
-            [33mclass[39m=[32m"font-semibold text-sm text-foreground mb-3 flex items-center gap-2"[39m
-          [36m>[39m
-            [36m<span[39m
-              [33mclass[39m=[32m"w-1 h-4 bg-primary rounded-full"[39m
-            [36m/>[39m
-            [0mSummary[0m
-          [36m</h3>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"grid grid-cols-2 gap-4 text-sm"[39m
-          [36m>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"space-y-1"[39m
-            [36m>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-              [36m>[39m
-                [0mTimestamp[0m
-              [36m</p>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"font-mono text-foreground"[39m
-              [36m>[39m
-                [0m11/30/2025, 12:04:25 PM[0m
-              [36m</p>[39m
-            [36m</div>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"space-y-1"[39m
-            [36m>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-              [36m>[39m
-                [0mProtocol[0m
-              [36m</p>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"font-mono text-foreground"[39m
-              [36m>[39m
-                [0mTCP[0m
-              [36m</p>[39m
-            [36m</div>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"space-y-1"[39m
-            [36m>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-              [36m>[39m
-                [0mSource[0m
-              [36m</p>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"font-mono text-foreground"[39m
-              [36m>[39m
-                [36m<span[39m
-                  [33mclass[39m=[32m""[39m
-                [36m>[39m
-                  [0m192.168.1.1[0m
-                [36m</span>[39m
-                [36m<span[39m
-                  [33mclass[39m=[32m""[39m
-                [36m>[39m
-                  [0m:12345[0m
-                [36m</span>[39m
-              [36m</p>[39m
-            [36m</div>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"space-y-1"[39m
-            [36m>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"text-muted-foreground text-xs uppercase tracking-wider"[39m
-              [36m>[39m
-                [0mDestina...
- ❯ src/components/PacketDetailView.test.tsx:171:29
-    169| 
-    170|     await waitFor(() => {
-    171|       expect(HexDumpViewer).toHaveBeenCalledWith(
-       |                             ^
-    172|         expect.objectContaining({
-    173|           highlightRanges: [], // Should be empty without threats
- ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
- ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
- ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/14]⎯
-
- FAIL  src/components/ThreatPanel.test.tsx > ThreatPanel > renders a list of threats when provided
-TestingLibraryElementError: Found multiple elements with the text: /SQL Injection \(critical\)/i
-
-Here are the matching elements:
-
-Ignored nodes: comments, script, style
-[36m<span[39m
-  [33mclass[39m=[32m"font-medium text-red-700"[39m
-[36m>[39m
-  [0mSQL Injection[0m
-  [0m ([0m
-  [0mcritical[0m
-  [0m)[0m
-[36m</span>[39m
-
-Ignored nodes: comments, script, style
-[36m<span[39m
-  [33mclass[39m=[32m"font-medium text-red-700"[39m
-[36m>[39m
-  [0mSQL Injection[0m
-  [0m ([0m
-  [0mcritical[0m
-  [0m)[0m
-[36m</span>[39m
-
-(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
-
-Ignored nodes: comments, script, style
-[36m<body>[39m
-  [36m<div>[39m
-    [36m<div[39m
-      [33mclass[39m=[32m"threat-panel p-4 border rounded-lg shadow-md bg-white"[39m
-    [36m>[39m
-      [36m<h2[39m
-        [33mclass[39m=[32m"text-lg font-semibold mb-4"[39m
-      [36m>[39m
-        [0mDetected Threats[0m
-      [36m</h2>[39m
-      [36m<ul[39m
-        [33mclass[39m=[32m"space-y-2"[39m
-      [36m>[39m
-        [36m<li[39m
-          [33mclass[39m=[32m"p-3 border rounded-md bg-red-50 hover:bg-red-100"[39m
-        [36m>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"cursor-pointer"[39m
-          [36m>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"flex justify-between items-center"[39m
-            [36m>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m"font-medium text-red-700"[39m
-              [36m>[39m
-                [0mSQL Injection[0m
-                [0m ([0m
-                [0mcritical[0m
-                [0m)[0m
-              [36m</span>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m"text-sm text-gray-500"[39m
-              [36m>[39m
-                [0m3/15/2023, 9:20:00 AM[0m
-              [36m</span>[39m
-            [36m</div>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
-            [36m>[39m
-              [0mPotential SQL Injection detected in HTTP request (encoding: none)[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-xs text-gray-400 mt-1"[39m
-            [36m>[39m
-              [0mMITRE ATT&CK: [0m
-              [0mT1190[0m
-            [36m</p>[39m
-          [36m</div>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"flex justify-end gap-2 mt-2"[39m
-          [36m>[39m
-            [36m<button[39m
-              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"[39m
-            [36m>[39m
-              [0mMark as False Positive[0m
-            [36m</button>[39m
-            [36m<button[39m
-              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
-            [36m>[39m
-              [0mMark as Confirmed[0m
-            [36m</button>[39m
-          [36m</div>[39m
-        [36m</li>[39m
-        [36m<li[39m
-          [33mclass[39m=[32m"p-3 border rounded-md bg-red-50 hover:bg-red-100"[39m
-        [36m>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"cursor-pointer"[39m
-          [36m>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"flex justify-between items-center"[39m
-            [36m>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m"font-medium text-red-700"[39m
-              [36m>[39m
-                [0mSQL Injection[0m
-                [0m ([0m
-                [0mcritical[0m
-                [0m)[0m
-              [36m</span>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m"text-sm text-gray-500"[39m
-              [36m>[39m
-                [0m3/15/2023, 9:21:00 AM[0m
-              [36m</span>[39m
-            [36m</div>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
-            [36m>[39m
-              [0mPotential SQL Injection detected in HTTP request (encoding: url)[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-xs text-gray-400 mt-1"[39m
-            [36m>[39m
-              [0mMITRE ATT&CK: [0m
-              [0mT1190[0m
-            [36m</p>[39m
-          [36m</div>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"flex justify-end gap-2 mt-2"[39m
-          [36m>[39m
-            [36m<button[39m
-              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"[39m
-              [33mdisabled[39m=[32m""[39m
-            [36m>[39m
-              [0mFalse Positive (Marked)[0m
-            [36m</button>[39m
-            [36m<button[39m
-              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
-            [36m>[39m
-              [0mMark as Confirmed[0m
-            [36m</button>[39m
-          [36m</div>[39m
-        [36m</li>[39m
-      [36m</ul>[39m
-    [36m</div>[39m
-  [36m</div>[39m
-[36m</body>[39m
- ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
- ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
- ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
- ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
- ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
- ❯ src/components/ThreatPanel.test.tsx:57:19
-     55|       />,
-     56|     );
-     57|     expect(screen.getByText(/SQL Injection \(critical\)/i)).toBeInTheD…
-       |                   ^
-     58|     expect(
-     59|       screen.getByText(
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/14]⎯
-
- FAIL  src/components/ThreatPanel.test.tsx > ThreatPanel > calls onThreatClick when a threat item is clicked
-TestingLibraryElementError: Found multiple elements with the text: /SQL Injection \(critical\)/i
-
-Here are the matching elements:
-
-Ignored nodes: comments, script, style
-[36m<span[39m
-  [33mclass[39m=[32m"font-medium text-red-700"[39m
-[36m>[39m
-  [0mSQL Injection[0m
-  [0m ([0m
-  [0mcritical[0m
-  [0m)[0m
-[36m</span>[39m
-
-Ignored nodes: comments, script, style
-[36m<span[39m
-  [33mclass[39m=[32m"font-medium text-red-700"[39m
-[36m>[39m
-  [0mSQL Injection[0m
-  [0m ([0m
-  [0mcritical[0m
-  [0m)[0m
-[36m</span>[39m
-
-(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
-
-Ignored nodes: comments, script, style
-[36m<body>[39m
-  [36m<div>[39m
-    [36m<div[39m
-      [33mclass[39m=[32m"threat-panel p-4 border rounded-lg shadow-md bg-white"[39m
-    [36m>[39m
-      [36m<h2[39m
-        [33mclass[39m=[32m"text-lg font-semibold mb-4"[39m
-      [36m>[39m
-        [0mDetected Threats[0m
-      [36m</h2>[39m
-      [36m<ul[39m
-        [33mclass[39m=[32m"space-y-2"[39m
-      [36m>[39m
-        [36m<li[39m
-          [33mclass[39m=[32m"p-3 border rounded-md bg-red-50 hover:bg-red-100"[39m
-        [36m>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"cursor-pointer"[39m
-          [36m>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"flex justify-between items-center"[39m
-            [36m>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m"font-medium text-red-700"[39m
-              [36m>[39m
-                [0mSQL Injection[0m
-                [0m ([0m
-                [0mcritical[0m
-                [0m)[0m
-              [36m</span>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m"text-sm text-gray-500"[39m
-              [36m>[39m
-                [0m3/15/2023, 9:20:00 AM[0m
-              [36m</span>[39m
-            [36m</div>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
-            [36m>[39m
-              [0mPotential SQL Injection detected in HTTP request (encoding: none)[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-xs text-gray-400 mt-1"[39m
-            [36m>[39m
-              [0mMITRE ATT&CK: [0m
-              [0mT1190[0m
-            [36m</p>[39m
-          [36m</div>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"flex justify-end gap-2 mt-2"[39m
-          [36m>[39m
-            [36m<button[39m
-              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"[39m
-            [36m>[39m
-              [0mMark as False Positive[0m
-            [36m</button>[39m
-            [36m<button[39m
-              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
-            [36m>[39m
-              [0mMark as Confirmed[0m
-            [36m</button>[39m
-          [36m</div>[39m
-        [36m</li>[39m
-        [36m<li[39m
-          [33mclass[39m=[32m"p-3 border rounded-md bg-red-50 hover:bg-red-100"[39m
-        [36m>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"cursor-pointer"[39m
-          [36m>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"flex justify-between items-center"[39m
-            [36m>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m"font-medium text-red-700"[39m
-              [36m>[39m
-                [0mSQL Injection[0m
-                [0m ([0m
-                [0mcritical[0m
-                [0m)[0m
-              [36m</span>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m"text-sm text-gray-500"[39m
-              [36m>[39m
-                [0m3/15/2023, 9:21:00 AM[0m
-              [36m</span>[39m
-            [36m</div>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
-            [36m>[39m
-              [0mPotential SQL Injection detected in HTTP request (encoding: url)[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-xs text-gray-400 mt-1"[39m
-            [36m>[39m
-              [0mMITRE ATT&CK: [0m
-              [0mT1190[0m
-            [36m</p>[39m
-          [36m</div>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"flex justify-end gap-2 mt-2"[39m
-          [36m>[39m
-            [36m<button[39m
-              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"[39m
-              [33mdisabled[39m=[32m""[39m
-            [36m>[39m
-              [0mFalse Positive (Marked)[0m
-            [36m</button>[39m
-            [36m<button[39m
-              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
-            [36m>[39m
-              [0mMark as Confirmed[0m
-            [36m</button>[39m
-          [36m</div>[39m
-        [36m</li>[39m
-      [36m</ul>[39m
-    [36m</div>[39m
-  [36m</div>[39m
-[36m</body>[39m
- ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
- ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
- ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
- ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
- ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
- ❯ src/components/ThreatPanel.test.tsx:76:28
-     74|       />,
-     75|     );
-     76|     fireEvent.click(screen.getByText(/SQL Injection \(critical\)/i));
-       |                            ^
-     77|     expect(handleThreatClick).toHaveBeenCalledWith('packet-1');
-     78|   });
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/14]⎯
-
- FAIL  src/components/ThreatPanel.test.tsx > ThreatPanel > calls onUpdateThreatStatus with "confirmed" when "Mark as Confirmed" button is clicked
-TestingLibraryElementError: Found multiple elements with the role "button" and name `/Mark as Confirmed/i`
-
-Here are the matching elements:
-
-Ignored nodes: comments, script, style
-[36m<button[39m
-  [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
-[36m>[39m
-  [0mMark as Confirmed[0m
-[36m</button>[39m
-
-Ignored nodes: comments, script, style
-[36m<button[39m
-  [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
-[36m>[39m
-  [0mMark as Confirmed[0m
-[36m</button>[39m
-
-(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
-
-Ignored nodes: comments, script, style
-[36m<body>[39m
-  [36m<div>[39m
-    [36m<div[39m
-      [33mclass[39m=[32m"threat-panel p-4 border rounded-lg shadow-md bg-white"[39m
-    [36m>[39m
-      [36m<h2[39m
-        [33mclass[39m=[32m"text-lg font-semibold mb-4"[39m
-      [36m>[39m
-        [0mDetected Threats[0m
-      [36m</h2>[39m
-      [36m<ul[39m
-        [33mclass[39m=[32m"space-y-2"[39m
-      [36m>[39m
-        [36m<li[39m
-          [33mclass[39m=[32m"p-3 border rounded-md bg-red-50 hover:bg-red-100"[39m
-        [36m>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"cursor-pointer"[39m
-          [36m>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"flex justify-between items-center"[39m
-            [36m>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m"font-medium text-red-700"[39m
-              [36m>[39m
-                [0mSQL Injection[0m
-                [0m ([0m
-                [0mcritical[0m
-                [0m)[0m
-              [36m</span>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m"text-sm text-gray-500"[39m
-              [36m>[39m
-                [0m3/15/2023, 9:20:00 AM[0m
-              [36m</span>[39m
-            [36m</div>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
-            [36m>[39m
-              [0mPotential SQL Injection detected in HTTP request (encoding: none)[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-xs text-gray-400 mt-1"[39m
-            [36m>[39m
-              [0mMITRE ATT&CK: [0m
-              [0mT1190[0m
-            [36m</p>[39m
-          [36m</div>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"flex justify-end gap-2 mt-2"[39m
-          [36m>[39m
-            [36m<button[39m
-              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"[39m
-            [36m>[39m
-              [0mMark as False Positive[0m
-            [36m</button>[39m
-            [36m<button[39m
-              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
-            [36m>[39m
-              [0mMark as Confirmed[0m
-            [36m</button>[39m
-          [36m</div>[39m
-        [36m</li>[39m
-        [36m<li[39m
-          [33mclass[39m=[32m"p-3 border rounded-md bg-red-50 hover:bg-red-100"[39m
-        [36m>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"cursor-pointer"[39m
-          [36m>[39m
-            [36m<div[39m
-              [33mclass[39m=[32m"flex justify-between items-center"[39m
-            [36m>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m"font-medium text-red-700"[39m
-              [36m>[39m
-                [0mSQL Injection[0m
-                [0m ([0m
-                [0mcritical[0m
-                [0m)[0m
-              [36m</span>[39m
-              [36m<span[39m
-                [33mclass[39m=[32m"text-sm text-gray-500"[39m
-              [36m>[39m
-                [0m3/15/2023, 9:21:00 AM[0m
-              [36m</span>[39m
-            [36m</div>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-sm text-red-600 mt-1"[39m
-            [36m>[39m
-              [0mPotential SQL Injection detected in HTTP request (encoding: url)[0m
-            [36m</p>[39m
-            [36m<p[39m
-              [33mclass[39m=[32m"text-xs text-gray-400 mt-1"[39m
-            [36m>[39m
-              [0mMITRE ATT&CK: [0m
-              [0mT1190[0m
-            [36m</p>[39m
-          [36m</div>[39m
-          [36m<div[39m
-            [33mclass[39m=[32m"flex justify-end gap-2 mt-2"[39m
-          [36m>[39m
-            [36m<button[39m
-              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs"[39m
-              [33mdisabled[39m=[32m""[39m
-            [36m>[39m
-              [0mFalse Positive (Marked)[0m
-            [36m</button>[39m
-            [36m<button[39m
-              [33mclass[39m=[32m"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs"[39m
-            [36m>[39m
-              [0mMark as Confirmed[0m
-            [36m</button>[39m
-          [36m</div>[39m
-        [36m</li>[39m
-      [36m</ul>[39m
-    [36m</div>[39m
-  [36m</div>[39m
-[36m</body>[39m
- ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
- ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
- ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
- ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
- ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
- ❯ src/components/ThreatPanel.test.tsx:108:36
-    106|       />,
-    107|     );
-    108|     const confirmedButton = screen.getByRole('button', {
-       |                                    ^
-    109|       name: /Mark as Confirmed/i,
-    110|     });
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/14]⎯
-
- FAIL  src/utils/sqlInjectionDetector.test.ts > SQL Injection Detector > should detect classic SQL injection in GET query parameter (URL-encoded)
-AssertionError: expected [ { offset: 6, length: 11 } ] to deeply equal [ { offset: 6, length: 14 } ]
-
-- Expected
-+ Received
-
-  [
-    {
--     "length": 14,
-+     "length": 11,
-      "offset": 6,
-    },
-  ]
-
- ❯ src/utils/sqlInjectionDetector.test.ts:53:37
-     51|     expect(threats[0].mitreAttack).toEqual(['T1190']);
-     52|     expect(threats[0].description).toContain('query string (encoding: …
-     53|     expect(threats[0].matchDetails).toEqual([{ offset: 6, length: 14 }…
-       |                                     ^
-     54|   });
-     55| 
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/14]⎯
-
- FAIL  src/utils/sqlInjectionDetector.test.ts > SQL Injection Detector > should detect boolean-based OR 1=2 (none encoded)
-AssertionError: expected [] to have a length of 1 but got +0
-
-- Expected
-+ Received
-
-- 1
-+ 0
-
- ❯ src/utils/sqlInjectionDetector.test.ts:156:21
-    154|     const threats = detectSqlInjection(mockPacket);
-    155| 
-    156|     expect(threats).toHaveLength(1);
-       |                     ^
-    157|     expect(threats[0].type).toBe('SQL Injection');
-    158|     expect(threats[0].description).toContain('query string (encoding: …
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/14]⎯
-
- FAIL  src/utils/sqlInjectionDetector.test.ts > SQL Injection Detector > should handle multiple matches within the same field and encoding, aggregating matchDetails
-AssertionError: expected 2 to be 3 // Object.is equality
-
-- Expected
-+ Received
-
-- 3
-+ 2
-
- ❯ src/utils/sqlInjectionDetector.test.ts:233:45
-    231|     expect(threats[0].type).toBe('SQL Injection');
-    232|     expect(threats[0].description).toContain('query string (encoding: …
-    233|     expect(threats[0].matchDetails?.length).toBe(3); // Three patterns…
-       |                                             ^
-    234|     // Ensure both patterns are detected and their matchDetails are pr…
-    235|     const decodedQueryString = "q=test' OR '1'='1;WAITFOR DELAY '00:00…
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/14]⎯
-
- FAIL  src/utils/sqlInjectionPatterns.test.ts > SQL Injection Patterns > boolean-based patterns > should detect OR 1=2
-AssertionError: expected 'OR 1=2' to match /AND\s+(?:TRUE|FALSE)/gi
-
-- Expected: 
-/AND\s+(?:TRUE|FALSE)/gi
-
-+ Received: 
-"OR 1=2"
-
- ❯ src/utils/sqlInjectionPatterns.test.ts:76:24
-     74| 
-     75|     it('should detect OR 1=2', () => {
-     76|       expect('OR 1=2').toMatch(sqlInjectionPatterns.booleanBased[1]);
-       |                        ^
-     77|       expect("OR '1'='2'").toMatch(sqlInjectionPatterns.booleanBased[1…
-     78|     });
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/14]⎯
-
- FAIL  src/utils/sqlInjectionPatterns.test.ts > SQL Injection Patterns > boolean-based patterns > should detect AND TRUE/FALSE
-AssertionError: expected 'AND TRUE' to match /OR\s+(?:TRUE|FALSE)/gi
-
-- Expected: 
-/OR\s+(?:TRUE|FALSE)/gi
-
-+ Received: 
-"AND TRUE"
-
- ❯ src/utils/sqlInjectionPatterns.test.ts:81:26
-     79| 
-     80|     it('should detect AND TRUE/FALSE', () => {
-     81|       expect('AND TRUE').toMatch(sqlInjectionPatterns.booleanBased[2]);
-       |                          ^
-     82|       expect('AND FALSE').toMatch(sqlInjectionPatterns.booleanBased[2]…
-     83|     });
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/14]⎯
-
-
- Test Files  5 failed | 19 passed (24)
-      Tests  14 failed | 182 passed (196)
-   Start at  12:04:18
-   Duration  52.68s (transform 5.79s, setup 8.55s, import 20.50s, tests 46.06s, environment 63.35s)
+[1m  1st vi.fn() call:
+
+[22m[33m@@ -10,10 +10,11 @@[90m
+[2m        0,[22m
+[2m        0,[22m
+[2m        0,[22m
+[2m      ],[22m
+[2m      "payloadOffset": 0,[22m
+[31m+     "requestId": "93707276-2994-408d-aadf-d48c36103ec6",[90m
+[2m    },[22m
+[2m    [[22m
+[2m      ArrayBuffer [[22m
+[2m        0,[22m
+[2m        0,[22m
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m src/utils/stringExtractor.test.ts:[2m67:44[22m[39m
+    [90m 65| [39m    [34mextractStrings[39m(mockPayload[33m,[39m mockPacketId[33m,[39m mockOffset)[33m;[39m
+    [90m 66| [39m
+    [90m 67| [39m    [34mexpect[39m(lastCreatedWorker[33m?.[39mpostMessage)[33m.[39m[34mtoHaveBeenCalledWith[39m(
+    [90m   | [39m                                           [31m^[39m
+    [90m 68| [39m      {
+    [90m 69| [39m        payload[33m:[39m mockPayload[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/utils/stringExtractor.test.ts[2m > [22mstringExtractor[2m > [22mshould resolve with extracted strings on success
+[31m[1mError[22m: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m src/utils/stringExtractor.test.ts:[2m77:3[22m[39m
+    [90m 75| [39m  })[33m;[39m
+    [90m 76| [39m
+    [90m 77| [39m  [34mit[39m([32m'should resolve with extracted strings on success'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m   | [39m  [31m^[39m
+    [90m 78| [39m    [35mconst[39m mockPayload [33m=[39m [35mnew[39m [33mArrayBuffer[39m([34m8[39m)[33m;[39m
+    [90m 79| [39m    [35mconst[39m mockPacketId [33m=[39m [32m'packet-1'[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/utils/stringExtractor.test.ts[2m > [22mstringExtractor[2m > [22mshould reject with an error on failure
+[31m[1mError[22m: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m src/utils/stringExtractor.test.ts:[2m104:3[22m[39m
+    [90m102| [39m  })[33m;[39m
+    [90m103| [39m
+    [90m104| [39m  [34mit[39m([32m'should reject with an error on failure'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m   | [39m  [31m^[39m
+    [90m105| [39m    [35mconst[39m mockPayload [33m=[39m [35mnew[39m [33mArrayBuffer[39m([34m8[39m)[33m;[39m
+    [90m106| [39m    [35mconst[39m promise [33m=[39m [34mextractStrings[39m(mockPayload[33m,[39m [32m'packet-1'[39m[33m,[39m [34m0[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/15]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/utils/stringExtractor.test.ts[2m > [22mstringExtractor[2m > [22mshould reject with a default error message if none provided on failure
+[31m[1mError[22m: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m src/utils/stringExtractor.test.ts:[2m117:3[22m[39m
+    [90m115| [39m  })[33m;[39m
+    [90m116| [39m
+    [90m117| [39m  it('should reject with a default error message if none provided on f…
+    [90m   | [39m  [31m^[39m
+    [90m118| [39m    [35mconst[39m mockPayload [33m=[39m [35mnew[39m [33mArrayBuffer[39m([34m8[39m)[33m;[39m
+    [90m119| [39m    [35mconst[39m promise [33m=[39m [34mextractStrings[39m(mockPayload[33m,[39m [32m'packet-1'[39m[33m,[39m [34m0[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/15]⎯[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Unhandled Errors [49m[22m[31m⎯⎯⎯⎯⎯⎯[39m
+[31m[1m
+Vitest caught 2 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.[22m[39m
+
+[31m⎯⎯⎯⎯[39m[1m[41m Unhandled Rejection [49m[22m[31m⎯⎯⎯⎯⎯[39m
+[31m[1mReferenceError[22m: IDBRequest is not defined[39m
+[90m [2m❯[22m wrap node_modules/idb/build/index.js:[2m143:26[22m[39m
+[90m [2m❯[22m openDB node_modules/idb/build/index.js:[2m169:25[22m[39m
+[36m [2m❯[22m IOCService.initDB src/services/iocService.ts:[2m42:12[22m[39m
+    [90m 40| [39m
+    [90m 41| [39m  [35mprivate[39m [35masync[39m [34minitDB[39m() {
+    [90m 42| [39m    [35mreturn[39m openDB[33m<[39m[33mIOCDB[39m[33m>[39m([33mDB_NAME[39m[33m,[39m [33mDB_VERSION[39m[33m,[39m {
+    [90m   | [39m           [31m^[39m
+    [90m 43| [39m      [34mupgrade[39m(db) {
+    [90m 44| [39m        [35mconst[39m store [33m=[39m db[33m.[39m[34mcreateObjectStore[39m([32m'iocs'[39m[33m,[39m { keyPath[33m:[39m [32m'id'[39m })[33m;[39m
+[90m [2m❯[22m new IOCService src/services/iocService.ts:[2m37:27[22m[39m
+[90m [2m❯[22m src/services/iocService.ts:[2m187:27[22m[39m
+[90m [2m❯[22m processTicksAndRejections node:internal/process/task_queues:[2m103:5[22m[39m
+[90m [2m❯[22m VitestModuleEvaluator._runInlinedModule node_modules/vitest/dist/module-evaluator.js:[2m190:4[22m[39m
+[90m [2m❯[22m VitestModuleRunner.directRequest node_modules/vite/dist/node/module-runner.js:[2m1146:59[22m[39m
+[90m [2m❯[22m VitestModuleRunner.cachedRequest node_modules/vite/dist/node/module-runner.js:[2m1053:73[22m[39m
+[90m [2m❯[22m src/services/iocService.test.ts:[2m6:1[22m[39m
+
+[31mThis error originated in "[1msrc/services/iocService.test.ts[22m" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.[39m
+
+[31m⎯⎯⎯⎯[39m[1m[41m Unhandled Rejection [49m[22m[31m⎯⎯⎯⎯⎯[39m
+[31m[1mError[22m: Worker crashed[39m
+[36m [2m❯[22m src/utils/stringExtractor.ts:[2m49:7[22m[39m
+    [90m 47| [39m  pendingRequests[33m.[39m[34mforEach[39m((pending) [33m=>[39m {
+    [90m 48| [39m    pending[33m.[39m[34mreject[39m(
+    [90m 49| [39m      [35mnew[39m [33mError[39m(error[33m.[39mmessage [33m||[39m [32m'Error in string extraction worker'[39m)[33m,[39m
+    [90m   | [39m      [31m^[39m
+    [90m 50| [39m    )[33m;[39m
+    [90m 51| [39m  })[33m;[39m
+[90m [2m❯[22m MockWorker.stringExtractionWorker.onerror src/utils/stringExtractor.ts:[2m47:19[22m[39m
+[90m [2m❯[22m MockWorker.emitError src/utils/stringExtractor.test.ts:[2m29:12[22m[39m
+[90m [2m❯[22m src/utils/stringExtractor.test.ts:[2m136:24[22m[39m
+[90m [2m❯[22m node_modules/@vitest/runner/dist/index.js:[2m145:11[22m[39m
+[90m [2m❯[22m node_modules/@vitest/runner/dist/index.js:[2m919:26[22m[39m
+[90m [2m❯[22m node_modules/@vitest/runner/dist/index.js:[2m1244:20[22m[39m
+[90m [2m❯[22m runWithTimeout node_modules/@vitest/runner/dist/index.js:[2m1210:10[22m[39m
+
+[31mThis error originated in "[1msrc/utils/stringExtractor.test.ts[22m" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.[39m
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
+
+
+[2m Test Files [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m32 passed[39m[22m[90m (37)[39m
+[2m      Tests [22m [1m[31m14 failed[39m[22m[2m | [22m[1m[32m235 passed[39m[22m[90m (249)[39m
+[2m     Errors [22m [1m[31m2 errors[39m[22m
+[2m   Start at [22m 20:56:49
+[2m   Duration [22m 15.64s[2m (transform 1.18s, setup 1.48s, import 3.43s, tests 20.65s, environment 11.45s)[22m
 

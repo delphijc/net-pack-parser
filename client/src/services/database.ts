@@ -178,10 +178,6 @@ class DatabaseService {
       packetStore.add(packet);
       if (packet.fileReferences && packet.fileReferences.length > 0) {
         for (const file of packet.fileReferences) {
-          // We can't await inside this loop easily with transaction scope if we want to be strictly correct with IDB transaction lifetime,
-          // but for bulk add, we might just overwrite or check existence.
-          // getFileById creates a new transaction which might block.
-          // Better to just add/put.
           fileStore.put(file);
         }
       }

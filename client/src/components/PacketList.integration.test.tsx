@@ -44,19 +44,17 @@ vi.mock('../services/database', () => ({
 
 // Mock PacketDetailView and other UI components
 vi.mock('./PacketDetailView', () => ({
-  default: vi.fn(
-    ({ packet, isOpen, onOpenChange }) => {
-      if (!isOpen) return null;
-      return (
-        <div data-testid="mock-packet-detail-view">
-          <h2 data-testid="detail-view-title">
-            Packet Details - ID: {packet?.id}
-          </h2>
-          <button onClick={() => onOpenChange(false)}>Close Detail View</button>
-        </div>
-      );
-    },
-  ),
+  default: vi.fn(({ packet, isOpen, onOpenChange }) => {
+    if (!isOpen) return null;
+    return (
+      <div data-testid="mock-packet-detail-view">
+        <h2 data-testid="detail-view-title">
+          Packet Details - ID: {packet?.id}
+        </h2>
+        <button onClick={() => onOpenChange(false)}>Close Detail View</button>
+      </div>
+    );
+  }),
 }));
 
 // Mock the shadcn/ui Select component for ProtocolFilter
@@ -464,6 +462,10 @@ describe('PacketList Integration with ProtocolFilter, PacketDetailView and Proto
 
     const packetItem1 = screen.getByTestId(`packet-item-${mockPackets[0].id}`);
     fireEvent.click(within(packetItem1).getByTitle('Delete packet'));
+
+    // Wait for and click the confirmation button in the dialog
+    const confirmButton = await screen.findByText('Delete', { selector: 'button' });
+    fireEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(database.deletePacket).toHaveBeenCalledWith('packet-1');

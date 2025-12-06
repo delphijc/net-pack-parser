@@ -23,7 +23,11 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 
-const PcapUpload: React.FC = () => {
+interface PcapUploadProps {
+  onParsingStatusChange?: (isParsing: boolean) => void;
+}
+
+const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
   const [inputData, setInputData] = useState('');
   const [parsing, setParsing] = useState(false);
   const [capturing, setCapturing] = useState(false);
@@ -71,6 +75,7 @@ const PcapUpload: React.FC = () => {
 
     try {
       setParsing(true);
+      onParsingStatusChange?.(true);
       setErrorMessage('');
 
       // Parse the input data
@@ -104,12 +109,13 @@ const PcapUpload: React.FC = () => {
 
       // Clear the input data
       setInputData('');
-      setCapturedData([]);
+      // setCapturedData([]); // This is fine
     } catch (error) {
       console.error('Error parsing data:', error);
       setErrorMessage('Failed to parse data. Please try again.');
     } finally {
       setParsing(false);
+      onParsingStatusChange?.(false);
     }
   };
 
@@ -119,6 +125,7 @@ const PcapUpload: React.FC = () => {
 
     try {
       setParsing(true);
+      onParsingStatusChange?.(true);
       setErrorMessage('');
 
       const buffer = await file.arrayBuffer();
@@ -157,6 +164,8 @@ const PcapUpload: React.FC = () => {
       await database.storePackets(parsedPackets);
       // Ensure DB transaction completes before proceeding
       // (storePackets resolves after transaction oncomplete)
+      // Note: parsedPackets can be large, but IndexedDB handles it.
+      // The crash might have been due to main thread blocking from worker messages.
       setLastParsedPacket(parsedPackets[parsedPackets.length - 1]);
       setInputData('');
       setCapturedData([]);
@@ -167,6 +176,7 @@ const PcapUpload: React.FC = () => {
       );
     } finally {
       setParsing(false);
+      onParsingStatusChange?.(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }

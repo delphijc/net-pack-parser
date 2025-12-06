@@ -105,20 +105,24 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({
   };
 
   // Compute these only if packet exists
-  const rawDataBuffer = packet ? getRawDataBuffer(packet.rawData) : new ArrayBuffer(0);
+  const rawDataBuffer = packet
+    ? getRawDataBuffer(packet.rawData)
+    : new ArrayBuffer(0);
 
-  const tempPacket: Packet | null = packet ? {
-    id: packet.id,
-    timestamp: packet.timestamp,
-    sourceIP: packet.sourceIP,
-    destIP: packet.destIP,
-    sourcePort: packet.sourcePort || 0,
-    destPort: packet.destPort || 0,
-    protocol: packet.protocol,
-    length: rawDataBuffer.byteLength,
-    rawData: rawDataBuffer,
-    detectedProtocols: packet.detectedProtocols || [],
-  } : null;
+  const tempPacket: Packet | null = packet
+    ? {
+        id: packet.id,
+        timestamp: packet.timestamp,
+        sourceIP: packet.sourceIP,
+        destIP: packet.destIP,
+        sourcePort: packet.sourcePort || 0,
+        destPort: packet.destPort || 0,
+        protocol: packet.protocol,
+        length: rawDataBuffer.byteLength,
+        rawData: rawDataBuffer,
+        detectedProtocols: packet.detectedProtocols || [],
+      }
+    : null;
 
   const decodedHeaders = tempPacket ? decodePacketHeaders(tempPacket) : [];
 
@@ -247,7 +251,8 @@ const PacketDetailView: React.FC<PacketDetailViewProps> = ({
                       </span>
                       <span
                         className={cn(
-                          matchDetails?.sourcePort && 'bg-yellow-300 text-black',
+                          matchDetails?.sourcePort &&
+                            'bg-yellow-300 text-black',
                         )}
                       >
                         {packet.sourcePort ? `:${packet.sourcePort}` : ''}

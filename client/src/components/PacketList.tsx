@@ -12,6 +12,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import database from '../services/database';
 
 interface PacketListProps {
@@ -38,6 +48,7 @@ const PacketList: React.FC<PacketListProps> = ({
   const [filteredPackets, setFilteredPackets] = useState<ParsedPacket[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [packetToDelete, setPacketToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     filterPackets();
@@ -90,12 +101,17 @@ const PacketList: React.FC<PacketListProps> = ({
     setFilteredPackets(result);
   };
 
-  const handleDeletePacket = async (id: string, e: React.MouseEvent) => {
+  const handleDeleteClick = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this packet?')) {
-      await database.deletePacket(id);
+    setPacketToDelete(id);
+  };
+
+  const confirmDelete = async () => {
+    if (packetToDelete) {
+      await database.deletePacket(packetToDelete);
       onPacketSelect(null); // Clear selected packet in parent
       onPacketDeleted?.(); // Notify parent that a packet was deleted
+      setPacketToDelete(null);
     }
   };
 
@@ -279,7 +295,7 @@ const PacketList: React.FC<PacketListProps> = ({
                   </span>
                 </div>
                 <button
-                  onClick={(e) => handleDeletePacket(packet.id, e)}
+                  onClick={(e) => handleDeleteClick(packet.id, e)}
                   className="text-muted-foreground hover:text-destructive p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                   title="Delete packet"
                 >
@@ -290,6 +306,29 @@ const PacketList: React.FC<PacketListProps> = ({
           ))
         )}
       </div>
+      <AlertDialog
+        open={!!packetToDelete}
+        onOpenChange={(open) => !open && setPacketToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Packet</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this packet? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

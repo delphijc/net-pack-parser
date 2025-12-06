@@ -65,11 +65,12 @@ describe('stringExtractor', () => {
     extractStrings(mockPayload, mockPacketId, mockOffset);
 
     expect(lastCreatedWorker?.postMessage).toHaveBeenCalledWith(
-      {
+      expect.objectContaining({
         payload: mockPayload,
         packetId: mockPacketId,
         payloadOffset: mockOffset,
-      },
+        requestId: expect.any(String),
+      }),
       [mockPayload],
     );
   });
@@ -92,7 +93,11 @@ describe('stringExtractor', () => {
     const promise = extractStrings(mockPayload, mockPacketId, mockOffset);
 
     // Simulate worker success response
+    const lastCall = (lastCreatedWorker?.postMessage as any).mock.lastCall[0];
+    const requestId = lastCall.requestId;
+
     lastCreatedWorker?.emitMessage({
+      requestId,
       status: 'success',
       extractedStrings: mockExtractedStrings,
     });
@@ -106,7 +111,11 @@ describe('stringExtractor', () => {
     const promise = extractStrings(mockPayload, 'packet-1', 0);
 
     // Simulate worker error response
+    const lastCall = (lastCreatedWorker?.postMessage as any).mock.lastCall[0];
+    const requestId = lastCall.requestId;
+
     lastCreatedWorker?.emitMessage({
+      requestId,
       status: 'error',
       message: 'Extraction failed',
     });
@@ -119,7 +128,11 @@ describe('stringExtractor', () => {
     const promise = extractStrings(mockPayload, 'packet-1', 0);
 
     // Simulate worker error response without message
+    const lastCall = (lastCreatedWorker?.postMessage as any).mock.lastCall[0];
+    const requestId = lastCall.requestId;
+
     lastCreatedWorker?.emitMessage({
+      requestId,
       status: 'error',
     });
 

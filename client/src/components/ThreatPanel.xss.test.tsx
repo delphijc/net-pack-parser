@@ -21,12 +21,7 @@ describe('ThreatPanel XSS Integration', () => {
   };
 
   it('renders XSS threat correctly', () => {
-    render(
-      <ThreatPanel
-        threats={[xssThreat]}
-        onThreatClick={vi.fn()}
-      />,
-    );
+    render(<ThreatPanel threats={[xssThreat]} onThreatClick={vi.fn()} />);
 
     expect(
       screen.getByText(/Cross-Site Scripting \(XSS\)/),

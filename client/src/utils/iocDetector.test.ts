@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import 'fake-indexeddb/auto';
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { detectIOCs } from './iocDetector';
 import { iocService } from '../services/iocService';
@@ -64,7 +64,7 @@ describe('detectIOCs', () => {
     const urlCache = new Set<string>();
     const iocMap = new Map<string, any>();
 
-    mockIOCs.forEach(ioc => {
+    mockIOCs.forEach((ioc) => {
       if (ioc.type === 'ip') ipCache.add(ioc.value);
       if (ioc.type === 'domain') domainCache.add(ioc.value);
       if (ioc.type === 'url') urlCache.add(ioc.value);
@@ -129,9 +129,9 @@ describe('detectIOCs', () => {
           value: 'http://evil.com/malware',
           packetId: 'pkt-1',
           payloadOffset: 0,
-          length: 20
-        }
-      ]
+          length: 20,
+        },
+      ],
     };
     const threats = await detectIOCs(packet as any);
     expect(threats).toHaveLength(1);

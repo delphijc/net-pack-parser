@@ -9,7 +9,7 @@ import { exportDataAsJson, importDataFromJson } from '@/utils/dataImportExport';
 vi.mock('@/services/localStorage', () => ({
   localStorageService: {
     getUsagePercentage: vi.fn(() => 0),
-    onQuotaExceeded: vi.fn(() => () => {}),
+    onQuotaExceeded: vi.fn(() => () => { }),
     clearAll: vi.fn(),
   },
 }));
@@ -69,7 +69,7 @@ describe('SettingsPage', () => {
     expect(mockToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Success',
-        description: 'All local data cleared successfully.',
+        description: 'All local data (packets, files, logs, settings) cleared successfully.',
       }),
     );
   });

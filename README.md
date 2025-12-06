@@ -2,6 +2,12 @@
 
 A comprehensive web application and CLI toolkit for monitoring network performance and analyzing network traffic data. Built with React, TypeScript, and Tailwind CSS, this tool helps developers monitor application performance in real-time and analyze static PCAP files for deeper insights.
 
+## 📺 Demo Video
+
+See the Network Traffic Parser in action, from uploading a PCAP file to identifying SQL injection threats and analyzing packet details.
+
+![NetPack Parser Demo](demo/demo_video.webp)
+
 ## 🏗️ Project Architecture
 
 This project follows a **hybrid client-server architecture** designed to support two modes of operation:

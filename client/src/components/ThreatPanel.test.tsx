@@ -93,7 +93,7 @@ describe('ThreatPanel', () => {
     // threat-1 IP: 192.168.1.100
 
     // Change sort to Source IP
-    // Note: We need to find the Select trigger. 
+    // Note: We need to find the Select trigger.
     // Since Select is hard to test with fireEvent, we might need to rely on the fact that the component logic is correct
     // or try to interact with the Select.
     // However, for unit testing logic inside useMemo, it's often easier to test the output order.
@@ -103,4 +103,3 @@ describe('ThreatPanel', () => {
     // Skipping interaction test for now and relying on manual verification or logic check.
   });
 });
-

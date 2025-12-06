@@ -7,21 +7,45 @@ export async function detectIOCs(packet: ParsedPacket): Promise<ThreatAlert[]> {
   const threats: ThreatAlert[] = [];
 
   // Use synchronous cache for O(1) lookups
-  const { ip: ipCache, domain: domainCache, hash: hashCache, url: urlCache, map: iocMap } = iocService.getIOCCache();
+  const {
+    ip: ipCache,
+    domain: domainCache,
+    hash: hashCache,
+    url: urlCache,
+    map: iocMap,
+  } = iocService.getIOCCache();
 
   // 1. Check IPs (Source and Destination)
   if (ipCache.has(packet.sourceIP)) {
-    threats.push(createIOCAlert(packet, iocMap.get(packet.sourceIP)!, `Communication with known malicious IP: ${packet.sourceIP}`));
+    threats.push(
+      createIOCAlert(
+        packet,
+        iocMap.get(packet.sourceIP)!,
+        `Communication with known malicious IP: ${packet.sourceIP}`,
+      ),
+    );
   }
   if (ipCache.has(packet.destIP)) {
-    threats.push(createIOCAlert(packet, iocMap.get(packet.destIP)!, `Communication with known malicious IP: ${packet.destIP}`));
+    threats.push(
+      createIOCAlert(
+        packet,
+        iocMap.get(packet.destIP)!,
+        `Communication with known malicious IP: ${packet.destIP}`,
+      ),
+    );
   }
 
   // 2. Check Domains (DNS Queries and HTTP Host)
   if (packet.protocol === 'DNS' && packet.dnsQuery) {
     // Check exact match
     if (domainCache.has(packet.dnsQuery)) {
-      threats.push(createIOCAlert(packet, iocMap.get(packet.dnsQuery)!, `DNS Query for known malicious domain: ${packet.dnsQuery}`));
+      threats.push(
+        createIOCAlert(
+          packet,
+          iocMap.get(packet.dnsQuery)!,
+          `DNS Query for known malicious domain: ${packet.dnsQuery}`,
+        ),
+      );
     }
     // Check if query ends with a known malicious domain (subdomain check)
     // Note: This is O(M) where M is number of domain IOCs. For strict O(1) we only do exact match.
@@ -32,7 +56,13 @@ export async function detectIOCs(packet: ParsedPacket): Promise<ThreatAlert[]> {
 
   if (packet.protocol === 'HTTP' && packet.httpHost) {
     if (domainCache.has(packet.httpHost)) {
-      threats.push(createIOCAlert(packet, iocMap.get(packet.httpHost)!, `HTTP Request to known malicious domain: ${packet.httpHost}`));
+      threats.push(
+        createIOCAlert(
+          packet,
+          iocMap.get(packet.httpHost)!,
+          `HTTP Request to known malicious domain: ${packet.httpHost}`,
+        ),
+      );
     }
   }
 
@@ -45,7 +75,13 @@ export async function detectIOCs(packet: ParsedPacket): Promise<ThreatAlert[]> {
     if (packet.extractedStrings) {
       for (const str of packet.extractedStrings) {
         if (urlCache.has(str.value)) {
-          threats.push(createIOCAlert(packet, iocMap.get(str.value)!, `Malicious URL found in payload: ${str.value}`));
+          threats.push(
+            createIOCAlert(
+              packet,
+              iocMap.get(str.value)!,
+              `Malicious URL found in payload: ${str.value}`,
+            ),
+          );
         }
       }
     }
@@ -53,7 +89,13 @@ export async function detectIOCs(packet: ParsedPacket): Promise<ThreatAlert[]> {
 
   // 4. Check Hashes
   if (packet.fileHash && hashCache.has(packet.fileHash)) {
-    threats.push(createIOCAlert(packet, iocMap.get(packet.fileHash)!, `File hash match: ${packet.fileHash}`));
+    threats.push(
+      createIOCAlert(
+        packet,
+        iocMap.get(packet.fileHash)!,
+        `File hash match: ${packet.fileHash}`,
+      ),
+    );
   }
 
   return threats;

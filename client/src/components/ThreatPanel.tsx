@@ -27,15 +27,13 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
   const [selectedTactic, setSelectedTactic] = useState<string>('all');
   const [selectedTechnique, setSelectedTechnique] = useState<string>('all');
   const [selectedSeverity, setSelectedSeverity] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'timestamp' | 'severity' | 'sourceIp'>('timestamp');
+  const [sortBy, setSortBy] = useState<'timestamp' | 'severity' | 'sourceIp'>(
+    'timestamp',
+  );
   const [noteInput, setNoteInput] = useState<Record<string, string>>({});
 
-  const {
-    markFalsePositive,
-    confirmThreat,
-    addNote,
-    getAlertState,
-  } = useAlertStore();
+  const { markFalsePositive, confirmThreat, addNote, getAlertState } =
+    useAlertStore();
 
   // Extract unique tactics and techniques for filters
   const { tactics, techniques } = useMemo(() => {
@@ -64,7 +62,7 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
 
   // Filter and Sort threats
   const processedThreats = useMemo(() => {
-    let filtered = threats.filter((threat) => {
+    const filtered = threats.filter((threat) => {
       const alertState = getAlertState(threat.id);
 
       // Hide False Positives from main view
@@ -99,8 +97,10 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
     // Sort
     return filtered.sort((a, b) => {
       if (sortBy === 'severity') {
-        const scoreA = SEVERITY_LEVELS[a.severity as keyof typeof SEVERITY_LEVELS] || 0;
-        const scoreB = SEVERITY_LEVELS[b.severity as keyof typeof SEVERITY_LEVELS] || 0;
+        const scoreA =
+          SEVERITY_LEVELS[a.severity as keyof typeof SEVERITY_LEVELS] || 0;
+        const scoreB =
+          SEVERITY_LEVELS[b.severity as keyof typeof SEVERITY_LEVELS] || 0;
         return scoreB - scoreA; // Descending severity
       }
       if (sortBy === 'sourceIp') {
@@ -108,12 +108,19 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
       }
       return b.timestamp - a.timestamp; // Descending timestamp
     });
-  }, [threats, selectedTactic, selectedTechnique, selectedSeverity, sortBy, getAlertState]);
+  }, [
+    threats,
+    selectedTactic,
+    selectedTechnique,
+    selectedSeverity,
+    sortBy,
+    getAlertState,
+  ]);
 
   const handleAddNote = (id: string) => {
     if (noteInput[id]?.trim()) {
       addNote(id, noteInput[id]);
-      setNoteInput(prev => ({ ...prev, [id]: '' }));
+      setNoteInput((prev) => ({ ...prev, [id]: '' }));
     }
   };
 
@@ -181,7 +188,9 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
           </SelectContent>
         </Select>
 
-        {(selectedTactic !== 'all' || selectedTechnique !== 'all' || selectedSeverity !== 'all') && (
+        {(selectedTactic !== 'all' ||
+          selectedTechnique !== 'all' ||
+          selectedSeverity !== 'all') && (
           <Button
             variant="ghost"
             onClick={() => {
@@ -220,7 +229,9 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
                       <span className="font-medium text-slate-900">
                         {threat.type}
                       </span>
-                      {isConfirmed && <Badge variant="destructive">CONFIRMED</Badge>}
+                      {isConfirmed && (
+                        <Badge variant="destructive">CONFIRMED</Badge>
+                      )}
                     </div>
                     <span className="text-sm text-gray-500">
                       {new Date(threat.timestamp).toLocaleString()}
@@ -262,7 +273,9 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
                   {alertState?.notes && alertState.notes.length > 0 && (
                     <div className="mt-2 pl-2 border-l-2 border-slate-300">
                       {alertState.notes.map((note, idx) => (
-                        <p key={idx} className="text-xs text-slate-600 italic">"{note}"</p>
+                        <p key={idx} className="text-xs text-slate-600 italic">
+                          "{note}"
+                        </p>
                       ))}
                     </div>
                   )}
@@ -283,7 +296,7 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
                       <EyeOff className="w-3 h-3 mr-1" /> False Positive
                     </Button>
                     <Button
-                      variant={isConfirmed ? "secondary" : "default"}
+                      variant={isConfirmed ? 'secondary' : 'default'}
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -292,28 +305,42 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
                       disabled={isConfirmed}
                       className="text-xs"
                     >
-                      <CheckCircle className="w-3 h-3 mr-1" /> {isConfirmed ? 'Confirmed' : 'Confirm'}
+                      <CheckCircle className="w-3 h-3 mr-1" />{' '}
+                      {isConfirmed ? 'Confirmed' : 'Confirm'}
                     </Button>
                   </div>
 
                   {/* Add Note Input */}
-                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className="flex gap-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Input
                       placeholder="Add investigation note..."
                       className="h-8 text-xs"
                       value={noteInput[threat.id] || ''}
-                      onChange={(e) => setNoteInput({ ...noteInput, [threat.id]: e.target.value })}
+                      onChange={(e) =>
+                        setNoteInput({
+                          ...noteInput,
+                          [threat.id]: e.target.value,
+                        })
+                      }
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') handleAddNote(threat.id);
                       }}
                     />
-                    <Button size="sm" variant="ghost" className="h-8 px-2" onClick={() => handleAddNote(threat.id)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 px-2"
+                      onClick={() => handleAddNote(threat.id)}
+                    >
                       <MessageSquare className="w-3 h-3" />
                     </Button>
                   </div>
                 </div>
               </li>
-            )
+            );
           })}
         </ul>
       )}

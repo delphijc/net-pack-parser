@@ -17,6 +17,8 @@ import { localStorageService } from '@/services/localStorage';
 import { exportDataAsJson, importDataFromJson } from '@/utils/dataImportExport';
 // We will need a toast component for notifications. Let's assume we have one.
 import { useToast } from '@/components/ui/use-toast';
+import database from '@/services/database';
+import chainOfCustodyDb from '@/services/chainOfCustodyDb';
 
 type ImportMode = 'merge' | 'replace';
 
@@ -25,6 +27,7 @@ const SettingsPage: React.FC = () => {
   const [usage, setUsage] = useState(0);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   const [importedFileContent, setImportedFileContent] = useState<string | null>(
     null,
@@ -46,14 +49,30 @@ const SettingsPage: React.FC = () => {
     return () => unsubscribe();
   }, [toast]);
 
-  const handleClearData = () => {
-    localStorageService.clearAll();
-    setUsage(0);
-    setShowClearConfirm(false);
-    toast({
-      title: 'Success',
-      description: 'All local data cleared successfully.',
-    });
+  const handleClearData = async () => {
+    try {
+      setIsClearing(true);
+      await database.clearAllData();
+      await chainOfCustodyDb.clearAll();
+      localStorageService.clearAll();
+
+      setUsage(0);
+      setShowClearConfirm(false);
+      toast({
+        title: 'Success',
+        description:
+          'All local data (packets, files, logs, settings) cleared successfully.',
+      });
+    } catch (error) {
+      console.error('Failed to clear data:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to clear all data. See console for details.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsClearing(false);
+    }
   };
 
   const handleExportData = () => {
@@ -169,9 +188,17 @@ const SettingsPage: React.FC = () => {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleClearData}>
-                  Continue
+                <AlertDialogCancel disabled={isClearing}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleClearData();
+                  }}
+                  disabled={isClearing}
+                >
+                  {isClearing ? 'Clearing...' : 'Continue'}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

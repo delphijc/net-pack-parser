@@ -21,6 +21,7 @@ import { KillChainViz } from './KillChainViz';
 import { IOCManager } from '../IOCManager';
 import { FalsePositivesTab } from '../FalsePositivesTab';
 import { ThreatPanel } from '../ThreatPanel';
+import SettingsPage from '../SettingsPage';
 // import { useQuery } from '@tanstack/react-query'; // Removed
 import { useAlertStore } from '../../store/alertStore';
 import { runThreatDetection } from '../../utils/threatDetection';
@@ -32,6 +33,7 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [isGlobalParsing, setIsGlobalParsing] = useState(false);
   const [stats, setStats] = useState({
     totalPackets: 0,
     totalFiles: 0,
@@ -65,7 +67,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
     // Filter out false positives for stats
     const alertStates = useAlertStore.getState().alertStates;
     const activeThreats = detectedThreats.filter(
-      (t) => alertStates[t.id]?.status !== 'false_positive'
+      (t) => alertStates[t.id]?.status !== 'false_positive',
     );
 
     // Calculate protocol distribution
@@ -224,11 +226,12 @@ const Dashboard: React.FC<DashboardProps> = () => {
                   className="flex items-start pb-3 border-b border-white/5 last:border-0 last:pb-0"
                 >
                   <div
-                    className={`mt-1 w-2 h-2 rounded-full mr-3 ${packet.suspiciousIndicators &&
+                    className={`mt-1 w-2 h-2 rounded-full mr-3 ${
+                      packet.suspiciousIndicators &&
                       packet.suspiciousIndicators.length > 0
-                      ? 'bg-destructive'
-                      : 'bg-emerald-500'
-                      }`}
+                        ? 'bg-destructive'
+                        : 'bg-emerald-500'
+                    }`}
                   ></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate text-foreground">
@@ -252,78 +255,107 @@ const Dashboard: React.FC<DashboardProps> = () => {
   );
 
   return (
-    <div className="flex flex-col h-full">
+    <div
+      className={`flex flex-col h-full ${isGlobalParsing ? 'cursor-wait' : ''}`}
+    >
       {/* Navigation Tabs */}
       <div className="flex border-b border-white/10 mb-6">
         <button
-          onClick={() => setActiveTab('overview')}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'overview'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-            }`}
+          onClick={() => !isGlobalParsing && setActiveTab('overview')}
+          disabled={isGlobalParsing}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+            activeTab === 'overview'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Overview
         </button>
         <button
-          onClick={() => setActiveTab('parser')}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'parser'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-            }`}
+          onClick={() => !isGlobalParsing && setActiveTab('parser')}
+          disabled={isGlobalParsing}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+            activeTab === 'parser'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Parser & Upload
         </button>
         <button
-          onClick={() => setActiveTab('packets')}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'packets'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-            }`}
+          onClick={() => !isGlobalParsing && setActiveTab('packets')}
+          disabled={isGlobalParsing}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+            activeTab === 'packets'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Packet Inspector
         </button>
         <button
-          onClick={() => setActiveTab('yara')}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'yara'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-            }`}
+          onClick={() => !isGlobalParsing && setActiveTab('yara')}
+          disabled={isGlobalParsing}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+            activeTab === 'yara'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           YARA Rules
         </button>
         <button
-          onClick={() => setActiveTab('threat-intel')}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'threat-intel'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-            }`}
+          onClick={() => !isGlobalParsing && setActiveTab('threat-intel')}
+          disabled={isGlobalParsing}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+            activeTab === 'threat-intel'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Threat Intel
         </button>
         <button
-          onClick={() => setActiveTab('ioc-manager')}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'ioc-manager'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-            }`}
+          onClick={() => !isGlobalParsing && setActiveTab('ioc-manager')}
+          disabled={isGlobalParsing}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+            activeTab === 'ioc-manager'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           IOC Manager
         </button>
         <button
-          onClick={() => setActiveTab('false-positives')}
-          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === 'false-positives'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-            }`}
+          onClick={() => !isGlobalParsing && setActiveTab('false-positives')}
+          disabled={isGlobalParsing}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+            activeTab === 'false-positives'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           False Positives
+        </button>
+        <button
+          onClick={() => !isGlobalParsing && setActiveTab('settings')}
+          disabled={isGlobalParsing}
+          className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
+            activeTab === 'settings'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
+          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          Settings
         </button>
       </div>
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'overview' && renderOverview()}
-        {activeTab === 'parser' && <PcapUpload />}
+        {activeTab === 'parser' && (
+          <PcapUpload onParsingStatusChange={setIsGlobalParsing} />
+        )}
         {activeTab === 'packets' && <PcapAnalysisPage />}
         {activeTab === 'yara' && (
           <div className="p-6">
@@ -353,13 +385,18 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
             {/* Threat Panel Integration */}
             <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-4">Threat Detection Log</h3>
-              <ThreatPanel threats={allThreats} onThreatClick={() => { }} />
+              <h3 className="text-lg font-semibold mb-4">
+                Threat Detection Log
+              </h3>
+              <ThreatPanel threats={allThreats} onThreatClick={() => {}} />
             </div>
           </div>
         )}
         {activeTab === 'ioc-manager' && <IOCManager />}
-        {activeTab === 'false-positives' && <FalsePositivesTab threats={allThreats} />}
+        {activeTab === 'false-positives' && (
+          <FalsePositivesTab threats={allThreats} />
+        )}
+        {activeTab === 'settings' && <SettingsPage />}
       </div>
     </div>
   );

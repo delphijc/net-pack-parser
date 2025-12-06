@@ -106,6 +106,30 @@ class ChainOfCustodyDb {
       }
     });
   }
+
+  public async clearAll(): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const store = await this.getObjectStore('readwrite');
+        const request = store.clear();
+
+        request.onsuccess = () => {
+          console.log('All File Chain of Custody events cleared.');
+          resolve();
+        };
+
+        request.onerror = (event) => {
+          console.error(
+            'Error clearing all file chain of custody events:',
+            (event.target as IDBRequest).error,
+          );
+          reject((event.target as IDBRequest).error);
+        };
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }
 
 export default new ChainOfCustodyDb();

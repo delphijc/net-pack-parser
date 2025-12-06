@@ -26,6 +26,9 @@ This guide provides step-by-step instructions on how to use the generated `demo.
     *   The **Packet Details** view will open on the right (or bottom, depending on layout).
     *   Select the **"Hex Dump"** tab to view the raw packet data.
     *   Select the **"Payload"** tab to see the ASCII representation of the HTTP request.
+3.  **Delete Packet**: Hover over a packet in the list and click the **Trash Icon**.
+    *   A confirmation dialog will appear.
+    *   Click **"Delete"** to remove the packet from the analysis.
 
 ## Step 3: Verify Threat Detection
 
@@ -62,6 +65,17 @@ The `demo.pcap` file contains specific traffic patterns designed to trigger the 
 1.  Navigate to the **"Dashboard"** tab (if available in the navigation menu) or check the summary metrics at the top of the analysis page.
 2.  **Threat Summary**: You should see a count of "High" and "Critical" threats corresponding to the attacks in the PCAP.
 3.  **Kill Chain Visualization**: If implemented, check if these threats are mapped to stages of the Cyber Kill Chain (e.g., "Exploitation", "Delivery").
+
+## Step 5: Master Data Management
+
+The application persists data between sessions. To reset the environment:
+
+1.  Navigate to the **"Settings"** tab in the main navigation menu.
+2.  Locate the **"Local Storage"** section to see current usage.
+3.  Click **"Clear All Local Data"**.
+4.  Confirm the action in the dialog.
+    *   This will wipe all parsed packets, file references, and audit logs.
+    *   The application will return to a clean state, ready for a new upload.
 
 ## Troubleshooting
 

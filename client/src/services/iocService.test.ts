@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import 'fake-indexeddb/auto';
+
 import { describe, it, expect, beforeEach } from 'vitest';
 import { iocService, type IOC } from './iocService';
 
@@ -95,7 +95,12 @@ describe('IOCService', () => {
   });
 
   it('should not cache disabled IOCs', async () => {
-    const disabledIOC = { ...mockIOC, id: 'disabled-1', enabled: false, value: '9.9.9.9' };
+    const disabledIOC = {
+      ...mockIOC,
+      id: 'disabled-1',
+      enabled: false,
+      value: '9.9.9.9',
+    };
     await iocService.addIOC(disabledIOC);
     const cache = iocService.getIOCCache();
     expect(cache.ip.has(disabledIOC.value)).toBe(false);

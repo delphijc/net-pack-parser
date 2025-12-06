@@ -49,49 +49,53 @@ const PcapAnalysisPage: React.FC = () => {
   // Polling for packets from the database
   useEffect(() => {
     const loadPackets = async () => {
-      const packetsFromDb = await database.getAllPackets();
-      setAllPackets(packetsFromDb);
+      try {
+        const packetsFromDb = await database.getAllPackets();
+        setAllPackets(packetsFromDb);
 
-      // Run threat detection for all packets and collect all threats
-      const threatPromises = packetsFromDb.map((packet) =>
-        runThreatDetection(packet),
-      );
-      const threatsResults = await Promise.all(threatPromises);
-      const detectedThreats: ThreatAlert[] = threatsResults.flat();
-      setAllThreats(detectedThreats);
-
-      // Map threats to suspiciousIndicators for the packets
-      const packetsWithThreats = packetsFromDb.map((packet) => {
-        const packetThreats = detectedThreats.filter(
-          (t) => t.packetId === packet.id,
+        // Run threat detection for all packets and collect all threats
+        const threatPromises = packetsFromDb.map((packet) =>
+          runThreatDetection(packet),
         );
-        if (packetThreats.length > 0) {
-          return {
-            ...packet,
-            suspiciousIndicators: packetThreats.map((threat) => ({
-              id: threat.id,
-              type: (threat.type === 'SQL Injection'
-                ? 'sql_injection'
-                : 'suspicious_pattern') as any, // Cast to any to avoid complex type matching for now, or import SuspiciousIndicator type
-              severity:
-                threat.severity === 'info' ? 'low' : (threat.severity as any), // Map 'info' to 'low' or cast
-              description: threat.description,
-              evidence: 'See threat details', // Placeholder as ThreatAlert doesn't have raw evidence string
-              confidence: 100,
-              mitreTactic: threat.mitreAttack[0], // Take the first one
-            })),
-          };
-        }
-        return packet;
-      });
+        const threatsResults = await Promise.all(threatPromises);
+        const detectedThreats: ThreatAlert[] = threatsResults.flat();
+        setAllThreats(detectedThreats);
 
-      setAllPackets(packetsWithThreats);
+        // Map threats to suspiciousIndicators for the packets
+        const packetsWithThreats = packetsFromDb.map((packet) => {
+          const packetThreats = detectedThreats.filter(
+            (t) => t.packetId === packet.id,
+          );
+          if (packetThreats.length > 0) {
+            return {
+              ...packet,
+              suspiciousIndicators: packetThreats.map((threat) => ({
+                id: threat.id,
+                type: (threat.type === 'SQL Injection'
+                  ? 'sql_injection'
+                  : 'suspicious_pattern') as any, // Cast to any to avoid complex type matching for now, or import SuspiciousIndicator type
+                severity:
+                  threat.severity === 'info' ? 'low' : (threat.severity as any), // Map 'info' to 'low' or cast
+                description: threat.description,
+                evidence: 'See threat details', // Placeholder as ThreatAlert doesn't have raw evidence string
+                confidence: 100,
+                mitreTactic: threat.mitreAttack[0], // Take the first one
+              })),
+            };
+          }
+          return packet;
+        });
 
-      // Extract unique protocols for the filter
-      const uniqueProtocols = Array.from(
-        new Set(packetsWithThreats.flatMap((p) => p.detectedProtocols || [])),
-      );
-      setAvailableProtocols(uniqueProtocols);
+        setAllPackets(packetsWithThreats);
+
+        // Extract unique protocols for the filter
+        const uniqueProtocols = Array.from(
+          new Set(packetsWithThreats.flatMap((p) => p.detectedProtocols || [])),
+        );
+        setAvailableProtocols(uniqueProtocols);
+      } catch (error) {
+        console.error('[PcapAnalysisPage] Error loading packets:', error);
+      }
     };
 
     loadPackets(); // Load initially
