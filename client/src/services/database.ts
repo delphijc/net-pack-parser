@@ -7,7 +7,7 @@ import type { ForensicCase, TimelineEvent, ThreatIntelligence } from '../types';
 import type { CaptureSession } from '../types/captureSession';
 
 const DB_NAME = 'networkParserDB';
-const DB_VERSION = 2; // Increment version if schema changes
+const DB_VERSION = 3; // Increment version if schema changes
 
 class DatabaseService {
   private static instance: DatabaseService;
@@ -83,7 +83,9 @@ class DatabaseService {
 
       request.onsuccess = (event) => {
         this.db = (event.target as IDBOpenDBRequest).result;
+        this.db = (event.target as IDBOpenDBRequest).result;
         console.log('IndexedDB for File References opened successfully.');
+        this.loadTimelineEventsFromIDB();
         resolve(this.db);
       };
 
@@ -95,9 +97,25 @@ class DatabaseService {
         if (!db.objectStoreNames.contains('packets')) {
           db.createObjectStore('packets', { keyPath: 'id' });
         }
+        if (!db.objectStoreNames.contains('timelineEvents')) {
+          db.createObjectStore('timelineEvents', { keyPath: 'id' });
+        }
         console.log('IndexedDB upgrade complete.');
       };
     });
+  }
+
+  private loadTimelineEventsFromIDB(): void {
+    if (!this.db) return;
+    const transaction = this.db.transaction(['timelineEvents'], 'readonly');
+    const store = transaction.objectStore('timelineEvents');
+    const request = store.getAll();
+    request.onsuccess = () => {
+      this.timelineEvents = request.result || [];
+    };
+    request.onerror = () => {
+      console.warn('Failed to load timeline events from IDB', request.error);
+    };
   }
 
   // Load/Save non-FileReference data using localStorage
@@ -110,7 +128,7 @@ class DatabaseService {
         // this.files is now handled by IndexedDB
         this.performanceEntries = parsedData.performanceEntries || [];
         this.forensicCases = parsedData.forensicCases || [];
-        this.timelineEvents = parsedData.timelineEvents || [];
+        // this.timelineEvents = parsedData.timelineEvents || []; // Handled by IDB
         this.threatIntelligence = parsedData.threatIntelligence || [];
         this.captureSessions = parsedData.captureSessions || [];
       }
@@ -132,7 +150,7 @@ class DatabaseService {
         // files is now handled by IndexedDB
         performanceEntries: this.performanceEntries,
         forensicCases: this.forensicCases,
-        timelineEvents: this.timelineEvents,
+        // timelineEvents: this.timelineEvents, // Handled by IDB
         threatIntelligence: this.threatIntelligence,
         captureSessions: this.captureSessions,
       };
@@ -413,10 +431,38 @@ class DatabaseService {
   }
 
   // Timeline Management
-  public storeTimelineEvent(event: TimelineEvent): string {
+  public async storeTimelineEvent(event: TimelineEvent): Promise<string> {
     this.timelineEvents.push(event);
-    this.saveNonFileDataToStorage();
+
+    // Store in IDB
+    if (this.db) {
+      try {
+        const tx = this.db.transaction('timelineEvents', 'readwrite');
+        tx.objectStore('timelineEvents').add(event);
+        // We don't await transaction complete here to avoid blocking UI too much for single events,
+        // but we suppress errors.
+      } catch (e) { console.error('Failed to store timeline event', e); }
+    }
+
+    // this.saveNonFileDataToStorage(); // Removed
     return event.id;
+  }
+
+  public async storeTimelineEvents(events: TimelineEvent[]): Promise<void> {
+    if (events.length === 0) return;
+    this.timelineEvents.push(...events);
+
+    if (this.db) {
+      const tx = this.db.transaction('timelineEvents', 'readwrite');
+      const store = tx.objectStore('timelineEvents');
+      for (const event of events) {
+        store.add(event);
+      }
+      return new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
   }
 
   public getAllTimelineEvents(): TimelineEvent[] {
@@ -532,25 +578,48 @@ class DatabaseService {
     this.captureSessions = []; // Also clear capture sessions
 
     try {
-      await this.dbPromise;
+      // Ensure DB is initialized before attempting to clear
+      if (!this.db) {
+        await this.dbPromise;
+      }
+
+      if (this.db) {
+        const transaction = this.db.transaction(
+          ['packets', 'fileReferences', 'timelineEvents'],
+          'readwrite',
+        );
+
+        await Promise.all([
+          new Promise((resolve, reject) => {
+            const req = transaction.objectStore('fileReferences').clear();
+            req.onsuccess = resolve;
+            req.onerror = reject;
+          }),
+          new Promise((resolve, reject) => {
+            const req = transaction.objectStore('packets').clear();
+            req.onsuccess = resolve;
+            req.onerror = reject;
+          }),
+          new Promise((resolve, reject) => {
+            const req = transaction.objectStore('timelineEvents').clear();
+            req.onsuccess = resolve;
+            req.onerror = reject;
+          }),
+        ]);
+
+        await new Promise((resolve, reject) => {
+          transaction.oncomplete = () => resolve(undefined);
+          transaction.onerror = () => reject(transaction.error);
+          transaction.onabort = () => reject(new Error('Transaction aborted'));
+        });
+      }
     } catch (e) {
-      console.error('IndexedDB init failed', e);
+      console.error('Failed to clear IndexedDB data:', e);
+      // Even if IDB fails, we should clear what we can from local state
+      // but we throw so the UI knows something went wrong with the persistent store
+      throw e;
     }
 
-    if (this.db) {
-      const transaction = this.db.transaction(
-        ['packets', 'fileReferences'],
-        'readwrite',
-      );
-      const fileStore = transaction.objectStore('fileReferences');
-      fileStore.clear();
-      const packetStore = transaction.objectStore('packets');
-      packetStore.clear();
-      await new Promise((resolve, reject) => {
-        transaction.oncomplete = () => resolve(undefined);
-        transaction.onerror = () => reject(transaction.error);
-      });
-    }
     this.saveNonFileDataToStorage();
   }
 

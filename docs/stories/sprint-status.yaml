@@ -14,6 +14,7 @@ development_status:
   1-7-token-string-extraction: done
   1-8-protocol-detection-classification: done
   1-9-file-reference-detection-download: done
+  1-10-smart-packet-list-views: done
   epic-1-retrospective: completed
   epic-2: contexted
   2-1-bpf-filter-engine: done

@@ -281,11 +281,10 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
               <div className="flex space-x-2">
                 <button
                   onClick={handleCaptureToggle}
-                  className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${
-                    capturing
-                      ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
-                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                  }`}
+                  className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${capturing
+                    ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    }`}
                 >
                   {capturing ? (
                     <>
@@ -424,11 +423,10 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                 <button
                   type="submit"
                   disabled={parsing}
-                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center transition-colors ${
-                    parsing
-                      ? 'bg-primary/50 cursor-not-allowed'
-                      : 'bg-primary hover:bg-primary/90'
-                  }`}
+                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center transition-colors ${parsing
+                    ? 'bg-primary/50 cursor-not-allowed'
+                    : 'bg-primary hover:bg-primary/90'
+                    }`}
                 >
                   {parsing ? (
                     <>

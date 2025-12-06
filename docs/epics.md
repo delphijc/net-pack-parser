@@ -68,6 +68,10 @@ This document provides the complete epic and story breakdown for Network Traffic
 - FR104: System displays session metadata
 - FR105: Users load server-side sessions for browser analysis
 
+**Advanced Visualization & Views** (FR106-FR107):
+- FR106: Users configure "Show Threats Only" default view
+- FR107: Users view aggregated TCP flows (tcpflow style) analysis
+
 **Real-Time Performance Monitoring** (FR7-FR15):
 - FR7: System monitors Core Web Vitals (LCP, FCP, CLS, FID, TTFB)
 - FR8: System tracks page load time and navigation timing
@@ -503,7 +507,43 @@ And downloaded files are added to chain of custody log
 
 **FR Coverage:** FR21, FR22
 
+### Story 1.10: Smart Packet List Views
+
+As a security analyst,
+I want to filter out noise by defaulting to threats or viewing aggregated flows,
+So that I can focus on relevant information in large capture files.
+
+**Acceptance Criteria:**
+
+Given I have loaded a large PCAP file
+When I view the packet list
+Then I can toggle "Show Threats Only" view
+And I can set this as my default preference in Settings
+And when I switch to "Flow View"
+Then I see aggregated TCP/UDP sessions (like tcpflow) instead of individual packets
+And each flow row shows:
+  - Source IP:Port
+  - Destination IP:Port
+  - Protocol
+  - Start Time / Duration
+  - Total Bytes / Packet Count
+  - Extracted Text Preview (first N bytes)
+And I can click a flow to expand it and see the constituent packets
+And the system suggests "Flow View" if packet count > 10,000
+
+**Prerequisites:** Story 1.4
+
+**Technical Notes:**
+- Implement flow aggregation logic (group by 5-tuple: srcIP, dstIP, srcPort, dstPort, Proto)
+- Use virtual scrolling for flow list
+- Persist view preferences in localStorage
+- Flow view should support "Follow TCP Stream" style reassembly text
+
+**FR Coverage:** FR106, FR107
+
 ---
+
+
 
 ## Epic 2: Search, Filter & Basic Analysis
 

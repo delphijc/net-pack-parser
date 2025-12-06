@@ -1,0 +1,32 @@
+<context>
+  <story_id>1.10</story_id>
+  <story_title>Smart Packet List Views</story_title>
+  <components>
+    <component>
+        <name>PacketList</name>
+        <path>/Users/delphijc/Projects/net-pack-parser/client/src/components/PacketList.tsx</path>
+        <description>Main component for displaying packets. Will be enhanced with a View Mode toggle.</description>
+    </component>
+    <component>
+        <name>SettingsPage</name>
+        <path>/Users/delphijc/Projects/net-pack-parser/client/src/components/SettingsPage.tsx</path>
+        <description>Settings management. View preferences (default to threats) will be persisted here.</description>
+    </component>
+    <component>
+        <name>ParsedPacket</name>
+        <path>/Users/delphijc/Projects/net-pack-parser/client/src/types/index.ts</path>
+        <description>Type definition for packets, used for aggregation.</description>
+    </component>
+    <component>
+        <name>pcapUtils</name>
+        <path>/Users/delphijc/Projects/net-pack-parser/client/src/utils/pcapUtils.ts</path>
+        <description>Utilities for PCAP parsing. Flow aggregation logic might reside here or in a new helper.</description>
+    </component>
+  </components>
+  <requirements>
+    <requirement>Default "Show Threats Only" view logic in PacketList.</requirement>
+    <requirement>Persist view preference in Settings.</requirement>
+    <requirement>Implement "Flow View" with aggregated 5-tuple flows.</requirement>
+    <requirement>Implement Flow Details view (expandable or separate).</requirement>
+  </requirements>
+</context>

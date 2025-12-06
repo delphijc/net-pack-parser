@@ -1,11 +1,25 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { ParsedPacket } from '../types'; // Updated import path
 import {
   multiCriteriaSearch,
   type MultiSearchCriteria,
 } from '@/utils/multiCriteriaSearch'; // Import multiCriteriaSearch and MultiSearchCriteria
-import { Search, Trash2, Clock, Shield, X } from 'lucide-react';
+import {
+  Search,
+  Trash2,
+  Clock,
+  Shield,
+  X,
+  Activity,
+  Layers,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FlowList } from './FlowList';
+import { aggregateFlows } from '@/utils/flowUtils';
+import { localStorageService } from '@/services/localStorage';
+import { useToast } from '@/components/ui/use-toast';
 import {
   Tooltip,
   TooltipContent,
@@ -45,12 +59,42 @@ const PacketList: React.FC<PacketListProps> = ({
   searchCriteria,
   onClearSearchCriteria,
 }) => {
-  const [filteredPackets, setFilteredPackets] = useState<ParsedPacket[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [packetToDelete, setPacketToDelete] = useState<string | null>(null);
 
-  const filterPackets = useCallback(() => {
+  // New State for Smart Views
+  const [viewMode, setViewMode] = useState<'packets' | 'flows'>('packets');
+  // Initialize preferences lazily
+  const [showThreatsOnly, setShowThreatsOnly] = useState(() => {
+    return localStorageService.getValue<string>('preferences.defaultView') === 'threats';
+  });
+  const { toast } = useToast();
+
+  // Compute Flows
+  const flows = useMemo(() => {
+    if (viewMode === 'flows') {
+      // In a real large app, this should be in a worker.
+      return aggregateFlows(packets);
+    }
+    return [];
+  }, [packets, viewMode]);
+
+  // Large file warning
+  useEffect(() => {
+    // Determine if large file suggestion needed
+    if (packets.length > 10000 && viewMode === 'packets' && !localStorageService.getValue<boolean>('preferences.suppressLargeFileWarning')) {
+      toast({
+        title: "Large File Detected",
+        description: "For better performance, consider switching to Flow View.",
+        action: <div onClick={() => setViewMode('flows')} className="font-bold cursor-pointer hover:underline">Switch to Flows</div>
+      });
+      // Avoid spamming
+      localStorageService.setValue('preferences.suppressLargeFileWarning', true);
+    }
+  }, [packets.length, viewMode, toast]);
+
+  const filteredPackets = useMemo(() => {
     let result = packets.map((p) => ({ ...p, matchesSearch: false })); // Initialize matchesSearch
 
     // Apply search (existing text search)
@@ -79,6 +123,14 @@ const PacketList: React.FC<PacketListProps> = ({
       );
     }
 
+    // Apply "Show Threats Only" filter
+    if (showThreatsOnly) {
+      result = result.filter(p =>
+        (p.suspiciousIndicators && p.suspiciousIndicators.length > 0) ||
+        (p.threatIntelligence && p.threatIntelligence.length > 0)
+      );
+    }
+
     // Apply multi-criteria search for highlighting
     if (searchCriteria) {
       result = result.map((p) => ({
@@ -94,12 +146,8 @@ const PacketList: React.FC<PacketListProps> = ({
       return sortOrder === 'asc' ? timeA - timeB : timeB - timeA;
     });
 
-    setFilteredPackets(result);
-  }, [packets, searchTerm, selectedProtocol, searchCriteria, sortOrder]);
-
-  useEffect(() => {
-    filterPackets();
-  }, [filterPackets]);
+    return result;
+  }, [packets, searchTerm, selectedProtocol, searchCriteria, sortOrder, showThreatsOnly]);
 
   const handleDeleteClick = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -158,9 +206,9 @@ const PacketList: React.FC<PacketListProps> = ({
       <div className="p-3 border-b border-white/10 bg-card/50">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-sm font-semibold flex items-center text-foreground">
-            Captured Packets
+            {viewMode === 'packets' ? 'Captured Packets' : 'Network Flows'}
             <span className="ml-2 text-xs bg-secondary px-2 py-0.5 rounded-full text-muted-foreground">
-              {filteredPackets.length}
+              {viewMode === 'packets' ? filteredPackets.length : flows.length}
             </span>
           </h2>
           <button
@@ -233,10 +281,44 @@ const PacketList: React.FC<PacketListProps> = ({
             <Clock size={16} />
           </button>
         </div>
+
+        {/* View Toggles */}
+        <div className="flex items-center gap-2 mb-2 p-1 bg-secondary/20 rounded-md">
+          <Tabs
+            value={viewMode}
+            onValueChange={(v) => setViewMode(v as 'packets' | 'flows')}
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-2 h-7">
+              <TabsTrigger value="packets" className="text-xs h-6">
+                <Activity size={12} className="mr-1" />
+                Packets
+              </TabsTrigger>
+              <TabsTrigger value="flows" className="text-xs h-6">
+                <Layers size={12} className="mr-1" />
+                Flows
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        <div className="flex items-center mb-2 px-1">
+          <Button
+            size="sm"
+            variant={showThreatsOnly ? 'destructive' : 'outline'}
+            onClick={() => setShowThreatsOnly(!showThreatsOnly)}
+            aria-label="Toggle threats only"
+            className={`w-full text-xs h-7 border-transparent ${showThreatsOnly ? 'bg-destructive/20 text-destructive border-destructive/30 hover:bg-destructive/30' : 'hover:bg-secondary'}`}
+          >
+            <Shield size={12} className="mr-2" />
+            {showThreatsOnly ? 'Threats Only' : 'Show Threats Only'}
+          </Button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
-        {filteredPackets.length === 0 ? (
+        {viewMode === 'flows' ? (
+          <FlowList flows={flows} onPacketSelect={onPacketSelect} />
+        ) : filteredPackets.length === 0 ? (
           <div className="text-center py-10 text-muted-foreground">
             <p className="text-sm">No packets found</p>
             {searchTerm && (
@@ -251,11 +333,10 @@ const PacketList: React.FC<PacketListProps> = ({
               key={packet.id}
               data-testid={`packet-item-${packet.id}`}
               onClick={() => onPacketSelect(packet)}
-              className={`group p-2 rounded-md cursor-pointer border transition-all duration-200 ${
-                selectedPacketId === packet.id
-                  ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
-                  : 'bg-card/30 border-transparent hover:bg-secondary/50 hover:border-white/5'
-              } ${packet.matchesSearch ? 'bg-yellow-200/20 border-yellow-300' : ''}`}
+              className={`group p-2 rounded-md cursor-pointer border transition-all duration-200 ${selectedPacketId === packet.id
+                ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
+                : 'bg-card/30 border-transparent hover:bg-secondary/50 hover:border-white/5'
+                } ${packet.matchesSearch ? 'bg-yellow-200/20 border-yellow-300' : ''}`}
             >
               <div className="flex justify-between items-center mb-1">
                 <div className="flex items-center gap-2">
@@ -263,17 +344,16 @@ const PacketList: React.FC<PacketListProps> = ({
                     <Badge
                       key={proto}
                       variant="outline"
-                      className={`text-[10px] font-bold px-1.5 py-0.5 ${
-                        proto === 'HTTP' || proto === 'HTTPS'
-                          ? 'bg-emerald-500/10 text-emerald-500'
-                          : proto === 'TCP'
-                            ? 'bg-blue-500/10 text-blue-500'
-                            : proto === 'UDP'
-                              ? 'bg-orange-500/10 text-orange-500'
-                              : proto === 'DNS'
-                                ? 'bg-purple-500/10 text-purple-500'
-                                : 'bg-gray-500/10 text-gray-400'
-                      }`}
+                      className={`text-[10px] font-bold px-1.5 py-0.5 ${proto === 'HTTP' || proto === 'HTTPS'
+                        ? 'bg-emerald-500/10 text-emerald-500'
+                        : proto === 'TCP'
+                          ? 'bg-blue-500/10 text-blue-500'
+                          : proto === 'UDP'
+                            ? 'bg-orange-500/10 text-orange-500'
+                            : proto === 'DNS'
+                              ? 'bg-purple-500/10 text-purple-500'
+                              : 'bg-gray-500/10 text-gray-400'
+                        }`}
                     >
                       {proto}
                     </Badge>

@@ -33,18 +33,18 @@ export const parseNetworkData = async (
 };
 
 /**
- * Browser-compatible PCAP parser implementation using pcap-decoder
- */
-/**
  * Browser-compatible PCAP parser implementation using custom parser
  */
 const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
-  const packets: ParsedPacket[] = [];
+  const allPackets: ParsedPacket[] = [];
+  const BATCH_SIZE = 50;
 
   try {
     const { packets: pcapPackets } = parsePcap(data);
+    console.log(`Parsed ${pcapPackets.length} raw packets from PCAP.`);
 
-    for (const packet of pcapPackets) {
+    // Helper function to process a single packet
+    const processPacket = async (packet: import('../utils/pcapUtils').PcapPacket): Promise<{ parsedPacket: ParsedPacket, timelineEvent: import('../types').TimelineEvent }> => {
       const packetId = uuidv4();
       const tokens: Token[] = [];
       const sections: ParsedSection[] = [];
@@ -166,11 +166,12 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
         const timeoutPromise = new Promise<never>((_, reject) => {
           setTimeout(
             () => reject(new Error('String extraction timed out')),
-            500,
+            2000,
           );
         });
 
         // Pass the ArrayBuffer to the worker
+        // console.time('extractStrings'); 
         const extractionPromise = extractStrings(
           rawPacketDataBuffer.slice(0) as ArrayBuffer, // Pass a copy to avoid detachment
           packetId,
@@ -181,14 +182,15 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
           extractionPromise,
           timeoutPromise,
         ]);
+        // console.timeEnd('extractStrings');
 
         parsedPacket.extractedStrings =
           extracted as import('../types/extractedStrings').ExtractedString[];
       } catch (strExtractError) {
-        console.warn(
-          `Error extracting strings for packet ${packetId}:`,
-          strExtractError,
-        );
+        // console.warn(
+        //   `Error extracting strings for packet ${packetId}:`,
+        //   strExtractError,
+        // );
         // Fallback or empty strings on error/timeout
         parsedPacket.extractedStrings = [];
       }
@@ -213,18 +215,39 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
 
       // Create timeline event
       const timelineEvent = createTimelineEvent(parsedPacket);
-      database.storeTimelineEvent(timelineEvent);
+      // database.storeTimelineEvent(timelineEvent); // Don't store individually
 
-      packets.push(parsedPacket);
+      return { parsedPacket, timelineEvent };
+    };
+
+    // Process in Batches
+    for (let i = 0; i < pcapPackets.length; i += BATCH_SIZE) {
+      const batch = pcapPackets.slice(i, i + BATCH_SIZE);
+      if (i % 500 === 0) {
+        // console.log(`Processing batch starting at ${i}/${pcapPackets.length}`);
+        // Yield to main thread briefly to update UI/logs
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+
+      const batchResults = await Promise.all(batch.map(processPacket));
+
+      // Extract packets and timeline events
+      const batchPackets = batchResults.map(r => r.parsedPacket);
+      const batchTimelineEvents = batchResults.map(r => r.timelineEvent);
+
+      // Bulk store timeline events
+      await database.storeTimelineEvents(batchTimelineEvents);
+
+      allPackets.push(...batchPackets);
     }
   } catch (error) {
     console.warn('Error parsing PCAP data:', error);
-    if (packets.length === 0) {
+    if (allPackets.length === 0) {
       console.error('Failed to decode any packets');
     }
   }
 
-  return packets;
+  return allPackets;
 };
 
 const parseStringData = (data: string): ParsedPacket => {

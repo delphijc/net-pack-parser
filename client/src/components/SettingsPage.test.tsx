@@ -5,12 +5,31 @@ import SettingsPage from './SettingsPage';
 import { localStorageService } from '@/services/localStorage';
 import { exportDataAsJson, importDataFromJson } from '@/utils/dataImportExport';
 
+import database from '@/services/database';
+import chainOfCustodyDb from '@/services/chainOfCustodyDb';
+
 // Mock the localStorageService
 vi.mock('@/services/localStorage', () => ({
   localStorageService: {
     getUsagePercentage: vi.fn(() => 0),
-    onQuotaExceeded: vi.fn(() => () => {}),
+    onQuotaExceeded: vi.fn(() => () => { }),
     clearAll: vi.fn(),
+    getValue: vi.fn(() => null),
+    setValue: vi.fn(),
+  },
+}));
+
+// Mock database and chainOfCustodyDb
+vi.mock('@/services/database', () => ({
+  default: {
+    clearAllData: vi.fn().mockResolvedValue(undefined),
+    clearPerformanceEntries: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/chainOfCustodyDb', () => ({
+  default: {
+    clearAll: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -28,9 +47,19 @@ vi.mock('@/components/ui/use-toast', () => ({
   }),
 }));
 
+// Mock usePerformanceStore
+vi.mock('@/store/performanceStore', () => ({
+  usePerformanceStore: {
+    getState: () => ({
+      resetMetrics: vi.fn(),
+    }),
+  },
+}));
+
+
 describe('SettingsPage', () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the settings page with storage usage', () => {
@@ -42,37 +71,37 @@ describe('SettingsPage', () => {
     expect(screen.getByText('15.00% used')).toBeInTheDocument();
   });
 
-  it('shows a confirmation dialog when "Clear All Local Data" is clicked', async () => {
+  it('shows a confirmation dialog when "Clear Analysis Data" is clicked', async () => {
     render(<SettingsPage />);
 
     const user = userEvent.setup();
     const clearButton = screen.getByRole('button', {
-      name: /Clear All Local Data/i,
+      name: /Clear Analysis Data/i,
     });
     await user.click(clearButton);
 
-    expect(screen.getByText('Are you absolutely sure?')).toBeInTheDocument();
+    expect(screen.getByText('Clear Analysis Data?')).toBeInTheDocument();
   });
 
-  it('calls clearAll when confirmation is accepted', async () => {
+  it('calls clearAllData when confirmation is accepted', async () => {
     render(<SettingsPage />);
     const user = userEvent.setup();
     const clearButton = screen.getByRole('button', {
-      name: /Clear All Local Data/i,
+      name: /Clear Analysis Data/i,
     });
     await user.click(clearButton);
 
-    const continueButton = screen.getByRole('button', { name: /Continue/i });
+    const continueButton = screen.getByRole('button', { name: /Clear Data/i });
     await user.click(continueButton);
 
     await waitFor(() => {
-      expect(localStorageService.clearAll).toHaveBeenCalled();
+      expect(database.clearAllData).toHaveBeenCalled();
+      expect(chainOfCustodyDb.clearAll).toHaveBeenCalled();
     });
     expect(mockToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Success',
-        description:
-          'All local data (packets, files, logs, settings) cleared successfully.',
+        description: 'Analysis data (Packets, Files, Logs) cleared successfully.',
       }),
     );
   });

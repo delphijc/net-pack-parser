@@ -8,6 +8,7 @@ vi.mock('./database', () => ({
     storePackets: vi.fn(),
     updateFileReference: vi.fn(),
     storeTimelineEvent: vi.fn(),
+    storeTimelineEvents: vi.fn(),
   },
 }));
 

@@ -12,13 +12,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { localStorageService } from '@/services/localStorage';
 import { exportDataAsJson, importDataFromJson } from '@/utils/dataImportExport';
-// We will need a toast component for notifications. Let's assume we have one.
 import { useToast } from '@/components/ui/use-toast';
 import database from '@/services/database';
 import chainOfCustodyDb from '@/services/chainOfCustodyDb';
+import { usePerformanceStore } from '@/store/performanceStore';
 
 type ImportMode = 'merge' | 'replace';
 
@@ -26,6 +33,7 @@ const SettingsPage: React.FC = () => {
   const { toast } = useToast();
   const [usage, setUsage] = useState(0);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showPerformanceConfirm, setShowPerformanceConfirm] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
 
@@ -49,28 +57,44 @@ const SettingsPage: React.FC = () => {
     return () => unsubscribe();
   }, [toast]);
 
-  const handleClearData = async () => {
+  const handleClearAnalysisData = async () => {
     try {
       setIsClearing(true);
       await Promise.all([database.clearAllData(), chainOfCustodyDb.clearAll()]);
-      localStorageService.clearAll();
 
-      setUsage(0);
+      // Update usage stats
+      setUsage(localStorageService.getUsagePercentage());
       setShowClearConfirm(false);
       toast({
         title: 'Success',
         description:
-          'All local data (packets, files, logs, settings) cleared successfully.',
+          'Analysis data (Packets, Files, Logs) cleared successfully.',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to clear data:', error);
       toast({
         title: 'Error',
-        description: 'Failed to clear all data. See console for details.',
+        description: `Failed to clear analysis data: ${error.message || 'Unknown error'}`,
         variant: 'destructive',
       });
     } finally {
       setIsClearing(false);
+    }
+  };
+
+  const handleClearPerformanceData = async () => {
+    try {
+      usePerformanceStore.getState().resetMetrics();
+      database.clearPerformanceEntries();
+      toast({ title: 'Success', description: 'Performance metrics reset.' });
+      setUsage(localStorageService.getUsagePercentage());
+      setShowPerformanceConfirm(false);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: `Failed to clear performance data: ${error.message}`,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -170,20 +194,22 @@ const SettingsPage: React.FC = () => {
             className="hidden"
           />
           <Button onClick={handleExportData}>Export Data</Button>
+
+          {/* Clear Analysis Data Dialog */}
           <AlertDialog
             open={showClearConfirm}
             onOpenChange={setShowClearConfirm}
           >
             <AlertDialogTrigger asChild>
-              <Button variant="destructive">Clear All Local Data</Button>
+              <Button variant="destructive">Clear Analysis Data</Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogTitle>Clear Analysis Data?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete all
-                  your analysis data, settings, and other cached information
-                  from your browser.
+                  This will permanently delete all parsed PACKETS, imported
+                  FILES, and forensic CASES. Settings and Performance metrics
+                  will be kept.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -193,15 +219,90 @@ const SettingsPage: React.FC = () => {
                 <AlertDialogAction
                   onClick={(e) => {
                     e.preventDefault();
-                    handleClearData();
+                    handleClearAnalysisData();
                   }}
                   disabled={isClearing}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
-                  {isClearing ? 'Clearing...' : 'Continue'}
+                  {isClearing ? 'Clearing...' : 'Clear Data'}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+
+          {/* Clear Performance Data Dialog */}
+          <AlertDialog
+            open={showPerformanceConfirm}
+            onOpenChange={setShowPerformanceConfirm}
+          >
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="text-destructive border-destructive hover:bg-destructive/10"
+              >
+                Clear Performance
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear Performance Metrics?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will reset all Web Vitals, Long Tasks, and Navigation
+                  Timing history.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleClearPerformanceData();
+                  }}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Clear Metrics
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
+
+      {/* Analysis Preferences Section */}
+      <div className="mt-8 space-y-4">
+        <div>
+          <h3 className="text-lg font-medium">Analysis Preferences</h3>
+          <p className="text-sm text-muted-foreground">
+            Customize your default views and analysis behavior.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Default Packet View</label>
+          <Select
+            value={
+              localStorageService.getValue<string>('preferences.defaultView') ||
+              'all'
+            }
+            onValueChange={(value) => {
+              localStorageService.setValue('preferences.defaultView', value);
+              toast({
+                title: 'Preference Saved',
+                description: `Default view set to: ${value === 'threats' ? 'Threats Only' : 'All Packets'}`,
+              });
+              // Force re-render to update UI if needed (though localStorageService doesn't trigger one, the next reload will pick it up)
+            }}
+          >
+            <SelectTrigger className="w-[280px]">
+              <SelectValue placeholder="Select default view" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Show All Packets</SelectItem>
+              <SelectItem value="threats">Show Threats Only</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-sm text-muted-foreground">
+            Choose what to see first when opening a PCAP file.
+          </p>
         </div>
       </div>
 
