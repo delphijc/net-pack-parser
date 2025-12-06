@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>7</epicId>
+    <storyId>7.11</storyId>
+    <title>Multi-client Connection Support</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/7-11-multi-client-connection-support.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>the system to handle multiple browser tabs or users gracefully</iWant>
+    <soThat>I don't crash the agent by accident</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`server/src/services/SessionManager.ts` [NEW]</path>
+        <title>SessionManager.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **State**: `activeSessions: Map&lt;interfaceName, CaptureSession&gt;`.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

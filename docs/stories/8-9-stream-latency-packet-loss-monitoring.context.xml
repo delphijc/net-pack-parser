@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>8</epicId>
+    <storyId>8.9</storyId>
+    <title>Stream Latency &amp; Packet Loss Monitoring</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/8-9-stream-latency-packet-loss-monitoring.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to monitor the "lag" between packet capture time and display time</iWant>
+    <soThat>I can optimize the pipeline</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/Footer.tsx` (Display stats there)</path>
+        <title>Footer.tsx` (Display stats there)</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Clock Sync**: Server should send its time on connect. Client calculates offset.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

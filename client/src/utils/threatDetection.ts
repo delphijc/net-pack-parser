@@ -82,7 +82,6 @@ export async function runThreatDetection(
         };
       });
       allThreats = allThreats.concat(yaraThreats);
-      allThreats = allThreats.concat(yaraThreats);
     }
   } catch (error) {
     console.error('YARA Scan failed:', error);

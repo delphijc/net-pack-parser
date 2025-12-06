@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>8</epicId>
+    <storyId>8.6</storyId>
+    <title>Real-time Alert Generation (Notifications)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/8-6-real-time-alert-generation-notifications.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>to be notified of high-severity threats even if I'm looking at a different tab (in the app)</iWant>
+    <soThat>I don't miss critical events</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/common/Toaster.tsx` (Use shadcn/ui toast)</path>
+        <title>ui toast)</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Debounce**: Use `lodash.debounce` or similar to coalesce multiple alerts.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

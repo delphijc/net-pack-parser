@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.7</storyId>
+    <title>Chain of Custody Logging &amp; Audit Trail</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/5-7-chain-of-custody-logging-audit-trail.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>forensic investigator</asA>
+    <iWant>implement the feature</iWant>
+    <soThat>I can prove the integrity of my analysis in court</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/services/chainOfCustodyDb.ts`</path>
+        <title>chainOfCustodyDb.ts`</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/components/ChainOfCustodyLog.tsx`</path>
+        <title>ChainOfCustodyLog.tsx`</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Service Integration**: The `ChainOfCustodyService` should be a singleton or accessed via Hook throughout the app.
+- **Interceptor**: Consider a middleware approach if using Redux/Zustand middleware to auto-log state changes, otherwise manual calls `ChainOfCustodyService.log(...)` in handlers are fine.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

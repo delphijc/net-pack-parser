@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Network Traffic Parser uses a **hybrid client-server architecture** with two deployment modes: (1) **Browser-Only Mode** for privacy-first PCAP file analysis with 100% client-side processing, and (2) **Connected Mode** for real-time OS-level packet capture with a server-side agent streaming packets via WebSocket to the browser. This architecture combines web performance monitoring and network forensics in a single modern web platform, leveraging Vite + React + TypeScript for the browser UI and Node.js + TypeScript for the optional capture agent.
+Network Traffic Parser uses a **Client-Server architecture**. While originally planned as a hybrid with a browser-only mode, performance requirements for large PCAP files necessitate a server-side parsing component. The system consists of: (1) **Frontend**: React/TypeScript web interface for visualization and analysis, and (2) **Backend**: Node.js/TypeScript server for heavy lifting (PCAP parsing) and future live capture capabilities.
 
 ---
 
@@ -27,14 +27,14 @@ npx tailwindcss init -p
 npm install -D @shadcn/ui
 ```
 
-### Server (Capture Agent)
+### Server (Backend)
 
 **Initialization Command:**
 ```bash
 mkdir server && cd server
 npm init -y
-npm install express ws bcrypt jsonwebtoken dotenv
-npm install -D typescript @types/node @types/express @types/ws @types/bcrypt @types/jsonwebtoken ts-node nodemon
+npm install express cors multer ws pcap-parser
+npm install -D typescript @types/node @types/express @types/cors @types/multer @types/ws ts-node nodemon
 npx tsc --init
 ```
 
@@ -66,7 +66,7 @@ net-pack-parser/
 | **Project Structure** | Monorepo | N/A | All epics | Frontend + Server in same repo for shared types, easier development, single version control |
 | **State Management - Server State** | TanStack Query | 5.x | Epic 1-8 | Best-in-class async state management, automatic caching/refetching, perfect for API calls and WebSocket data |
 | **State Management - UI State** | Zustand | 4.x | Epic 1-6 | Lightweight (3KB), minimal boilerplate, fast, no Provider wrapper needed, simple API |
-| **PCAP Parser (Browser)** | pcap-decoder | Latest | Epic 1 | TypeScript, browser-native (ArrayBuffer), Web Streams API support, actively maintained (2024) |
+| **PCAP Parser (Backend)** | pcap-parser | Latest | Epic 1.5 | Node.js based parsing to handle large files efficiently without blocking the browser thread. |
 | **Packet Capture (Server)** | cap | 0.2.x | Epic 7-8 | Cross-platform libpcap bindings (Linux/macOS/Windows), simpler API, stable despite age |
 | **Chart Library** | Recharts | 2.x | Epic 6 | React-native, TypeScript support, modern declarative API, composable charts, responsive |
 | **Testing Framework** | Vitest | 1.x | Epic 1-8 | Fast Vite-powered unit tests, compatible with Vitest ecosystem, better DX than Jest |

@@ -3,6 +3,8 @@ import { ScoreGauge } from './ScoreGauge';
 import { VitalsCard } from './VitalsCard';
 import { NavigationTimingView } from './NavigationTimingView';
 import { LongTasksView } from './LongTasksView';
+import { ServerMonitor } from './ServerMonitor';
+import { WaterfallChart } from './WaterfallChart';
 import { usePerformanceObserver } from '../../hooks/usePerformanceObserver';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
@@ -44,6 +46,7 @@ export const PerformanceDashboard = () => {
           </div>
         </div>
         <div className="col-span-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <ServerMonitor />
           <VitalsCard
             metric={getMetric('LCP')}
             description={definitions['LCP']}
@@ -75,6 +78,11 @@ export const PerformanceDashboard = () => {
         <div className="md:col-span-1">
           <LongTasksView />
         </div>
+      </div>
+
+      {/* Resource Waterfall */}
+      <div className="h-[400px]">
+        <WaterfallChart />
       </div>
     </div>
   );

@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.10</storyId>
+    <title>Case Notes &amp; Investigator Comments</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/5-10-case-notes-investigator-comments.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>a dedicated space to write high-level case objectives and summaries</iWant>
+    <soThat>the context of the investigation is preserved alongside the technical evidence</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/CaseInfoPanel.tsx` [NEW]</path>
+        <title>CaseInfoPanel.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/store/forensicStore.ts` (Update to hold metadata) (Story 5.4 store)</path>
+        <title>forensicStore.ts` (Update to hold metadata) (Story 5.4 store)</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Rich Text**: Use a lightweight Markdown editor (like `react-markdown` with an editing mode, or just a `textarea` for MVP).
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { usePerformanceStore, type LongTask } from '../store/performanceStore';
+import { usePerformanceStore, type LongTask, type ResourceTiming } from '../store/performanceStore';
 
 export const usePerformanceObserver = () => {
   const addLongTask = usePerformanceStore((state) => state.addLongTask);
+  const addResource = usePerformanceStore((state) => state.addResource);
   const observerRef = useRef<PerformanceObserver | null>(null);
 
   useEffect(() => {
@@ -16,7 +17,7 @@ export const usePerformanceObserver = () => {
       observerRef.current = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         entries.forEach((entry) => {
-          // We only care about long tasks (though we specify entryTypes below)
+          // Handle Long Tasks
           if (entry.entryType === 'longtask') {
             // Cast to any to access attribution, as it's not always in the standard Typescript lib definitions depending on version
             // Or utilize PerformanceLongTaskTiming interface if available
@@ -49,10 +50,36 @@ export const usePerformanceObserver = () => {
 
             addLongTask(task);
           }
+
+          // Handle Resource Timing
+          if (entry.entryType === 'resource') {
+            const resourceEntry = entry as PerformanceResourceTiming;
+
+            // Basic filtering: ignore own API calls if checking performance of external stuff, 
+            // but for a parser tool, we likely want to see everything including chunk loads.
+            // We can filter extremely fast internal things if needed, but for now capture all.
+
+            const resource: ResourceTiming = {
+              id: crypto.randomUUID(),
+              name: resourceEntry.name,
+              initiatorType: resourceEntry.initiatorType,
+              startTime: resourceEntry.startTime,
+              duration: resourceEntry.duration,
+              transferSize: resourceEntry.transferSize,
+              breakdown: {
+                dns: resourceEntry.domainLookupEnd - resourceEntry.domainLookupStart,
+                tcp: resourceEntry.connectEnd - resourceEntry.connectStart,
+                ttfb: resourceEntry.responseStart - resourceEntry.requestStart,
+                download: resourceEntry.responseEnd - resourceEntry.responseStart,
+              },
+            };
+
+            addResource(resource);
+          }
         });
       });
 
-      observerRef.current.observe({ entryTypes: ['longtask'] });
+      observerRef.current.observe({ entryTypes: ['longtask', 'resource'] });
     } catch (e) {
       console.warn('PerformanceObserver failed to start:', e);
     }
@@ -62,5 +89,5 @@ export const usePerformanceObserver = () => {
         observerRef.current.disconnect();
       }
     };
-  }, [addLongTask]);
+  }, [addLongTask, addResource]);
 };

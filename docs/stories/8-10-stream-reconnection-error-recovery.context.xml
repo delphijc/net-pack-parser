@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>8</epicId>
+    <storyId>8.10</storyId>
+    <title>Stream Reconnection &amp; Error Recovery</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/8-10-stream-reconnection-error-recovery.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>the application to automatically recover from network interruptions</iWant>
+    <soThat>I don't have to manually refresh the page when the connection drops</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>client/src/hooks/useWebSocket.ts</path>
+        <title>useWebSocket.ts</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>client/src/components/common/ConnectionBanner.tsx</path>
+        <title>ConnectionBanner.tsx</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- Reconnection: Use a reconnectionAttempts ref in the hook. Reset it on successful onopen.
+- Increase delay: Math.min(30000, 1000 * Math.pow(2, attempts)).
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

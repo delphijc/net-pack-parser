@@ -255,12 +255,12 @@ This project will be delivered across 8 epics, each providing incremental user v
 
 **Hybrid Client-Server Architecture** with two deployment modes:
 
-#### Mode 1: Browser-Only (Standalone)
-- **Components**: Web interface only
+#### Mode 1: Local Analysis (Client-Server)
+- **Components**: Web interface + Local Server Backend
 - **Use Case**: PCAP file analysis, no live capture needed
-- **Deployment**: Static hosting (GitHub Pages, S3, CDN)
-- **Data Flow**: User uploads PCAP → browser parses → analysis runs locally → results displayed
-- **Privacy**: 100% client-side processing, zero data transmission
+- **Deployment**: Local Node.js server (serves API) + React Frontend
+- **Data Flow**: User uploads PCAP → Server parses → Frontend fetches results → analysis runs locally/in-browser
+- **Privacy**: Processing happens on the local machine (local server), no data leaves the device network.
 
 #### Mode 2: Connected (Live Capture)
 - **Components**: Web interface + Capture Agent (server-side)
@@ -537,7 +537,7 @@ This project will be delivered across 8 epics, each providing incremental user v
 ### PCAP File Analysis
 
 - **FR16**: Users can upload PCAP files via drag-and-drop or file picker
-- **FR17**: System parses PCAP files and extracts packet metadata (timestamp, source/dest IP, protocol, port, size)
+- **FR17**: System parses PCAP files on the backend server and returns packet metadata (timestamp, source/dest IP, protocol, port, size)
 - **FR18**: System generates cryptographic hashes (SHA-256, MD5) for uploaded files
 - **FR19**: System extracts tokens and strings from packet payloads
 - **FR20**: System detects protocols (HTTP, HTTPS, FTP, SMTP, DNS, TCP, UDP, ICMP)

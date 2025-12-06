@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>7</epicId>
+    <storyId>7.14</storyId>
+    <title>Auto-reconnection Logic</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/7-14-auto-reconnection-logic.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>the app to try and reconnect if the network drops momentarily</iWant>
+    <soThat>I don't lose my session context</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/services/AgentClient.ts`</path>
+        <title>AgentClient.ts`</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **TanStack Query**: `retry` configuration in `useQuery` can handle some of this, but a global connection state manager is better for the "Agent" concept.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

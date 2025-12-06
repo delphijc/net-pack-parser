@@ -12,17 +12,15 @@ See the Network Traffic Parser in action, from uploading a PCAP file to identify
 
 This project follows a **hybrid client-server architecture** designed to support two modes of operation:
 
-1.  **Browser-Only Mode (Client)**: A privacy-first, standalone web application that processes PCAP files and analyzes network traffic entirely within the browser. No data is sent to any server.
-2.  **Connected Mode (Server)**: (In Development) A Node.js capture agent that streams real-time network traffic from the host OS to the browser via WebSockets.
+1.  **Local Analysis (Client-Server)**: A web interface paired with a local Node.js server to handle PCAP file parsing. The server is **required** for parsing operations.
+2.  **Connected Mode**: (Planned) Extends the local server to act as a capture agent, streaming real-time network traffic from the host OS to the browser.
 
 ### Directory Structure
 
 ```
 net-pack-parser/
 ├── client/              # Browser UI (Vite + React + TypeScript)
-│   ├── src/             # Source code
-│   └── package.json     # Client dependencies
-├── server/              # (Planned) Capture Agent
+├── server/              # Backend PCAP Processing Server (Node.js + Express)
 └── package.json         # Root configuration
 ```
 
@@ -50,21 +48,35 @@ net-pack-parser/
     npm install
     ```
 
-### 💻 Running in Development Mode
-
-To start the **Browser-Only** application:
-
-1.  Navigate to the client directory:
+3.  **Install Server Dependencies**
     ```bash
-    cd client
+    cd ../server
+    npm install
     ```
 
-2.  Start the development server:
-    ```bash
-    npm run dev
-    ```
+### 💻 Running the Application
 
-3.  Open your browser and navigate to `http://localhost:5173`.
+This application requires both the **Server** (for parsing) and the **Client** (for the UI) to be running.
+
+**1. Start the Server**
+Open a terminal:
+```bash
+cd server
+npm run build
+npm run start
+```
+*Server runs on http://localhost:3000*
+
+**2. Start the Client**
+Open a second terminal:
+```bash
+cd client
+npm run dev
+```
+*Client runs on http://localhost:5173*
+
+**3. Use the App**
+Open your browser and navigate to `http://localhost:5173`. Uploading a PCAP file will now send it to the local server for processing.
 
 ### 🧪 Testing
 
@@ -132,7 +144,7 @@ The build artifacts will be generated in the `client/dist` directory, ready for 
 
 -   **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, shadcn/ui
 -   **State Management**: TanStack Query (Server State), Zustand (UI State)
--   **Parsing**: `pcap-decoder` for browser-based PCAP processing
+-   **Parsing**: Node.js backend for PCAP processing (server-side)
 -   **Testing**: Vitest, React Testing Library
 
 ---

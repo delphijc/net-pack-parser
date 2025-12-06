@@ -1,16 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { parseNetworkData, downloadFile } from '../../services/pcapParser';
+import { api } from '../../services/api';
+import { useSessionStore } from '../../store/sessionStore';
 import {
   startNetworkCapture,
   stopNetworkCapture,
 } from '../../services/networkCapture';
 import database from '../../services/database';
 import type { ParsedPacket } from '../../types';
-import { generateSha256Hash, generateMd5Hash } from '../../utils/hashGenerator';
-import FileInfo from '../FileInfo'; // Import the new FileInfo component
-import chainOfCustodyDb from '../../services/chainOfCustodyDb';
-import { v4 as uuidv4 } from 'uuid';
-import type { FileChainOfCustodyEvent } from '../../types';
 import ChainOfCustodyLog from '../ChainOfCustodyLog';
 import {
   Terminal,
@@ -40,30 +37,10 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
 
   // New state for file info
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
-  const [uploadedFileSize, setUploadedFileSize] = useState<number | null>(null);
-  const [uploadedFileSha256, setUploadedFileSha256] = useState<string | null>(
-    null,
-  );
-  const [uploadedFileMd5, setUploadedFileMd5] = useState<string | null>(null);
-  const [uploadedFileBuffer, setUploadedFileBuffer] =
-    useState<ArrayBuffer | null>(null);
+  // const [uploadedFileSize, setUploadedFileSize] = useState<number | null>(null);
 
-  const handleVerifyIntegrity = async (): Promise<{
-    sha256Match: boolean;
-    md5Match: boolean;
-  }> => {
-    if (!uploadedFileBuffer || !uploadedFileSha256 || !uploadedFileMd5) {
-      throw new Error('No file uploaded or hashes available for verification.');
-    }
+  // Client-side hashing variables removed for performance
 
-    const recalculatedSha256 = await generateSha256Hash(uploadedFileBuffer);
-    const recalculatedMd5 = await generateMd5Hash(uploadedFileBuffer);
-
-    return {
-      sha256Match: recalculatedSha256 === uploadedFileSha256,
-      md5Match: recalculatedMd5 === uploadedFileMd5,
-    };
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,6 +96,74 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
     }
   };
 
+  // Polling function for server status
+  const pollServerStatus = async (sessionId: string) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const statusData = await api.getStatus(sessionId);
+
+        if (statusData.status === 'complete') {
+          clearInterval(pollInterval);
+
+          // Fetch results
+          const resultsData = await api.getResults(sessionId);
+
+          if (resultsData.packets && resultsData.packets.length > 0) {
+            // Transform server packets to client ParsedPacket format
+            const adaptedPackets: ParsedPacket[] = resultsData.packets.map((p: any) => ({
+              id: p.id,
+              timestamp: p.timestamp,
+              protocol: p.protocol,
+              sourceIP: p.sourceIp,
+              destIP: p.destIp,
+              sourcePort: 0,
+              destPort: 0,
+              length: p.length,
+              info: p.info,
+              originalLength: p.length,
+              rawData: p.raw ? new TextEncoder().encode(p.raw).buffer : new ArrayBuffer(0),
+              detectedProtocols: [p.protocol],
+              tokens: [],
+              sections: [],
+              fileReferences: [],
+              sessionId: sessionId
+            }));
+
+            await database.storePackets(adaptedPackets);
+
+            // Register session in store
+            useSessionStore.getState().addSession({
+              id: sessionId,
+              name: uploadedFileName || 'Unknown Session',
+              timestamp: Date.now(),
+              packetCount: adaptedPackets.length
+            });
+
+            setLastParsedPacket(adaptedPackets[adaptedPackets.length - 1]);
+            setCapturedData([]);
+            setErrorMessage('');
+          } else {
+            setErrorMessage('No packets found in file.');
+          }
+
+          setParsing(false);
+          onParsingStatusChange?.(false);
+        } else if (statusData.status === 'error') {
+          clearInterval(pollInterval);
+          setErrorMessage(`Server Parsing Error: ${statusData.error}`);
+          setParsing(false);
+          onParsingStatusChange?.(false);
+        }
+      } catch (err) {
+        clearInterval(pollInterval);
+        console.error('Polling error', err);
+        setErrorMessage('Failed to communicate with analysis server.');
+        setParsing(false);
+        onParsingStatusChange?.(false);
+      }
+    }, 1000);
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -128,53 +173,27 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
       onParsingStatusChange?.(true);
       setErrorMessage('');
 
-      const buffer = await file.arrayBuffer();
-      setUploadedFileBuffer(buffer);
+      // Create FormData
+      const formData = new FormData();
+      formData.append('pcap', file);
 
-      // Generate hashes
-      const sha256Hash = await generateSha256Hash(buffer);
-      const md5Hash = await generateMd5Hash(buffer);
-
-      // Store file info and hashes in state
       setUploadedFileName(file.name);
-      setUploadedFileSize(file.size);
-      setUploadedFileSha256(sha256Hash);
-      setUploadedFileMd5(md5Hash);
+      // setUploadedFileSize(file.size);
 
-      // Create and store Chain of Custody log entry
-      const cocEvent: FileChainOfCustodyEvent = {
-        id: uuidv4(),
-        timestamp: new Date().toISOString(),
-        action: 'File Uploaded',
-        filename: file.name,
-        fileSize: file.size,
-        sha256Hash: sha256Hash,
-        md5Hash: md5Hash,
-        userAgent: navigator.userAgent,
-      };
-      await chainOfCustodyDb.addFileChainOfCustodyEvent(cocEvent);
+      // Upload to server using API service
+      const uploadData = await api.uploadPcap(file);
+      const sessionId = uploadData.sessionId;
 
-      const parsedPackets = await parseNetworkData(buffer);
+      console.log(`Upload success. Session: ${sessionId}. polling...`);
 
-      if (parsedPackets.length === 0) {
-        setErrorMessage('No valid packets found in PCAP file.');
-        return;
-      }
+      // Start polling
+      pollServerStatus(sessionId);
 
-      await database.storePackets(parsedPackets);
-      // Ensure DB transaction completes before proceeding
-      // (storePackets resolves after transaction oncomplete)
-      // Note: parsedPackets can be large, but IndexedDB handles it.
-      // The crash might have been due to main thread blocking from worker messages.
-      setLastParsedPacket(parsedPackets[parsedPackets.length - 1]);
-      setInputData('');
-      setCapturedData([]);
     } catch (error) {
-      console.error('Error parsing PCAP file:', error);
+      console.error('Error uploading file:', error);
       setErrorMessage(
-        "Failed to parse PCAP file. Please ensure it's a valid capture file.",
+        "Failed to upload PCAP file. Please check server connection.",
       );
-    } finally {
       setParsing(false);
       onParsingStatusChange?.(false);
       if (fileInputRef.current) {
@@ -557,7 +576,9 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
         </div>
       )}
 
-      {uploadedFileName &&
+      {/* Client-side hashing disabled for performance on large files. 
+          Todo: Fetch hashes from server response. */}
+      {/* {uploadedFileName &&
         uploadedFileSize !== null &&
         uploadedFileSha256 &&
         uploadedFileMd5 && (
@@ -568,7 +589,7 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
             md5Hash={uploadedFileMd5}
             onVerifyIntegrity={handleVerifyIntegrity}
           />
-        )}
+        )} */}
 
       <ChainOfCustodyLog />
     </div>

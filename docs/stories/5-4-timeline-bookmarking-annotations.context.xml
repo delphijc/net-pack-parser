@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.4</storyId>
+    <title>Timeline Bookmarking &amp; Annotations</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/5-4-timeline-bookmarking-annotations.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to bookmark specific packets and add notes to the timeline</iWant>
+    <soThat>I can document key evidence and findings during my investigation</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/timeline/TimelineView.tsx`</path>
+        <title>TimelineView.tsx`</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/store/forensicStore.ts` [NEW]</path>
+        <title>forensicStore.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/components/AnnotationDrawer.tsx` [NEW]</path>
+        <title>AnnotationDrawer.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Storage**: Use a new `forensicStore` (Zustand) that syncs to `IndexedDB` or the existing `ChainOfCustody` service.
+- **UX**: Right-click on timeline -&gt; "Add Bookmark".
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

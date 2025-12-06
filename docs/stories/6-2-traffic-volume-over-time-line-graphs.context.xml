@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.2</storyId>
+    <title>Traffic Volume Over Time (Line Graphs)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/6-2-traffic-volume-over-time-line-graphs.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to visualize the volume of traffic (packets/bytes) over the duration of the capture</iWant>
+    <soThat>I can spot bursts, quiet periods, or rhythmic patterns</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/dashboard/TrafficVolume.tsx` [NEW]</path>
+        <title>TrafficVolume.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Reuse**: Logic from `TimelineView` (Story 5.1) might be reusable here, but this is a dashboard widget (smaller, less interactive) vs the full forensic timeline.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

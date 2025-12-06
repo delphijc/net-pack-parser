@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>8</epicId>
+    <storyId>8.4</storyId>
+    <title>Live Packet Display in Browser</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/8-4-live-packet-display-in-browser.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>to see packets appearing in the list as they are captured</iWant>
+    <soThat>I have immediate visibility into the network traffic</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/store/liveStore.ts` [NEW]</path>
+        <title>liveStore.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/components/PacketList.tsx`</path>
+        <title>PacketList.tsx`</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Performance**: Do NOT use `useState` for the packet list if updating 50 times/sec. Use a mutable ref or `zustand/vanilla` with a throttled subscriber, or `tanstack-virtual` to only render visible rows.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

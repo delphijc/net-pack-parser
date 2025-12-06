@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>8</epicId>
+    <storyId>8.1</storyId>
+    <title>WebSocket Server Setup (WSS with TLS)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/8-1-websocket-server-setup-wss-with-tls.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>the server agent to accept secure WebSocket connections</iWant>
+    <soThat>I can push real-time data to the browser</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`server/src/services/WebSocketHandler.ts` [NEW]</path>
+        <title>WebSocketHandler.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Auth**: Since WebSockets don't allow custom headers in the standard browser API, pass the token in `?token=...` or use the `sec-websocket-protocol` header.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

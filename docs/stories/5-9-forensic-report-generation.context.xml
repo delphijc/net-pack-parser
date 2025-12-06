@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.9</storyId>
+    <title>Forensic Report Generation</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/5-9-forensic-report-generation.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to generate a professional PDF or HTML report of my findings</iWant>
+    <soThat>I can present the evidence to non-technical stakeholders or legal teams</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/services/ReportGenerator.ts` [NEW]</path>
+        <title>ReportGenerator.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/components/ReportPreview.tsx` [NEW]</path>
+        <title>ReportPreview.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **HTML Report**: Easiest path. Embed data as JSON in a `&lt;script&gt;` tag within a template HTML file, and include a mini-viewer script.
+- **Charts**: Use `html2canvas` to screenshot the existing charts, or render them server-side (not applicable here).
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

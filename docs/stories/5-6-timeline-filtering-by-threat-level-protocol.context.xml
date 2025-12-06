@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.6</storyId>
+    <title>Timeline Filtering by Threat Level &amp; Protocol</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/5-6-timeline-filtering-by-threat-level-protocol.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to filter the timeline to show only High Severity threats or specific protocols</iWant>
+    <soThat>I can cut through the noise and focus on malicious activity</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/timeline/TimelineView.tsx`</path>
+        <title>TimelineView.tsx`</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/components/timeline/TimelineControls.tsx` [NEW]</path>
+        <title>TimelineControls.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Filtering**: Apply filters to the data passed to the Chart.
+- **Styling**: Use the threat severity color from Epic 3 (Red/Orange/Yellow) for the bars.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

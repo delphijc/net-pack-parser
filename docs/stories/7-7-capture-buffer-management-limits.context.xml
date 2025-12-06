@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>7</epicId>
+    <storyId>7.7</storyId>
+    <title>Capture Buffer Management (Limits)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/7-7-capture-buffer-management-limits.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to set a size limit for the capture file</iWant>
+    <soThat>the server disk doesn't fill up completely</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`server/src/services/CaptureSession.ts`</path>
+        <title>CaptureSession.ts`</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Check Frequency**: Check file size every N packets (e.g., 1000) to avoid `fs.stat` overhead on every packet.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

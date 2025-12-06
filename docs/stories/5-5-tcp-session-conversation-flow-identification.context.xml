@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.5</storyId>
+    <title>TCP Session Conversation Flow Identification</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/5-5-tcp-session-conversation-flow-identification.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to reconstruct the full text or payload of a TCP conversation</iWant>
+    <soThat>I can read the exchange (e</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/StreamFollower.tsx` [NEW]</path>
+        <title>StreamFollower.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/services/TcpReassembler.ts` [NEW]</path>
+        <title>TcpReassembler.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Logic**: Use the `flowId` from Story 5.3 to fetch all packets. Sort by `seq`.
+- **UI**: Standard "Wireshark-style" text view. Red for request, Blue for response.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

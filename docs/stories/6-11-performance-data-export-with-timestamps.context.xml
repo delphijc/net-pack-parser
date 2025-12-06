@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.11</storyId>
+    <title>Performance Data Export with Timestamps</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/6-11-performance-data-export-with-timestamps.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to export the performance metrics (Story 4.6 history) to CSV</iWant>
+    <soThat>I can analyze trends externally</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/PerformanceDashboard.tsx`</path>
+        <title>PerformanceDashboard.tsx`</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Reuse**: Reuse `CsvExporter` service.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

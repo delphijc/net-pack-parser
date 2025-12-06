@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.8</storyId>
+    <title>Evidence Package Export with Metadata</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/5-8-evidence-package-export-with-metadata.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to export the original PCAP along with my analysis notes and audit log in a single secure package</iWant>
+    <soThat>I can hand off the case or archive it with full context</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/services/EvidencePackager.ts` [NEW]</path>
+        <title>EvidencePackager.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/components/ExportControl.tsx` [NEW]</path>
+        <title>ExportControl.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **JSZip**: Use `jszip` to create the bundle.
+- **Streaming**: For large PCAPs, ensure we don't duplicate the blob in memory unnecessarily. Use `finalize` stream if possible or blob references.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

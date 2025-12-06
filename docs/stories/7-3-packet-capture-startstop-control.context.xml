@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>7</epicId>
+    <storyId>7.3</storyId>
+    <title>Packet Capture Start/Stop Control</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/7-3-packet-capture-startstop-control.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>to start and stop packet capture sessions via the API</iWant>
+    <soThat>I can control the agent remotely</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`server/src/services/CaptureSession.ts` [NEW]</path>
+        <title>CaptureSession.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Streams**: Use a `WriteStream` to dump the raw buffer to disk in PCAP format. You might need a `PcapWriter` utility to write the global header first, then packet headers.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

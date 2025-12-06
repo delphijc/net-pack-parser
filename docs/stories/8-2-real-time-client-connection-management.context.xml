@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>8</epicId>
+    <storyId>8.2</storyId>
+    <title>Real-time Client Connection Management</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/8-2-real-time-client-connection-management.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>the browser to connect to the stream seamlessly</iWant>
+    <soThat>I don't have to manually refresh or reload</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/hooks/useWebSocket.ts` [NEW]</path>
+        <title>useWebSocket.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Robustness**: Handle `onclose` vs `onerror`.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

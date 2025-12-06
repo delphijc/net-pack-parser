@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>7</epicId>
+    <storyId>7.15</storyId>
+    <title>Version Compatibility Check</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/7-15-version-compatibility-check.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>the client to warn me if the connected agent is incompatible</iWant>
+    <soThat>I don't face weird bugs due to version mismatch</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`server/package.json` (Source of truth for server version)</path>
+        <title>package.json` (Source of truth for server version)</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/package.json` (Source of truth for client version)</path>
+        <title>package.json` (Source of truth for client version)</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Endpoint**: Ensure `GET /api/version` is public or protected (protected is better, but maybe public if we want to check before login).
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

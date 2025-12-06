@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>7</epicId>
+    <storyId>7.13</storyId>
+    <title>Connection Status Monitoring</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/7-13-connection-status-monitoring.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>to know if I am currently connected to the agent and what the latency is</iWant>
+    <soThat>I can trust the data I'm seeing is current</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/ConnectionStatus.tsx` [NEW]</path>
+        <title>ConnectionStatus.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **API**: Add a simple `GET /api/ping` to the server if `health` is too heavy.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

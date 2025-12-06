@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.5</storyId>
+    <title>Performance Dashboard &amp; Real-Time Metrics</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/4-5-performance-dashboard-real-time-metrics.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>a centralized dashboard view of all performance metrics</iWant>
+    <soThat>I can see the application's health at a glance</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/PerformanceDashboard.tsx` [NEW]</path>
+        <title>PerformanceDashboard.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/components/performance/VitalsCard.tsx` (From Story 4.1)</path>
+        <title>VitalsCard.tsx` (From Story 4.1)</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/components/performance/WaterfallChart.tsx` (From Story 4.4)</path>
+        <title>WaterfallChart.tsx` (From Story 4.4)</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/hooks/usePerformanceObserver.ts`</path>
+        <title>usePerformanceObserver.ts`</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Orchestration**: This component triggers the `usePerformanceObserver` hook. It should be the single source of truth for subscription life-cycle.
+- **Responsiveness**: Ensure the grid collapses gracefully on smaller screens (though desktop is primary for this tool).
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

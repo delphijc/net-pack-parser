@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>8</epicId>
+    <storyId>8.3</storyId>
+    <title>Streaming Protocol Definition (JSON/Binary)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/8-3-streaming-protocol-definition-jsonbinary.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>implement the feature</iWant>
+    <soThat>the server and client agree on data formats</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/types/WebSocketMessages.ts` [NEW]</path>
+        <title>WebSocketMessages.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`server/src/types/WebSocketMessages.ts` [NEW] (Ideally symlinked or shared pkg)</path>
+        <title>WebSocketMessages.ts` [NEW] (Ideally symlinked or shared pkg)</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Efficiency**: Minimize payload size. Only send essential packet headers for the list view. Fetch full payload via REST only when "inspected". (Hybrid approach).
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.5</storyId>
+    <title>Chart Export as Images (PNG/SVG)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/6-5-chart-export-as-images-png-svg.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to copy or download charts as images</iWant>
+    <soThat>I can paste them into external presentation slides or documents</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/dashboard/ChartWrapper.tsx` [NEW]</path>
+        <title>ChartWrapper.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **html-to-image**: Use `toPng` and `toSvg` functions. Pass the chart's DOM node ref.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

@@ -8,14 +8,14 @@ export interface Token {
 export interface ParsedSection {
   id: string;
   type:
-    | 'header'
-    | 'body'
-    | 'footer'
-    | 'from'
-    | 'to'
-    | 'subject'
-    | 'sheet'
-    | 'cell';
+  | 'header'
+  | 'body'
+  | 'footer'
+  | 'from'
+  | 'to'
+  | 'subject'
+  | 'sheet'
+  | 'cell';
   startIndex: number;
   endIndex: number;
   content: string;
@@ -34,6 +34,7 @@ export interface ParsedPacket extends Packet {
   threatIntelligence?: ThreatIntelligence[];
   suspiciousIndicators?: SuspiciousIndicator[];
   matchesSearch?: boolean;
+  sessionId?: string; // Optional for backward compatibility/legacy packets
 }
 
 export interface ForensicMetadata {
@@ -59,10 +60,10 @@ export interface ChainOfCustodyEntry {
 export interface ThreatIntelligence {
   id: string;
   type:
-    | 'malicious_domain'
-    | 'malicious_ip'
-    | 'malware_signature'
-    | 'suspicious_pattern';
+  | 'malicious_domain'
+  | 'malicious_ip'
+  | 'malware_signature'
+  | 'suspicious_pattern';
   value: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   source: string;
@@ -73,15 +74,15 @@ export interface ThreatIntelligence {
 export interface SuspiciousIndicator {
   id: string;
   type:
-    | 'unusual_port'
-    | 'encrypted_payload'
-    | 'base64_content'
-    | 'suspicious_user_agent'
-    | 'data_exfiltration'
-    | 'command_injection'
-    | 'sql_injection'
-    | 'xss_attempt'
-    | 'brute_force';
+  | 'unusual_port'
+  | 'encrypted_payload'
+  | 'base64_content'
+  | 'suspicious_user_agent'
+  | 'data_exfiltration'
+  | 'command_injection'
+  | 'sql_injection'
+  | 'xss_attempt'
+  | 'brute_force';
   severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   evidence: string;
@@ -108,11 +109,11 @@ export interface TimelineEvent {
   id: string;
   timestamp: string;
   type:
-    | 'network_activity'
-    | 'file_access'
-    | 'authentication'
-    | 'data_transfer'
-    | 'suspicious_activity';
+  | 'network_activity'
+  | 'file_access'
+  | 'authentication'
+  | 'data_transfer'
+  | 'suspicious_activity';
   source: string;
   destination?: string;
   description: string;

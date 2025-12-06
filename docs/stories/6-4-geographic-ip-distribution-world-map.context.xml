@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.4</storyId>
+    <title>Geographic IP Distribution (World Map)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/6-4-geographic-ip-distribution-world-map.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to map IP addresses to their geographic locations</iWant>
+    <soThat>I can visualize the physical origin and destination of traffic</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/dashboard/GeoMap.tsx` [NEW]</path>
+        <title>GeoMap.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/services/GeoIpService.ts` [NEW]</path>
+        <title>GeoIpService.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Offline First**: Bundling a full MaxMind DB (60MB+) might be too heavy for the client bundle. Consider a simplified "Country-only" JSON map (~1MB) for the MVP.
+- **Privacy**: Do NOT send IPs to free APIs (ip-api.com) unless explicitly opted-in by user, as this leaks investigation targets. Prefer local lookup.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>7</epicId>
+    <storyId>7.6</storyId>
+    <title>Capture Statistics Monitoring</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/7-6-capture-statistics-monitoring.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>to see real-time statistics of the capture (packets count, dropped packets)</iWant>
+    <soThat>I know if the agent is keeping up with the traffic load</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`server/src/services/CaptureSession.ts`</path>
+        <title>CaptureSession.ts`</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **pcap_stats**: The native `pcap_stats` struct provides `ps_recv`, `ps_drop`, `ps_ifdrop`. Expose this via the API.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

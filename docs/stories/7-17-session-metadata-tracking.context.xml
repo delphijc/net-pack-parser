@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>7</epicId>
+    <storyId>7.17</storyId>
+    <title>Session Metadata Tracking</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/7-17-session-metadata-tracking.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>the server to remember details about past captures</iWant>
+    <soThat>I can identify them later by date or packet count</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`server/src/db/Database.ts` [NEW]</path>
+        <title>Database.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`server/src/repositories/SessionRepository.ts` [NEW]</path>
+        <title>SessionRepository.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **LowDB**: For MVP, `lowdb` (JSON file) is sufficient and easier than SQLite setup.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

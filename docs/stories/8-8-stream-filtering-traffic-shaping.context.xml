@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>8</epicId>
+    <storyId>8.8</storyId>
+    <title>Stream Filtering &amp; Traffic Shaping</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/8-8-stream-filtering-traffic-shaping.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>to filter the stream at the source (server)</iWant>
+    <soThat>I don't waste bandwidth receiving packets I don't care about</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`server/src/services/WebSocketHandler.ts`</path>
+        <title>WebSocketHandler.ts`</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **BPF**: If possible, update the `cap` instance's BPF filter. If not (limitations of libpcap on live capture), filter in Node.js memory before `.send()`.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

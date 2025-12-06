@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>7</epicId>
+    <storyId>7.10</storyId>
+    <title>JWT Authentication &amp; Token Management</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/7-10-jwt-authentication-token-management.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>security-conscious user</asA>
+    <iWant>the agent to require authentication</iWant>
+    <soThat>unauthorized users cannot sniff traffic on my network interfaces</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`server/src/controllers/AuthController.ts` [NEW]</path>
+        <title>AuthController.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`server/src/middleware/authMiddleware.ts` [NEW]</path>
+        <title>authMiddleware.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Security**: Use `bcrypt` to compare passwords even if stored in a config file hash (recommended).
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

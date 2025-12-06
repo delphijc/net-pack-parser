@@ -11,6 +11,21 @@ export interface Metric {
   id: string;
 }
 
+export interface ResourceTiming {
+  id: string;
+  name: string;
+  initiatorType: string;
+  startTime: number;
+  duration: number;
+  transferSize: number;
+  breakdown: {
+    dns: number;
+    tcp: number;
+    ttfb: number;
+    download: number;
+  };
+}
+
 export interface LongTask {
   id: string;
   startTime: number;
@@ -19,12 +34,15 @@ export interface LongTask {
   timestamp: number;
 }
 
+
 interface PerformanceState {
   metrics: Record<string, Metric>;
   longTasks: LongTask[];
+  resources: ResourceTiming[];
   score: number;
   updateMetric: (metric: Metric) => void;
   addLongTask: (task: LongTask) => void;
+  addResource: (resource: ResourceTiming) => void;
   resetMetrics: () => void;
 }
 
@@ -33,6 +51,7 @@ export const usePerformanceStore = create<PerformanceState>()(
     (set) => ({
       metrics: {},
       longTasks: [],
+      resources: [],
       score: 100, // Default optimistic score
 
       updateMetric: (metric) => {
@@ -82,7 +101,16 @@ export const usePerformanceStore = create<PerformanceState>()(
         });
       },
 
-      resetMetrics: () => set({ metrics: {}, score: 100, longTasks: [] }),
+      addResource: (resource) => {
+        set((state) => {
+          // Add new resource and keep only the last 100 entries to prevent memory bloat
+          const updatedResources = [resource, ...state.resources].slice(0, 100);
+          return { resources: updatedResources };
+        });
+      },
+
+      resetMetrics: () =>
+        set({ metrics: {}, score: 100, longTasks: [], resources: [] }),
     }),
     {
       name: 'performance-storage',
@@ -90,6 +118,7 @@ export const usePerformanceStore = create<PerformanceState>()(
         metrics: state.metrics,
         score: state.score,
         longTasks: state.longTasks,
+        resources: state.resources,
       }),
     },
   ),

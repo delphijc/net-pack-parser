@@ -71,3 +71,18 @@ export default defineConfig([
   },
 ]);
 ```
+## Performance Monitoring
+
+The application includes a comprehensive Performance Dashboard (`src/components/performance/`) that visualizes:
+
+- **Core Web Vitals**: Real-time tracking of LCP, FCP, CLS, INP, and TTFB using the `web-vitals` library.
+- **Navigation Timing**: Detailed breakdown of page load phases (DNS, TCP, Request, Response, DOM Processing).
+- **Resource Waterfall**: A Gantt-style chart showing loading timelines of all resources (JS, CSS, Images, XHR) with filtering capabilities.
+- **Long Tasks**: Monitoring of tasks blocking the main thread for >50ms.
+
+### Key Components
+
+- `PerformanceDashboard.tsx`: Main container for performance views.
+- `WaterfallChart.tsx`: Visualizer for resource timings.
+- `usePerformanceObserver.ts`: Hook for capturing `longtask` and `resource` entries.
+- `performanceStore.ts`: Zustand store for aggregating performance metrics.

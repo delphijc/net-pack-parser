@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>7</epicId>
+    <storyId>7.9</storyId>
+    <title>RESTful API for Capture Control</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/7-9-restful-api-for-capture-control.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>a structured REST API to interact with the capture agent</iWant>
+    <soThat>the frontend client can perform actions in a standard way</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`server/src/app.ts` (App setup)</path>
+        <title>app.ts` (App setup)</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Structure**: Use a clear controller-service pattern. `routes -&gt; controller -&gt; service`.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

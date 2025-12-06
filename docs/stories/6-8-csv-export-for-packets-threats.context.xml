@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.8</storyId>
+    <title>CSV Export for Packets &amp; Threats</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/6-8-csv-export-for-packets-threats.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to export packet data and threat lists to CSV</iWant>
+    <soThat>I can import them into Excel or other legacy analysis tools</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/services/Exporters/CsvExporter.ts` [NEW]</path>
+        <title>CsvExporter.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Library**: `papaparse` or simple string template string builder.
+- **Data**: Stream directly from `pcapParser` results.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

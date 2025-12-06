@@ -309,7 +309,33 @@ And after successful import, shows confirmation: "X packets, Y filters imported 
 
 **FR Coverage:** FR3, FR4
 
-### Story 1.4: PCAP File Upload & Parsing
+### Epic 1.5: Backend Infrastructure & Parsing
+**Goal:** Establish the Node.js backend to handle heavy PCAP parsing duties, resolving performance issues with large files.
+
+### Story 1.5.1: Server Initialization
+As a developer,
+I want a Node.js/Express server configured in the repository,
+So that I can implement server-side logic.
+
+**Acceptance Criteria:**
+- `server/` directory created
+- `package.json` with `express`, `typescript`, `ts-node`
+- `tsconfig.json` configured
+- `npm run dev` in `server/` starts the API server on port 3000
+
+### Story 1.5.2: Server-Side PCAP Parsing
+As a user,
+I want my uploaded PCAP file to be parsed by the server,
+So that I can analyze files larger than browser memory limits.
+
+**Acceptance Criteria:**
+- API Endpoint `POST /api/upload` accepts .pcap files
+- Server parses the file using a stream-based parser
+- Server extracts packet metadata and stores it (in-memory or temp file for now)
+- API Endpoint `GET /api/packets/:sessionId` returns the parsed data
+- Client mocks or basic integration to prove flow
+
+### Story 1.4: PCAP File Upload & Parsing (Updated)
 
 As a security analyst,
 I want to upload PCAP files via drag-and-drop or file picker,

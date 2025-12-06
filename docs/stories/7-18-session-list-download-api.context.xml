@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>7</epicId>
+    <storyId>7.18</storyId>
+    <title>Session List &amp; Download API</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/7-18-session-list-download-api.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>to browse and download my previous capture sessions</iWant>
+    <soThat>I can review old evidence</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`server/src/controllers/SessionController.ts`</path>
+        <title>SessionController.ts`</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Pagination**: Optional for MVP, but good practice if many files.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

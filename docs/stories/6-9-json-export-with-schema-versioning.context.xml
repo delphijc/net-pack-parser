@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.9</storyId>
+    <title>JSON Export with Schema Versioning</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/6-9-json-export-with-schema-versioning.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to export the parsed data as JSON</iWant>
+    <soThat>I can programmatically process it in other scripts</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/services/Exporters/JsonExporter.ts` [NEW]</path>
+        <title>JsonExporter.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Streaming**: For large datasets, use `JSON.stringify` on chunks if possible, or build the blob incrementally.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

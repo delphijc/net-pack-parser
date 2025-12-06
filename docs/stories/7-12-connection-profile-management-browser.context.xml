@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>7</epicId>
+    <storyId>7.12</storyId>
+    <title>Connection Profile Management (Browser)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/7-12-connection-profile-management-browser.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>user</asA>
+    <iWant>to save my server connection details (URL, API Key) in the browser</iWant>
+    <soThat>I don't have to re-type them every time I open the app</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/AgentConnectionPanel.tsx` [NEW]</path>
+        <title>AgentConnectionPanel.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/services/AgentClient.ts` [NEW]</path>
+        <title>AgentClient.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Security**: Be careful storing passwords. Only store the JWT.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

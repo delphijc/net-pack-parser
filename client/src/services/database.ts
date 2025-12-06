@@ -95,7 +95,15 @@ class DatabaseService {
           db.createObjectStore('fileReferences', { keyPath: 'id' });
         }
         if (!db.objectStoreNames.contains('packets')) {
-          db.createObjectStore('packets', { keyPath: 'id' });
+          const packetStore = db.createObjectStore('packets', { keyPath: 'id' });
+          packetStore.createIndex('sessionId', 'sessionId', { unique: false });
+        } else {
+          // Migration for existing DB
+          const tx = (event.target as IDBOpenDBRequest).transaction!;
+          const packetStore = tx.objectStore('packets');
+          if (!packetStore.indexNames.contains('sessionId')) {
+            packetStore.createIndex('sessionId', 'sessionId', { unique: false });
+          }
         }
         if (!db.objectStoreNames.contains('timelineEvents')) {
           db.createObjectStore('timelineEvents', { keyPath: 'id' });
@@ -347,6 +355,37 @@ class DatabaseService {
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
+  }
+
+  public async getPacketsBySession(sessionId: string): Promise<ParsedPacket[]> {
+    try {
+      await this.dbPromise;
+    } catch (e) {
+      console.error('IndexedDB init failed', e);
+      return [];
+    }
+    if (!this.db) return [];
+    const transaction = this.db.transaction(['packets'], 'readonly');
+    const store = transaction.objectStore('packets');
+    const index = store.index('sessionId');
+    const request = index.getAll(sessionId);
+
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  public async getAllSessions(): Promise<string[]> {
+    // In a real app we'd have a separate 'sessions' store.
+    // For now, scan all packets and get unique session IDs.
+    // Or better, assume we track sessions in localStorage via SessionStore, 
+    // but let's provide a DB way to scan if needed.
+    // Actually, scanning ALL packets is slow. Let's rely on SessionStore/localStorage 
+    // for list of sessions, but if we need to recover, we can scan.
+    // Use cursor to scan unique values? IDB doesn't support 'distinct' easily.
+    // Minimal implementation:
+    return [];
   }
 
   public async getAllFiles(): Promise<FileReference[]> {

@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.7</storyId>
+    <title>Performance Score Calculation (0-100)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/4-7-performance-score-calculation-0-100.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>a simple 0-100 performance score summarizing various metrics</iWant>
+    <soThat>I can quickly gauge the overall health of the application</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/performance/ScoreGauge.tsx` [NEW]</path>
+        <title>ScoreGauge.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/utils/performanceUtils.ts` [NEW]</path>
+        <title>performanceUtils.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Reference**: Google's Lighthouse scoring calculator.
+- **Weights**: Use 25% FCP, 25% LCP, 25% CLS, 25% INP for a balanced desktop view.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

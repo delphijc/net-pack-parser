@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { openDB, type IDBPDatabase } from 'idb';
 import { yaraEngine } from '../services/yaraEngine';
+import { defaultYaraRules } from './defaultRules';
 
 interface YaraRule {
   id: string;
@@ -38,11 +39,33 @@ export const useYaraRuleStore = create<YaraRuleState>((set, get) => ({
   isLoading: false,
   error: null,
 
+
+
+  // ... existing code ...
+
   loadRules: async () => {
     set({ isLoading: true, error: null });
     try {
       const db = await getDb();
-      const rules = await db.getAll(STORE_NAME);
+      let rules = await db.getAll(STORE_NAME);
+
+      // Seed default rules if empty
+      if (rules.length === 0) {
+        // Generate IDs for default rules
+        const rulesToSeed = defaultYaraRules.map(r => ({
+          id: crypto.randomUUID(),
+          name: r.name,
+          content: r.content,
+          enabled: true
+        }));
+
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        await Promise.all(rulesToSeed.map(r => tx.store.put(r)));
+        await tx.done;
+
+        rules = await db.getAll(STORE_NAME);
+      }
+
       set({ rules });
       await get().compileActiveRules();
     } catch (error: unknown) {

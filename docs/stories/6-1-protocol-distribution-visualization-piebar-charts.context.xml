@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.1</storyId>
+    <title>Protocol Distribution Visualization (Pie/Bar Charts)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/6-1-protocol-distribution-visualization-piebar-charts.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to see the breakdown of network protocols (HTTP, TCP, UDP, etc.) in the captured data</iWant>
+    <soThat>I can quickly identify the dominant traffic types or unexpected protocols</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/dashboard/ProtocolDistribution.tsx` [NEW]</path>
+        <title>ProtocolDistribution.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/components/Dashboard.tsx`</path>
+        <title>Dashboard.tsx`</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Colors**: Use a consistent palette for protocols (e.g., HTTP=Blue, DNS=Orange) across the app if possible.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

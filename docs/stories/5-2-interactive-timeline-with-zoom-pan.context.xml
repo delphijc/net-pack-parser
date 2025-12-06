@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5.2</storyId>
+    <title>Interactive Timeline with Zoom &amp; Pan</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/5-2-interactive-timeline-with-zoom-pan.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to zoom into specific time ranges and pan across the timeline</iWant>
+    <soThat>I can investigate bursts of traffic or isolate specific seconds of activity</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/TimelineView.tsx`</path>
+        <title>TimelineView.tsx`</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/store/timelineStore.ts` [NEW]</path>
+        <title>timelineStore.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/components/PacketList.tsx` (Must subscribe to timeline store filtering)</path>
+        <title>PacketList.tsx` (Must subscribe to timeline store filtering)</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Recharts Zoom**: Recharts has built-in `Brush` or ReferenceArea for zooming.
+- **State Integration**: The `PacketList` needs to know the current filtered time range. Use a global store (Zustand) to share `timeRange: [start, end]` between the Chart and the List.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

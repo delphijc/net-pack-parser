@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.3</storyId>
+    <title>Top Talkers Analysis (Most Active IPs)</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/6-3-top-talkers-analysis-most-active-ips.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to identify the IP addresses responsible for the most traffic</iWant>
+    <soThat>I can investigate potential attackers or compromised hosts</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/dashboard/TopTalkers.tsx` [NEW]</path>
+        <title>TopTalkers.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Bucketing**: MapReduce style aggregation on the packet array: `Map&lt;IP, Count&gt;`.
+- **Performance**: Compute this during initial parse or lazily on dashboard load.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

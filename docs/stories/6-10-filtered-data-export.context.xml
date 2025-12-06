@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.10</storyId>
+    <title>Filtered Data Export</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/6-10-filtered-data-export.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>to export ONLY the filtered packets (e.g., just HTTP traffic)</iWant>
+    <soThat>I can share a relevant subset of the data</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/services/Exporters/ExporterFactory.ts` [NEW]</path>
+        <title>ExporterFactory.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Pass Filter**: Pass the current filter predicate (from Zustand) to the export service.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

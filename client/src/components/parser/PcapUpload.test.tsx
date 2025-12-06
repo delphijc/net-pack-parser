@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, it, vi, expect } from 'vitest';
+import { describe, it, vi, expect, beforeEach } from 'vitest';
 import PcapUpload from './PcapUpload';
 import * as pcapParser from '../../services/pcapParser';
 import database from '../../services/database';
@@ -45,6 +45,14 @@ vi.mock('../../services/database', () => ({
   },
 }));
 
+vi.mock('../../services/api', () => ({
+  api: {
+    uploadPcap: vi.fn(),
+    getStatus: vi.fn(),
+    getResults: vi.fn(),
+  },
+}));
+
 vi.mock('@/services/chainOfCustodyDb', () => ({
   default: {
     addFileChainOfCustodyEvent: vi.fn(() => Promise.resolve()),
@@ -53,6 +61,10 @@ vi.mock('@/services/chainOfCustodyDb', () => ({
 }));
 
 describe('PcapUpload Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders correctly', () => {
     render(<PcapUpload />);
     expect(screen.getByText('Parse Network Data')).toBeInTheDocument();
@@ -108,16 +120,41 @@ describe('PcapUpload Component', () => {
       suspiciousIndicators: [],
     } as unknown as ParsedPacket;
 
-    vi.mocked(pcapParser.parseNetworkData).mockResolvedValue([mockPacket]);
+    // Mock API responses
+    const { api } = await import('../../services/api');
+    vi.mocked(api.uploadPcap).mockResolvedValue({
+      sessionId: 'test-session',
+      status: 'processing', // "pending" is invalid
+      originalName: 'test.pcap',
+      size: 1024
+    });
+    vi.mocked(api.getStatus).mockResolvedValue({
+      status: 'complete',
+      progress: 100,
+      packetCount: 1
+    });
+    vi.mocked(api.getResults).mockResolvedValue({
+      sessionId: 'test-session',
+      status: 'complete',
+      summary: { packetCount: 1, totalBytes: 100 }, // removed duration/protocolBreakdown
+      packets: [{
+        id: '456',
+        timestamp: mockPacket.timestamp, // Ensure timestamp matches expected adapted packet
+        sourceIp: '10.0.0.1',
+        destIp: '10.0.0.2',
+        protocol: 'TCP',
+        length: 100,
+        info: 'Test packet',
+        raw: 'Binary Data'
+      }]
+    });
 
     const { container } = render(<PcapUpload />);
 
     const file = new File(['dummy content'], 'test.pcap', {
       type: 'application/vnd.tcpdump.pcap',
     });
-    Object.defineProperty(file, 'arrayBuffer', {
-      value: vi.fn().mockResolvedValue(new ArrayBuffer(10)),
-    });
+
     // Find the hidden file input
     const fileInput = container.querySelector('input[type="file"]');
 
@@ -125,9 +162,12 @@ describe('PcapUpload Component', () => {
       fireEvent.change(fileInput, { target: { files: [file] } });
 
       await waitFor(() => {
-        expect(pcapParser.parseNetworkData).toHaveBeenCalled();
-        expect(database.storePackets).toHaveBeenCalledWith([mockPacket]);
-      });
+        // Correct expectation: Local parser is NOT called for file upload anymore
+        expect(pcapParser.parseNetworkData).not.toHaveBeenCalled();
+        // Database storage IS called with adapted packets
+        expect(database.storePackets).toHaveBeenCalled();
+        expect(screen.getByText('Successfully Parsed Packet')).toBeInTheDocument();
+      }, { timeout: 3000 });
     } else {
       throw new Error('File input not found');
     }

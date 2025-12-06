@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.4</storyId>
+    <title>Resource Timing Capture &amp; Waterfall Visualization</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/4-4-resource-timing-capture-waterfall-visualization.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer optimizing application performance</asA>
+    <iWant>to visualize the loading waterfall of network resources (JS, CSS, Images, API calls)</iWant>
+    <soThat>I can identify slow assets, blocking requests, and optimization opportunities</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/components/PerformanceDashboard.tsx` (Parent component)</path>
+        <title>PerformanceDashboard.tsx` (Parent component)</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/hooks/usePerformanceObserver.ts` (Logic for capturing entries)</path>
+        <title>usePerformanceObserver.ts` (Logic for capturing entries)</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/components/performance/WaterfallChart.tsx` [NEW]</path>
+        <title>WaterfallChart.tsx` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+      <doc>
+        <path>`client/src/types/performance.ts` [NEW]</path>
+        <title>performance.ts` [NEW]</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **PerformanceObserver**: Ensure you check `PerformanceObserver.supportedEntryTypes.includes('resource')`.
+- **Buffer**: Use `performance.setResourceTimingBufferSize(300)` to ensure enough buffer for heavy pages.
+- **Normalization**: Some browsers might restrict timing data (CORS). Check `responseStatus` or `transferSize` which might be 0 for cross-origin opaque responses.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>

@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<story-context id="bmad/story-context/template" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>6.6</storyId>
+    <title>Summary Report Generation</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2025-12-06</generatedAt>
+    <sourceStoryPath>docs/stories/6-6-summary-report-generation.md</sourceStoryPath>
+  </metadata>
+  <story>
+    <asA>developer</asA>
+    <iWant>a one-click "Generate Summary" button</iWant>
+    <soThat>I can get a quick overview document of the capture without manual composition</soThat>
+    <tasks>
+
+</tasks>
+  </story>
+  <acceptanceCriteria>
+
+</acceptanceCriteria>
+  <artifacts>
+    <docs>
+      <doc>
+        <path>`client/src/services/ReportGenerator.ts`</path>
+        <title>ReportGenerator.ts`</title>
+        <section>Related File</section>
+      </doc>
+    </docs>
+  </artifacts>
+  <tests>
+    <ideas>
+- **Template**: Define a fixed layout for the "Quick Summary". Reuse the `ReportGenerator` logic from Epic 5, but call it with a predefined configuration.
+</ideas>
+  </tests>
+  <constraints/>
+  <interfaces/>
+</story-context>
