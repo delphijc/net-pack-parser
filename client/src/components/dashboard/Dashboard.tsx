@@ -9,6 +9,8 @@ import {
   Clock,
   AlertTriangle,
   Download,
+  LayoutTemplate,
+  Sidebar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { exportThreatReport } from '../../utils/dataImportExport';
@@ -22,7 +24,6 @@ import { IOCManager } from '../IOCManager';
 import { FalsePositivesTab } from '../FalsePositivesTab';
 import { ThreatPanel } from '../ThreatPanel';
 import SettingsPage from '../SettingsPage';
-// import { useQuery } from '@tanstack/react-query'; // Removed
 import { useAlertStore } from '../../store/alertStore';
 import { runThreatDetection } from '../../utils/threatDetection';
 import type { ThreatAlert } from '../../types/threat';
@@ -32,8 +33,12 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('dashboardActiveTab') || 'overview';
+  });
   const [isGlobalParsing, setIsGlobalParsing] = useState(false);
+  const [layoutMode, setLayoutMode] = useState<'top' | 'left'>('top');
+
   const [stats, setStats] = useState({
     totalPackets: 0,
     totalFiles: 0,
@@ -41,14 +46,31 @@ const Dashboard: React.FC<DashboardProps> = () => {
     suspiciousActivities: 0,
     protocols: {} as Record<string, number>,
   });
-  const [recentActivity, setRecentActivity] = useState<ParsedPacket[]>([]);
 
+  // Persist active tab
+  useEffect(() => {
+    localStorage.setItem('dashboardActiveTab', activeTab);
+  }, [activeTab]);
+  const [recentActivity, setRecentActivity] = useState<ParsedPacket[]>([]);
   const [allThreats, setAllThreats] = useState<ThreatAlert[]>([]);
+
+  // Load layout preference
+  useEffect(() => {
+    const savedLayout = localStorage.getItem('dashboardLayoutMode');
+    if (savedLayout === 'left') {
+      setLayoutMode('left');
+    }
+  }, []);
+
+  const toggleLayout = () => {
+    const newMode = layoutMode === 'top' ? 'left' : 'top';
+    setLayoutMode(newMode);
+    localStorage.setItem('dashboardLayoutMode', newMode);
+  };
 
   const updateStats = useCallback(async () => {
     const packets = await database.getAllPackets();
     const files = await database.getAllFiles();
-    // const threats = await database.getAllThreatIntelligence(); // Remove this as it returns wrong type
 
     // Run threat detection
     const threatPromises = packets.map((packet) => runThreatDetection(packet));
@@ -88,8 +110,6 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
   useEffect(() => {
     updateStats();
-
-    // Set up polling for real-time updates
     const intervalId = setInterval(updateStats, 2000);
     return () => clearInterval(intervalId);
   }, [updateStats]);
@@ -198,7 +218,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                       <div
                         className="bg-primary h-2 rounded-full transition-all duration-500"
                         style={{
-                          width: `${(count / stats.totalPackets) * 100}% `,
+                          width: `${(count / stats.totalPackets) * 100}%`,
                         }}
                       ></div>
                     </div>
@@ -226,12 +246,12 @@ const Dashboard: React.FC<DashboardProps> = () => {
                   className="flex items-start pb-3 border-b border-white/5 last:border-0 last:pb-0"
                 >
                   <div
-                    className={`mt - 1 w - 2 h - 2 rounded - full mr - 3 ${
+                    className={`mt-1 w-2 h-2 rounded-full mr-3 ${
                       packet.suspiciousIndicators &&
                       packet.suspiciousIndicators.length > 0
                         ? 'bg-destructive'
                         : 'bg-emerald-500'
-                    } `}
+                    }`}
                   ></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate text-foreground">
@@ -254,100 +274,72 @@ const Dashboard: React.FC<DashboardProps> = () => {
     </div>
   );
 
+  const navButtons = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'parser', label: 'Parser & Upload' },
+    { id: 'packets', label: 'Packet Inspector' },
+    { id: 'yara', label: 'YARA Rules' },
+    { id: 'threat-intel', label: 'Threat Intel' },
+    { id: 'ioc-manager', label: 'IOC Manager' },
+    { id: 'false-positives', label: 'False Positives' },
+    { id: 'settings', label: 'Settings' },
+  ];
+
   return (
     <div
-      className={`flex flex - col h - full ${isGlobalParsing ? 'cursor-wait' : ''} `}
+      // Fixed: Removed spaces from class names and used layoutMode
+      className={`flex ${layoutMode === 'left' ? 'flex-row' : 'flex-col'} h-full ${
+        isGlobalParsing ? 'cursor-wait' : ''
+      }`}
     >
       {/* Navigation Tabs */}
-      <div className="flex border-b border-white/10 mb-6">
-        <button
-          onClick={() => !isGlobalParsing && setActiveTab('overview')}
-          disabled={isGlobalParsing}
-          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
-            activeTab === 'overview'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
+      <div
+        className={`flex ${
+          layoutMode === 'left'
+            ? 'flex-col border-r w-64 p-2 space-y-1'
+            : 'flex-row border-b items-center'
+        } border-white/10 ${layoutMode === 'top' ? 'mb-6' : ''} bg-background/50 backdrop-blur-sm`}
+      >
+        <div
+          className={`flex items-center ${layoutMode === 'top' ? 'mr-2 px-2' : 'mb-4 justify-end'}`}
         >
-          Overview
-        </button>
-        <button
-          onClick={() => !isGlobalParsing && setActiveTab('parser')}
-          disabled={isGlobalParsing}
-          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
-            activeTab === 'parser'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
-        >
-          Parser & Upload
-        </button>
-        <button
-          onClick={() => !isGlobalParsing && setActiveTab('packets')}
-          disabled={isGlobalParsing}
-          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
-            activeTab === 'packets'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
-        >
-          Packet Inspector
-        </button>
-        <button
-          onClick={() => !isGlobalParsing && setActiveTab('yara')}
-          disabled={isGlobalParsing}
-          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
-            activeTab === 'yara'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
-        >
-          YARA Rules
-        </button>
-        <button
-          onClick={() => !isGlobalParsing && setActiveTab('threat-intel')}
-          disabled={isGlobalParsing}
-          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
-            activeTab === 'threat-intel'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
-        >
-          Threat Intel
-        </button>
-        <button
-          onClick={() => !isGlobalParsing && setActiveTab('ioc-manager')}
-          disabled={isGlobalParsing}
-          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
-            activeTab === 'ioc-manager'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
-        >
-          IOC Manager
-        </button>
-        <button
-          onClick={() => !isGlobalParsing && setActiveTab('false-positives')}
-          disabled={isGlobalParsing}
-          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
-            activeTab === 'false-positives'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
-        >
-          False Positives
-        </button>
-        <button
-          onClick={() => !isGlobalParsing && setActiveTab('settings')}
-          disabled={isGlobalParsing}
-          className={`px - 6 py - 3 text - sm font - medium transition - colors border - b - 2 ${
-            activeTab === 'settings'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-white/20'
-          } ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''} `}
-        >
-          Settings
-        </button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleLayout}
+            title="Toggle Layout Mode"
+          >
+            {layoutMode === 'top' ? (
+              <Sidebar className="h-4 w-4" />
+            ) : (
+              <LayoutTemplate className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+
+        {navButtons.map((btn) => (
+          <button
+            key={btn.id}
+            onClick={() => !isGlobalParsing && setActiveTab(btn.id)}
+            disabled={isGlobalParsing}
+            className={`
+              px-6 py-3 text-sm font-medium transition-colors
+              ${
+                layoutMode === 'left'
+                  ? 'text-left w-full rounded-md border-l-2'
+                  : 'border-b-2'
+              }
+              ${
+                activeTab === btn.id
+                  ? 'border-primary text-primary bg-primary/5'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              }
+              ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}
+            `}
+          >
+            {btn.label}
+          </button>
+        ))}
       </div>
 
       {/* Content Area */}

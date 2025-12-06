@@ -52,8 +52,7 @@ const SettingsPage: React.FC = () => {
   const handleClearData = async () => {
     try {
       setIsClearing(true);
-      await database.clearAllData();
-      await chainOfCustodyDb.clearAll();
+      await Promise.all([database.clearAllData(), chainOfCustodyDb.clearAll()]);
       localStorageService.clearAll();
 
       setUsage(0);

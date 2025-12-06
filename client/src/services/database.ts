@@ -21,6 +21,34 @@ class DatabaseService {
   private captureSessions: CaptureSession[] = [];
   private storageKey = 'network_parser_data'; // For non-file data
 
+  /**
+   * Checks if storage usage is within safe limits (80% of quota).
+   * Throws an error if the limit is exceeded.
+   */
+  private async checkStorageQuota(): Promise<void> {
+    if (navigator.storage && navigator.storage.estimate) {
+      try {
+        const { usage, quota } = await navigator.storage.estimate();
+        if (usage && quota) {
+          const usagePercent = usage / quota;
+          if (usagePercent > 0.8) {
+            throw new Error(
+              `Storage quota exceeded safe limit (80%). Usage: ${(
+                usagePercent * 100
+              ).toFixed(1)}%`,
+            );
+          }
+        }
+      } catch (e: any) {
+        // existing error or just rethrow
+        if (e.message && e.message.includes('Storage quota exceeded')) {
+          throw e;
+        }
+        console.warn('Failed to estimate storage:', e);
+      }
+    }
+  }
+
   private constructor() {
     this.dbPromise = this.initIndexedDB();
     this.loadNonFileDataFromStorage();
@@ -116,8 +144,12 @@ class DatabaseService {
 
   public async storePacket(packet: ParsedPacket): Promise<string> {
     try {
+      await this.checkStorageQuota();
       await this.dbPromise;
-    } catch (e) {
+    } catch (e: any) {
+      if (e.message && e.message.includes('Storage quota exceeded')) {
+        throw e;
+      }
       console.error('IndexedDB init failed', e);
       return packet.id;
     }
@@ -156,8 +188,12 @@ class DatabaseService {
 
   public async storePackets(packets: ParsedPacket[]): Promise<void> {
     try {
+      await this.checkStorageQuota();
       await this.dbPromise;
-    } catch (e) {
+    } catch (e: any) {
+      if (e.message && e.message.includes('Storage quota exceeded')) {
+        throw e;
+      }
       console.error('IndexedDB init failed', e);
       return;
     }

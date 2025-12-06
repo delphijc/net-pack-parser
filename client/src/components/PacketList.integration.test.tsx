@@ -302,7 +302,7 @@ describe('PacketList Integration with ProtocolFilter, PacketDetailView and Proto
     vi.clearAllMocks();
     (database.getAllPackets as Mock).mockReturnValue(mockPackets);
     // Suppress console errors from TextDecoder if rawData is malformed or very short
-    vi.spyOn(console, 'error').mockImplementation(() => { });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {

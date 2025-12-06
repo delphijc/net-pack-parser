@@ -1,5 +1,0 @@
-POST /comment HTTP/1.1
-Host: blog.com
-Content-Length: 25
-
-<script>alert(1)</script>

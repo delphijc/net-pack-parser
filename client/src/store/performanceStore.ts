@@ -86,7 +86,11 @@ export const usePerformanceStore = create<PerformanceState>()(
     }),
     {
       name: 'performance-storage',
-      partialize: (state) => ({ metrics: state.metrics, score: state.score, longTasks: state.longTasks }),
+      partialize: (state) => ({
+        metrics: state.metrics,
+        score: state.score,
+        longTasks: state.longTasks,
+      }),
     },
   ),
 );
