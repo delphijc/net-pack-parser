@@ -74,6 +74,8 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
       let sourcePort = 0;
       let destPort = 0;
       let packetFlags: string[] | undefined = undefined;
+      let packetSeq: number | undefined = undefined;
+      let packetAck: number | undefined = undefined;
 
       if (rawPacketData.length >= ipStart + 20) {
         // Extract source and dest IP (bytes 12-19 of IP header)
@@ -109,7 +111,27 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
           if (flagsByte & 0x20) flags.push('URG');
           if (flagsByte & 0x40) flags.push('ECE');
           if (flagsByte & 0x80) flags.push('CWR');
+          if (flagsByte & 0x80) flags.push('CWR');
           packetFlags = flags;
+
+          // Parse Sequence and Acknowledgment Numbers
+          // Seq Number: Bytes 4-7 of TCP header
+          // Ack Number: Bytes 8-11 of TCP header
+          const seq =
+            (rawPacketData[transportStart + 4] * 16777216) + // using arithmetic to avoid bitwise signed 32-bit issue
+            (rawPacketData[transportStart + 5] << 16) |
+            (rawPacketData[transportStart + 6] << 8) |
+            rawPacketData[transportStart + 7];
+
+          const ack =
+            (rawPacketData[transportStart + 8] * 16777216) +
+            (rawPacketData[transportStart + 9] << 16) |
+            (rawPacketData[transportStart + 10] << 8) |
+            rawPacketData[transportStart + 11];
+
+          // We need to pass these out. Let's declare vars in outer scope like packetFlags
+          packetSeq = seq >>> 0; // Unsigned shift to ensure positive integer
+          packetAck = ack >>> 0;
         } else if (
           protocolNum === 17 &&
           rawPacketData.length >= transportStart + 4
@@ -163,6 +185,8 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
         length: packet.header.inclLen,
         rawData: rawPacketDataBuffer as ArrayBuffer, // Assign raw ArrayBuffer
         flags: packetFlags,
+        seq: packetSeq,
+        ack: packetAck,
         // Initialize new fields
         detectedProtocols: [], // Will be populated by detectProtocols
         portBasedProtocol: undefined,

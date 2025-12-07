@@ -36,7 +36,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu'; // Assuming basic ContextMenu is available or we fallback to buttons
 import database from '../services/database';
+import { StreamFollower } from './StreamFollower'; // New component
+import { FileText } from 'lucide-react'; // Icon for Follow Stream
 
 interface PacketListProps {
   onPacketSelect: (packet: ParsedPacket | null) => void;
@@ -234,6 +242,23 @@ const PacketList: React.FC<PacketListProps> = ({
     return parts.join(' | ') + ` (${criteria.logic})`;
   };
 
+  const [streamFollowerState, setStreamFollowerState] = useState<{
+    isOpen: boolean;
+    flowId: string | null;
+  }>({ isOpen: false, flowId: null });
+
+  const handleFollowStream = (packet: ParsedPacket) => {
+    if (packet.flowId) {
+      setStreamFollowerState({ isOpen: true, flowId: packet.flowId });
+    } else {
+      toast({
+        title: "Cannot follow stream",
+        description: "No Flow ID found for this packet.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="bg-card border border-white/10 rounded-lg shadow-sm flex flex-col overflow-hidden backdrop-blur-sm h-full">
       <div className="p-3 border-b border-white/10 bg-card/50">
@@ -362,62 +387,87 @@ const PacketList: React.FC<PacketListProps> = ({
           </div>
         ) : (
           filteredPackets.map((packet) => (
-            <div
-              key={packet.id}
-              data-testid={`packet-item-${packet.id}`}
-              onClick={() => onPacketSelect(packet)}
-              className={`group p-2 rounded-md cursor-pointer border transition-all duration-200 ${selectedPacketId === packet.id
-                ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
-                : selectedFlowId && packet.flowId === selectedFlowId
-                  ? 'bg-blue-500/5 border-l-2 border-l-blue-400 border-t-transparent border-r-transparent border-b-transparent hover:bg-blue-500/10'
-                  : 'bg-card/30 border-transparent hover:bg-secondary/50 hover:border-white/5'
-                } ${packet.matchesSearch ? 'bg-yellow-200/20 border-yellow-300' : ''}`}
-            >
-              <div className="flex justify-between items-center mb-1">
-                <div className="flex items-center gap-2">
-                  {packet.detectedProtocols?.map((proto: string) => (
-                    <Badge
-                      key={proto}
-                      variant="outline"
-                      className={`text-[10px] font-bold px-1.5 py-0.5 ${proto === 'HTTP' || proto === 'HTTPS'
-                        ? 'bg-emerald-500/10 text-emerald-500'
-                        : proto === 'TCP'
-                          ? 'bg-blue-500/10 text-blue-500'
-                          : proto === 'UDP'
-                            ? 'bg-orange-500/10 text-orange-500'
-                            : proto === 'DNS'
-                              ? 'bg-purple-500/10 text-purple-500'
-                              : 'bg-gray-500/10 text-gray-400'
-                        }`}
-                    >
-                      {proto}
-                    </Badge>
-                  ))}
-                  <span className="text-[10px] text-muted-foreground font-mono">
-                    {new Date(packet.timestamp).toLocaleTimeString()}
-                  </span>
-                </div>
-                {packet.suspiciousIndicators &&
-                  packet.suspiciousIndicators.length > 0 && (
-                    <Shield size={12} className="text-destructive" />
-                  )}
-              </div>
-
-              <div className="flex justify-between items-center">
-                <div className="flex items-center text-xs font-mono text-foreground/80 truncate max-w-[180px]">
-                  <span className="truncate">
-                    {packet.sourceIP} → {packet.destIP}
-                  </span>
-                </div>
-                <button
-                  onClick={(e) => handleDeleteClick(packet.id, e)}
-                  className="text-muted-foreground hover:text-destructive p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  title="Delete packet"
+            <ContextMenu key={packet.id}>
+              <ContextMenuTrigger>
+                <div
+                  data-testid={`packet-item-${packet.id}`}
+                  onClick={() => onPacketSelect(packet)}
+                  className={`group p-2 rounded-md cursor-pointer border transition-all duration-200 ${selectedPacketId === packet.id
+                    ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
+                    : selectedFlowId && packet.flowId === selectedFlowId
+                      ? 'bg-blue-500/5 border-l-2 border-l-blue-400 border-t-transparent border-r-transparent border-b-transparent hover:bg-blue-500/10'
+                      : 'bg-card/30 border-transparent hover:bg-secondary/50 hover:border-white/5'
+                    } ${packet.matchesSearch ? 'bg-yellow-200/20 border-yellow-300' : ''}`}
                 >
-                  <Trash2 size={12} />
-                </button>
-              </div>
-            </div>
+                  <div className="flex justify-between items-center mb-1">
+                    <div className="flex items-center gap-2">
+                      {packet.detectedProtocols?.map((proto: string) => (
+                        <Badge
+                          key={proto}
+                          variant="outline"
+                          className={`text-[10px] font-bold px-1.5 py-0.5 ${proto === 'HTTP' || proto === 'HTTPS'
+                            ? 'bg-emerald-500/10 text-emerald-500'
+                            : proto === 'TCP'
+                              ? 'bg-blue-500/10 text-blue-500'
+                              : proto === 'UDP'
+                                ? 'bg-orange-500/10 text-orange-500'
+                                : proto === 'DNS'
+                                  ? 'bg-purple-500/10 text-purple-500'
+                                  : 'bg-gray-500/10 text-gray-400'
+                            }`}
+                        >
+                          {proto}
+                        </Badge>
+                      ))}
+                      <span className="text-[10px] text-muted-foreground font-mono">
+                        {new Date(packet.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    {packet.suspiciousIndicators &&
+                      packet.suspiciousIndicators.length > 0 && (
+                        <Shield size={12} className="text-destructive" />
+                      )}
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center text-xs font-mono text-foreground/80 truncate max-w-[180px]">
+                      <span className="truncate">
+                        {packet.sourceIP} → {packet.destIP}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {packet.protocol === 'TCP' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFollowStream(packet);
+                          }}
+                          className="text-muted-foreground hover:text-blue-500 p-1"
+                          title="Follow TCP Stream"
+                        >
+                          <FileText size={12} />
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => handleDeleteClick(packet.id, e)}
+                        className="text-muted-foreground hover:text-destructive p-1"
+                        title="Delete packet"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem onClick={() => handleFollowStream(packet)} disabled={packet.protocol !== 'TCP'}>
+                  <FileText className="mr-2 h-4 w-4" /> Follow TCP Stream
+                </ContextMenuItem>
+                <ContextMenuItem onClick={() => setPacketToDelete(packet.id)} className="text-destructive focus:text-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete Packet
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
           ))
         )}
       </div>
@@ -444,6 +494,13 @@ const PacketList: React.FC<PacketListProps> = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <StreamFollower
+        isOpen={streamFollowerState.isOpen}
+        onCloseOperation={() => setStreamFollowerState(prev => ({ ...prev, isOpen: false }))}
+        flowId={streamFollowerState.flowId || ''}
+        packets={packets}
+      />
     </div>
   );
 };

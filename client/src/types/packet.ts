@@ -14,6 +14,8 @@ export interface Packet {
   length: number; // Bytes
   rawData: ArrayBuffer; // Packet payload
   flags?: string[]; // TCP flags ['SYN', 'ACK']
+  seq?: number; // TCP Sequence Number
+  ack?: number; // TCP Acknowledgment Number
   sessionId?: string; // For TCP session grouping
   extractedStrings?: ExtractedString[]; // Array of extracted strings from the payload
   fileReferences?: FileReference[]; // Added
