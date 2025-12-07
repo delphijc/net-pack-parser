@@ -65,5 +65,7 @@ export const aggregateFlows = (packets: ParsedPacket[]): Flow[] => {
     flow.duration = flow.endTime - flow.startTime;
   });
 
-  return Array.from(flowsMap.values()).sort((a, b) => b.startTime - a.startTime);
+  return Array.from(flowsMap.values()).sort(
+    (a, b) => b.startTime - a.startTime,
+  );
 };

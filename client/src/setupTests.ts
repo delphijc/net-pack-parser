@@ -34,9 +34,9 @@ class Worker {
   postMessage() {
     // Default implementation does nothing
   }
-  terminate() { }
-  addEventListener() { }
-  removeEventListener() { }
+  terminate() {}
+  addEventListener() {}
+  removeEventListener() {}
   dispatchEvent() {
     return true;
   }

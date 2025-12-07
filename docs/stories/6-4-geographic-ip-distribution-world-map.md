@@ -2,7 +2,7 @@
 
 **Story ID:** 6.4
 **Epic:** 6 (Visualization, Reporting & Export)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,15 +13,15 @@ So that I can visualize the physical origin and destination of traffic.
 ## Acceptance Criteria
 
 ### AC 1: Map Visualization
-- [ ] Dashboard displays a World Map with markers or heatmap overlays indicating IP activity.
-- [ ] Hovering a country/marker shows connection counts.
+- [x] Dashboard displays a World Map with markers or heatmap overlays indicating IP activity.
+- [x] Hovering a country/marker shows connection counts.
 
 ### AC 2: Geo Lookup
-- [ ] System resolves public IPs to Country/City.
-- [ ] Private IPs (LAN) are excluded or marked "Local".
+- [x] System resolves public IPs to Country/City.
+- [x] Private IPs (LAN) are excluded or marked "Local".
 
 ### AC 3: Dependencies
-- [ ] Uses a local database or robust offline mapping to avoid leaking IPs to 3rd party APIs.
+- [x] Uses a local database or robust offline mapping to avoid leaking IPs to 3rd party APIs.
 
 ## Design & Implementation
 

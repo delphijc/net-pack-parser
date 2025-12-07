@@ -54,19 +54,19 @@ development_status:
   5-10-case-notes-investigator-comments: done
   epic-5-retrospective: completed
   epic-6: contexted
-  6-1-protocol-distribution-visualization-piebar-charts: ready-for-dev
-  6-2-traffic-volume-over-time-line-graphs: ready-for-dev
-  6-3-top-talkers-analysis-most-active-ips: ready-for-dev
-  6-4-geographic-ip-distribution-world-map: ready-for-dev
-  6-5-chart-export-as-images-png-svg: ready-for-dev
-  6-6-summary-report-generation: ready-for-dev
-  6-7-customizable-report-builder: ready-for-dev
-  6-8-csv-export-for-packets-threats: ready-for-dev
-  6-9-json-export-with-schema-versioning: ready-for-dev
-  6-10-filtered-data-export: ready-for-dev
-  6-11-performance-data-export-with-timestamps: ready-for-dev
-  6-12-threat-evidence-export-with-integrity-hashes: ready-for-dev
-  epic-6-retrospective: optional
+  6-1-protocol-distribution-visualization-piebar-charts: done
+  6-2-traffic-volume-over-time-line-graphs: done
+  6-3-top-talkers-analysis-most-active-ips: done
+  6-4-geographic-ip-distribution-world-map: done
+  6-5-chart-export-as-images-png-svg: done
+  6-6-summary-report-generation: done
+  6-7-customizable-report-builder: done
+  6-8-csv-export-for-packets-threats: done
+  6-9-json-export-with-schema-versioning: done
+  6-10-filtered-data-export: done
+  6-11-performance-data-export-with-timestamps: done
+  6-12-threat-evidence-export-with-integrity-hashes: done
+  epic-6-retrospective: completed
   epic-7: contexted
   7-1-capture-agent-project-setup-nodejs-python-libpcap-bindings: ready-for-dev
   7-2-network-interface-enumeration: ready-for-dev

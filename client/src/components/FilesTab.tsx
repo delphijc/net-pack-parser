@@ -60,7 +60,7 @@ const FilesTab: React.FC<FilesTabProps> = ({ packet }) => {
         fileSize: file.size,
         mimeType: file.mimeType,
         sha256Hash: file.sha256Hash,
-        userAgent: navigator.userAgent
+        userAgent: navigator.userAgent,
       });
 
       console.log(

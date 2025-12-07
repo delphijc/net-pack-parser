@@ -15,8 +15,10 @@ import { RefreshCw, Download } from 'lucide-react';
 import { usePerformanceFilter } from '../../hooks/usePerformanceFilter';
 import { PerformanceFilters } from './PerformanceFilters';
 
+import { CsvExporter } from '@/services/Exporters/CsvExporter';
+
 export const PerformanceDashboard = () => {
-  const { metrics, score, longTasks, resources, resetMetrics } =
+  const { metrics, score, longTasks, resources, resetMetrics, metricHistory } =
     usePerformanceStore();
   const [timeRange, setTimeRange] = useState<TimeRange>('5m');
 
@@ -77,7 +79,9 @@ export const PerformanceDashboard = () => {
   return (
     <div className="p-6 space-y-6 bg-background min-h-screen text-foreground">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">performance dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          performance dashboard
+        </h1>
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -88,15 +92,26 @@ export const PerformanceDashboard = () => {
             <RefreshCw className="h-4 w-4 mr-2" />
             Reset
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExport}
-            title="Export Report"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              title="Export Report (JSON)"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Report (JSON)
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => CsvExporter.exportPerformanceMetrics(metricHistory)}
+              title="Export Metrics (CSV)"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Metrics (CSV)
+            </Button>
+          </div>
         </div>
       </div>
 

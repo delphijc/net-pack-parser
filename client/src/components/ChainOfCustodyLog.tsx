@@ -36,7 +36,8 @@ const ChainOfCustodyLog: React.FC = () => {
             className="border-b border-gray-700 pb-3 last:border-b-0"
           >
             <p className="text-sm font-medium text-gray-300">
-              <span className="text-blue-400 font-bold">[{entry.action}]</span> {entry.details}
+              <span className="text-blue-400 font-bold">[{entry.action}]</span>{' '}
+              {entry.details}
             </p>
             <p className="text-xs text-gray-400">
               <span className="text-gray-600">Timestamp:</span>{' '}

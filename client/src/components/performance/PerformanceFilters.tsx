@@ -9,7 +9,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Filter, Globe } from 'lucide-react';
-import type { ResourceType, DomainType } from '../../hooks/usePerformanceFilter';
+import type {
+  ResourceType,
+  DomainType,
+} from '../../hooks/usePerformanceFilter';
 
 interface PerformanceFiltersProps {
   resourceType: ResourceType;
@@ -80,7 +83,9 @@ export const PerformanceFilters: React.FC<PerformanceFiltersProps> = ({
       </DropdownMenu>
 
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">Min Duration (ms):</span>
+        <span className="text-sm text-muted-foreground">
+          Min Duration (ms):
+        </span>
         <Input
           type="number"
           value={minDuration}

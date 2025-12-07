@@ -2,7 +2,7 @@
 
 **Story ID:** 6.10
 **Epic:** 6 (Visualization, Reporting & Export)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,8 +13,8 @@ So that I can share a relevant subset of the data.
 ## Acceptance Criteria
 
 ### AC 1: Filtering
-- [ ] Export (CSV/JSON/PCAP) respects the currently active filters.
-- [ ] Option to "Export All" vs "Export Filtered".
+- [x] Export (CSV/JSON/PCAP) respects the currently active filters.
+- [x] Option to "Export All" vs "Export Filtered".
 
 ## Design & Implementation
 

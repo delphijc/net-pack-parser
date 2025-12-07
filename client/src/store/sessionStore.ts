@@ -6,6 +6,9 @@ export interface Session {
   name: string;
   timestamp: number;
   packetCount: number;
+  fileHash?: string;
+  duration?: number;
+  size?: number;
 }
 
 interface SessionState {

@@ -59,7 +59,9 @@ export const ScoreGauge = ({ score }: ScoreGaugeProps) => {
           </PieChart>
         </ResponsiveContainer>
       </div>
-      <div className="text-sm font-medium mt-[-10px] text-muted-foreground">Performance Score</div>
+      <div className="text-sm font-medium mt-[-10px] text-muted-foreground">
+        Performance Score
+      </div>
       <Badge variant={badgeVariant} className="mt-2 text-xs px-2 py-0.5">
         {status}
       </Badge>

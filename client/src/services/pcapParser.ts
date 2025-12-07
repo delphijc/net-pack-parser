@@ -118,14 +118,14 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
           // Seq Number: Bytes 4-7 of TCP header
           // Ack Number: Bytes 8-11 of TCP header
           const seq =
-            (rawPacketData[transportStart + 4] * 16777216) + // using arithmetic to avoid bitwise signed 32-bit issue
-            (rawPacketData[transportStart + 5] << 16) |
+            (rawPacketData[transportStart + 4] * 16777216 + // using arithmetic to avoid bitwise signed 32-bit issue
+              (rawPacketData[transportStart + 5] << 16)) |
             (rawPacketData[transportStart + 6] << 8) |
             rawPacketData[transportStart + 7];
 
           const ack =
-            (rawPacketData[transportStart + 8] * 16777216) +
-            (rawPacketData[transportStart + 9] << 16) |
+            (rawPacketData[transportStart + 8] * 16777216 +
+              (rawPacketData[transportStart + 9] << 16)) |
             (rawPacketData[transportStart + 10] << 8) |
             rawPacketData[transportStart + 11];
 

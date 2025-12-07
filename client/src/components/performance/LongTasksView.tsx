@@ -1,4 +1,7 @@
-import { usePerformanceStore, type LongTask } from '../../store/performanceStore';
+import {
+  usePerformanceStore,
+  type LongTask,
+} from '../../store/performanceStore';
 import {
   Card,
   CardContent,

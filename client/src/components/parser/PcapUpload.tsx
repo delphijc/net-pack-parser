@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { parseNetworkData, downloadFile } from '../../services/pcapParser';
 import { api } from '../../services/api';
@@ -32,8 +31,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+} from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { CaseInfoPanel } from '../CaseInfoPanel';
 import { SummaryEditor } from '../SummaryEditor';
@@ -216,9 +221,8 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
       logAction('UPLOAD', `File uploaded: ${file.name}`, {
         filename: file.name,
         size: file.size,
-        lastModified: file.lastModified
+        lastModified: file.lastModified,
       });
-
     } catch (error) {
       console.error('Error uploading file:', error);
       setErrorMessage(
@@ -362,28 +366,34 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                     </DialogHeader>
                     <div className="space-y-4 text-sm mt-2">
                       <div>
-                        <h3 className="font-medium text-primary mb-1">What data can I parse?</h3>
+                        <h3 className="font-medium text-primary mb-1">
+                          What data can I parse?
+                        </h3>
                         <p className="text-muted-foreground">
                           You can paste any network traffic data including HTTP
-                          requests/responses, emails, JSON payloads, and more. You can
-                          also upload PCAP files from Wireshark or use direct network
-                          capture.
+                          requests/responses, emails, JSON payloads, and more.
+                          You can also upload PCAP files from Wireshark or use
+                          direct network capture.
                         </p>
                       </div>
                       <div>
-                        <h3 className="font-medium text-primary mb-1">How does it work?</h3>
+                        <h3 className="font-medium text-primary mb-1">
+                          How does it work?
+                        </h3>
                         <p className="text-muted-foreground">
-                          The parser extracts tokens (non-alphanumeric characters) and
-                          string content, identifies sections, and detects file
-                          references in URLs. For PCAP files, it analyzes packet headers
-                          and payload data.
+                          The parser extracts tokens (non-alphanumeric
+                          characters) and string content, identifies sections,
+                          and detects file references in URLs. For PCAP files,
+                          it analyzes packet headers and payload data.
                         </p>
                       </div>
                       <div>
-                        <h3 className="font-medium text-primary mb-1">Where is data stored?</h3>
+                        <h3 className="font-medium text-primary mb-1">
+                          Where is data stored?
+                        </h3>
                         <p className="text-muted-foreground">
-                          All parsed data is stored locally in your browser. Nothing is
-                          sent to external servers.
+                          All parsed data is stored locally in your browser.
+                          Nothing is sent to external servers.
                         </p>
                       </div>
                     </div>
@@ -391,14 +401,18 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                 </Dialog>
 
                 <div className="h-6 w-px bg-gray-300 mx-1" />
-                <ExportControl pcapFile={currentFile} disabled={!currentFile || parsing} />
+                <ExportControl
+                  pcapFile={currentFile}
+                  disabled={!currentFile || parsing}
+                />
                 <ReportGeneratorControl disabled={!currentFile || parsing} />
                 <button
                   onClick={handleCaptureToggle}
-                  className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${capturing
-                    ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
-                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                    }`}
+                  className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${
+                    capturing
+                      ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
+                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  }`}
                 >
                   {capturing ? (
                     <>
@@ -537,10 +551,11 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                 <button
                   type="submit"
                   disabled={parsing}
-                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center transition-colors ${parsing
-                    ? 'bg-primary/50 cursor-not-allowed'
-                    : 'bg-primary hover:bg-primary/90'
-                    }`}
+                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center transition-colors ${
+                    parsing
+                      ? 'bg-primary/50 cursor-not-allowed'
+                      : 'bg-primary hover:bg-primary/90'
+                  }`}
                 >
                   {parsing ? (
                     <>

@@ -2,7 +2,7 @@
 
 **Story ID:** 6.8
 **Epic:** 6 (Visualization, Reporting & Export)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,10 +13,10 @@ So that I can import them into Excel or other legacy analysis tools.
 ## Acceptance Criteria
 
 ### AC 1: Export Packets
-- [ ] Users can download `packets.csv` containing columns for Time, Source IP, Dst IP, Protocol, Length, Info.
+- [x] Users can download `packets.csv` containing columns for Time, Source IP, Dst IP, Protocol, Length, Info.
 
 ### AC 2: Export Threats
-- [ ] Users can download `threats.csv` containing columns for Packet ID, Threat Type, Severity, Description.
+- [x] Users can download `threats.csv` containing columns for Packet ID, Threat Type, Severity, Description.
 
 ## Design & Implementation
 

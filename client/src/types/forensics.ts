@@ -1,17 +1,17 @@
 export interface Bookmark {
-    id: string;
-    timestamp: number;
-    label: string;
-    note: string;
-    author?: string;
-    packetId?: string;
+  id: string;
+  timestamp: number;
+  label: string;
+  note: string;
+  author?: string;
+  packetId?: string;
 }
 
 export interface CaseMetadata {
-    caseId: string;
-    caseName: string;
-    investigator: string;
-    organization: string;
-    summary: string;
-    startDate: string;
+  caseId: string;
+  caseName: string;
+  investigator: string;
+  organization: string;
+  summary: string;
+  startDate: string;
 }

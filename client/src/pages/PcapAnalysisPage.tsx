@@ -3,7 +3,7 @@ import type { ParsedPacket } from '@/types';
 import PacketList from '@/components/PacketList';
 import PacketDetailView from '@/components/PacketDetailView';
 import { ProtocolFilter } from '@/components/ProtocolFilter';
-import { ProtocolDistributionChart } from '@/components/ProtocolDistributionChart';
+import { ProtocolDistribution } from '@/components/dashboard/ProtocolDistribution';
 import database from '@/services/database';
 import { FilterBar } from '@/components/FilterBar';
 import { matchBpfFilter, validateBpfFilter } from '@/utils/bpfFilter';
@@ -27,7 +27,13 @@ import { runThreatDetection } from '@/utils/threatDetection'; // Import threat d
 import { useTimelineStore } from '@/store/timelineStore';
 import { useDebounce } from '@/hooks/useDebounce';
 
-const PcapAnalysisPage: React.FC = () => {
+interface PcapAnalysisPageProps {
+  initialFilter?: string;
+}
+
+const PcapAnalysisPage: React.FC<PcapAnalysisPageProps> = ({
+  initialFilter,
+}) => {
   const [allPackets, setAllPackets] = useState<ParsedPacket[]>([]);
   const { startTime, endTime } = useTimelineStore();
 
@@ -49,9 +55,17 @@ const PcapAnalysisPage: React.FC = () => {
 
   const [allThreats, setAllThreats] = useState<ThreatAlert[]>([]); // New state for all threats
 
-  const [bpfFilterAst, setBpfFilterAst] = useState<BpfAST | null>(null);
+  const [bpfFilterAst, setBpfFilterAst] = useState<BpfAST | null>(() => {
+    if (!initialFilter) return null;
+    const res = validateBpfFilter(initialFilter);
+    return res.isValid && res.ast ? res.ast : null;
+  });
   const [bpfFilterError, setBpfFilterError] = useState<string | undefined>(
-    undefined,
+    () => {
+      if (!initialFilter) return undefined;
+      const res = validateBpfFilter(initialFilter);
+      return res.isValid ? undefined : res.error;
+    },
   );
 
   // Polling for packets from the database
@@ -122,7 +136,8 @@ const PcapAnalysisPage: React.FC = () => {
     // Apply timeline filter
     if (debouncedStartTime !== null && debouncedEndTime !== null) {
       filtered = filtered.filter(
-        (p) => p.timestamp >= debouncedStartTime && p.timestamp <= debouncedEndTime,
+        (p) =>
+          p.timestamp >= debouncedStartTime && p.timestamp <= debouncedEndTime,
       );
     }
 
@@ -148,7 +163,14 @@ const PcapAnalysisPage: React.FC = () => {
     }
 
     return filtered;
-  }, [allPackets, selectedProtocol, bpfFilterAst, multiSearchCriteria, debouncedStartTime, debouncedEndTime]);
+  }, [
+    allPackets,
+    selectedProtocol,
+    bpfFilterAst,
+    multiSearchCriteria,
+    debouncedStartTime,
+    debouncedEndTime,
+  ]);
 
   const handlePacketSelect = (packet: ParsedPacket | null) => {
     setSelectedPacket(packet);
@@ -301,6 +323,7 @@ const PcapAnalysisPage: React.FC = () => {
         </Collapsible>
         <PacketList
           packets={displayedPackets} // Pass filtered packets to PacketList
+          allPackets={allPackets} // Pass all packets for export
           onPacketSelect={handlePacketSelect}
           selectedPacketId={selectedPacketId}
           onClearAllPackets={handleClearAllPackets} // Pass clear function
@@ -311,7 +334,7 @@ const PcapAnalysisPage: React.FC = () => {
       <div className="lg:col-span-2 flex flex-col space-y-6">
         {' '}
         {/* Added a div for the charts and detail view */}
-        <ProtocolDistributionChart packets={allPackets} />{' '}
+        <ProtocolDistribution packets={allPackets} />{' '}
         {/* Pass all packets to the chart */}
         <PacketDetailView
           packet={selectedPacket}

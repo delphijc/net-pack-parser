@@ -1,21 +1,24 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import database from '../../services/database';
+import { ProtocolDistribution } from './ProtocolDistribution';
+import { TrafficVolume } from './TrafficVolume';
+import { TopTalkers } from './TopTalkers';
+import { GeoMap } from './GeoMap';
 import type { ParsedPacket } from '../../types';
 import { useSessionStore } from '../../store/sessionStore';
 import SessionSelector from './SessionSelector';
 import {
-  BarChart3,
   Activity,
   Shield,
   FileText,
   Clock,
   AlertTriangle,
-  Download,
   LayoutTemplate,
   Sidebar,
+  Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { exportThreatReport } from '../../utils/dataImportExport';
 import PcapUpload from '../parser/PcapUpload';
 import PcapAnalysisPage from '../../pages/PcapAnalysisPage';
 import YaraRuleManager from '../YaraRuleManager';
@@ -30,12 +33,20 @@ import { TimelineView } from '../TimelineView';
 import { useAlertStore } from '../../store/alertStore';
 import { runThreatDetection } from '../../utils/threatDetection';
 import type { ThreatAlert } from '../../types/threat';
+import {
+  ReportGenerator,
+  type ReportConfig,
+} from '../../services/ReportGenerator';
+import html2canvas from 'html2canvas';
+import { ReportBuilderDialog } from '../reporting/ReportBuilderDialog';
+import { useForensicStore } from '../../store/forensicStore';
 
 interface DashboardProps {
   onNavigate?: (tab: string) => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('dashboardActiveTab') || 'overview';
   });
@@ -73,6 +84,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
   };
 
   const { activeSessionId } = useSessionStore();
+  const { caseMetadata } = useForensicStore();
 
   const updateStats = useCallback(async () => {
     let packets: ParsedPacket[] = [];
@@ -121,27 +133,77 @@ const Dashboard: React.FC<DashboardProps> = () => {
     setRecentActivity(packets.slice(-5).reverse());
 
     // Optimization: Only update allPackets if count changed to avoid costly re-renders of TimelineView
-    setAllPackets(prev => {
+    setAllPackets((prev) => {
       if (prev.length !== packets.length) {
         return packets;
       }
       return prev;
     });
-  }, []);
+  }, [activeSessionId]);
 
   useEffect(() => {
     updateStats();
     const intervalId = setInterval(updateStats, 2000);
     return () => clearInterval(intervalId);
-  }, [updateStats, activeSessionId]); // Add activeSessionId dependency
+  }, [updateStats]);
 
-  const handleExportThreats = () => {
-    const alertStates = useAlertStore.getState().alertStates;
-    const enrichedThreats = allThreats.map((threat) => ({
-      ...threat,
-      ...alertStates[threat.id],
-    }));
-    exportThreatReport(enrichedThreats);
+  const [initialPacketFilter, setInitialPacketFilter] = useState<string>('');
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+
+  const handleGenerateReportClick = () => {
+    setReportDialogOpen(true);
+  };
+
+  const runReportGeneration = async (config: ReportConfig) => {
+    const generator = new ReportGenerator();
+
+    const capture = async (id: string, scale = 2) => {
+      const el = document.getElementById(id);
+      if (el) {
+        try {
+          const canvas = await html2canvas(el, {
+            scale,
+            backgroundColor: null,
+          });
+          return canvas.toDataURL('image/png');
+        } catch (e) {
+          console.error(`Failed to capture ${id}`, e);
+          return undefined;
+        }
+      }
+      return undefined;
+    };
+
+    // Capture charts if they are included in selection (or capture all for simplicity, browser might be slow)
+    // To optimization: only capture what's needed.
+    let protocolImg, timelineImg, topTalkersImg, geoMapImg;
+
+    if (config.sections.includes('protocol'))
+      protocolImg = await capture('chart-protocol');
+    if (config.sections.includes('timeline'))
+      timelineImg = await capture('chart-timeline');
+    if (config.sections.includes('toptalkers'))
+      topTalkersImg = await capture('chart-toptalkers');
+    // Geo map might be heavy, scale 1 might be safer if it crashes, but 2 is better quality
+    if (config.sections.includes('geomap'))
+      geoMapImg = await capture('chart-geomap');
+
+    const data = await generator.generateReportData(
+      {
+        protocol: protocolImg,
+        timeline: timelineImg,
+        topTalkers: topTalkersImg,
+        geoMap: geoMapImg,
+      },
+      allThreats,
+    );
+
+    await generator.generatePdf(data, config);
+  };
+
+  const handleTopTalkerClick = (ip: string, _type: 'src' | 'dst') => {
+    setInitialPacketFilter(`host ${ip}`);
+    setActiveTab('packets');
   };
 
   const renderOverview = () => (
@@ -214,47 +276,29 @@ const Dashboard: React.FC<DashboardProps> = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Protocol Distribution */}
-        <div className="bg-card border border-white/10 p-6 rounded-lg shadow-sm backdrop-blur-sm lg:col-span-2">
-          <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
-            <BarChart3 size={18} className="mr-2 text-primary" />
-            Protocol Distribution
-          </h3>
-          <div className="space-y-4">
-            {Object.entries(stats.protocols).length > 0 ? (
-              Object.entries(stats.protocols)
-                .sort(([, a], [, b]) => b - a)
-                .map(([protocol, count]) => (
-                  <div key={protocol}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="font-medium text-foreground">
-                        {protocol}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {count} packets (
-                        {Math.round((count / stats.totalPackets) * 100)}%)
-                      </span>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all duration-500"
-                        style={{
-                          width: `${(count / stats.totalPackets) * 100}%`,
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                ))
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                No data available. Start capturing or upload a PCAP file.
-              </div>
-            )}
-          </div>
+        {/* Protocol Distribution & Traffic Volume */}
+        <div className="lg:col-span-1" id="chart-protocol">
+          <ProtocolDistribution packets={allPackets} />
+        </div>
+        <div className="lg:col-span-2" id="chart-timeline">
+          <TrafficVolume packets={allPackets} />
+        </div>
+
+        {/* Top Talkers */}
+        <div className="lg:col-span-1 min-h-[350px]" id="chart-toptalkers">
+          <TopTalkers
+            packets={allPackets}
+            onFilterClick={handleTopTalkerClick}
+          />
+        </div>
+
+        {/* Geo Map */}
+        <div className="lg:col-span-2 min-h-[350px]" id="chart-geomap">
+          <GeoMap packets={allPackets} />
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-card border border-white/10 p-6 rounded-lg shadow-sm backdrop-blur-sm">
+        <div className="bg-card border border-white/10 p-6 rounded-lg shadow-sm backdrop-blur-sm lg:col-span-3">
           <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
             <Clock size={18} className="mr-2 text-emerald-500" />
             Recent Activity
@@ -268,9 +312,9 @@ const Dashboard: React.FC<DashboardProps> = () => {
                 >
                   <div
                     className={`mt-1 w-2 h-2 rounded-full mr-3 ${packet.suspiciousIndicators &&
-                      packet.suspiciousIndicators.length > 0
-                      ? 'bg-destructive'
-                      : 'bg-emerald-500'
+                        packet.suspiciousIndicators.length > 0
+                        ? 'bg-destructive'
+                        : 'bg-emerald-500'
                       }`}
                   ></div>
                   <div className="flex-1 min-w-0">
@@ -319,8 +363,8 @@ const Dashboard: React.FC<DashboardProps> = () => {
       {/* Navigation Tabs */}
       <div
         className={`flex ${layoutMode === 'left'
-          ? 'flex-col border-r w-64 p-2 space-y-1'
-          : 'flex-row border-b items-center'
+            ? 'flex-col border-r w-64 p-2 space-y-1'
+            : 'flex-row border-b items-center'
           } border-white/10 ${layoutMode === 'top' ? 'mb-6' : ''} bg-background/50 backdrop-blur-sm`}
       >
         <div
@@ -369,7 +413,9 @@ const Dashboard: React.FC<DashboardProps> = () => {
         {activeTab === 'parser' && (
           <PcapUpload onParsingStatusChange={setIsGlobalParsing} />
         )}
-        {activeTab === 'packets' && <PcapAnalysisPage />}
+        {activeTab === 'packets' && (
+          <PcapAnalysisPage initialFilter={initialPacketFilter} />
+        )}
         {activeTab === 'timeline' && (
           <div className="p-6">
             <TimelineView packets={allPackets} />
@@ -386,14 +432,16 @@ const Dashboard: React.FC<DashboardProps> = () => {
               <h2 className="text-xl font-semibold">
                 MITRE ATT&CK Intelligence
               </h2>
-              <Button
-                variant="outline"
-                onClick={handleExportThreats}
-                disabled={allThreats.length === 0}
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Export Report
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={handleGenerateReportClick}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Generate Summary
+                </Button>
+                <Button onClick={() => navigate('/')}>
+                  <Upload className="mr-2 h-4 w-4" />
+                  New Analysis
+                </Button>
+              </div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <MitreTacticsChart threats={allThreats} />
@@ -416,6 +464,13 @@ const Dashboard: React.FC<DashboardProps> = () => {
         )}
         {activeTab === 'settings' && <SettingsPage />}
       </div>
+
+      <ReportBuilderDialog
+        open={reportDialogOpen}
+        onOpenChange={setReportDialogOpen}
+        onGenerate={runReportGeneration}
+        defaultSummary={caseMetadata?.summary}
+      />
     </div>
   );
 };

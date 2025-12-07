@@ -13,8 +13,20 @@ import { useAlertStore } from '../store/alertStore';
 import { getSeverityColor, SEVERITY_LEVELS } from '../utils/severity';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { MessageSquare, CheckCircle, EyeOff } from 'lucide-react';
+import { MessageSquare, CheckCircle, EyeOff, Download } from 'lucide-react';
 import { useAuditLogger } from '@/hooks/useAuditLogger';
+import { CsvExporter } from '@/services/Exporters/CsvExporter';
+import { JsonExporter } from '@/services/Exporters/JsonExporter';
+import { EvidenceExporter } from '@/services/Exporters/EvidenceExporter';
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ThreatPanelProps {
   threats: ThreatAlert[];
@@ -130,8 +142,42 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
     <div className="threat-panel p-4 border rounded-lg shadow-md bg-white">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Detected Threats</h2>
-        <div className="text-sm text-gray-500">
-          {processedThreats.length} / {threats.length}
+        <div className="flex items-center gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground">
+                <Download className="mr-2 h-3 w-3" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => CsvExporter.exportThreats(processedThreats, 'threats_filtered.csv')}>
+                CSV (Visible)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => JsonExporter.exportThreats(processedThreats, 'threats_filtered.json')}>
+                JSON (Visible)
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => EvidenceExporter.exportThreatsWithIntegrity(processedThreats, 'csv', 'threats_evidence')}>
+                Evidence Zip (CSV + Hash)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => EvidenceExporter.exportThreatsWithIntegrity(processedThreats, 'json', 'threats_evidence')}>
+                Evidence Zip (JSON + Hash)
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => CsvExporter.exportThreats(threats, 'threats_all.csv')}>
+                CSV (All)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => JsonExporter.exportThreats(threats, 'threats_all.json')}>
+                JSON (All)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <div className="text-sm text-gray-500">
+            {processedThreats.length} / {threats.length}
+          </div>
         </div>
       </div>
 
@@ -297,7 +343,11 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         markFalsePositive(threat.id);
-                        logAction('THREAT_UPDATE', `Marked False Positive: ${threat.type}`, { threatId: threat.id, severity: threat.severity });
+                        logAction(
+                          'THREAT_UPDATE',
+                          `Marked False Positive: ${threat.type}`,
+                          { threatId: threat.id, severity: threat.severity },
+                        );
                       }}
                       className="text-xs"
                     >
@@ -309,7 +359,11 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         confirmThreat(threat.id);
-                        logAction('THREAT_UPDATE', `Confirmed Threat: ${threat.type}`, { threatId: threat.id, severity: threat.severity });
+                        logAction(
+                          'THREAT_UPDATE',
+                          `Confirmed Threat: ${threat.type}`,
+                          { threatId: threat.id, severity: threat.severity },
+                        );
                       }}
                       disabled={isConfirmed}
                       className="text-xs"

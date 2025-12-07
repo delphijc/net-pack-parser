@@ -2,7 +2,7 @@
 
 **Story ID:** 6.5
 **Epic:** 6 (Visualization, Reporting & Export)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,11 +13,11 @@ So that I can paste them into external presentation slides or documents.
 ## Acceptance Criteria
 
 ### AC 1: Export Controls
-- [ ] Each chart widget has a "menu" icon (three dots) with options: "Download PNG", "Download SVG".
+- [x] Each chart widget has a "menu" icon (three dots) with options: "Download PNG", "Download SVG".
 
 ### AC 2: Image Quality
-- [ ] Exported images are high resolution (at least 2x scale for PNG).
-- [ ] SVG exports preserve vector scalability.
+- [x] Exported images are high resolution (at least 2x scale for PNG).
+- [x] SVG exports preserve vector scalability.
 
 ## Design & Implementation
 

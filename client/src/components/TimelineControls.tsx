@@ -3,66 +3,64 @@ import { useTimelineStore } from '../store/timelineStore';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 
 import { useAuditLogger } from '../hooks/useAuditLogger';
 
 export const TimelineControls: React.FC = () => {
-    const {
-        showThreatsOnly,
-        toggleThreatsOnly,
-        selectedProtocol,
-        setProtocol
-    } = useTimelineStore();
-    const { logAction } = useAuditLogger();
+  const { showThreatsOnly, toggleThreatsOnly, selectedProtocol, setProtocol } =
+    useTimelineStore();
+  const { logAction } = useAuditLogger();
 
-    const handleThreatToggle = (checked: boolean) => {
-        toggleThreatsOnly();
-        logAction('FILTER', `Threats Only Toggle: ${checked ? 'ON' : 'OFF'}`);
-    };
+  const handleThreatToggle = (checked: boolean) => {
+    toggleThreatsOnly();
+    logAction('FILTER', `Threats Only Toggle: ${checked ? 'ON' : 'OFF'}`);
+  };
 
-    const handleProtocolChange = (val: string) => {
-        const protocol = val === "ALL" ? null : val;
-        setProtocol(protocol);
-        logAction('FILTER', `Protocol Filter Changed: ${val}`);
-    };
+  const handleProtocolChange = (val: string) => {
+    const protocol = val === 'ALL' ? null : val;
+    setProtocol(protocol);
+    logAction('FILTER', `Protocol Filter Changed: ${val}`);
+  };
 
-    return (
-        <div className="flex items-center gap-6 px-4 py-2 bg-card border rounded-md mb-4">
-            <div className="flex items-center space-x-2">
-                <Switch
-                    id="show-threats"
-                    checked={showThreatsOnly}
-                    onCheckedChange={handleThreatToggle}
-                />
-                <Label htmlFor="show-threats">Show Threats Only</Label>
-            </div>
+  return (
+    <div className="flex items-center gap-6 px-4 py-2 bg-card border rounded-md mb-4">
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="show-threats"
+          checked={showThreatsOnly}
+          onCheckedChange={handleThreatToggle}
+        />
+        <Label htmlFor="show-threats">Show Threats Only</Label>
+      </div>
 
-            <div className="flex items-center space-x-2">
-                <Label htmlFor="protocol-filter" className="whitespace-nowrap">Protocol:</Label>
-                <Select
-                    value={selectedProtocol || "ALL"}
-                    onValueChange={handleProtocolChange}
-                >
-                    <SelectTrigger className="w-[120px] h-8 text-xs">
-                        <SelectValue placeholder="All" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ALL">All</SelectItem>
-                        <SelectItem value="TCP">TCP</SelectItem>
-                        <SelectItem value="UDP">UDP</SelectItem>
-                        <SelectItem value="HTTP">HTTP</SelectItem>
-                        <SelectItem value="DNS">DNS</SelectItem>
-                        <SelectItem value="TLS">TLS</SelectItem>
-                        <SelectItem value="ICMP">ICMP</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-        </div>
-    );
+      <div className="flex items-center space-x-2">
+        <Label htmlFor="protocol-filter" className="whitespace-nowrap">
+          Protocol:
+        </Label>
+        <Select
+          value={selectedProtocol || 'ALL'}
+          onValueChange={handleProtocolChange}
+        >
+          <SelectTrigger className="w-[120px] h-8 text-xs">
+            <SelectValue placeholder="All" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All</SelectItem>
+            <SelectItem value="TCP">TCP</SelectItem>
+            <SelectItem value="UDP">UDP</SelectItem>
+            <SelectItem value="HTTP">HTTP</SelectItem>
+            <SelectItem value="DNS">DNS</SelectItem>
+            <SelectItem value="TLS">TLS</SelectItem>
+            <SelectItem value="ICMP">ICMP</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
 };

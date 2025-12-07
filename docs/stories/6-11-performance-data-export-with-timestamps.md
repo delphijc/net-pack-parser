@@ -2,7 +2,7 @@
 
 **Story ID:** 6.11
 **Epic:** 6 (Visualization, Reporting & Export)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,8 +13,8 @@ So that I can analyze trends externally.
 ## Acceptance Criteria
 
 ### AC 1: Export
-- [ ] Button on Performance Dashboard to "Export Metrics".
-- [ ] CSV format: `Timestamp, MetricName, Value`.
+- [x] Button on Performance Dashboard to "Export Metrics".
+- [x] CSV format: `Timestamp, MetricName, Value`.
 
 ## Dependencies
 - Epic 4 (Performance Data).

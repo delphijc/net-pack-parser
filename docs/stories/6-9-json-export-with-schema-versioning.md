@@ -2,7 +2,7 @@
 
 **Story ID:** 6.9
 **Epic:** 6 (Visualization, Reporting & Export)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,10 +13,10 @@ So that I can programmatically process it in other scripts.
 ## Acceptance Criteria
 
 ### AC 1: JSON Output
-- [ ] Export file includes valid JSON array of packet objects.
+- [x] Export file includes valid JSON array of packet objects.
 
 ### AC 2: Schema Version
-- [ ] The export includes a header or metadata field specifying schema version (e.g., `version: "1.0"`).
+- [x] The export includes a header or metadata field specifying schema version (e.g., `version: "1.0"`).
 
 ## Design & Implementation
 

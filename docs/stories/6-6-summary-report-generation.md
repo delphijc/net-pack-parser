@@ -2,7 +2,7 @@
 
 **Story ID:** 6.6
 **Epic:** 6 (Visualization, Reporting & Export)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,14 +13,14 @@ So that I can get a quick overview document of the capture without manual compos
 ## Acceptance Criteria
 
 ### AC 1: Content
-- [ ] Standard template includes:
+- [x] Standard template includes:
     - File Name, SHA256 Hash, Capture Duration.
     - Total Packets, Bytes, Flow Count.
     - Protocol Distribution Chart.
     - Top 5 Talkers.
 
 ### AC 2: Output
-- [ ] Generates a single-page PDF.
+- [x] Generates a single-page PDF.
 
 ## Design & Implementation
 

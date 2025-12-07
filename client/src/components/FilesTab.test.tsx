@@ -52,9 +52,7 @@ describe('FilesTab', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (DatabaseService.getFileById as any).mockResolvedValue(mockFileRef);
-    (ChainOfCustodyDb.addEvent as any).mockResolvedValue(
-      'event-id',
-    );
+    (ChainOfCustodyDb.addEvent as any).mockResolvedValue('event-id');
   });
 
   it('renders detected files', async () => {
@@ -71,9 +69,7 @@ describe('FilesTab', () => {
   it('handles file download', async () => {
     render(<FilesTab packet={mockPacket} />);
 
-    await waitFor(() =>
-      expect(screen.getByText('Download')).toBeDefined(),
-    );
+    await waitFor(() => expect(screen.getByText('Download')).toBeDefined());
 
     const downloadBtn = screen.getByText('Download');
     fireEvent.click(downloadBtn);

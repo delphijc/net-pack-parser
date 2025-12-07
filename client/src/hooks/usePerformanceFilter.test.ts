@@ -58,18 +58,33 @@ describe('usePerformanceFilter', () => {
   it('filters resources by domain (internal/external)', () => {
     const { result } = renderHook(() => usePerformanceFilter());
     const domainResources: ResourceTiming[] = [
-      { id: '1', name: 'http://localhost:5173/script.js', initiatorType: 'script', duration: 100 } as any,
-      { id: '2', name: 'https://thirdparty.com/analytics.js', initiatorType: 'script', duration: 50 } as any,
-      { id: '3', name: '/local-asset.png', initiatorType: 'img', duration: 10 } as any, // Relative path is internal
+      {
+        id: '1',
+        name: 'http://localhost:5173/script.js',
+        initiatorType: 'script',
+        duration: 100,
+      } as any,
+      {
+        id: '2',
+        name: 'https://thirdparty.com/analytics.js',
+        initiatorType: 'script',
+        duration: 50,
+      } as any,
+      {
+        id: '3',
+        name: '/local-asset.png',
+        initiatorType: 'img',
+        duration: 10,
+      } as any, // Relative path is internal
     ];
 
     // Mock window.location for test environment
     Object.defineProperty(window, 'location', {
       value: {
         origin: 'http://localhost:5173',
-        hostname: 'localhost'
+        hostname: 'localhost',
       },
-      writable: true
+      writable: true,
     });
 
     // Test Internal
@@ -78,8 +93,8 @@ describe('usePerformanceFilter', () => {
     });
     const internal = result.current.filterResources(domainResources);
     expect(internal).toHaveLength(2); // localhost and relative
-    expect(internal.map(r => r.id)).toContain('1');
-    expect(internal.map(r => r.id)).toContain('3');
+    expect(internal.map((r) => r.id)).toContain('1');
+    expect(internal.map((r) => r.id)).toContain('3');
 
     // Test External
     act(() => {

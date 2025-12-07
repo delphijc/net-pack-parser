@@ -2,7 +2,7 @@
 
 **Story ID:** 6.3
 **Epic:** 6 (Visualization, Reporting & Export)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,14 +13,14 @@ So that I can investigate potential attackers or compromised hosts.
 ## Acceptance Criteria
 
 ### AC 1: Top N List
-- [ ] Dashboard displays a list (Table or Horizontal Bar Chart) of the top Source and Destination IPs by volume (bytes).
+- [x] Dashboard displays a list (Table or Horizontal Bar Chart) of the top Source and Destination IPs by volume (bytes).
 
 ### AC 2: Details
-- [ ] Shows IP address, total bytes, and packet count.
-- [ ] (Enhancement) Shows resolved hostname if available.
+- [x] Shows IP address, total bytes, and packet count.
+- [x] (Enhancement) Shows resolved hostname if available.
 
 ### AC 3: Filtering
-- [ ] Clicking an IP adds it to the global filter (e.g., `ip.src == X`).
+- [x] Clicking an IP adds it to the global filter (e.g., `ip.src == X`).
 
 ## Design & Implementation
 

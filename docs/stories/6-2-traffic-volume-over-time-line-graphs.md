@@ -2,7 +2,7 @@
 
 **Story ID:** 6.2
 **Epic:** 6 (Visualization, Reporting & Export)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,14 +13,14 @@ So that I can spot bursts, quiet periods, or rhythmic patterns.
 ## Acceptance Criteria
 
 ### AC 1: Volume Chart
-- [ ] Dashboard displays an Area or Line chart of traffic volume.
-- [ ] X-axis: Time. Y-axis: Bits/sec or Packets/sec.
+- [x] Dashboard displays an Area or Line chart of traffic volume.
+- [x] X-axis: Time. Y-axis: Bits/sec or Packets/sec.
 
 ### AC 2: Granularity
-- [ ] Chart automatically adjusts bucket size (seconds, minutes) based on total duration.
+- [x] Chart automatically adjusts bucket size (seconds, minutes) based on total duration.
 
 ### AC 3: Filter Sync
-- [ ] Zooming/Filtering this chart updates the core time filter (shared with Story 5.2 Timeline).
+- [x] Zooming/Filtering this chart updates the core time filter (shared with Story 5.2 Timeline).
 
 ## Design & Implementation
 

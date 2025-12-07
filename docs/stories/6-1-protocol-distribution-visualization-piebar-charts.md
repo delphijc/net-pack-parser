@@ -2,7 +2,7 @@
 
 **Story ID:** 6.1
 **Epic:** 6 (Visualization, Reporting & Export)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,14 +13,14 @@ So that I can quickly identify the dominant traffic types or unexpected protocol
 ## Acceptance Criteria
 
 ### AC 1: Rendering
-- [ ] Dashboard displays a chart (Pie or Bar) showing the distribution of protocols.
-- [ ] Legend identifies each protocol and its percentage.
+- [x] Dashboard displays a chart (Pie or Bar) showing the distribution of protocols.
+- [x] Legend identifies each protocol and its percentage.
 
 ### AC 2: Interaction
-- [ ] Clicking a slice/bar filters the main Packet List to show only packets of that protocol.
+- [x] Clicking a slice/bar filters the main Packet List to show only packets of that protocol.
 
 ### AC 3: Data Aggregation
-- [ ] System accurately counts packets per protocol from the parsed dataset.
+- [x] System accurately counts packets per protocol from the parsed dataset.
 
 ## Design & Implementation
 

@@ -30,7 +30,7 @@ class ChainOfCustodyDb {
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           db.createObjectStore(STORE_NAME, { keyPath: 'id' });
         }
-        // Ideally we would migrate old 'fileChainOfCustodyEvents' here, 
+        // Ideally we would migrate old 'fileChainOfCustodyEvents' here,
         // but let's assume fresh start or parallel existence.
       };
 
@@ -41,13 +41,18 @@ class ChainOfCustodyDb {
       };
 
       request.onerror = (event) => {
-        console.error('IndexedDB error:', (event.target as IDBOpenDBRequest).error);
+        console.error(
+          'IndexedDB error:',
+          (event.target as IDBOpenDBRequest).error,
+        );
         reject((event.target as IDBOpenDBRequest).error);
       };
     });
   }
 
-  private async getObjectStore(mode: IDBTransactionMode): Promise<IDBObjectStore> {
+  private async getObjectStore(
+    mode: IDBTransactionMode,
+  ): Promise<IDBObjectStore> {
     await this._dbPromise;
     if (!this.db) {
       throw new Error('IndexedDB is not initialized.');
@@ -69,7 +74,10 @@ class ChainOfCustodyDb {
           };
 
           request.onerror = (event) => {
-            console.error('Error adding event:', (event.target as IDBRequest).error);
+            console.error(
+              'Error adding event:',
+              (event.target as IDBRequest).error,
+            );
             reject((event.target as IDBRequest).error);
           };
         } catch (error) {
@@ -91,7 +99,10 @@ class ChainOfCustodyDb {
           };
 
           request.onerror = (event) => {
-            console.error('Error getting events:', (event.target as IDBRequest).error);
+            console.error(
+              'Error getting events:',
+              (event.target as IDBRequest).error,
+            );
             reject((event.target as IDBRequest).error);
           };
         } catch (error) {

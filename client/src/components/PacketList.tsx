@@ -12,6 +12,8 @@ import {
   X,
   Activity,
   Layers,
+  FileText,
+  Download
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -44,12 +46,23 @@ import {
 } from '@/components/ui/context-menu'; // Assuming basic ContextMenu is available or we fallback to buttons
 import database from '../services/database';
 import { StreamFollower } from './StreamFollower'; // New component
-import { FileText } from 'lucide-react'; // Icon for Follow Stream
+import { CsvExporter } from '@/services/Exporters/CsvExporter';
+import { JsonExporter } from '@/services/Exporters/JsonExporter';
+import { EvidenceExporter } from '@/services/Exporters/EvidenceExporter';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface PacketListProps {
   onPacketSelect: (packet: ParsedPacket | null) => void;
   selectedPacketId: string | null;
   packets: ParsedPacket[]; // Packets now received as a prop
+  allPackets?: ParsedPacket[]; // Include all packets for "Export All"
   onClearAllPackets: () => void; // Callback to clear all packets in parent
   selectedProtocol?: string;
   onPacketDeleted?: () => void; // Optional callback when a packet is deleted
@@ -61,6 +74,7 @@ const PacketList: React.FC<PacketListProps> = ({
   onPacketSelect,
   selectedPacketId,
   packets,
+  allPackets,
   onClearAllPackets,
   selectedProtocol,
   onPacketDeleted,
@@ -252,9 +266,9 @@ const PacketList: React.FC<PacketListProps> = ({
       setStreamFollowerState({ isOpen: true, flowId: packet.flowId });
     } else {
       toast({
-        title: "Cannot follow stream",
-        description: "No Flow ID found for this packet.",
-        variant: "destructive"
+        title: 'Cannot follow stream',
+        description: 'No Flow ID found for this packet.',
+        variant: 'destructive',
       });
     }
   };
@@ -269,14 +283,49 @@ const PacketList: React.FC<PacketListProps> = ({
               {viewMode === 'packets' ? filteredPackets.length : flows.length}
             </span>
           </h2>
-          <button
-            onClick={handleClearAll}
-            className="text-xs text-destructive hover:text-destructive/80 flex items-center transition-colors"
-            title="Clear all packets"
-          >
-            <Trash2 size={14} className="mr-1" />
-            Clear
-          </button>
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground mr-2">
+                  <Download size={14} className="mr-1" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => CsvExporter.exportPackets(filteredPackets, 'packets_filtered.csv')}>
+                  CSV (Visible)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => JsonExporter.exportPackets(filteredPackets, 'packets_filtered.json')}>
+                  JSON (Visible)
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => EvidenceExporter.exportPacketsWithIntegrity(filteredPackets, 'csv', 'packets_evidence')}>
+                  Evidence Zip (CSV + Hash)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => EvidenceExporter.exportPacketsWithIntegrity(filteredPackets, 'json', 'packets_evidence')}>
+                  Evidence Zip (JSON + Hash)
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => CsvExporter.exportPackets(allPackets || packets, 'packets_all.csv')}>
+                  CSV (All)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => JsonExporter.exportPackets(allPackets || packets, 'packets_all.json')}>
+                  JSON (All)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <button
+              onClick={handleClearAll}
+              className="text-xs text-destructive hover:text-destructive/80 flex items-center transition-colors"
+              title="Clear all packets"
+            >
+              <Trash2 size={14} className="mr-1" />
+              Clear
+            </button>
+          </div>
         </div>
 
         {searchCriteria && (
@@ -460,10 +509,16 @@ const PacketList: React.FC<PacketListProps> = ({
                 </div>
               </ContextMenuTrigger>
               <ContextMenuContent>
-                <ContextMenuItem onClick={() => handleFollowStream(packet)} disabled={packet.protocol !== 'TCP'}>
+                <ContextMenuItem
+                  onClick={() => handleFollowStream(packet)}
+                  disabled={packet.protocol !== 'TCP'}
+                >
                   <FileText className="mr-2 h-4 w-4" /> Follow TCP Stream
                 </ContextMenuItem>
-                <ContextMenuItem onClick={() => setPacketToDelete(packet.id)} className="text-destructive focus:text-destructive">
+                <ContextMenuItem
+                  onClick={() => setPacketToDelete(packet.id)}
+                  className="text-destructive focus:text-destructive"
+                >
                   <Trash2 className="mr-2 h-4 w-4" /> Delete Packet
                 </ContextMenuItem>
               </ContextMenuContent>
@@ -497,7 +552,9 @@ const PacketList: React.FC<PacketListProps> = ({
 
       <StreamFollower
         isOpen={streamFollowerState.isOpen}
-        onCloseOperation={() => setStreamFollowerState(prev => ({ ...prev, isOpen: false }))}
+        onCloseOperation={() =>
+          setStreamFollowerState((prev) => ({ ...prev, isOpen: false }))
+        }
         flowId={streamFollowerState.flowId || ''}
         packets={packets}
       />
