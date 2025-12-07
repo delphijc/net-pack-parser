@@ -26,6 +26,7 @@ import { IOCManager } from '../IOCManager';
 import { FalsePositivesTab } from '../FalsePositivesTab';
 import { ThreatPanel } from '../ThreatPanel';
 import SettingsPage from '../SettingsPage';
+import { TimelineView } from '../TimelineView';
 import { useAlertStore } from '../../store/alertStore';
 import { runThreatDetection } from '../../utils/threatDetection';
 import type { ThreatAlert } from '../../types/threat';
@@ -54,6 +55,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
     localStorage.setItem('dashboardActiveTab', activeTab);
   }, [activeTab]);
   const [recentActivity, setRecentActivity] = useState<ParsedPacket[]>([]);
+  const [allPackets, setAllPackets] = useState<ParsedPacket[]>([]);
   const [allThreats, setAllThreats] = useState<ThreatAlert[]>([]);
 
   // Load layout preference
@@ -117,6 +119,14 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
     // Get recent activity (last 5 packets)
     setRecentActivity(packets.slice(-5).reverse());
+
+    // Optimization: Only update allPackets if count changed to avoid costly re-renders of TimelineView
+    setAllPackets(prev => {
+      if (prev.length !== packets.length) {
+        return packets;
+      }
+      return prev;
+    });
   }, []);
 
   useEffect(() => {
@@ -257,12 +267,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
                   className="flex items-start pb-3 border-b border-white/5 last:border-0 last:pb-0"
                 >
                   <div
-                    className={`mt-1 w-2 h-2 rounded-full mr-3 ${
-                      packet.suspiciousIndicators &&
+                    className={`mt-1 w-2 h-2 rounded-full mr-3 ${packet.suspiciousIndicators &&
                       packet.suspiciousIndicators.length > 0
-                        ? 'bg-destructive'
-                        : 'bg-emerald-500'
-                    }`}
+                      ? 'bg-destructive'
+                      : 'bg-emerald-500'
+                      }`}
                   ></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate text-foreground">
@@ -289,6 +298,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
     { id: 'overview', label: 'Overview' },
     { id: 'parser', label: 'Parser & Upload' },
     { id: 'packets', label: 'Packet Inspector' },
+    { id: 'timeline', label: 'Timeline' },
     { id: 'yara', label: 'YARA Rules' },
     { id: 'threat-intel', label: 'Threat Intel' },
     { id: 'ioc-manager', label: 'IOC Manager' },
@@ -298,9 +308,8 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
   return (
     <div
-      className={`flex ${layoutMode === 'left' ? 'flex-row' : 'flex-col'} h-full ${
-        isGlobalParsing ? 'cursor-wait' : ''
-      }`}
+      className={`flex ${layoutMode === 'left' ? 'flex-row' : 'flex-col'} h-full ${isGlobalParsing ? 'cursor-wait' : ''
+        }`}
     >
       {/* Header / Session Selector Area */}
       <div className="bg-background/80 backdrop-blur-sm border-b border-white/10 px-6 py-2 flex justify-between items-center">
@@ -309,11 +318,10 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
       {/* Navigation Tabs */}
       <div
-        className={`flex ${
-          layoutMode === 'left'
-            ? 'flex-col border-r w-64 p-2 space-y-1'
-            : 'flex-row border-b items-center'
-        } border-white/10 ${layoutMode === 'top' ? 'mb-6' : ''} bg-background/50 backdrop-blur-sm`}
+        className={`flex ${layoutMode === 'left'
+          ? 'flex-col border-r w-64 p-2 space-y-1'
+          : 'flex-row border-b items-center'
+          } border-white/10 ${layoutMode === 'top' ? 'mb-6' : ''} bg-background/50 backdrop-blur-sm`}
       >
         <div
           className={`flex items-center ${layoutMode === 'top' ? 'mr-2 px-2' : 'mb-4 justify-end'}`}
@@ -339,15 +347,13 @@ const Dashboard: React.FC<DashboardProps> = () => {
             disabled={isGlobalParsing}
             className={`
               px-6 py-3 text-sm font-medium transition-colors
-              ${
-                layoutMode === 'left'
-                  ? 'text-left w-full rounded-md border-l-2'
-                  : 'border-b-2'
+              ${layoutMode === 'left'
+                ? 'text-left w-full rounded-md border-l-2'
+                : 'border-b-2'
               }
-              ${
-                activeTab === btn.id
-                  ? 'border-primary text-primary bg-primary/5'
-                  : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              ${activeTab === btn.id
+                ? 'border-primary text-primary bg-primary/5'
+                : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'
               }
               ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}
             `}
@@ -364,6 +370,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
           <PcapUpload onParsingStatusChange={setIsGlobalParsing} />
         )}
         {activeTab === 'packets' && <PcapAnalysisPage />}
+        {activeTab === 'timeline' && (
+          <div className="p-6">
+            <TimelineView packets={allPackets} />
+          </div>
+        )}
         {activeTab === 'yara' && (
           <div className="p-6">
             <YaraRuleManager />
@@ -395,7 +406,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
               <h3 className="text-lg font-semibold mb-4">
                 Threat Detection Log
               </h3>
-              <ThreatPanel threats={allThreats} onThreatClick={() => {}} />
+              <ThreatPanel threats={allThreats} onThreatClick={() => { }} />
             </div>
           </div>
         )}

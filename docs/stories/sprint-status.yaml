@@ -42,7 +42,7 @@ development_status:
   4-8-performance-data-filtering-analysis: done 
   epic-4-retrospective: completed
   epic-5: contexted
-  5-1-chronological-timeline-generation: ready-for-dev
+  5-1-chronological-timeline-generation: done
   5-2-interactive-timeline-with-zoom-pan: ready-for-dev
   5-3-event-correlation-engine: ready-for-dev
   5-4-timeline-bookmarking-annotations: ready-for-dev
