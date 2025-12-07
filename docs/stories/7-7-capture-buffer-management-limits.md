@@ -2,7 +2,7 @@
 
 **Story ID:** 7.7
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,11 +13,11 @@ So that the server disk doesn't fill up completely.
 ## Acceptance Criteria
 
 ### AC 1: Size Limit
-- [ ] `POST /api/capture/start` accepts `{ sizeLimit: number }` (in MB).
-- [ ] When the PCAP file reaches this limit, the capture automatically stops (or rotates - for now, Stop is safer for MVP).
+- [x] `POST /api/capture/start` accepts `sizeLimit` (MB).
+- [x] Capture stops when limit reached.
 
 ### AC 2: Safety Stop
-- [ ] System automatically stops capture if disk space is critical (< 100MB free).
+- [x] Auto-stops if disk space critical (<100MB).
 
 ## Design & Implementation
 

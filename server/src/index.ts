@@ -1,26 +1,25 @@
 import express from 'express';
 import cors from 'cors';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import morgan from 'morgan';
 import os from 'os';
-import { analysisRouter } from './routes/analysis';
+import { apiRouter } from './routes';
+import { sessionRouter } from './routes/sessions';
+import { CleanupService } from './services/CleanupService';
+import { WebSocketService } from './services/WebSocketService';
+import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 const port = 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'));
 
-// Ensure uploads directory exists
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Start background services
+CleanupService.start();
 
-// Routes
-app.use('/api', analysisRouter);
+app.use('/api', apiRouter);
+app.use('/api/sessions', sessionRouter);
 
 // Health check and System Monitor
 app.get('/health', (req, res) => {
@@ -33,6 +32,13 @@ app.get('/health', (req, res) => {
         hostname: os.hostname()
     });
 });
+
+// 404 handler for unknown API routes
+app.use('/api/*', (req, res) => {
+    res.status(404).json({ error: 'Endpoint not found' });
+});
+
+app.use(errorHandler);
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

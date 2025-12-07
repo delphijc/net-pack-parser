@@ -2,7 +2,7 @@
 
 **Story ID:** 8.3
 **Epic:** 8 (Real-Time Streaming & Live Analysis)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,14 +13,14 @@ So that the server and client agree on data formats.
 ## Acceptance Criteria
 
 ### AC 1: Message Types
-- [ ] `SUBSCRIBE { filters... }`: Client -> Server. Start sending data.
-- [ ] `PACKET { data... }`: Server -> Client. A new packet arrived.
-- [ ] `STATS { captured, dropped }`: Server -> Client. Periodic update.
-- [ ] `ERROR { code, msg }`: Server -> Client.
+- [x] `SUBSCRIBE`, `UPDATE_FILTER`: Client -> Server.
+- [x] `PACKET`: Server -> Client (new packet).
+- [x] `STATS`: Server -> Client (periodic).
+- [x] `ERROR`: Server -> Client.
 
 ### AC 2: Format
-- [ ] JSON format is used for MVP.
-- [ ] Timestamps are ISO strings or Unix integers.
+- [x] JSON format used.
+- [x] Timestamps as Unix integers.
 
 ## Design & Implementation
 

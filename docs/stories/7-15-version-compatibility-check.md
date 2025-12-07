@@ -2,7 +2,7 @@
 
 **Story ID:** 7.15
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,12 +13,12 @@ So that I don't face weird bugs due to version mismatch.
 ## Acceptance Criteria
 
 ### AC 1: Version Handshake
-- [ ] Client requests `GET /api/version` on connect.
-- [ ] Client compares Server Version vs Client Version (semver).
+- [x] Client requests `/api/version` on connect.
+- [x] Compares versions.
 
 ### AC 2: Enforcement
-- [ ] If Major version differs, block connection and show error.
-- [ ] If Minor version differs, show warning.
+- [x] Major mismatch blocks connection.
+- [x] Minor mismatch shows warning.
 
 ## Design & Implementation
 

@@ -1,7 +1,7 @@
-// client/src/utils/threatDetection.ts
 
-import type { Packet, ParsedPacket } from '../types/packet';
-import type { ThreatAlert } from '../types/threat';
+import type { Packet } from '@/types/packet';
+import type { ParsedPacket } from '@/types';
+import type { ThreatAlert } from '@/types/threat';
 import { detectSqlInjection } from './sqlInjectionDetector';
 import { detectXss } from './xssDetector';
 import { detectCommandInjection } from './commandInjectionDetector';
@@ -66,7 +66,7 @@ export async function runThreatDetection(
           packetId: packet.id,
           severity,
           type: 'Malware Detection',
-          description: `YARA Rule Match: ${match.rule}`,
+          description: `YARA Rule Match: ${match.rule} `,
           mitreAttack: mitre,
           timestamp: packet.timestamp,
           falsePositive: false,
@@ -89,7 +89,7 @@ export async function runThreatDetection(
 
   // IOC Detection (Async)
   try {
-    const iocThreats = await detectIOCs(packet as ParsedPacket);
+    const iocThreats = await detectIOCs(packet as unknown as ParsedPacket);
     allThreats = allThreats.concat(iocThreats);
   } catch (error) {
     console.error('IOC Detection failed:', error);

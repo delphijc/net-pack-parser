@@ -2,7 +2,7 @@
 
 **Story ID:** 7.6
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,14 +13,14 @@ So that I know if the agent is keeping up with the traffic load.
 ## Acceptance Criteria
 
 ### AC 1: Stats API
-- [ ] `GET /api/capture/stats` (or SSE stream) returns:
-    - `captured`: Total packets written to disk.
-    - `dropped`: Packets dropped by kernel (if available via `cap.stats()`).
-    - `fileSize`: Current size of the PCAP file.
+- [x] `GET /api/capture/stats` returns:
+    - `captured`: Packets written.
+    - `dropped`: Dropped packets (via `cap.stats()`).
+    - `fileSize`: PCAP file size.
     - `duration`: Time since start.
 
 ### AC 2: Integration
-- [ ] Frontend displays these metrics in the Capture Control panel.
+- [x] Frontend displays metrics in Capture Control panel.
 
 ## Design & Implementation
 

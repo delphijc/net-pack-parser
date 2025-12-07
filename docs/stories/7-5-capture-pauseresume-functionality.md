@@ -2,7 +2,7 @@
 
 **Story ID:** 7.5
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,12 +13,12 @@ So that I can ignore irrelevant traffic periods or inspect the current buffer.
 ## Acceptance Criteria
 
 ### AC 1: Pause
-- [ ] `POST /api/capture/pause` stops writing new packets to the disk buffer.
-- [ ] The underlying interface listener might remain active or be paused depending on implementation, but no new data is added to the session file.
+- [x] `POST /api/capture/pause` - stops writing to buffer.
+- [x] `CaptureSession.isPaused` flag controls packet writing.
 
 ### AC 2: Resume
-- [ ] `POST /api/capture/resume` continues writing packets to the same session file.
-- [ ] Handles the time gap gracefully in the PCAP (timestamps will just jump).
+- [x] `POST /api/capture/resume` continues writing.
+- [x] Timestamps jump handled gracefully.
 
 ## Design & Implementation
 

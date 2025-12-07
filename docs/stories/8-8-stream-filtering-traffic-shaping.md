@@ -2,7 +2,7 @@
 
 **Story ID:** 8.8
 **Epic:** 8 (Real-Time Streaming & Live Analysis)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,12 +13,11 @@ So that I don't waste bandwidth receiving packets I don't care about.
 ## Acceptance Criteria
 
 ### AC 1: Dynamic Filter
-- [ ] Client can send a `UPDATE_FILTER` message over WebSocket.
-- [ ] Server applies this filter to the stream immediately.
+- [x] Client can send `UPDATE_FILTER` message via `LiveFilterPanel`.
+- [x] Server applies filter per-client in `WebSocketService.broadcast()`.
 
 ### AC 2: Traffic Shaping (Throttle)
-- [ ] Client can request a "throttle" (e.g., max 100 packets/sec).
-- [ ] Server samples or drops excess packets to respect the limit (optional enhancement, nice to have for performance).
+- [ ] Throttle (max packets/sec) - Deferred as optional enhancement.
 
 ## Design & Implementation
 

@@ -2,7 +2,7 @@
 
 **Story ID:** 7.8
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,11 +13,11 @@ So that I can analyze it locally in the browser or other tools.
 ## Acceptance Criteria
 
 ### AC 1: Download Endpoint
-- [ ] `GET /api/sessions/:id/download` streams the file.
-- [ ] `Content-Disposition` header set to attachment with filename.
+- [x] `GET /api/sessions/:id/download` streams file.
+- [x] Content-Disposition header set.
 
 ### AC 2: Access Control
-- [ ] Only authenticated users can download. (Implied by Global Auth, but worth noting).
+- [x] Auth required (via JWT middleware).
 
 ## Design & Implementation
 

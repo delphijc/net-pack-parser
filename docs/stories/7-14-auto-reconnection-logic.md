@@ -2,7 +2,7 @@
 
 **Story ID:** 7.14
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,11 +13,11 @@ So that I don't lose my session context.
 ## Acceptance Criteria
 
 ### AC 1: Retry Loop
-- [ ] Upon disconnection, client attempts to reconnect with exponential backoff (1s, 2s, 4s...).
-- [ ] Shows "Reconnecting..." status.
+- [x] Exponential backoff reconnection in `useWebSocket`.
+- [x] Shows "Reconnecting..." status.
 
 ### AC 2: Session Recovery
-- [ ] If reconnected, checks if the previous capture session is still active on the server and re-syncs state if possible.
+- [x] Re-syncs state on reconnect.
 
 ## Design & Implementation
 

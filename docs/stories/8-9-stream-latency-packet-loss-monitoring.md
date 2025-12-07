@@ -2,7 +2,7 @@
 
 **Story ID:** 8.9
 **Epic:** 8 (Real-Time Streaming & Live Analysis)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,11 +13,11 @@ So that I can optimize the pipeline.
 ## Acceptance Criteria
 
 ### AC 1: Latency Metrics
-- [ ] UI displays "Stream Latency: X ms".
-- [ ] Calculated as `Date.now() - packet.timestamp` (assuming synchronized clocks ideally, or just relative drift).
+- [x] UI displays "Latency: X ms" in `LivePacketList` toolbar.
+- [x] Calculated using exponential moving average in `liveStore`.
 
 ### AC 2: Loss Detection
-- [ ] If sequence numbers (optional) skip, UI indicates "Packet Loss Detected".
+- [ ] Packet loss detection - Deferred (requires sequence numbers not in current `PacketData`).
 
 ## Design & Implementation
 

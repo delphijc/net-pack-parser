@@ -2,7 +2,7 @@
 
 **Story ID:** 7.16
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,11 +13,11 @@ So that they don't overwrite each other and are easy to locate.
 ## Acceptance Criteria
 
 ### AC 1: Directory Structure
-- [ ] Server ensures a `captures/` directory exists.
-- [ ] Files are named with UUIDs or timestamps: `capture-<timestamp>-<interface>.pcap`.
+- [x] `captures/` directory created.
+- [x] UUID/timestamp-based filenames.
 
 ### AC 2: Write Stream
-- [ ] Capture engine writes directly to this file stream.
+- [x] Direct file stream writing.
 
 ## Design & Implementation
 

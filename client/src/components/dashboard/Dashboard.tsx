@@ -40,6 +40,10 @@ import {
 import html2canvas from 'html2canvas';
 import { ReportBuilderDialog } from '../reporting/ReportBuilderDialog';
 import { useForensicStore } from '../../store/forensicStore';
+import { AgentConnectionPanel } from '../AgentConnectionPanel';
+import { ConnectionStatus } from '../ConnectionStatus';
+import LivePacketList from '../LivePacketList';
+import { LiveTimelineView } from '../LiveTimelineView';
 
 interface DashboardProps {
   onNavigate?: (tab: string) => void;
@@ -312,9 +316,9 @@ const Dashboard: React.FC<DashboardProps> = () => {
                 >
                   <div
                     className={`mt-1 w-2 h-2 rounded-full mr-3 ${packet.suspiciousIndicators &&
-                        packet.suspiciousIndicators.length > 0
-                        ? 'bg-destructive'
-                        : 'bg-emerald-500'
+                      packet.suspiciousIndicators.length > 0
+                      ? 'bg-destructive'
+                      : 'bg-emerald-500'
                       }`}
                   ></div>
                   <div className="flex-1 min-w-0">
@@ -348,6 +352,8 @@ const Dashboard: React.FC<DashboardProps> = () => {
     { id: 'ioc-manager', label: 'IOC Manager' },
     { id: 'false-positives', label: 'False Positives' },
     { id: 'settings', label: 'Settings' },
+    { id: 'agent', label: 'Remote Capture' },
+    { id: 'live', label: 'Live Capture' },
   ];
 
   return (
@@ -358,13 +364,15 @@ const Dashboard: React.FC<DashboardProps> = () => {
       {/* Header / Session Selector Area */}
       <div className="bg-background/80 backdrop-blur-sm border-b border-white/10 px-6 py-2 flex justify-between items-center">
         <SessionSelector />
+        <ConnectionStatus />
+
       </div>
 
       {/* Navigation Tabs */}
       <div
         className={`flex ${layoutMode === 'left'
-            ? 'flex-col border-r w-64 p-2 space-y-1'
-            : 'flex-row border-b items-center'
+          ? 'flex-col border-r w-64 p-2 space-y-1'
+          : 'flex-row border-b items-center'
           } border-white/10 ${layoutMode === 'top' ? 'mb-6' : ''} bg-background/50 backdrop-blur-sm`}
       >
         <div
@@ -463,6 +471,17 @@ const Dashboard: React.FC<DashboardProps> = () => {
           <FalsePositivesTab threats={allThreats} />
         )}
         {activeTab === 'settings' && <SettingsPage />}
+        {activeTab === 'agent' && (
+          <div className="p-6">
+            <AgentConnectionPanel />
+          </div>
+        )}
+        {activeTab === 'live' && (
+          <div className="h-full p-4 space-y-6">
+            <LivePacketList />
+            <LiveTimelineView />
+          </div>
+        )}
       </div>
 
       <ReportBuilderDialog

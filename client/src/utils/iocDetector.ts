@@ -1,6 +1,6 @@
 import { iocService, type IOC } from '../services/iocService';
 import type { ThreatAlert } from '../types/threat';
-import type { ParsedPacket } from '../types/packet';
+import type { ParsedPacket } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function detectIOCs(packet: ParsedPacket): Promise<ThreatAlert[]> {

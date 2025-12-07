@@ -2,7 +2,7 @@
 
 **Story ID:** 7.4
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,14 +13,14 @@ So that I only record relevant traffic and save disk space.
 ## Acceptance Criteria
 
 ### AC 1: API Support
-- [ ] `POST /api/capture/start` accepts optional `{ filter: string }` parameter.
+- [x] `POST /api/capture/start` accepts optional `filter` parameter.
 
 ### AC 2: Validation
-- [ ] Agent attempts to compile/set the filter.
-- [ ] Returns 400 Bad Request if filter syntax is invalid.
+- [x] Filter compiled/validated.
+- [x] Returns 400 if syntax invalid.
 
 ### AC 3: Application
-- [ ] Capture engine enforces the filter at the kernel/library level (pre-ingest).
+- [x] Filter enforced via `cap.setFilter()` at kernel level.
 
 ## Design & Implementation
 

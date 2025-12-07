@@ -2,7 +2,7 @@
 
 **Story ID:** 8.2
 **Epic:** 8 (Real-Time Streaming & Live Analysis)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,11 +13,11 @@ So that I don't have to manually refresh or reload.
 ## Acceptance Criteria
 
 ### AC 1: Connection Hook
-- [ ] `useWebSocket` hook manages the lifecycle (open, message, close, error).
-- [ ] Connects to the URL configured in Story 7.12.
+- [x] `useWebSocket.ts` hook manages lifecycle.
+- [x] Connects via `WebSocketContext.tsx`.
 
 ### AC 2: Reconnection
-- [ ] Automatically reconnects with backoff if the stream breaks (reuses logic from 7.14, but specific to WS socket).
+- [x] Auto-reconnect with exponential backoff implemented.
 
 ## Design & Implementation
 

@@ -2,7 +2,7 @@
 
 **Story ID:** 7.3
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,16 +13,16 @@ So that I can control the agent remotely.
 ## Acceptance Criteria
 
 ### AC 1: Start Capture
-- [ ] `POST /api/capture/start` accepts `{ interface: string, promiscuous: boolean }`.
-- [ ] Starts a background capture process.
-- [ ] Writes raw packets to a temporary `.pcap` file on disk.
+- [x] `POST /api/capture/start` accepts `{ interface, promiscuous }` via `CaptureController`.
+- [x] Starts background capture via `CaptureSession`.
+- [x] Writes to temp `.pcap` file.
 
 ### AC 2: Stop Capture
-- [ ] `POST /api/capture/stop` terminates the active capture.
-- [ ] Closes the file handle properly.
+- [x] `POST /api/capture/stop` terminates capture.
+- [x] File handle closed properly.
 
 ### AC 3: Status
-- [ ] API returns 409 Conflict if capture is already running on that interface.
+- [x] Returns 409 if capture already running.
 
 ## Design & Implementation
 

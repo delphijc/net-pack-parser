@@ -2,7 +2,7 @@
 
 **Story ID:** 7.1
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,12 +13,12 @@ So that I can start building the capture logic.
 ## Acceptance Criteria
 
 ### AC 1: Project Structure
-- [ ] `server/` directory initialized with `package.json`, `tsconfig.json`.
-- [ ] Dependencies installed: `express`, `cap` (or `pcap`), `typescript`.
-- [ ] Linting and formatting set up (ESLint/Prettier).
+- [x] `server/` directory initialized with `package.json`, `tsconfig.json`.
+- [x] Dependencies: `express`, `cap`, `typescript`, `ws` installed.
+- [x] ESLint configured.
 
 ### AC 2: Native Compiling
-- [ ] `npm install` successfully builds the native C++ bindings for the capture library on the host OS.
+- [x] `npm install` builds native bindings for `cap` library.
 
 ## Design & Implementation
 

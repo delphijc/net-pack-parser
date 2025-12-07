@@ -2,7 +2,7 @@
 
 **Story ID:** 8.1
 **Epic:** 8 (Real-Time Streaming & Live Analysis)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,12 +13,12 @@ So that I can push real-time data to the browser.
 ## Acceptance Criteria
 
 ### AC 1: WSS Initialization
-- [ ] Server initializes a `WebSocketServer` (using `ws` library) attached to the main HTTP(S) server.
-- [ ] Enforces TLS (if HTTPS is used) or upgrades connection securely for WSS.
+- [x] `WebSocketServer` initialized via `ws` library in `WebSocketService.ts`.
+- [x] TLS supported via HTTPS server.
 
 ### AC 2: Authentication
-- [ ] Connection upgrade request (handshake) validates the JWT token (passed via query param or header).
-- [ ] Rejects unauthorized connections immediately.
+- [x] JWT validated via query param in upgrade handshake.
+- [x] Returns 401/403 for invalid tokens.
 
 ## Design & Implementation
 

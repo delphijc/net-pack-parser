@@ -2,7 +2,7 @@
 
 **Story ID:** 8.10
 **Epic:** 8 (Real-Time Streaming & Live Analysis)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,15 +13,15 @@ So that I don't have to manually refresh the page when the connection drops.
 ## Acceptance Criteria
 
 ### AC 1: Detection
-- [ ] Client detects WebSocket closure (code != 1000) or heartbeat timeout.
-- [ ] UI displays a "Reconnecting..." banner or toaster.
+- [x] Client detects WebSocket closure (code != 1000) in `useWebSocket.ts`.
+- [x] UI displays `ConnectionBanner` with reconnecting/failed states.
 
 ### AC 2: Recovery Strategy
-- [ ] Exponential backoff strategy for reconnection attempts (1s, 2s, 5s, 10s).
-- [ ] Max retries limit (e.g., 5 attempts), then show "Connection Lost" modal with manual "Retry" button.
+- [x] Exponential backoff implemented (1s to 30s max).
+- [x] Max 5 retries, then "Connection Lost" with "Retry" button.
 
 ### AC 3: State Sync
-- [ ] Upon reconnection, client requests the *latest* state or clears the buffer to avoid showing stale data mixed with new data.
+- [x] Upon reconnection, `liveStore` buffer is cleared in `LivePacketList` to avoid stale data.
 
 ## Design & Implementation
 

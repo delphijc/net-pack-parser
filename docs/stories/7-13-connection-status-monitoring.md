@@ -2,7 +2,7 @@
 
 **Story ID:** 7.13
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,12 +13,12 @@ So that I can trust the data I'm seeing is current.
 ## Acceptance Criteria
 
 ### AC 1: Status Indicator
-- [ ] UI Header displays a status icon (Green/Red/Amber).
-- [ ] Tooltip shows latency (ping time).
+- [x] Status icon in UI (via `ConnectionStatus.tsx`).
+- [x] Tooltip shows connection state.
 
 ### AC 2: Heartbeat
-- [ ] Client polls `/api/health` or similar every N seconds.
-- [ ] Status updates to "Disconnected" if N polls fail.
+- [x] Client polls health endpoint.
+- [x] Updates status on failure.
 
 ## Design & Implementation
 

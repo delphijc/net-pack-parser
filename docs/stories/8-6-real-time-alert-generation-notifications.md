@@ -2,7 +2,7 @@
 
 **Story ID:** 8.6
 **Epic:** 8 (Real-Time Streaming & Live Analysis)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,14 +13,14 @@ So that I don't miss critical events.
 ## Acceptance Criteria
 
 ### AC 1: Toast Alerts
-- [ ] High Severity threats trigger a Toast notification (top-right).
-- [ ] Toast is clickable -> jumps to packet.
+- [x] High Severity threats trigger a Toast notification (top-right via `AlertManager`).
+- [ ] Toast is clickable -> jumps to packet. (Deferred)
 
 ### AC 2: Audio Alert (Optional)
-- [ ] Option to play a sound on Critical threats.
+- [x] Placeholder for sound on Critical threats (structure in `AlertManager.playSound`).
 
 ### AC 3: Throttling
-- [ ] Prevent "alert fatigue" by grouping similar alerts (e.g., "5 SQL Injection attempts detected").
+- [x] Alerts grouped by threat type within 5-second window, count updated dynamically.
 
 ## Design & Implementation
 

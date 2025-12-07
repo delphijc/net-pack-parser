@@ -2,7 +2,7 @@
 
 **Story ID:** 7.11
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,11 +13,11 @@ So that I don't crash the agent by accident.
 ## Acceptance Criteria
 
 ### AC 1: Interface Locking
-- [ ] Only ONE capture session can be active on a specific interface at a time.
-- [ ] If User A is capturing on `eth0`, User B sees it as "Busy" or "In Use".
+- [x] One capture session per interface.
+- [x] Shows "Busy" if in use.
 
 ### AC 2: Shared State
-- [ ] If User B connects while User A is capturing, User B can see the *status* of the capture (e.g., "Capturing... 500 pkts"), but cannot Start a new one on that interface.
+- [x] Other users can view capture status but cannot start new capture.
 
 ## Design & Implementation
 

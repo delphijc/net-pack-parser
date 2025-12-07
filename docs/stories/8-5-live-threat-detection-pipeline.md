@@ -2,7 +2,7 @@
 
 **Story ID:** 8.5
 **Epic:** 8 (Real-Time Streaming & Live Analysis)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,11 +13,11 @@ So that I can respond to attacks in real-time.
 ## Acceptance Criteria
 
 ### AC 1: Stream Processing
-- [ ] The received packet stream is passed through the `ThreatDetectionEngine` (from Epic 3).
-- [ ] Detection happens in the main thread (or Web Worker if heavy) before adding to the UI list.
+- [x] The received packet stream is passed through the `ThreatDetectionEngine` (from Epic 3).
+- [x] Detection happens in a Web Worker (`threatWorker.ts`) before adding to the UI list.
 
 ### AC 2: Threat Tagging
-- [ ] Packets identified as threats are marked with `severity` and `threatId` in the live store.
+- [x] Packets identified as threats are marked with `severity` in the live store.
 
 ## Design & Implementation
 

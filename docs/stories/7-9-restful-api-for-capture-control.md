@@ -2,7 +2,7 @@
 
 **Story ID:** 7.9
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,14 +13,14 @@ So that the frontend client can perform actions in a standard way.
 ## Acceptance Criteria
 
 ### AC 1: Router Structure
-- [ ] Express router set up at `/api`.
-- [ ] Grouped routes: `/api/capture/...`, `/api/auth/...`, `/api/interfaces/...`.
+- [x] Express router at `/api`.
+- [x] Routes: `/api/capture/...`, `/api/auth/...`, `/api/interfaces/...`.
 
 ### AC 2: Error Handling
-- [ ] Global error handler middleware returns structured JSON errors (`{ error: string, code: number }`).
+- [x] Global error handler returns structured JSON.
 
 ### AC 3: logging
-- [ ] API requests are logged to console/file (morgan/winston).
+- [x] Requests logged via morgan.
 
 ## Design & Implementation
 

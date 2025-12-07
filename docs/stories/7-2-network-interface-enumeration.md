@@ -2,7 +2,7 @@
 
 **Story ID:** 7.2
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,12 +13,12 @@ So that I can choose which one to capture traffic from.
 ## Acceptance Criteria
 
 ### AC 1: API Endpoint
-- [ ] `GET /api/interfaces` returns a JSON list of devices.
-- [ ] Each device object includes: `name`, `addresses` (IP/MAC), `description`.
+- [x] `GET /api/interfaces` returns JSON list (via `CaptureService.getInterfaces()`).
+- [x] Each device includes: `name`, `addresses`, `description`.
 
 ### AC 2: Filtering
-- [ ] Loopback interface is identified.
-- [ ] Down/Inactive interfaces are flagged.
+- [x] Loopback interface identified.
+- [x] Inactive interfaces flagged.
 
 ## Design & Implementation
 

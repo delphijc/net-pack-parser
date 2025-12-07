@@ -2,7 +2,7 @@
 
 **Story ID:** 8.7
 **Epic:** 8 (Real-Time Streaming & Live Analysis)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,12 +13,12 @@ So that I can see the traffic pattern evolving over time.
 ## Acceptance Criteria
 
 ### AC 1: Dynamic X-Axis
-- [ ] Timeline chart automatically expands its X-axis domain to include the `timestamp` of the newest packet.
-- [ ] Smooth transition/interpolation is preferred.
+- [x] Timeline chart automatically expands X-axis as new packets arrive (`LiveTimelineView`).
+- [x] Recharts handles smooth transitions.
 
 ### AC 2: Performance
-- [ ] Timeline does not re-render the entire history for every packet.
-- [ ] Uses canvas-based rendering or optimized SVG updates.
+- [x] Updates throttled to once per second to avoid excessive re-renders.
+- [x] Uses Recharts (SVG-based) with efficient update strategy.
 
 ## Design & Implementation
 

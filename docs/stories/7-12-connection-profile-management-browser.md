@@ -2,7 +2,7 @@
 
 **Story ID:** 7.12
 **Epic:** 7 (Server-Side Capture Agent)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -13,15 +13,15 @@ So that I don't have to re-type them every time I open the app.
 ## Acceptance Criteria
 
 ### AC 1: Connection Form
-- [ ] UI provides inputs for: Agent URL (e.g., `https://192.168.1.5:3000`), Username, Password.
-- [ ] Connect button initiates Auth flow (Story 7.10).
+- [x] Connection form in `AgentConnectionPanel.tsx`.
+- [x] Connect initiates auth flow.
 
 ### AC 2: Profile Storage
-- [ ] "Remember Me" option saves the URL and JWT (securely) to `localStorage` (or `sessionStorage`).
-- [ ] JWT is automatically used for subsequent requests.
+- [x] JWT saved to `localStorage` via `AgentClient`.
+- [x] Auto-used for requests.
 
 ### AC 3: Disconnect
-- [ ] "Disconnect" button clears the session state.
+- [x] Disconnect clears session.
 
 ## Design & Implementation
 

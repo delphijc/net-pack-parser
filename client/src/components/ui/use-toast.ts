@@ -15,6 +15,7 @@ type ToastProps = {
   variant?: 'default' | 'destructive';
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  duration?: number;
 };
 
 type Action =
@@ -79,9 +80,9 @@ export const reducer = (state: State, action: Action): State => {
         toasts: state.toasts.map((t) =>
           t.id === toastId || toastId === undefined
             ? {
-                ...t,
-                open: false,
-              }
+              ...t,
+              open: false,
+            }
             : t,
         ),
       };
