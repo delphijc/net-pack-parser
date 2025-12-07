@@ -13,6 +13,7 @@ import {
 } from '../utils/analysis';
 
 import { parsePcap } from '../utils/pcapUtils';
+import { generateFlowId } from '../utils/flowUtils'; // Import generateFlowId
 
 /**
  * Parses network traffic data into tokens and strings
@@ -72,6 +73,7 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
       let protocol = 'unknown';
       let sourcePort = 0;
       let destPort = 0;
+      let packetFlags: string[] | undefined = undefined;
 
       if (rawPacketData.length >= ipStart + 20) {
         // Extract source and dest IP (bytes 12-19 of IP header)
@@ -86,7 +88,7 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
         const transportStart = ipStart + ipHeaderLength;
 
         // Parse transport layer
-        if (protocolNum === 6 && rawPacketData.length >= transportStart + 4) {
+        if (protocolNum === 6 && rawPacketData.length >= transportStart + 14) {
           // TCP
           protocol = 'TCP';
           sourcePort =
@@ -95,6 +97,19 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
           destPort =
             (rawPacketData[transportStart + 2] << 8) |
             rawPacketData[transportStart + 3];
+
+          const flags: string[] = [];
+          const flagsByte = rawPacketData[transportStart + 13]; // TCP flags byte
+
+          if (flagsByte & 0x01) flags.push('FIN');
+          if (flagsByte & 0x02) flags.push('SYN');
+          if (flagsByte & 0x04) flags.push('RST');
+          if (flagsByte & 0x08) flags.push('PSH');
+          if (flagsByte & 0x10) flags.push('ACK');
+          if (flagsByte & 0x20) flags.push('URG');
+          if (flagsByte & 0x40) flags.push('ECE');
+          if (flagsByte & 0x80) flags.push('CWR');
+          packetFlags = flags;
         } else if (
           protocolNum === 17 &&
           rawPacketData.length >= transportStart + 4
@@ -147,6 +162,7 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
         protocol,
         length: packet.header.inclLen,
         rawData: rawPacketDataBuffer as ArrayBuffer, // Assign raw ArrayBuffer
+        flags: packetFlags,
         // Initialize new fields
         detectedProtocols: [], // Will be populated by detectProtocols
         portBasedProtocol: undefined,
@@ -157,6 +173,9 @@ const parsePcapData = async (data: ArrayBuffer): Promise<ParsedPacket[]> => {
         fileReferences: [],
         extractedStrings: [], // Initialize extractedStrings
       };
+
+      // Generate Flow ID
+      parsedPacket.flowId = generateFlowId(parsedPacket);
 
       // --- Integrate protocol detection here ---
       parsedPacket.detectedProtocols = detectProtocols(

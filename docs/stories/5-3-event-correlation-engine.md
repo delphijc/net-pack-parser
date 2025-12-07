@@ -2,7 +2,7 @@
 
 **Story ID:** 5.3
 **Epic:** 5 (Forensic Investigation & Timeline Analysis)
-**Status:** Ready for Development
+**Status:** Done
 
 ## User Story
 
@@ -33,4 +33,59 @@ So that I can follow a specific conversation without manual filtering.
 - Add `flowId` (string hash of 5-tuple) to `Packet` interface.
 
 ## Dependencies
-- Epic 1 (Packet Parsing).
+## Tasks/Subtasks
+- [x] Refine Data Model
+    - [x] Update `ParsedPacket` interface in `client/src/types/index.ts` to include optional `flowId`.
+    - [x] Update `Packet` interface if necessary (or just ParsedPacket).
+- [x] Implement Flow Identification Logic
+    - [x] Create `generateFlowId(packet)` utility function (likely in `client/src/utils/pcapUtils.ts` or new `flowUtils.ts`).
+    - [x] Logic: 5-tuple hash (SrcIP, SrcPort, DstIP, DstPort, Proto). Sort IPs/Ports to ensure bidirectional flow has same ID.
+- [x] Integrate Flow ID into Packet Parsing
+    - [x] Update `pcapParser.ts` or `pcapUtils.ts` to calculate and assign `flowId` during parsing/processing.
+- [x] Update Packet List UI
+    - [x] Highlight packets with same `flowId` on selection.
+    - [x] Add "Follow TCP/UDP Stream" context menu or button (filters list by `flowId`).
+- [x] Verification
+    - [x] Verify `flowId` generation for bidirectional traffic.
+    - [x] Verify UI highlighting.
+
+## Review Follow-ups (AI)
+- [x] [AI-Review] Implement AC 3: Parse TCP flags in `pcapParser.ts`.
+
+## Dev Notes
+- **Flow ID Generation**: `flowId = ${sorted(srcIP, dstIP)}-${sorted(srcPort, dstPort)}-${proto}`.
+- **Performance**: Determine if we calculate `flowId` for *every* packet. Yes, it's cheap string manipulation.
+- **UI Highlighting**: In `PacketList`, when a row is selected (`selectedPacketId`), find its `flowId` and highlight other rows with matching `flowId`.
+
+## Dev Agent Record
+### Implementation Plan
+- **Data**: value `flowId: string` on `ParsedPacket`.
+- **Logic**: New util `getFlowId(packet)`.
+- **UI**: `PacketList.tsx` uses `selectedPacket.flowId` to style rows.
+
+### Debug Log
+- 
+
+### Completion Notes
+- 
+
+## File List
+- client/src/types/index.ts
+- client/src/types/packet.ts
+- client/src/utils/flowUtils.ts
+- client/src/services/pcapParser.ts
+- client/src/components/PacketList.tsx
+- client/src/components/FlowList.tsx
+
+## Senior Developer Review (AI)
+- **Date:** 2025-12-07
+- **Outcome:** Approved
+- **Summary:** Core flow identification and UI highlighting are implemented well. AC 3 (Connection Tracking) was missing but has been implemented and verified. TCP flags are now parsed.
+
+### Action Items
+- [x] [High] Implement AC 3: Parse TCP flags (SYN, ACK, FIN, RST) in `pcapParser.ts` and ensure they are populated in the `Packet` object.
+- [ ] [Medium] Update `Packet` interface documentation if needed.
+
+
+## Change Log
+- 

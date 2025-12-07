@@ -20,6 +20,7 @@ export interface Packet {
   detectedProtocols: string[]; // List of detected protocols (e.g., ["TCP", "HTTP"])
   portBasedProtocol?: string; // Protocol detected via port heuristics
   deepInspectionProtocol?: string; // Protocol detected via deep packet inspection
+  flowId?: string; // Unique identifier for the 5-tuple flow
 }
 
 export interface ParsedPacket extends Packet {

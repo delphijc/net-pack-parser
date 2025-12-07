@@ -174,7 +174,13 @@ const PacketList: React.FC<PacketListProps> = ({
     searchCriteria,
     sortOrder,
     showThreatsOnly,
+    showThreatsOnly,
   ]);
+
+  const selectedFlowId = useMemo(() => {
+    if (!selectedPacketId) return null;
+    return packets.find((p) => p.id === selectedPacketId)?.flowId || null;
+  }, [packets, selectedPacketId]);
 
   const handleDeleteClick = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -360,11 +366,12 @@ const PacketList: React.FC<PacketListProps> = ({
               key={packet.id}
               data-testid={`packet-item-${packet.id}`}
               onClick={() => onPacketSelect(packet)}
-              className={`group p-2 rounded-md cursor-pointer border transition-all duration-200 ${
-                selectedPacketId === packet.id
-                  ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
+              className={`group p-2 rounded-md cursor-pointer border transition-all duration-200 ${selectedPacketId === packet.id
+                ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
+                : selectedFlowId && packet.flowId === selectedFlowId
+                  ? 'bg-blue-500/5 border-l-2 border-l-blue-400 border-t-transparent border-r-transparent border-b-transparent hover:bg-blue-500/10'
                   : 'bg-card/30 border-transparent hover:bg-secondary/50 hover:border-white/5'
-              } ${packet.matchesSearch ? 'bg-yellow-200/20 border-yellow-300' : ''}`}
+                } ${packet.matchesSearch ? 'bg-yellow-200/20 border-yellow-300' : ''}`}
             >
               <div className="flex justify-between items-center mb-1">
                 <div className="flex items-center gap-2">
@@ -372,17 +379,16 @@ const PacketList: React.FC<PacketListProps> = ({
                     <Badge
                       key={proto}
                       variant="outline"
-                      className={`text-[10px] font-bold px-1.5 py-0.5 ${
-                        proto === 'HTTP' || proto === 'HTTPS'
-                          ? 'bg-emerald-500/10 text-emerald-500'
-                          : proto === 'TCP'
-                            ? 'bg-blue-500/10 text-blue-500'
-                            : proto === 'UDP'
-                              ? 'bg-orange-500/10 text-orange-500'
-                              : proto === 'DNS'
-                                ? 'bg-purple-500/10 text-purple-500'
-                                : 'bg-gray-500/10 text-gray-400'
-                      }`}
+                      className={`text-[10px] font-bold px-1.5 py-0.5 ${proto === 'HTTP' || proto === 'HTTPS'
+                        ? 'bg-emerald-500/10 text-emerald-500'
+                        : proto === 'TCP'
+                          ? 'bg-blue-500/10 text-blue-500'
+                          : proto === 'UDP'
+                            ? 'bg-orange-500/10 text-orange-500'
+                            : proto === 'DNS'
+                              ? 'bg-purple-500/10 text-purple-500'
+                              : 'bg-gray-500/10 text-gray-400'
+                        }`}
                     >
                       {proto}
                     </Badge>

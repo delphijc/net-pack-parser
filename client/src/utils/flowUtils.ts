@@ -1,10 +1,10 @@
-import type { ParsedPacket } from '../types';
+import type { Packet, ParsedPacket } from '../types';
 
 export interface Flow {
-  id: string; // Composite key
+  id: string;
   startTime: number;
   endTime: number;
-  duration: number; // in ms
+  duration: number;
   sourceIp: string;
   sourcePort: number;
   destIp: string;
@@ -13,83 +13,57 @@ export interface Flow {
   packetCount: number;
   totalBytes: number;
   packets: ParsedPacket[];
-  info?: string; // Preview of payload
 }
 
-/**
- * Aggregates packets into 5-tuple flows.
- * Handles bidirectional aggregation by canonicalizing the IP/Port pair.
- */
+export const generateFlowId = (packet: Packet): string => {
+  const { sourceIP, destIP, sourcePort, destPort, protocol } = packet;
+
+  // Sort IPs to handle bidirectional flow
+  const [ip1, ip2] = [sourceIP, destIP].sort();
+
+  // Sort Ports to handle bidirectional flow
+  const [port1, port2] = [sourcePort, destPort].sort((a, b) => a - b);
+
+  return `${protocol}-${ip1}:${port1}-${ip2}:${port2}`;
+};
+
 export const aggregateFlows = (packets: ParsedPacket[]): Flow[] => {
-  const flows = new Map<string, Flow>();
+  const flowsMap = new Map<string, Flow>();
 
   packets.forEach((packet) => {
-    const srcIp = packet.sourceIP || 'Unknown';
-    const dstIp = packet.destIP || 'Unknown';
-    const srcPort = packet.sourcePort || 0;
-    const dstPort = packet.destPort || 0;
-    const proto = packet.protocol || 'Unknown';
-    const length = packet.length || 0;
+    // Use existing flowId from packet if available, otherwise generate it
+    // Note: pcapParser now assigns flowId, so it should be there.
+    // Fallback just in case of old packets or different source.
+    const flowId = packet.flowId || generateFlowId(packet);
 
-    // Packet timestamp is in ms, we want seconds for consistency with PCAP tools or maintain precision.
-    // FlowList expects seconds (multiplies by 1000 for Date).
-    const ts = packet.timestamp ? packet.timestamp / 1000 : Date.now() / 1000;
-
-    // Canonicalize key for bidirectional flow
-    let key = '';
-    if (srcIp < dstIp) {
-      key = `${srcIp}:${srcPort}-${dstIp}:${dstPort}-${proto}`;
-    } else if (srcIp > dstIp) {
-      key = `${dstIp}:${dstPort}-${srcIp}:${srcPort}-${proto}`;
-    } else {
-      if (srcPort < dstPort) {
-        key = `${srcIp}:${srcPort}-${dstIp}:${dstPort}-${proto}`;
-      } else {
-        key = `${dstIp}:${dstPort}-${srcIp}:${srcPort}-${proto}`;
-      }
-    }
-
-    if (!flows.has(key)) {
-      flows.set(key, {
-        id: key,
-        startTime: ts,
-        endTime: ts,
+    if (!flowsMap.has(flowId)) {
+      flowsMap.set(flowId, {
+        id: flowId,
+        startTime: packet.timestamp,
+        endTime: packet.timestamp, // Initialize with same
         duration: 0,
-        sourceIp: srcIp,
-        sourcePort: srcPort,
-        destIp: dstIp,
-        destPort: dstPort,
-        protocol: proto,
+        sourceIp: packet.sourceIP,
+        sourcePort: packet.sourcePort,
+        destIp: packet.destIP,
+        destPort: packet.destPort,
+        protocol: packet.protocol,
         packetCount: 0,
         totalBytes: 0,
         packets: [],
-        info: '',
       });
     }
 
-    const flow = flows.get(key)!;
+    const flow = flowsMap.get(flowId)!;
     flow.packetCount++;
-    flow.totalBytes += length;
+    flow.totalBytes += packet.length;
     flow.packets.push(packet);
 
-    // Update times
-    if (ts < flow.startTime) flow.startTime = ts;
-    if (ts > flow.endTime) flow.endTime = ts;
-    // duration in ms? Flow interface said "in ms".
-    // If ts is seconds, diff is seconds.
-    // Let's keep ts in SECONDS for start/end, but calculate duration in MS?
-    // Or store everything in ms?
-    // FlowList says: new Date(flow.startTime * 1000) -> expects Seconds.
-    // FlowList says: flow.duration > 1000 ? ...s : ...ms. implies MS.
-    flow.duration = (flow.endTime - flow.startTime) * 1000;
+    // Update time range
+    if (packet.timestamp < flow.startTime) flow.startTime = packet.timestamp;
+    if (packet.timestamp > flow.endTime) flow.endTime = packet.timestamp;
 
-    // Update Info (simple preview)
-    if (!flow.info && packet.rawData && packet.rawData.byteLength > 0) {
-      // Try to extract useful info/preview
-      // Just a placeholder logic for now
-      flow.info = `Len: ${packet.rawData.byteLength}`;
-    }
+    flow.duration = flow.endTime - flow.startTime;
   });
 
-  return Array.from(flows.values()).sort((a, b) => a.startTime - b.startTime);
+  return Array.from(flowsMap.values()).sort((a, b) => b.startTime - a.startTime);
 };
