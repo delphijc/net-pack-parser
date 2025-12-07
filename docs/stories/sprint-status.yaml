@@ -50,7 +50,7 @@ development_status:
   5-6-timeline-filtering-by-threat-level-protocol: done
   5-7-chain-of-custody-logging-audit-trail: done
   5-8-evidence-package-export-with-metadata: done
-  5-9-forensic-report-generation: ready-for-dev
+  5-9-forensic-report-generation: done
   5-10-case-notes-investigator-comments: ready-for-dev
   epic-5-retrospective: optional
   epic-6: contexted

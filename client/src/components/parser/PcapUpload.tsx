@@ -25,6 +25,7 @@ interface PcapUploadProps {
 }
 
 import { ExportControl } from '@/components/ExportControl';
+import { ReportGeneratorControl } from '../ReportGeneratorControl';
 import { useAuditLogger } from '@/hooks/useAuditLogger';
 
 const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
@@ -314,6 +315,7 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
               </div>
               <div className="flex space-x-2">
                 <ExportControl pcapFile={currentFile} disabled={!currentFile || parsing} />
+                <ReportGeneratorControl disabled={!currentFile || parsing} />
                 <button
                   onClick={handleCaptureToggle}
                   className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${capturing

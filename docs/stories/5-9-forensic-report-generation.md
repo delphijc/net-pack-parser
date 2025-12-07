@@ -34,5 +34,33 @@ So that I can present the evidence to non-technical stakeholders or legal teams.
 ### Libraries
 - `jspdf` for PDF generation, or simply Print-to-PDF styles if focusing on HTML. `html2canvas` for charts.
 
+## Senior Developer Review (AI)
+
+| Criteria | Assessment | Notes |
+| :--- | :--- | :--- |
+| **Code Quality** | Approved | `ReportGenerator` service separates logic well. Components are modular. |
+| **Functionality** | Approved | Report generation for HTML and PDF implemented. Preview available. |
+| **Testing** | Approved | Unit tests cover data collection and HTML formatting. |
+| **Security** | Approved | No sensitive data exposed externally; local generation only. |
+
+## Action Items
+- None.
+
+## Tasks/Subtasks
+- [x] Dependencies
+    - [x] Install `jspdf` and `html2canvas`.
+    - [x] Install `@types/jspdf` and `@types/html2canvas`.
+- [x] Core Logic
+    - [x] Create `client/src/services/ReportGenerator.ts` service.
+    - [x] Implement data collection (Metadata, Summary, Stats, Threats, CoC).
+    - [x] Implement HTML/PDF generation logic (using `jspdf` or browser print).
+- [x] UI Components
+    - [x] Create `client/src/components/ReportPreview.tsx`.
+    - [x] Create `client/src/components/ReportGeneratorControl.tsx` (Button/Modal).
+    - [x] Add to `FilesTab.tsx` or `PacketAnalysis` (Added to `PcapUpload.tsx`).
+- [x] Verification
+    - [x] Verify generated HTML contains Case ID, Threat Summary, and CoC log.
+    - [x] Verify PDF generation works (mocked/basic check).
+
 ## Dependencies
 - All previous Epic 5 stories (to populate the report).
