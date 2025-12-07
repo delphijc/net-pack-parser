@@ -1,96 +1,85 @@
-# GEMINI.md - Project Context for Gemini
-
-This document provides a comprehensive overview of the "Network Traffic Parser" project to be used as a instructional context for Gemini.
+# GEMINI.md
 
 ## Project Overview
 
-The Network Traffic Parser is a comprehensive web application for network performance monitoring and traffic analysis. It is built with a modern frontend stack and is designed to operate in two modes:
+This is a network traffic analysis tool with a web-based interface and a backend server. The project is structured as a monorepo with a `client` and a `server` directory.
 
-1.  **Browser-Only Mode:** For analyzing PCAP files directly in the browser with all processing done on the client-side. This is the primary mode for the current implementation.
-2.  **Connected Mode:** (Planned) Involves a server-side agent for real-time packet capture, streaming data to the browser via WebSockets.
+-   **Client:** A React application built with Vite, TypeScript, and Tailwind CSS. It provides the user interface for uploading and analyzing PCAP files. The client is responsible for rendering the data provided by the server and for all user interactions. It includes a number of UI components for displaying packet data, as well as services for interacting with the backend API and managing local data. The main UI is a dashboard with multiple tabs for different views, including an overview, packet inspector, timeline, and threat intelligence.
+-   **Server:** A Node.js application built with Express and TypeScript. It handles the parsing of PCAP files and provides the results to the client via a REST API. The server is responsible for the heavy lifting of parsing the PCAP files and extracting the relevant information.
 
-The project is structured as a monorepo, with the main frontend application located in the `client` directory.
-
-### Key Technologies
-
--   **Frontend:** React, TypeScript, Vite, Tailwind CSS
--   **Component Library:** shadcn/ui
--   **State Management:** TanStack Query (for server state) and Zustand (for UI state)
--   **Testing:** Vitest (unit), React Testing Library (component)
--   **Packet Parsing:** `pcap-decoder` library for in-browser parsing.
-
-## Development Environment Setup
-
-The primary application is within the `client` directory.
+## Building and Running
 
 ### Prerequisites
 
--   Node.js (version specified in `.nvmrc`)
+-   Node.js (version 22.x or higher)
 -   npm
 
 ### Installation
 
-To set up the development environment, first install the dependencies in the `client` directory:
-
-```bash
-cd client
-npm install
-```
+1.  **Install Client Dependencies:**
+    ```bash
+    cd client
+    npm install
+    ```
+2.  **Install Server Dependencies:**
+    ```bash
+    cd ../server
+    npm install
+    ```
 
 ### Running the Application
 
-To start the development server for the frontend application:
+The application requires both the client and server to be running.
 
-```bash
-cd client
-npm run dev
-```
+1.  **Start the Server:**
+    ```bash
+    cd server
+    npm run build
+    npm run start
+    ```
+    The server will be running at `http://localhost:3000`.
 
-The application will be available at `http://localhost:5173`.
-
-## Building and Running
-
-### Development
-
--   **Run dev server:** `cd client && npm run dev`
--   **Run linters:** `cd client && npm run lint`
-### Production
-
--   **Build the application:** `cd client && npm run build`
--   **Preview the production build:** `cd client && npm run preview`
-
-## Codebase Structure
-
-The project aims for a monorepo structure, but the primary focus for now is the `client` directory.
-
-```
-/
-├── client/              # Main frontend application (Vite + React + TS)
-│   ├── src/
-│   │   ├── components/  # UI components
-│   │   ├── hooks/       # Custom React hooks
-│   │   ├── services/    # API clients and services
-│   │   ├── utils/       # Utility functions (e.g., packet parsing)
-│   │   ├── types/       # TypeScript types
-│   │   ├── App.tsx      # Root component
-│   │   └── main.tsx     # Application entry point
-│   ├── package.json     # Client dependencies and scripts
-│   └── vite.config.ts   # Vite configuration
-│
-├── src/                 # Older/alternative root application source
-├── docs/                # Project documentation (architecture, PRD)
-├── package.json         # Root package.json
-└── README.md
-```
+2.  **Start the Client:**
+    ```bash
+    cd client
+    npm run dev
+    ```
+    The client will be running at `http://localhost:5173`.
 
 ## Development Conventions
 
--   **Styling:** Utility-first classes with Tailwind CSS.
--   **Components:** Reusable components are located in `client/src/components`. `shadcn/ui` is used for the base component library.
--   **State Management:**
-    -   Use **Zustand** for managing local UI state.
-    -   Use **TanStack Query** for managing asynchronous operations and server state.
--   **Testing:**
-    -   Unit tests are co-located with the source files (`*.test.tsx`).
--   **Linting:** ESLint is used for code quality. Run `npm run lint` in the `client` directory to check for issues.
--   **Imports:** Use absolute imports with the `@/` alias for the `client/src` directory.
+### Testing
+
+The client-side tests can be run using the following command:
+
+```bash
+cd client
+npm test
+```
+
+### Linting
+
+Both the client and server have linting configured.
+
+-   **Client:**
+    ```bash
+    cd client
+    npm run lint
+    ```
+-   **Server:**
+    ```bash
+    cd server
+    npm run lint
+    ```
+
+### Code Style
+
+The project uses Prettier for code formatting. It is recommended to use a Prettier extension in your editor to automatically format the code on save.
+
+### API
+
+The server exposes a REST API for the client to consume. The API is defined in `server/src/routes/analysis.ts`.
+
+-   `POST /api/upload`: Uploads a PCAP file for analysis.
+-   `GET /api/analysis/:sessionId/status`: Retrieves the status of an analysis session.
+-   `GET /api/analysis/:sessionId/results`: Retrieves the results of an analysis session.

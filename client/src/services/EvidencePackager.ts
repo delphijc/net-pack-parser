@@ -18,6 +18,7 @@ export class EvidencePackager {
 
         // 2. Collect Metadata
         let session = useSessionStore.getState().sessions.find(s => s.id === useSessionStore.getState().activeSessionId);
+        const storedMetadata = useForensicStore.getState().caseMetadata;
 
         if (!session) {
             // Fallback if no active session found (e.g. direct parse)
@@ -33,8 +34,12 @@ export class EvidencePackager {
             version: '1.0',
             exportedAt: new Date().toISOString(),
             originalFilename: filename,
+            caseId: storedMetadata?.caseId || session.id,
+            caseName: storedMetadata?.caseName || session.name,
+            investigator: storedMetadata?.investigator || 'Analyst',
+            organization: storedMetadata?.organization || '',
+            summary: storedMetadata?.summary || '',
             session: session,
-            investigator: 'Analyst', // Hardcoded for now
             system: {
                 userAgent: navigator.userAgent,
                 platform: navigator.platform

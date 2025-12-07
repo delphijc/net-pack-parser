@@ -6,3 +6,12 @@ export interface Bookmark {
     author?: string;
     packetId?: string;
 }
+
+export interface CaseMetadata {
+    caseId: string;
+    caseName: string;
+    investigator: string;
+    organization: string;
+    summary: string;
+    startDate: string;
+}

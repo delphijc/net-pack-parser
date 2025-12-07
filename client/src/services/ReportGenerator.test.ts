@@ -27,10 +27,19 @@ describe('ReportGenerator', () => {
             }]
         });
 
+
         (useForensicStore as any).getState = vi.fn().mockReturnValue({
             bookmarks: [
                 { id: 'bm1', packetId: 'pkt1', note: 'Suspicious payload', timestamp: 1672531200000 }
-            ]
+            ],
+            caseMetadata: {
+                caseId: 'session-123',
+                caseName: 'Test Case',
+                investigator: 'Sherlock Holmes',
+                organization: 'Scotland Yard',
+                summary: 'Found evidence of Moriarty.',
+                startDate: '2023-01-01'
+            }
         });
 
         // Mock DB
@@ -45,6 +54,9 @@ describe('ReportGenerator', () => {
         expect(data).toBeDefined();
         expect(data.metadata.caseId).toBe('session-123');
         expect(data.metadata.caseName).toBe('Test Case');
+        expect(data.metadata.investigator).toBe('Sherlock Holmes');
+        expect(data.metadata.organization).toBe('Scotland Yard');
+        expect(data.metadata.summary).toBe('Found evidence of Moriarty.');
         expect(data.stats.packetCount).toBe(500);
         expect(data.bookmarks).toHaveLength(1);
         expect(data.chainOfCustody).toHaveLength(1);
@@ -56,6 +68,9 @@ describe('ReportGenerator', () => {
 
         expect(html).toContain('<h1>Forensic Report</h1>');
         expect(html).toContain('Test Case');
+        expect(html).toContain('Sherlock Holmes');
+        expect(html).toContain('Scotland Yard');
+        expect(html).toContain('Found evidence of Moriarty.');
         expect(html).toContain('Suspicious payload');
         expect(html).toContain('FILE_UPLOAD');
     });

@@ -52,6 +52,14 @@ describe('EvidencePackager', () => {
 
         useForensicStore.setState({
             bookmarks: [{ id: 'bm-1', packetId: 'pkg-1', note: 'test note', timestamp: 12345 }],
+            caseMetadata: {
+                caseId: 'session-1',
+                caseName: 'Investigation Zulu',
+                investigator: 'Agent Smith',
+                organization: 'Matrix Defense',
+                summary: 'Anomaly detected.',
+                startDate: '2023-01-01'
+            }
         });
 
         // Mock DB response
@@ -77,7 +85,9 @@ describe('EvidencePackager', () => {
 
         // Verify ZIP content
         expect(mockFile).toHaveBeenCalledWith('evidence.pcap', mockBlob);
-        expect(mockFile).toHaveBeenCalledWith('case-metadata.json', expect.stringContaining('Test Session'));
+        expect(mockFile).toHaveBeenCalledWith('case-metadata.json', expect.stringContaining('Investigation Zulu'));
+        expect(mockFile).toHaveBeenCalledWith('case-metadata.json', expect.stringContaining('Agent Smith'));
+        expect(mockFile).toHaveBeenCalledWith('case-metadata.json', expect.stringContaining('Matrix Defense'));
         expect(mockFile).toHaveBeenCalledWith('chain-of-custody.json', expect.stringContaining('TEST_ACTION'));
         expect(mockFile).toHaveBeenCalledWith('annotations.json', expect.stringContaining('test note'));
 

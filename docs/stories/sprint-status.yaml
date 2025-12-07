@@ -51,8 +51,8 @@ development_status:
   5-7-chain-of-custody-logging-audit-trail: done
   5-8-evidence-package-export-with-metadata: done
   5-9-forensic-report-generation: done
-  5-10-case-notes-investigator-comments: ready-for-dev
-  epic-5-retrospective: optional
+  5-10-case-notes-investigator-comments: done
+  epic-5-retrospective: completed
   epic-6: contexted
   6-1-protocol-distribution-visualization-piebar-charts: ready-for-dev
   6-2-traffic-volume-over-time-line-graphs: ready-for-dev

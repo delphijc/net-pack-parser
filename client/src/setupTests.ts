@@ -1,6 +1,6 @@
 // src/setupTests.ts
 
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 const localStorageMock = (() => {
   let store: { [key: string]: string } = {};
@@ -34,9 +34,9 @@ class Worker {
   postMessage() {
     // Default implementation does nothing
   }
-  terminate() {}
-  addEventListener() {}
-  removeEventListener() {}
+  terminate() { }
+  addEventListener() { }
+  removeEventListener() { }
   dispatchEvent() {
     return true;
   }

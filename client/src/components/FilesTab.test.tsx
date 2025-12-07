@@ -14,7 +14,7 @@ vi.mock('../services/database', () => ({
 
 vi.mock('../services/chainOfCustodyDb', () => ({
   default: {
-    addFileChainOfCustodyEvent: vi.fn(),
+    addEvent: vi.fn(),
   },
 }));
 
@@ -52,7 +52,7 @@ describe('FilesTab', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (DatabaseService.getFileById as any).mockResolvedValue(mockFileRef);
-    (ChainOfCustodyDb.addFileChainOfCustodyEvent as any).mockResolvedValue(
+    (ChainOfCustodyDb.addEvent as any).mockResolvedValue(
       'event-id',
     );
   });
@@ -61,10 +61,10 @@ describe('FilesTab', () => {
     render(<FilesTab packet={mockPacket} />);
 
     await waitFor(() => {
-      expect(screen.getByText('test.txt')).toBeInTheDocument();
-      expect(screen.getByText('1 KB')).toBeInTheDocument(); // 1024 bytes
-      expect(screen.getByText('text/plain')).toBeInTheDocument();
-      expect(screen.getByText('hash123')).toBeInTheDocument();
+      expect(screen.getByText('test.txt')).toBeDefined();
+      expect(screen.getByText('1 KB')).toBeDefined(); // 1024 bytes
+      expect(screen.getByText('text/plain')).toBeDefined();
+      expect(screen.getByText('hash123')).toBeDefined();
     });
   });
 
@@ -72,7 +72,7 @@ describe('FilesTab', () => {
     render(<FilesTab packet={mockPacket} />);
 
     await waitFor(() =>
-      expect(screen.getByText('Download')).toBeInTheDocument(),
+      expect(screen.getByText('Download')).toBeDefined(),
     );
 
     const downloadBtn = screen.getByText('Download');
@@ -82,7 +82,7 @@ describe('FilesTab', () => {
       mockFileRef.data,
     );
     // Verify Chain of Custody logging
-    expect(ChainOfCustodyDb.addFileChainOfCustodyEvent).toHaveBeenCalled();
+    expect(ChainOfCustodyDb.addEvent).toHaveBeenCalled();
   });
 
   it('displays message when no files detected', () => {
@@ -90,6 +90,6 @@ describe('FilesTab', () => {
     render(<FilesTab packet={packetNoFiles} />);
     expect(
       screen.getByText('No file references detected for this packet.'),
-    ).toBeInTheDocument();
+    ).toBeDefined();
   });
 });

@@ -8,6 +8,13 @@ See the Network Traffic Parser in action, from uploading a PCAP file to identify
 
 ![NetPack Parser Demo](demo/demo_video.webp)
 
+"You want the truth? NetPackParser **can** handle the truth."
+
+"Know thy enemy with NetPackParser Threat and Forensics Analysis."
+
+"PCAP because NetPackParser knows what happened."
+
+
 ## 🏗️ Project Architecture
 
 This project follows a **hybrid client-server architecture** designed to support two modes of operation:

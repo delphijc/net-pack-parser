@@ -10,6 +10,8 @@ interface ReportMetadata {
   caseName: string;
   generatedAt: string;
   investigator: string;
+  organization: string;
+  summary: string;
 }
 
 interface ReportStats {
@@ -32,11 +34,16 @@ export class ReportGenerator {
     const activeSessionId = sessionStore.activeSessionId;
     const activeSession = sessionStore.sessions.find((s: any) => s.id === activeSessionId);
 
+    // Prefer metadata from Forensic Store if initialized
+    const caseMeta = forensicStore.caseMetadata;
+
     const metadata: ReportMetadata = {
-      caseId: activeSessionId || 'unknown',
-      caseName: activeSession?.name || 'Unknown Session',
+      caseId: caseMeta?.caseId || activeSessionId || 'unknown',
+      caseName: caseMeta?.caseName || activeSession?.name || 'Unknown Session',
       generatedAt: new Date().toISOString(),
-      investigator: 'Investigator' // TODO: Get from user profile
+      investigator: caseMeta?.investigator || 'Investigator',
+      organization: caseMeta?.organization || '',
+      summary: caseMeta?.summary || ''
     };
 
     const stats: ReportStats = {
@@ -70,6 +77,7 @@ export class ReportGenerator {
           th, td { text-align: left; padding: 10px; border-bottom: 1px solid #ddd; }
           th { background-color: #f1f1f1; }
           .snapshot img { max-width: 100%; border: 1px solid #ddd; }
+          .summary-content { white-space: pre-wrap; font-family: monospace; background: #fff; padding: 10px; border: 1px solid #ddd; }
         </style>
       </head>
       <body>
@@ -78,8 +86,16 @@ export class ReportGenerator {
           <p><strong>Case Name:</strong> ${data.metadata.caseName}</p>
           <p><strong>Case ID:</strong> ${data.metadata.caseId}</p>
           <p><strong>Investigator:</strong> ${data.metadata.investigator}</p>
+          ${data.metadata.organization ? `<p><strong>Organization:</strong> ${data.metadata.organization}</p>` : ''}
           <p><strong>Date:</strong> ${new Date(data.metadata.generatedAt).toLocaleString()}</p>
         </div>
+
+        ${data.metadata.summary ? `
+        <div class="section">
+            <h2>Executive Summary</h2>
+            <div class="summary-content">${data.metadata.summary}</div>
+        </div>
+        ` : ''}
 
         <div class="section">
           <h2>Summary Statistics</h2>
@@ -144,17 +160,36 @@ export class ReportGenerator {
     doc.setFontSize(12);
     doc.text(`Case: ${data.metadata.caseName}`, 20, yPos); yPos += 7;
     doc.text(`ID: ${data.metadata.caseId}`, 20, yPos); yPos += 7;
+    doc.text(`Investigator: ${data.metadata.investigator || '-'}`, 20, yPos); yPos += 7;
+    if (data.metadata.organization) {
+      doc.text(`Organization: ${data.metadata.organization}`, 20, yPos); yPos += 7;
+    }
     doc.text(`Date: ${new Date(data.metadata.generatedAt).toLocaleString()}`, 20, yPos); yPos += 15;
+
+    // Executive Summary
+    if (data.metadata.summary) {
+      doc.setFontSize(16);
+      doc.text('Executive Summary', 20, yPos); yPos += 10;
+      doc.setFontSize(10);
+
+      const splitSummary = doc.splitTextToSize(data.metadata.summary, pageWidth - 40);
+      doc.text(splitSummary, 20, yPos);
+      yPos += (splitSummary.length * 5) + 10;
+
+      if (yPos > 250) { doc.addPage(); yPos = 20; }
+    }
 
     // Stats
     doc.setFontSize(16);
-    doc.text('Summary', 20, yPos); yPos += 10;
+    doc.text('Summary Statistics', 20, yPos); yPos += 10;
     doc.setFontSize(12);
     doc.text(`Total Packets: ${data.stats.packetCount}`, 20, yPos); yPos += 7;
     doc.text(`Threats: ${data.stats.threatCount}`, 20, yPos); yPos += 15;
 
     // Timeline Snapshot (if available)
     if (data.timelineSnapshot) {
+      if (yPos > 200) { doc.addPage(); yPos = 20; }
+
       doc.setFontSize(16);
       doc.text('Timeline', 20, yPos); yPos += 10;
       try {
@@ -170,7 +205,7 @@ export class ReportGenerator {
     // Checking space for next sections...
     if (yPos > 250) { doc.addPage(); yPos = 20; }
 
-    // CoC (Simplified for now - can use autoTable for better layout)
+    // CoC
     doc.setFontSize(16);
     doc.text('Chain of Custody (Last 10 Events)', 20, yPos); yPos += 10;
     doc.setFontSize(10);

@@ -13,26 +13,27 @@ vi.mock('recharts', () => ({
     YAxis: () => <div data-testid="y-axis" />,
     Tooltip: () => <div data-testid="tooltip" />,
     CartesianGrid: () => <div data-testid="cartesian-grid" />,
+    Brush: () => <div data-testid="brush" />,
 }));
 
 describe('TimelineChart', () => {
     const mockData: TimelineDataPoint[] = [
-        { timestamp: 1000, count: 5 },
-        { timestamp: 2000, count: 10 },
+        { timestamp: 1000, count: 5, threatCount: 0, normalCount: 5 },
+        { timestamp: 2000, count: 10, threatCount: 2, normalCount: 8 },
     ];
 
     it('renders graph components', () => {
         render(<TimelineChart data={mockData} />);
 
-        expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
-        expect(screen.getByTestId('bar-chart')).toBeInTheDocument();
-        expect(screen.getByTestId('bar')).toBeInTheDocument();
-        expect(screen.getByTestId('x-axis')).toBeInTheDocument();
-        expect(screen.getByTestId('y-axis')).toBeInTheDocument();
+        expect(screen.getByTestId('responsive-container')).toBeDefined();
+        expect(screen.getByTestId('bar-chart')).toBeDefined();
+        expect(screen.getAllByTestId('bar').length).toBeGreaterThan(0);
+        expect(screen.getByTestId('x-axis')).toBeDefined();
+        expect(screen.getByTestId('y-axis')).toBeDefined();
     });
 
     it('renders "No data" message when data is empty', () => {
         render(<TimelineChart data={[]} />);
-        expect(screen.getByText(/No timeline data available/i)).toBeInTheDocument();
+        expect(screen.getByText(/No timeline data available/i)).toBeDefined();
     });
 });

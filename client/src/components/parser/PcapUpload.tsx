@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { parseNetworkData, downloadFile } from '../../services/pcapParser';
 import { api } from '../../services/api';
@@ -18,15 +19,28 @@ import {
   Loader2,
   Send,
   AlertTriangle,
+  ClipboardList,
 } from 'lucide-react';
-
-interface PcapUploadProps {
-  onParsingStatusChange?: (isParsing: boolean) => void;
-}
 
 import { ExportControl } from '@/components/ExportControl';
 import { ReportGeneratorControl } from '../ReportGeneratorControl';
 import { useAuditLogger } from '@/hooks/useAuditLogger';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { CaseInfoPanel } from '../CaseInfoPanel';
+import { SummaryEditor } from '../SummaryEditor';
+
+interface PcapUploadProps {
+  onParsingStatusChange?: (isParsing: boolean) => void;
+}
 
 const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
   const [inputData, setInputData] = useState('');
@@ -303,8 +317,8 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
         Network Traffic Parser
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
+      <div className="flex flex-col gap-6">
+        <div className="w-full">
           <div className="bg-card border border-white/10 rounded-lg shadow-sm p-6 backdrop-blur-sm">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center">
@@ -314,6 +328,69 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                 </h2>
               </div>
               <div className="flex space-x-2">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <ClipboardList className="h-4 w-4 mr-2" />
+                      Case Details
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent className="w-[600px] sm:w-[540px] overflow-y-auto">
+                    <SheetHeader className="mb-4">
+                      <SheetTitle>Investigation Case Notes</SheetTitle>
+                    </SheetHeader>
+                    <div className="space-y-6">
+                      <CaseInfoPanel />
+                      <SummaryEditor />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+                <div className="h-6 w-px bg-gray-300 mx-1" />
+
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" title="Quick Help">
+                      Help
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Quick Help</DialogTitle>
+                      <DialogDescription>
+                        Guide to using the Network Traffic Parser.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 text-sm mt-2">
+                      <div>
+                        <h3 className="font-medium text-primary mb-1">What data can I parse?</h3>
+                        <p className="text-muted-foreground">
+                          You can paste any network traffic data including HTTP
+                          requests/responses, emails, JSON payloads, and more. You can
+                          also upload PCAP files from Wireshark or use direct network
+                          capture.
+                        </p>
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-primary mb-1">How does it work?</h3>
+                        <p className="text-muted-foreground">
+                          The parser extracts tokens (non-alphanumeric characters) and
+                          string content, identifies sections, and detects file
+                          references in URLs. For PCAP files, it analyzes packet headers
+                          and payload data.
+                        </p>
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-primary mb-1">Where is data stored?</h3>
+                        <p className="text-muted-foreground">
+                          All parsed data is stored locally in your browser. Nothing is
+                          sent to external servers.
+                        </p>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                <div className="h-6 w-px bg-gray-300 mx-1" />
                 <ExportControl pcapFile={currentFile} disabled={!currentFile || parsing} />
                 <ReportGeneratorControl disabled={!currentFile || parsing} />
                 <button
@@ -479,50 +556,6 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-
-        <div>
-          <div className="bg-card border border-white/10 rounded-lg shadow-sm p-6 h-full backdrop-blur-sm">
-            <h2 className="text-lg font-semibold mb-4 text-foreground">
-              Quick Help
-            </h2>
-
-            <div className="space-y-4 text-sm">
-              <div>
-                <h3 className="font-medium text-primary mb-1">
-                  What data can I parse?
-                </h3>
-                <p className="text-muted-foreground">
-                  You can paste any network traffic data including HTTP
-                  requests/responses, emails, JSON payloads, and more. You can
-                  also upload PCAP files from Wireshark or use direct network
-                  capture.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="font-medium text-primary mb-1">
-                  How does it work?
-                </h3>
-                <p className="text-muted-foreground">
-                  The parser extracts tokens (non-alphanumeric characters) and
-                  string content, identifies sections, and detects file
-                  references in URLs. For PCAP files, it analyzes packet headers
-                  and payload data.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="font-medium text-primary mb-1">
-                  Where is data stored?
-                </h3>
-                <p className="text-muted-foreground">
-                  All parsed data is stored locally in your browser. Nothing is
-                  sent to external servers.
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
