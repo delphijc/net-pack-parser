@@ -5,6 +5,7 @@ import type { ParsedPacket } from '../types';
 import { TimelineChart } from './TimelineChart';
 import { generateTimelineData } from '../utils/timelineUtils';
 import { useTimelineStore } from '../store/timelineStore';
+import { useAuditLogger } from '../hooks/useAuditLogger';
 import { useForensicStore } from '../store/forensicStore';
 import { AnnotationPanel } from './AnnotationPanel';
 import { TimelineControls } from './TimelineControls';
@@ -90,6 +91,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ packets }) => {
         setRange(newStartTime, newEndTime);
     };
 
+    const { logAction } = useAuditLogger();
+
     const handlePlotClick = (timestamp: number) => {
         addBookmark({
             id: crypto.randomUUID(), // Use naive UUID for now
@@ -98,6 +101,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ packets }) => {
             note: 'Enter note here...',
             author: 'Analyst',
         });
+        logAction('ANNOTATE', `Created bookmark at ${new Date(timestamp).toLocaleString()}`);
     };
 
     return (

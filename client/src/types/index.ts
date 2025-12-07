@@ -8,14 +8,14 @@ export interface Token {
 export interface ParsedSection {
   id: string;
   type:
-    | 'header'
-    | 'body'
-    | 'footer'
-    | 'from'
-    | 'to'
-    | 'subject'
-    | 'sheet'
-    | 'cell';
+  | 'header'
+  | 'body'
+  | 'footer'
+  | 'from'
+  | 'to'
+  | 'subject'
+  | 'sheet'
+  | 'cell';
   startIndex: number;
   endIndex: number;
   content: string;
@@ -60,10 +60,10 @@ export interface ChainOfCustodyEntry {
 export interface ThreatIntelligence {
   id: string;
   type:
-    | 'malicious_domain'
-    | 'malicious_ip'
-    | 'malware_signature'
-    | 'suspicious_pattern';
+  | 'malicious_domain'
+  | 'malicious_ip'
+  | 'malware_signature'
+  | 'suspicious_pattern';
   value: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   source: string;
@@ -74,15 +74,15 @@ export interface ThreatIntelligence {
 export interface SuspiciousIndicator {
   id: string;
   type:
-    | 'unusual_port'
-    | 'encrypted_payload'
-    | 'base64_content'
-    | 'suspicious_user_agent'
-    | 'data_exfiltration'
-    | 'command_injection'
-    | 'sql_injection'
-    | 'xss_attempt'
-    | 'brute_force';
+  | 'unusual_port'
+  | 'encrypted_payload'
+  | 'base64_content'
+  | 'suspicious_user_agent'
+  | 'data_exfiltration'
+  | 'command_injection'
+  | 'sql_injection'
+  | 'xss_attempt'
+  | 'brute_force';
   severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   evidence: string;
@@ -109,11 +109,11 @@ export interface TimelineEvent {
   id: string;
   timestamp: string;
   type:
-    | 'network_activity'
-    | 'file_access'
-    | 'authentication'
-    | 'data_transfer'
-    | 'suspicious_activity';
+  | 'network_activity'
+  | 'file_access'
+  | 'authentication'
+  | 'data_transfer'
+  | 'suspicious_activity';
   source: string;
   destination?: string;
   description: string;
@@ -183,13 +183,18 @@ export interface User {
   role: 'lead_investigator' | 'investigator' | 'analyst' | 'viewer';
 }
 
-export interface FileChainOfCustodyEvent {
+export interface ChainOfCustodyEvent {
   id: string;
   timestamp: string;
-  action: string; // e.g., "File Uploaded"
-  filename: string;
-  fileSize: number;
-  sha256Hash: string;
-  md5Hash: string;
-  userAgent: string;
+  action: string; // e.g., "File Uploaded", "Filter Applied"
+  details: string; // Generic description
+  user?: string; // "Analyst" or specific user
+  hash?: string; // SHA-256 hash if applicable to data
+  metadata?: {
+    filename?: string;
+    fileSize?: number;
+    md5Hash?: string;
+    userAgent?: string;
+    [key: string]: any;
+  };
 }

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import type { FileReference, ParsedPacket } from '../types';
 import DatabaseService from '../services/database';
-import ChainOfCustodyDb from '../services/chainOfCustodyDb';
+import DatabaseService from '../services/database';
 import {
   Table,
   TableBody,
@@ -14,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { useAuditLogger } from '@/hooks/useAuditLogger';
 
 interface FilesTabProps {
   packet: ParsedPacket; // The packet that might contain file references
@@ -22,6 +23,7 @@ interface FilesTabProps {
 const FilesTab: React.FC<FilesTabProps> = ({ packet }) => {
   const [fileReferences, setFileReferences] = useState<FileReference[]>([]);
   const databaseService = DatabaseService;
+  const { logAction } = useAuditLogger();
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -42,7 +44,7 @@ const FilesTab: React.FC<FilesTabProps> = ({ packet }) => {
     fetchFiles();
   }, [packet, databaseService]);
 
-  const handleDownload = (file: FileReference) => {
+  const handleDownload = async (file: FileReference) => {
     if (file.data) {
       const url = URL.createObjectURL(file.data);
       const a = document.createElement('a');
@@ -52,27 +54,15 @@ const FilesTab: React.FC<FilesTabProps> = ({ packet }) => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
       // Integrate Chain of Custody logging (AC 5)
-      const chainOfCustodyEvent: any = {
-        // Using any temporarily to bypass strict type check if interface mismatches, or better, match interface
-        id: crypto.randomUUID(),
-        timestamp: new Date().toISOString(), // Fix: timestamp should be string
-        action: 'File Downloaded' as const,
+      logAction('DOWNLOAD', `File Downloaded: ${file.filename}`, {
         filename: file.filename,
         fileSize: file.size,
         mimeType: file.mimeType,
-        sha256Hash: file.sha256Hash, // Correct property name based on lint error
-        md5Hash: '', // Optional or empty if not available
-        userAgent: navigator.userAgent, // Add user agent
-        user: 'Current User', // Placeholder for user identity
-        details: `Downloaded file extracted from packet ${packet.id}`,
-      };
-
-      ChainOfCustodyDb.addFileChainOfCustodyEvent(chainOfCustodyEvent)
-        .then(() => console.log('Chain of Custody event logged'))
-        .catch((err) =>
-          console.error('Failed to log Chain of Custody event', err),
-        );
+        sha256Hash: file.sha256Hash,
+        userAgent: navigator.userAgent
+      });
 
       console.log(
         `Downloaded file: ${file.filename}, Hash: ${file.sha256Hash}`,

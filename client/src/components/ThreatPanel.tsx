@@ -14,6 +14,7 @@ import { getSeverityColor, SEVERITY_LEVELS } from '../utils/severity';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { MessageSquare, CheckCircle, EyeOff } from 'lucide-react';
+import { useAuditLogger } from '@/hooks/useAuditLogger';
 
 interface ThreatPanelProps {
   threats: ThreatAlert[];
@@ -34,6 +35,7 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
 
   const { markFalsePositive, confirmThreat, addNote, getAlertState } =
     useAlertStore();
+  const { logAction } = useAuditLogger();
 
   // Extract unique tactics and techniques for filters
   const { tactics, techniques } = useMemo(() => {
@@ -196,17 +198,17 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
         {(selectedTactic !== 'all' ||
           selectedTechnique !== 'all' ||
           selectedSeverity !== 'all') && (
-          <Button
-            variant="ghost"
-            onClick={() => {
-              setSelectedTactic('all');
-              setSelectedTechnique('all');
-              setSelectedSeverity('all');
-            }}
-          >
-            Clear
-          </Button>
-        )}
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setSelectedTactic('all');
+                setSelectedTechnique('all');
+                setSelectedSeverity('all');
+              }}
+            >
+              Clear
+            </Button>
+          )}
       </div>
 
       {processedThreats.length === 0 ? (
@@ -295,6 +297,7 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         markFalsePositive(threat.id);
+                        logAction('THREAT_UPDATE', `Marked False Positive: ${threat.type}`, { threatId: threat.id, severity: threat.severity });
                       }}
                       className="text-xs"
                     >
@@ -306,6 +309,7 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         confirmThreat(threat.id);
+                        logAction('THREAT_UPDATE', `Confirmed Threat: ${threat.type}`, { threatId: threat.id, severity: threat.severity });
                       }}
                       disabled={isConfirmed}
                       className="text-xs"

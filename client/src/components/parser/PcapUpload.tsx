@@ -24,6 +24,8 @@ interface PcapUploadProps {
   onParsingStatusChange?: (isParsing: boolean) => void;
 }
 
+import { useAuditLogger } from '@/hooks/useAuditLogger';
+
 const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
   const [inputData, setInputData] = useState('');
   const [parsing, setParsing] = useState(false);
@@ -34,6 +36,7 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
   );
   const [errorMessage, setErrorMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { logAction } = useAuditLogger();
 
   // New state for file info
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
@@ -191,6 +194,13 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
 
       // Start polling
       pollServerStatus(sessionId);
+
+      logAction('UPLOAD', `File uploaded: ${file.name}`, {
+        filename: file.name,
+        size: file.size,
+        lastModified: file.lastModified
+      });
+
     } catch (error) {
       console.error('Error uploading file:', error);
       setErrorMessage(
@@ -302,11 +312,10 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
               <div className="flex space-x-2">
                 <button
                   onClick={handleCaptureToggle}
-                  className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${
-                    capturing
-                      ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
-                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                  }`}
+                  className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${capturing
+                    ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    }`}
                 >
                   {capturing ? (
                     <>
@@ -445,11 +454,10 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                 <button
                   type="submit"
                   disabled={parsing}
-                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center transition-colors ${
-                    parsing
-                      ? 'bg-primary/50 cursor-not-allowed'
-                      : 'bg-primary hover:bg-primary/90'
-                  }`}
+                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center transition-colors ${parsing
+                    ? 'bg-primary/50 cursor-not-allowed'
+                    : 'bg-primary hover:bg-primary/90'
+                    }`}
                 >
                   {parsing ? (
                     <>

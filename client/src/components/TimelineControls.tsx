@@ -10,6 +10,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
+import { useAuditLogger } from '../hooks/useAuditLogger';
+
 export const TimelineControls: React.FC = () => {
     const {
         showThreatsOnly,
@@ -17,6 +19,18 @@ export const TimelineControls: React.FC = () => {
         selectedProtocol,
         setProtocol
     } = useTimelineStore();
+    const { logAction } = useAuditLogger();
+
+    const handleThreatToggle = (checked: boolean) => {
+        toggleThreatsOnly();
+        logAction('FILTER', `Threats Only Toggle: ${checked ? 'ON' : 'OFF'}`);
+    };
+
+    const handleProtocolChange = (val: string) => {
+        const protocol = val === "ALL" ? null : val;
+        setProtocol(protocol);
+        logAction('FILTER', `Protocol Filter Changed: ${val}`);
+    };
 
     return (
         <div className="flex items-center gap-6 px-4 py-2 bg-card border rounded-md mb-4">
@@ -24,7 +38,7 @@ export const TimelineControls: React.FC = () => {
                 <Switch
                     id="show-threats"
                     checked={showThreatsOnly}
-                    onCheckedChange={toggleThreatsOnly}
+                    onCheckedChange={handleThreatToggle}
                 />
                 <Label htmlFor="show-threats">Show Threats Only</Label>
             </div>
@@ -33,7 +47,7 @@ export const TimelineControls: React.FC = () => {
                 <Label htmlFor="protocol-filter" className="whitespace-nowrap">Protocol:</Label>
                 <Select
                     value={selectedProtocol || "ALL"}
-                    onValueChange={(val) => setProtocol(val === "ALL" ? null : val)}
+                    onValueChange={handleProtocolChange}
                 >
                     <SelectTrigger className="w-[120px] h-8 text-xs">
                         <SelectValue placeholder="All" />

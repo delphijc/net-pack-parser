@@ -6,11 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Bookmark as BookmarkIcon, Trash2, Edit2, Save, X } from 'lucide-react';
 
+import { useAuditLogger } from '@/hooks/useAuditLogger';
+
 export const AnnotationPanel: React.FC = () => {
     const { bookmarks, removeBookmark, updateBookmark } = useForensicStore();
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editNote, setEditNote] = useState('');
     const [editLabel, setEditLabel] = useState('');
+    const { logAction } = useAuditLogger();
 
     const startEdit = (id: string, currentLabel: string, currentNote: string) => {
         setEditingId(id);
@@ -27,6 +30,12 @@ export const AnnotationPanel: React.FC = () => {
     const saveEdit = (id: string) => {
         updateBookmark(id, { label: editLabel, note: editNote });
         setEditingId(null);
+        logAction('ANNOTATE', `Updated bookmark: ${editLabel}`);
+    };
+
+    const handleRemove = (id: string) => {
+        removeBookmark(id);
+        logAction('ANNOTATE', `Removed bookmark ID: ${id}`);
     };
 
     if (bookmarks.length === 0) {
@@ -94,7 +103,7 @@ export const AnnotationPanel: React.FC = () => {
                                                 <Edit2 size={12} />
                                             </button>
                                             <button
-                                                onClick={() => removeBookmark(bookmark.id)}
+                                                onClick={() => handleRemove(bookmark.id)}
                                                 className="text-muted-foreground hover:text-destructive p-0.5"
                                             >
                                                 <Trash2 size={12} />
