@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import type { FileReference, ParsedPacket } from '../types';
 import DatabaseService from '../services/database';
-import DatabaseService from '../services/database';
 import {
   Table,
   TableBody,

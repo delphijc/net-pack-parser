@@ -24,6 +24,7 @@ interface PcapUploadProps {
   onParsingStatusChange?: (isParsing: boolean) => void;
 }
 
+import { ExportControl } from '@/components/ExportControl';
 import { useAuditLogger } from '@/hooks/useAuditLogger';
 
 const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
@@ -40,6 +41,7 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
 
   // New state for file info
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
   // const [uploadedFileSize, setUploadedFileSize] = useState<number | null>(null);
 
   // Client-side hashing variables removed for performance
@@ -184,6 +186,7 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
       formData.append('pcap', file);
 
       setUploadedFileName(file.name);
+      setCurrentFile(file);
       // setUploadedFileSize(file.size);
 
       // Upload to server using API service
@@ -310,6 +313,7 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                 </h2>
               </div>
               <div className="flex space-x-2">
+                <ExportControl pcapFile={currentFile} disabled={!currentFile || parsing} />
                 <button
                   onClick={handleCaptureToggle}
                   className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${capturing
