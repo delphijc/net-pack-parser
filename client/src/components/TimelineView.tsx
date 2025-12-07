@@ -1,24 +1,49 @@
 import React, { useMemo } from 'react';
 import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { Packet } from '../types/packet';
+import type { ParsedPacket } from '../types';
 import { TimelineChart } from './TimelineChart';
 import { generateTimelineData } from '../utils/timelineUtils';
 import { useTimelineStore } from '../store/timelineStore';
 import { useForensicStore } from '../store/forensicStore';
 import { AnnotationPanel } from './AnnotationPanel';
+import { TimelineControls } from './TimelineControls';
 
 interface TimelineViewProps {
-    packets: Packet[];
+    packets: ParsedPacket[];
 }
 
 export const TimelineView: React.FC<TimelineViewProps> = ({ packets }) => {
-    const { startTime, endTime, setRange, resetRange } = useTimelineStore();
+    const {
+        startTime,
+        endTime,
+        setRange,
+        resetRange,
+        showThreatsOnly,
+        selectedProtocol
+    } = useTimelineStore();
     const { bookmarks, addBookmark } = useForensicStore();
 
     const timelineData = useMemo(() => {
-        return generateTimelineData(packets);
-    }, [packets]);
+        let filtered = packets;
+
+        // Apply filters
+        if (showThreatsOnly) {
+            filtered = filtered.filter(p =>
+                (p.suspiciousIndicators && p.suspiciousIndicators.length > 0) ||
+                (p.threatIntelligence && p.threatIntelligence.length > 0)
+            );
+        }
+
+        if (selectedProtocol) {
+            filtered = filtered.filter(p =>
+                p.protocol === selectedProtocol ||
+                p.detectedProtocols?.includes(selectedProtocol)
+            );
+        }
+
+        return generateTimelineData(filtered);
+    }, [packets, showThreatsOnly, selectedProtocol]);
 
     // Calculate indices based on store timestamps
     const startIndex = useMemo(() => {
@@ -95,6 +120,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ packets }) => {
                 </div>
             </div>
 
+            <TimelineControls />
+
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 min-h-0">
                 <div className="lg:col-span-3 rounded-xl border bg-card text-card-foreground shadow flex flex-col overflow-hidden">
                     <div className="p-6 h-full">
@@ -113,6 +140,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ packets }) => {
                     <AnnotationPanel />
                 </div>
             </div>
-        </div>
+        </div >
     );
 };

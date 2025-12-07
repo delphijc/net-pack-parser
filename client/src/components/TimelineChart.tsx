@@ -67,18 +67,30 @@ export const TimelineChart: React.FC<TimelineChartProps> = ({
                         formatter={(value) => [`${value} packets`, 'Count']}
                     />
                     <Bar
-                        dataKey="count"
+                        dataKey="normalCount"
+                        stackId="a"
                         fill="#3b82f6"
-                        radius={[4, 4, 0, 0]}
+                        radius={[0, 0, 0, 0]} // Bottom bar
                         onClick={(data: any) => {
-                            // Recharts types can be tricky, safest is to check payload or passed data
                             if (data && data.payload && data.payload.timestamp) {
                                 onPlotClick?.(data.payload.timestamp);
-                            } else if (data && data.timestamp) {
-                                onPlotClick?.(data.timestamp);
                             }
                         }}
                         cursor="pointer"
+                        name="Normal Traffic"
+                    />
+                    <Bar
+                        dataKey="threatCount"
+                        stackId="a"
+                        fill="#ef4444" // Tailwind red-500
+                        radius={[4, 4, 0, 0]} // Top bar gets radius
+                        onClick={(data: any) => {
+                            if (data && data.payload && data.payload.timestamp) {
+                                onPlotClick?.(data.payload.timestamp);
+                            }
+                        }}
+                        cursor="pointer"
+                        name="Threats"
                     />
                     {bookmarks.map((bookmark) => (
                         <ReferenceLine
