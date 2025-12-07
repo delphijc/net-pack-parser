@@ -43,7 +43,7 @@ development_status:
   epic-4-retrospective: completed
   epic-5: contexted
   5-1-chronological-timeline-generation: done
-  5-2-interactive-timeline-with-zoom-pan: ready-for-dev
+  5-2-interactive-timeline-with-zoom-pan: done
   5-3-event-correlation-engine: ready-for-dev
   5-4-timeline-bookmarking-annotations: ready-for-dev
   5-5-tcp-session-conversation-flow-identification: ready-for-dev

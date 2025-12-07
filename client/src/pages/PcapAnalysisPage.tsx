@@ -24,8 +24,16 @@ import { cn } from '@/lib/utils';
 import type { ThreatAlert } from '@/types/threat'; // Import ThreatAlert type
 import { runThreatDetection } from '@/utils/threatDetection'; // Import threat detection utility
 
+import { useTimelineStore } from '@/store/timelineStore';
+import { useDebounce } from '@/hooks/useDebounce';
+
 const PcapAnalysisPage: React.FC = () => {
   const [allPackets, setAllPackets] = useState<ParsedPacket[]>([]);
+  const { startTime, endTime } = useTimelineStore();
+
+  // Debounce timeline filter to prevent UI lag during dragging (300ms)
+  const debouncedStartTime = useDebounce(startTime, 300);
+  const debouncedEndTime = useDebounce(endTime, 300);
 
   const [selectedPacket, setSelectedPacket] = useState<ParsedPacket | null>(
     null,
@@ -111,6 +119,13 @@ const PcapAnalysisPage: React.FC = () => {
   const displayedPackets = useMemo(() => {
     let filtered = allPackets;
 
+    // Apply timeline filter
+    if (debouncedStartTime !== null && debouncedEndTime !== null) {
+      filtered = filtered.filter(
+        (p) => p.timestamp >= debouncedStartTime && p.timestamp <= debouncedEndTime,
+      );
+    }
+
     // Apply protocol filter first
     if (selectedProtocol && selectedProtocol !== 'ALL') {
       filtered = filtered.filter((p) =>
@@ -133,7 +148,7 @@ const PcapAnalysisPage: React.FC = () => {
     }
 
     return filtered;
-  }, [allPackets, selectedProtocol, bpfFilterAst, multiSearchCriteria]);
+  }, [allPackets, selectedProtocol, bpfFilterAst, multiSearchCriteria, debouncedStartTime, debouncedEndTime]);
 
   const handlePacketSelect = (packet: ParsedPacket | null) => {
     setSelectedPacket(packet);
