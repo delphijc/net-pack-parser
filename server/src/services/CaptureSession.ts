@@ -50,27 +50,9 @@ export class CaptureSession {
         filter: string = '',
         sizeLimitMB: number = 0,
     ) {
-        // Find device address (first one) to open
-        const devices = Cap.deviceList();
-        const device = devices.find((d: any) => d.name === this.interfaceName);
-
-        let ip: string | undefined;
-        if (device && device.addresses.length > 0) {
-            ip = device.addresses[0].addr;
-        }
-
-        // Cap.open arguments: device, filter, bufSize, buffer
-        // Note: we might need to handle IP selection better if multiple exist, but usually getting the name is enough for some implementations of pcap opens,
-        // however 'node-cap' expects the IP address for some OSs or device name.
-        // Based on node-cap documentation, 'open' takes specific arguments.
-        // Actually, looking at cap's docs/examples, usually it passes device IP or name.
-        // Let's assume device name is supported or we find the right IP.
-        // On macOS (where user is), 'cap' usually needs the IP address associated with the interface to open it via `pcap_open_live` semantics exposed?
-        // Wait, standard node-cap `open` takes (device, filter, bufSize, buffer).
-        // The `device` argument 'can be the IP address of the interface OR the name of the interface depending on the platform'.
-        // We will try using the interface IP if available, else name.
-
-        const target = ip || this.interfaceName; /* fallback */
+        // On macOS, cap.open() requires the interface NAME (e.g., 'en0'), not the IP address
+        const target = this.interfaceName;
+        console.log(`CaptureSession: starting capture on interface '${target}'`);
 
         if (sizeLimitMB > 0) {
             this.sizeLimitBytes = sizeLimitMB * 1024 * 1024;
@@ -83,7 +65,7 @@ export class CaptureSession {
                 10 * 1024 * 1024,
                 this.buffer,
             );
-            this.cap.setMinBytes(0);
+            // setMinBytes not available in all cap versions, removed
 
             // Directory handled by StorageService
 

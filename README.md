@@ -85,6 +85,24 @@ npm run dev
 **3. Use the App**
 Open your browser and navigate to `http://localhost:5173`. Uploading a PCAP file will now send it to the local server for processing.
 
+### 🔐 Authentication (Remote/Live Capture)
+
+Remote Capture and Live Capture features require authentication. Default credentials:
+
+| Setting | Default | Environment Variable |
+|---------|---------|---------------------|
+| Username | `admin` | `ADMIN_USER` |
+| Password | `password` | `ADMIN_PASS` |
+| JWT Secret | `dev-secret-key-change-in-prod` | `JWT_SECRET` |
+
+**For Production:** Set environment variables before starting the server:
+```bash
+export ADMIN_USER="your_username"
+export ADMIN_PASS="your_secure_password"
+export JWT_SECRET="your-random-secret-key"
+npm run start
+```
+
 ### 🧪 Testing
 
 The project includes Unit Tests (Vitest).

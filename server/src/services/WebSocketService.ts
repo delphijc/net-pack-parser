@@ -2,7 +2,6 @@ import { Server } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { IncomingMessage } from 'http';
 import jwt from 'jsonwebtoken';
-import url from 'url';
 import { WSServerMessage, WSMessageType, PacketFilter, PacketData, PacketMessage } from '../types/WebSocketMessages';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-change-in-prod';
@@ -26,10 +25,9 @@ export class WebSocketService {
     }
 
     private static handleUpgrade(request: IncomingMessage, socket: any, head: Buffer): void {
-        const { pathname, query } = url.parse(request.url || '', true);
-
-        // Expect token in query string: ?token=...
-        const token = query.token as string;
+        // Use WHATWG URL API instead of deprecated url.parse()
+        const reqUrl = new URL(request.url || '', `http://${request.headers.host || 'localhost'}`);
+        const token = reqUrl.searchParams.get('token');
 
         if (!token) {
             socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');

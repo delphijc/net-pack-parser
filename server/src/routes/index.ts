@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { captureRouter } from './capture';
+import { analysisRouter } from './analysis';
 import { AuthController } from '../controllers/AuthController';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { InterfaceController } from '../controllers/InterfaceController';
@@ -12,6 +13,9 @@ import { MetaController } from '../controllers/MetaController';
 apiRouter.get('/version', MetaController.getVersion);
 apiRouter.post('/auth/login', AuthController.login);
 
+// Analysis routes (includes /upload - public for file upload)
+apiRouter.use('/', analysisRouter);
+
 // Protected routes
 apiRouter.use('/capture', authMiddleware, captureRouter);
 
@@ -19,3 +23,4 @@ apiRouter.use('/capture', authMiddleware, captureRouter);
 const interfaceRouter = Router();
 interfaceRouter.get('/', InterfaceController.listInterfaces);
 apiRouter.use('/interfaces', authMiddleware, interfaceRouter);
+

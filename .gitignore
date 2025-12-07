@@ -18,7 +18,9 @@ playwright-report/trace/
 playwright-report/
 test-results/
 en0.pcap
-
+captures/
+uploads/
+data/
 
 # Editor directories and files
 .vscode/*
