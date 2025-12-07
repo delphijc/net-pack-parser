@@ -8,21 +8,27 @@ import {
     Tooltip,
     ResponsiveContainer,
     Brush,
+    ReferenceLine,
 } from 'recharts';
 import type { TimelineDataPoint } from '../types/timeline';
+import type { Bookmark } from '../types/forensics';
 
 interface TimelineChartProps {
     data: TimelineDataPoint[];
     startIndex?: number;
     endIndex?: number;
     onRangeChange?: (start: number | null, end: number | null) => void;
+    bookmarks?: Bookmark[];
+    onPlotClick?: (timestamp: number) => void;
 }
 
 export const TimelineChart: React.FC<TimelineChartProps> = ({
     data,
     startIndex,
     endIndex,
-    onRangeChange
+    onRangeChange,
+    bookmarks = [],
+    onPlotClick
 }) => {
     if (!data || data.length === 0) {
         return (
@@ -60,7 +66,34 @@ export const TimelineChart: React.FC<TimelineChartProps> = ({
                         labelFormatter={(label) => new Date(label).toLocaleString()}
                         formatter={(value) => [`${value} packets`, 'Count']}
                     />
-                    <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                    <Bar
+                        dataKey="count"
+                        fill="#3b82f6"
+                        radius={[4, 4, 0, 0]}
+                        onClick={(data: any) => {
+                            // Recharts types can be tricky, safest is to check payload or passed data
+                            if (data && data.payload && data.payload.timestamp) {
+                                onPlotClick?.(data.payload.timestamp);
+                            } else if (data && data.timestamp) {
+                                onPlotClick?.(data.timestamp);
+                            }
+                        }}
+                        cursor="pointer"
+                    />
+                    {bookmarks.map((bookmark) => (
+                        <ReferenceLine
+                            key={bookmark.id}
+                            x={bookmark.timestamp}
+                            stroke="red"
+                            strokeDasharray="3 3"
+                            label={{
+                                position: 'top',
+                                value: '🚩',
+                                fill: 'red',
+                                fontSize: 14,
+                            }}
+                        />
+                    ))}
                     <Brush
                         dataKey="timestamp"
                         height={30}

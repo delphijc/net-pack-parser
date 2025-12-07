@@ -5,6 +5,8 @@ import type { Packet } from '../types/packet';
 import { TimelineChart } from './TimelineChart';
 import { generateTimelineData } from '../utils/timelineUtils';
 import { useTimelineStore } from '../store/timelineStore';
+import { useForensicStore } from '../store/forensicStore';
+import { AnnotationPanel } from './AnnotationPanel';
 
 interface TimelineViewProps {
     packets: Packet[];
@@ -12,6 +14,7 @@ interface TimelineViewProps {
 
 export const TimelineView: React.FC<TimelineViewProps> = ({ packets }) => {
     const { startTime, endTime, setRange, resetRange } = useTimelineStore();
+    const { bookmarks, addBookmark } = useForensicStore();
 
     const timelineData = useMemo(() => {
         return generateTimelineData(packets);
@@ -26,12 +29,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ packets }) => {
 
     const endIndex = useMemo(() => {
         if (endTime === null) return undefined;
-        // Find index of first item > endTime, then subtract 1? 
-        // Or find item with timestamp <= endTime.
-        // Brush endIndex is inclusive.
-        // Let's iterate backwards or findIndex.
-        // Simple approach: findIndex of exact or closest match?
-        // Let's assume buckets are sorted.
         let idx = -1;
         for (let i = timelineData.length - 1; i >= 0; i--) {
             if (timelineData[i].timestamp <= endTime) {
@@ -68,9 +65,19 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ packets }) => {
         setRange(newStartTime, newEndTime);
     };
 
+    const handlePlotClick = (timestamp: number) => {
+        addBookmark({
+            id: crypto.randomUUID(), // Use naive UUID for now
+            timestamp,
+            label: 'New Bookmark',
+            note: 'Enter note here...',
+            author: 'Analyst',
+        });
+    };
+
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
+        <div className="space-y-4 h-[calc(100vh-200px)] flex flex-col">
+            <div className="flex items-center justify-between shrink-0">
                 <h3 className="text-lg font-medium">Timeline Analysis</h3>
                 <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground mr-2">
@@ -87,14 +94,23 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ packets }) => {
                     </Button>
                 </div>
             </div>
-            <div className="rounded-xl border bg-card text-card-foreground shadow">
-                <div className="p-6">
-                    <TimelineChart
-                        data={timelineData}
-                        startIndex={startIndex}
-                        endIndex={endIndex}
-                        onRangeChange={handleRangeChange}
-                    />
+
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 min-h-0">
+                <div className="lg:col-span-3 rounded-xl border bg-card text-card-foreground shadow flex flex-col overflow-hidden">
+                    <div className="p-6 h-full">
+                        <TimelineChart
+                            data={timelineData}
+                            startIndex={startIndex}
+                            endIndex={endIndex}
+                            onRangeChange={handleRangeChange}
+                            bookmarks={bookmarks}
+                            onPlotClick={handlePlotClick}
+                        />
+                    </div>
+                </div>
+
+                <div className="lg:col-span-1 min-h-0 overflow-hidden">
+                    <AnnotationPanel />
                 </div>
             </div>
         </div>
