@@ -18,8 +18,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Store active parsing sessions (in-memory for MVP)
-// In production this would be Redis/Database
+import { kafkaService } from '../services/kafkaService';
+import { elasticService } from '../services/elasticService';
+
+// Store active parsing sessions (in-memory for MVP status tracking, full data in ES)
 export const activeSessions: Record<string, any> = {};
 
 analysisRouter.post('/upload', upload.single('pcap'), async (req, res) => {
@@ -28,14 +30,13 @@ analysisRouter.post('/upload', upload.single('pcap'), async (req, res) => {
     }
 
     const filePath = req.file.path;
-    const sessionId = req.file.filename; // Use filename as simple session ID
+    const sessionId = req.file.filename;
 
     console.log(`File uploaded: ${filePath}, Session: ${sessionId}`);
 
     // Initialize session state
     activeSessions[sessionId] = {
         status: 'processing',
-        packets: [],
         progress: 0,
         error: null,
         summary: {
@@ -44,23 +45,24 @@ analysisRouter.post('/upload', upload.single('pcap'), async (req, res) => {
         }
     };
 
-    // Start parsing asynchronously
-    parsePcapFile(filePath, sessionId)
-        .then((packets) => {
-            console.log(`Parsing complete for session ${sessionId}. Packets: ${packets.length}`);
-            activeSessions[sessionId].status = 'complete';
-            activeSessions[sessionId].packets = packets;
-            // Update summary with final counts
-            activeSessions[sessionId].summary.packetCount = packets.length;
-            activeSessions[sessionId].summary.totalBytes = packets.reduce((sum, p) => sum + (p.length || 0), 0);
-        })
-        .catch((err) => {
-            console.error(`Parsing error for session ${sessionId}:`, err);
-            activeSessions[sessionId].status = 'error';
-            activeSessions[sessionId].error = err.message;
+    // Offload to Kafka Worker
+    try {
+        await kafkaService.produce('pcap-upload', {
+            filePath,
+            sessionId
         });
 
-    // Return session ID immediately
+        // Simulating the worker picking it up:
+        // In a real microservice, a separate worker process would consume this.
+        // For this MVP monolith, we'll start the processing logic "as if" triggered by Kafka if we wanted,
+        // OR we can actually implement the Consumer in this same process to read it back.
+        // Let's implement the Consumer listener in pcapService or index.ts to actually do the work.
+
+    } catch (err: any) {
+        console.error(`Failed to queue pcap for session ${sessionId}:`, err);
+        return res.status(500).json({ error: 'Failed to queue file for processing' });
+    }
+
     res.json({
         sessionId,
         status: 'processing',
@@ -72,6 +74,9 @@ analysisRouter.post('/upload', upload.single('pcap'), async (req, res) => {
 analysisRouter.get('/analysis/:sessionId/status', (req, res) => {
     const { sessionId } = req.params;
     const session = activeSessions[sessionId];
+
+    // If session is not in memory (restart?), check ES for ANY packet to see if it exists?
+    // For MVP, keep using memory for status.
 
     if (!session) {
         return res.status(404).json({ error: 'Session not found' });
@@ -85,30 +90,45 @@ analysisRouter.get('/analysis/:sessionId/status', (req, res) => {
     });
 });
 
-analysisRouter.get('/analysis/:sessionId/results', (req, res) => {
+analysisRouter.get('/analysis/:sessionId/results', async (req, res) => {
     const { sessionId } = req.params;
-    const session = activeSessions[sessionId];
+    // Pagination params
+    const from = parseInt(req.query.from as string) || 0;
+    const size = parseInt(req.query.size as string) || 100;
 
-    if (!session) {
-        return res.status(404).json({ error: 'Session not found' });
-    }
+    // Check if processing is done (optional, or just return what we have)
+    // const session = activeSessions[sessionId];
 
-    if (session.status !== 'complete') {
-        return res.json({
-            status: session.status,
-            packets: []
+    try {
+        const hits = await elasticService.searchPackets(sessionId, size, from);
+
+        // Map ES hits to clean Packet objects
+        const packets = hits.hits.map((hit: any) => hit._source);
+
+        res.json({
+            sessionId,
+            status: activeSessions[sessionId]?.status || 'unknown',
+            summary: activeSessions[sessionId]?.summary || {},
+            packets: packets,
+            total: hits.total.value
         });
+    } catch (e) {
+        console.error('Failed to fetch results from ES', e);
+        res.status(500).json({ error: 'Failed to fetch results' });
     }
+});
 
-    // Allow pagination in future, sending all for now or first chunk
-    // For large files, sending ALL JSON might still crash browser or be slow
-    // Ideally we stream or paginate.
-    // MVP: Send all, client handles it (still better than Client parsing everything)
+analysisRouter.get('/analysis/:sessionId/stats', async (req, res) => {
+    const { sessionId } = req.params;
 
-    res.json({
-        sessionId,
-        status: session.status,
-        summary: session.summary,
-        packets: session.packets
-    });
+    try {
+        const stats = await elasticService.getDashboardStats(sessionId);
+        if (!stats) {
+            return res.status(503).json({ error: 'Elasticsearch not connected' });
+        }
+        res.json(stats);
+    } catch (e) {
+        console.error('Failed to fetch stats from ES', e);
+        res.status(500).json({ error: 'Failed to fetch stats' });
+    }
 });

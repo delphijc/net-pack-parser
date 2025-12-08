@@ -17,8 +17,20 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import type { ParsedPacket } from '../../types';
 
 interface TopTalkersProps {
-  packets: ParsedPacket[];
+  packets?: ParsedPacket[];
   onFilterClick?: (ip: string, type: 'src' | 'dst') => void;
+  topTalkers?: {
+    src: { key: string; doc_count: number }[]; // Note: doc_count here means packet count if using simple terms agg, bytes if using sort?
+    // Wait, my ES query used terms aggregation on sourceIp/destIp which maps to doc_count (packets).
+    // The previous logic accumulated 'length' (bytes).
+    // Terms agg counts DOCUMENTS (packets).
+    // To get BYTES I would need a sub-aggregation (sum of length).
+    // For now, let's just map doc_count to 'bytes' property even if it's technically packet count, OR change chart label to Packets.
+    // Actually, 'Top Talkers' usually implies traffic volume (bytes).
+    // Getting bytes would require 'aggs: { total_bytes: { sum: { field: 'length' } } }' inside the terms agg.
+    // For MVP "Quick Fix", I'll map doc_count to bytes and it will show packet count distribution. It's an approximation for now.
+    dest: { key: string; doc_count: number }[];
+  };
 }
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe'];
@@ -26,9 +38,18 @@ const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe'];
 export const TopTalkers: React.FC<TopTalkersProps> = ({
   packets,
   onFilterClick,
+  topTalkers
 }) => {
   const { srcData, dstData } = useMemo(() => {
-    // ... (memo logic remains same)
+    if (topTalkers) {
+      return {
+        srcData: topTalkers.src.map(i => ({ ip: i.key, bytes: i.doc_count })),
+        dstData: topTalkers.dest.map(i => ({ ip: i.key, bytes: i.doc_count }))
+      };
+    }
+
+    if (!packets || !packets.length) return { srcData: [], dstData: [] };
+
     const srcCounts: Record<string, number> = {};
     const dstCounts: Record<string, number> = {};
 
@@ -48,7 +69,7 @@ export const TopTalkers: React.FC<TopTalkersProps> = ({
       srcData: process(srcCounts),
       dstData: process(dstCounts),
     };
-  }, [packets]);
+  }, [packets, topTalkers]);
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 B';

@@ -12,7 +12,8 @@ import { BarChart3 } from 'lucide-react';
 import type { ParsedPacket } from '../../types';
 
 interface ProtocolDistributionProps {
-  packets: ParsedPacket[];
+  packets?: ParsedPacket[];
+  distribution?: { key: string; doc_count: number }[];
 }
 
 const COLORS = [
@@ -28,29 +29,41 @@ const COLORS = [
 
 export const ProtocolDistribution: React.FC<ProtocolDistributionProps> = ({
   packets,
+  distribution,
 }) => {
-  const protocolCounts = packets.reduce(
-    (acc, packet) => {
-      // Use detectedProtocols if available, otherwise fallback to protocol field
-      if (packet.detectedProtocols && packet.detectedProtocols.length > 0) {
-        packet.detectedProtocols.forEach((protocol: string) => {
-          acc[protocol] = (acc[protocol] || 0) + 1;
-        });
-      } else {
-        const proto = packet.protocol || 'Unknown';
-        acc[proto] = (acc[proto] || 0) + 1;
-      }
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
+  let data: { name: string; value: number }[] = [];
 
-  const data = Object.entries(protocolCounts)
-    .map(([name, value]) => ({
-      name,
-      value,
-    }))
-    .sort((a, b) => b.value - a.value); // Sort by count desc
+  if (distribution) {
+    // Use pre-aggregated data from server
+    data = distribution.map((item) => ({
+      name: item.key,
+      value: item.doc_count,
+    }));
+  } else if (packets) {
+    // Fallback to client-side aggregation
+    const protocolCounts = packets.reduce(
+      (acc, packet) => {
+        // Use detectedProtocols if available, otherwise fallback to protocol field
+        if (packet.detectedProtocols && packet.detectedProtocols.length > 0) {
+          packet.detectedProtocols.forEach((protocol: string) => {
+            acc[protocol] = (acc[protocol] || 0) + 1;
+          });
+        } else {
+          const proto = packet.protocol || 'Unknown';
+          acc[proto] = (acc[proto] || 0) + 1;
+        }
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    data = Object.entries(protocolCounts)
+      .map(([name, value]) => ({
+        name,
+        value,
+      }))
+      .sort((a, b) => b.value - a.value);
+  }
 
   return (
     <ChartWrapper

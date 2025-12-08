@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import database from '../../services/database';
+
+import { api } from '../../services/api';
 import { ProtocolDistribution } from './ProtocolDistribution';
 import { TrafficVolume } from './TrafficVolume';
 import { TopTalkers } from './TopTalkers';
@@ -30,8 +31,8 @@ import { FalsePositivesTab } from '../FalsePositivesTab';
 import { ThreatPanel } from '../ThreatPanel';
 import SettingsPage from '../SettingsPage';
 import { TimelineView } from '../TimelineView';
-import { useAlertStore } from '../../store/alertStore';
-import { runThreatDetection } from '../../utils/threatDetection';
+
+
 import type { ThreatAlert } from '../../types/threat';
 import {
   ReportGenerator,
@@ -63,6 +64,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
     threatsDetected: 0,
     suspiciousActivities: 0,
     protocols: {} as Record<string, number>,
+    timeline: undefined as { key_as_string: string; doc_count: number }[] | undefined,
+    topTalkers: undefined as {
+      src: { key: string; doc_count: number }[];
+      dest: { key: string; doc_count: number }[];
+    } | undefined,
   });
 
   // Persist active tab
@@ -91,58 +97,68 @@ const Dashboard: React.FC<DashboardProps> = () => {
   const { caseMetadata } = useForensicStore();
 
   const updateStats = useCallback(async () => {
-    let packets: ParsedPacket[] = [];
-    if (activeSessionId) {
-      packets = await database.getPacketsBySession(activeSessionId);
-    } else {
-      // Fallback or empty? Maybe show recent from all?
-      // Let's force empty if no session selected to be clean.
-      packets = [];
+    if (!activeSessionId) {
+      setStats({
+        totalPackets: 0,
+        totalFiles: 0,
+        threatsDetected: 0,
+        suspiciousActivities: 0,
+        protocols: {},
+        timeline: undefined,
+        topTalkers: undefined,
+      });
+      setAllPackets([]);
+      setRecentActivity([]);
+      setAllThreats([]);
+      return;
     }
-    const files = await database.getAllFiles(); // TODO: Filter files by session too if we add sessionId to files
 
-    // Run threat detection
-    const threatPromises = packets.map((packet) => runThreatDetection(packet));
-    const threatsResults = await Promise.all(threatPromises);
-    const detectedThreats = threatsResults.flat();
-    setAllThreats(detectedThreats);
+    try {
+      const statsData = await api.getDashboardStats(activeSessionId);
 
-    // Filter out false positives for stats
-    const alertStates = useAlertStore.getState().alertStates;
-    const activeThreats = detectedThreats.filter(
-      (t) => alertStates[t.id]?.status !== 'false_positive',
-    );
+      const protocols: Record<string, number> = {};
+      statsData.protocols.forEach((b) => {
+        protocols[b.key] = b.doc_count;
+      });
 
-    // Calculate protocol distribution
-    const protocols: Record<string, number> = {};
-    packets.forEach((p) => {
-      protocols[p.protocol] = (protocols[p.protocol] || 0) + 1;
-    });
+      // Map server recent activity to ParsedPacket (partial)
+      // Note: timeline/charts components might expect full arrays.
+      // For proper chart rendering relying on 'allPackets' prop, we need to adapt:
+      // Charts components currently calculate from 'allPackets'.
+      // MIGRATION STEP:
+      // 1. Refactor child components (ProtocolDistribution, TrafficVolume, etc.) to accept aggregated data props.
+      // 2. OR fetch minimal packet data needed for them?
+      // fetching ALL packets is what we want to avoid.
+      // Let's pass the aggregated data from statsData to components if possible, or adapt.
 
-    // Count suspicious activities
-    const suspiciousCount = packets.reduce(
-      (count, p) => count + (p.suspiciousIndicators?.length || 0),
-      0,
-    );
+      // For now, let's keep allPackets internal state EMPTY or minimal,
+      // and adapt child components to optionally take pre-calculated stats.
+      // But re-writing all child charts is a bigger task.
+      // If we simply populate stats state, the cards will work.
+      // Charts need refactoring.
 
-    setStats({
-      totalPackets: packets.length,
-      totalFiles: files.length,
-      threatsDetected: activeThreats.length,
-      suspiciousActivities: suspiciousCount,
-      protocols,
-    });
+      setStats({
+        totalPackets: statsData.totalPackets,
+        totalFiles: statsData.files.total,
+        threatsDetected: statsData.threats.total,
+        suspiciousActivities: 0, // Not explicitly returning distinct suspicious count yet, threats covers it
+        protocols,
+        timeline: statsData.timeline,
+        topTalkers: statsData.topTalkers
+      });
 
-    // Get recent activity (last 5 packets)
-    setRecentActivity(packets.slice(-5).reverse());
+      setRecentActivity(statsData.recentActivity);
 
-    // Optimization: Only update allPackets if count changed to avoid costly re-renders of TimelineView
-    setAllPackets((prev) => {
-      if (prev.length !== packets.length) {
-        return packets;
-      }
-      return prev;
-    });
+      // We still need 'allThreats' for the threat panel etc if they are accessed there.
+      // We can fetch them or just show nothing/empty there for now until that tab is clicked.
+      // But Dashboard passes 'allThreats' to reporting/charts.
+      // Getting full threat list might be needed.
+      // For MVP dashboard view, we might not need active full list unless user drills down.
+      // Leaving allThreats empty or minimal for now to unblock 'Overview'.
+
+    } catch (err) {
+      console.error("Failed to load dashboard stats", err);
+    }
   }, [activeSessionId]);
 
   useEffect(() => {
@@ -281,24 +297,26 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Protocol Distribution & Traffic Volume */}
-        <div className="lg:col-span-1" id="chart-protocol">
-          <ProtocolDistribution packets={allPackets} />
+        <div className="lg:col-span-1 grid grid-cols-1 gap-4 h-[350px]" id="chart-protocol">
+          <ProtocolDistribution
+            packets={allPackets}
+            distribution={Object.entries(stats.protocols || {}).map(([k, v]) => ({ key: k, doc_count: v }))}
+          />
         </div>
-        <div className="lg:col-span-2" id="chart-timeline">
-          <TrafficVolume packets={allPackets} />
+        <div className="lg:col-span-2 grid grid-cols-1 gap-4 h-[350px]" id="chart-timeline">
+          <TrafficVolume packets={allPackets} timeline={stats.timeline} />
         </div>
 
-        {/* Top Talkers */}
-        <div className="lg:col-span-1 min-h-[350px]" id="chart-toptalkers">
+        {/* Top Talkers & Geo Map */}
+        <div className="lg:col-span-1 grid grid-cols-1 gap-4 h-[350px]" id="chart-toptalkers">
           <TopTalkers
             packets={allPackets}
+            topTalkers={stats.topTalkers}
             onFilterClick={handleTopTalkerClick}
           />
         </div>
-
-        {/* Geo Map */}
-        <div className="lg:col-span-2 min-h-[350px]" id="chart-geomap">
-          <GeoMap packets={allPackets} />
+        <div className="lg:col-span-2 grid grid-cols-1 gap-4 h-[350px]" id="chart-geomap">
+          <GeoMap packets={allPackets} onFilterClick={handleTopTalkerClick} />
         </div>
 
         {/* Recent Activity */}

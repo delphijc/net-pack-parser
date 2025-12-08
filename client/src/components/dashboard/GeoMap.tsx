@@ -14,7 +14,13 @@ import { geoIpService } from '../../services/GeoIpService';
 
 const GEO_URL = '/world-110m.json';
 
-export const GeoMap: React.FC<{ packets: ParsedPacket[] }> = ({ packets }) => {
+interface GeoMapProps {
+  packets: ParsedPacket[];
+  onFilterClick?: (ip: string, type: 'src' | 'dst') => void;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const GeoMap: React.FC<GeoMapProps> = ({ packets, onFilterClick: _onFilterClick }) => {
   const [countryData, setCountryData] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
 

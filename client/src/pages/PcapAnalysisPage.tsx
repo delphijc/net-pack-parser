@@ -22,7 +22,7 @@ import {
 } from '@/utils/multiCriteriaSearch';
 import { cn } from '@/lib/utils';
 import type { ThreatAlert } from '@/types/threat'; // Import ThreatAlert type
-import { runThreatDetection } from '@/utils/threatDetection'; // Import threat detection utility
+
 
 import { useTimelineStore } from '@/store/timelineStore';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -75,45 +75,17 @@ const PcapAnalysisPage: React.FC<PcapAnalysisPageProps> = ({
         const packetsFromDb = await database.getAllPackets();
         setAllPackets(packetsFromDb);
 
-        // Run threat detection for all packets and collect all threats
-        const threatPromises = packetsFromDb.map((packet) =>
-          runThreatDetection(packet),
-        );
-        const threatsResults = await Promise.all(threatPromises);
-        const detectedThreats: ThreatAlert[] = threatsResults.flat();
+        // Packets from DB already contain mapped threats/suspiciousIndicators from upload time
+        setAllPackets(packetsFromDb);
+
+        // Collect threats for state if needed, or just rely on packet.threats
+        // If we need a flat list of all threats:
+        const detectedThreats = packetsFromDb.flatMap(p => p.threats || []);
         setAllThreats(detectedThreats);
-
-        // Map threats to suspiciousIndicators for the packets
-        const packetsWithThreats = packetsFromDb.map((packet) => {
-          const packetThreats = detectedThreats.filter(
-            (t) => t.packetId === packet.id,
-          );
-          if (packetThreats.length > 0) {
-            return {
-              ...packet,
-              suspiciousIndicators: packetThreats.map((threat) => ({
-                id: threat.id,
-                type: (threat.type === 'SQL Injection'
-                  ? 'sql_injection'
-                  : 'suspicious_pattern') as import('@/types').SuspiciousIndicator['type'],
-                severity: (threat.severity === 'info'
-                  ? 'low'
-                  : threat.severity) as import('@/types').SuspiciousIndicator['severity'],
-                description: threat.description,
-                evidence: 'See threat details', // Placeholder as ThreatAlert doesn't have raw evidence string
-                confidence: 100,
-                mitreTactic: threat.mitreAttack[0], // Take the first one
-              })),
-            };
-          }
-          return packet;
-        });
-
-        setAllPackets(packetsWithThreats);
 
         // Extract unique protocols for the filter
         const uniqueProtocols = Array.from(
-          new Set(packetsWithThreats.flatMap((p) => p.detectedProtocols || [])),
+          new Set(packetsFromDb.flatMap((p: ParsedPacket) => p.detectedProtocols || [])),
         );
         setAvailableProtocols(uniqueProtocols);
       } catch (error) {
@@ -199,45 +171,14 @@ const PcapAnalysisPage: React.FC<PcapAnalysisPageProps> = ({
     const packetsFromDb = await database.getAllPackets();
     setAllPackets(packetsFromDb);
 
-    // Run threat detection for all packets
-    const threatPromises = packetsFromDb.map((packet) =>
-      runThreatDetection(packet),
-    );
-    const threatsResults = await Promise.all(threatPromises);
-    const detectedThreats: ThreatAlert[] = threatsResults.flat();
+
+
+    const detectedThreats = packetsFromDb.flatMap(p => p.threats || []);
     setAllThreats(detectedThreats);
-
-    // Map threats to suspiciousIndicators
-    const packetsWithThreats = packetsFromDb.map((packet) => {
-      const packetThreats = detectedThreats.filter(
-        (t) => t.packetId === packet.id,
-      );
-      if (packetThreats.length > 0) {
-        return {
-          ...packet,
-          suspiciousIndicators: packetThreats.map((threat) => ({
-            id: threat.id,
-            type: (threat.type === 'SQL Injection'
-              ? 'sql_injection'
-              : 'suspicious_pattern') as import('@/types').SuspiciousIndicator['type'],
-            severity: (threat.severity === 'info'
-              ? 'low'
-              : threat.severity) as import('@/types').SuspiciousIndicator['severity'],
-            description: threat.description,
-            evidence: 'See threat details',
-            confidence: 100,
-            mitreTactic: threat.mitreAttack[0],
-          })),
-        };
-      }
-      return packet;
-    });
-
-    setAllPackets(packetsWithThreats);
 
     // Extract unique protocols
     const uniqueProtocols = Array.from(
-      new Set(packetsWithThreats.flatMap((p) => p.detectedProtocols || [])),
+      new Set(packetsFromDb.flatMap((p) => p.detectedProtocols || [])),
     );
     setAvailableProtocols(uniqueProtocols);
   }, []);
@@ -275,6 +216,9 @@ const PcapAnalysisPage: React.FC<PcapAnalysisPageProps> = ({
 
   const selectedPacketThreats = useMemo(() => {
     if (!selectedPacket) return [];
+    // Prefer threats strictly attached to the packet from backend
+    if (selectedPacket.threats) return selectedPacket.threats;
+    // Fallback to searching allThreats just in case
     return allThreats.filter((threat) => threat.packetId === selectedPacket.id);
   }, [allThreats, selectedPacket]);
 

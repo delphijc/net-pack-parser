@@ -60,7 +60,7 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
   const { logAction } = useAuditLogger();
 
   // New state for file info
-  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   // const [uploadedFileSize, setUploadedFileSize] = useState<number | null>(null);
 
@@ -121,7 +121,7 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
   };
 
   // Polling function for server status
-  const pollServerStatus = async (sessionId: string) => {
+  const pollServerStatus = async (sessionId: string, fileName: string) => {
     const pollInterval = setInterval(async () => {
       try {
         const statusData = await api.getStatus(sessionId);
@@ -129,53 +129,81 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
         if (statusData.status === 'complete') {
           clearInterval(pollInterval);
 
-          // Fetch results
-          const resultsData = await api.getResults(sessionId);
+          let allPackets: ParsedPacket[] = [];
+          let fetchedCount = 0;
+          const totalToFetch = statusData.packetCount;
+          const BATCH_SIZE = 1000;
 
-          if (resultsData.packets && resultsData.packets.length > 0) {
-            // Transform server packets to client ParsedPacket format
-            const adaptedPackets: ParsedPacket[] = resultsData.packets.map(
-              (p: any) => ({
-                id: p.id,
-                timestamp: p.timestamp,
-                protocol: p.protocol,
-                sourceIP: p.sourceIp,
-                destIP: p.destIp,
-                sourcePort: 0,
-                destPort: 0,
-                length: p.length,
-                info: p.info,
-                originalLength: p.length,
-                rawData: p.raw
-                  ? (() => {
-                    const hex = p.raw;
-                    const len = hex.length;
-                    const bytes = new Uint8Array(len / 2);
-                    for (let i = 0; i < len; i += 2) {
-                      bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
-                    }
-                    return bytes.buffer;
-                  })()
-                  : new ArrayBuffer(0),
-                detectedProtocols: [p.protocol],
-                tokens: [],
-                sections: [],
-                fileReferences: [],
-                sessionId: sessionId,
-              }),
-            );
+          while (fetchedCount < totalToFetch) {
+            try {
+              const resultsData = await api.getResults(sessionId, fetchedCount, BATCH_SIZE);
 
-            await database.storePackets(adaptedPackets);
+              if (resultsData.packets && resultsData.packets.length > 0) {
+                const adaptedPackets: ParsedPacket[] = resultsData.packets.map(
+                  (p: any) => ({
+                    id: p.sessionId + '-' + fetchedCount++,
+                    timestamp: p.timestamp,
+                    protocol: p.protocol,
+                    sourceIP: p.sourceIp,
+                    destIP: p.destIp,
+                    sourcePort: 0,
+                    destPort: 0,
+                    length: p.length,
+                    info: p.info,
+                    originalLength: p.length,
+                    rawData: p.raw
+                      ? (() => {
+                        const binaryString = atob(p.raw);
+                        const len = binaryString.length;
+                        const bytes = new Uint8Array(len);
+                        for (let i = 0; i < len; i++) {
+                          bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        return bytes.buffer;
+                      })()
+                      : new ArrayBuffer(0),
+                    detectedProtocols: [p.protocol],
+                    tokens: [], // Legacy field, usage replaced by extractedStrings
+                    sections: [],
+                    fileReferences: p.fileReferences || [],
+                    extractedStrings: p.strings || [],
+                    threats: p.threats || [],
+                    suspiciousIndicators: (p.threats || []).map((t: any) => ({
+                      id: t.id,
+                      type: t.type,
+                      severity: t.severity,
+                      description: t.description,
+                      evidence: '', // Optional or derive
+                      confidence: 100
+                    })),
+                    sessionId: sessionId,
+                  }),
+                );
+                allPackets = allPackets.concat(adaptedPackets);
+              } else {
+                break;
+              }
+            } catch (e) {
+              console.error('Error fetching batch, stopping download', e);
+              break;
+            }
+          }
+
+          if (allPackets.length > 0) {
+            // Fix IDs to be unique index based if needed
+            allPackets = allPackets.map((p, idx) => ({ ...p, id: `${sessionId}-${idx}` }));
+
+            await database.storePackets(allPackets);
 
             // Register session in store
             useSessionStore.getState().addSession({
               id: sessionId,
-              name: uploadedFileName || 'Unknown Session',
+              name: fileName || 'Unknown Session',
               timestamp: Date.now(),
-              packetCount: adaptedPackets.length,
+              packetCount: allPackets.length,
             });
 
-            setLastParsedPacket(adaptedPackets[adaptedPackets.length - 1]);
+            setLastParsedPacket(allPackets[allPackets.length - 1]);
             setCapturedData([]);
             setErrorMessage('');
           } else {
@@ -190,10 +218,12 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
           setParsing(false);
           onParsingStatusChange?.(false);
         }
-      } catch (err) {
+      } catch (err: any) {
         clearInterval(pollInterval);
-        console.error('Polling error', err);
-        setErrorMessage('Failed to communicate with analysis server.');
+        console.error('Polling error/Parsing error:', err);
+        setErrorMessage(
+          `Failed to process server response: ${err.message || String(err)}`,
+        );
         setParsing(false);
         onParsingStatusChange?.(false);
       }
@@ -213,7 +243,7 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
       const formData = new FormData();
       formData.append('pcap', file);
 
-      setUploadedFileName(file.name);
+
       setCurrentFile(file);
       // setUploadedFileSize(file.size);
 
@@ -224,7 +254,7 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
       console.log(`Upload success. Session: ${sessionId}. polling...`);
 
       // Start polling
-      pollServerStatus(sessionId);
+      pollServerStatus(sessionId, file.name);
 
       logAction('UPLOAD', `File uploaded: ${file.name}`, {
         filename: file.name,
@@ -417,8 +447,8 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                 <button
                   onClick={handleCaptureToggle}
                   className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${capturing
-                      ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
-                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
                     }`}
                 >
                   {capturing ? (
@@ -559,8 +589,8 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                   type="submit"
                   disabled={parsing}
                   className={`px-4 py-2 rounded-md text-white font-medium flex items-center transition-colors ${parsing
-                      ? 'bg-primary/50 cursor-not-allowed'
-                      : 'bg-primary hover:bg-primary/90'
+                    ? 'bg-primary/50 cursor-not-allowed'
+                    : 'bg-primary hover:bg-primary/90'
                     }`}
                 >
                   {parsing ? (

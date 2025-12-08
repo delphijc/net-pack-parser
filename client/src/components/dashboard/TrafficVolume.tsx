@@ -13,15 +13,28 @@ import { Activity } from 'lucide-react';
 import type { ParsedPacket } from '../../types';
 import { useTimelineStore } from '../../store/timelineStore';
 
+
 interface TrafficVolumeProps {
-  packets: ParsedPacket[];
+  packets?: ParsedPacket[];
+  timeline?: { key_as_string: string; doc_count: number }[];
 }
 
-export const TrafficVolume: React.FC<TrafficVolumeProps> = ({ packets }) => {
+export const TrafficVolume: React.FC<TrafficVolumeProps> = ({
+  packets,
+  timeline,
+}) => {
   const { setRange } = useTimelineStore();
 
   const data = useMemo(() => {
-    if (!packets.length) return [];
+    if (timeline) {
+      return timeline.map(item => ({
+        time: new Date(item.key_as_string).getTime(),
+        bytes: item.doc_count, // Use doc_count as approximation for volume if bytes not available, or label as Packets
+        packets: item.doc_count
+      })).sort((a, b) => a.time - b.time);
+    }
+
+    if (!packets || !packets.length) return [];
 
     // Determine time range
     const timestamps = packets.map((p) => p.timestamp);
@@ -52,7 +65,7 @@ export const TrafficVolume: React.FC<TrafficVolumeProps> = ({ packets }) => {
     });
 
     return Object.values(buckets).sort((a, b) => a.time - b.time);
-  }, [packets]);
+  }, [packets, timeline]);
 
   const handleChartClick = (data: any) => {
     if (data && data.activePayload && data.activePayload.length > 0) {

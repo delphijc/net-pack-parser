@@ -3,6 +3,9 @@ import cors from 'cors';
 import morgan from 'morgan';
 import os from 'os';
 import http from 'http';
+
+import { kafkaService } from './services/kafkaService';
+import { elasticService } from './services/elasticService';
 import { apiRouter } from './routes';
 import { sessionRouter } from './routes/sessions';
 import { CleanupService } from './services/CleanupService';
@@ -49,8 +52,20 @@ app.use(errorHandler);
 const server = http.createServer(app);
 WebSocketService.init(server);
 
+import { startPcapWorker } from './workers/pcapWorker';
+
+// Initialize Services
+(async () => {
+    try {
+        await kafkaService.connect();
+        await elasticService.connect();
+        await startPcapWorker();
+    } catch (e) {
+        console.error('Failed to initialize infrastructure services', e);
+    }
+})();
+
 server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
     console.log(`WebSocket server available at ws://localhost:${port}`);
 });
-

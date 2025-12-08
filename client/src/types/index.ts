@@ -25,6 +25,8 @@ import type { Packet } from './packet';
 export type { Packet };
 import type { FileReference } from './fileReference';
 export * from './fileReference';
+import type { ExtractedString } from './extractedStrings';
+import type { ThreatAlert } from './threat';
 
 export interface ParsedPacket extends Packet {
   tokens: Token[];
@@ -39,6 +41,8 @@ export interface ParsedPacket extends Packet {
   httpHost?: string;
   fileHash?: string;
   info?: string; // Summary info
+  extractedStrings?: ExtractedString[];
+  threats?: ThreatAlert[];
 }
 
 export interface ForensicMetadata {

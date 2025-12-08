@@ -17,17 +17,22 @@ See the Network Traffic Parser in action, from uploading a PCAP file to identify
 
 ## 🏗️ Project Architecture
 
-This project follows a **hybrid client-server architecture** designed to support two modes of operation:
+This project follows a **hybrid client-server architecture** designed to support scalable analysis:
 
-1.  **Local Analysis (Client-Server)**: A web interface paired with a local Node.js server to handle PCAP file parsing. The server is **required** for parsing operations.
-2.  **Connected Mode**: (Planned) Extends the local server to act as a capture agent, streaming real-time network traffic from the host OS to the browser.
+1.  **Frontend (Client)**: A React/Vite application for visualization and user interaction.
+2.  **Backend (Server)**: A Node.js server that acts as the API gateway and coordination layer.
+3.  **Data Pipeline**:
+    *   **Kafka (Redpanda)**: Handles streaming of PCAP data for asynchronous processing.
+    *   **Elasticsearch**: Stores indexed packet data for fast search and retrieval.
+    *   **Workers**: Background workers consume from Kafka to parse and index data.
 
 ### Directory Structure
 
 ```
 net-pack-parser/
 ├── client/              # Browser UI (Vite + React + TypeScript)
-├── server/              # Backend PCAP Processing Server (Node.js + Express)
+├── server/              # Backend API & Workers (Node.js + Express)
+├── docker-compose.yml   # Infrastructure definition (Redpanda, Elasticsearch)
 └── package.json         # Root configuration
 ```
 
@@ -39,6 +44,7 @@ net-pack-parser/
 
 -   **Node.js** (version 22.x LTS recommended)
 -   **npm** (comes with Node.js)
+-   **Docker** & **Docker Compose** (Required for Kafka & Elasticsearch)
 -   **Git**
 
 ### Installation
@@ -49,13 +55,20 @@ net-pack-parser/
     cd network-traffic-parser
     ```
 
-2.  **Install Client Dependencies**
+2.  **Start Infrastructure**
+    Start the required services (Kafka/Redpanda, Elasticsearch, Kibana):
+    ```bash
+    docker-compose up -d
+    ```
+    *Wait a few moments for the containers to initialize.*
+
+3.  **Install Client Dependencies**
     ```bash
     cd client
     npm install
     ```
 
-3.  **Install Server Dependencies**
+4.  **Install Server Dependencies**
     ```bash
     cd ../server
     npm install
@@ -63,7 +76,7 @@ net-pack-parser/
 
 ### 💻 Running the Application
 
-This application requires both the **Server** (for parsing) and the **Client** (for the UI) to be running.
+This application requires **Infrastructure** (Docker), **Server**, and **Client** to be running.
 
 **1. Start the Server**
 Open a terminal:
@@ -83,7 +96,7 @@ npm run dev
 *Client runs on http://localhost:5173*
 
 **3. Use the App**
-Open your browser and navigate to `http://localhost:5173`. Uploading a PCAP file will now send it to the local server for processing.
+Open your browser and navigate to `http://localhost:5173`. Uploading a PCAP file will now stream it to the local server, queue it in Kafka, and index it in Elasticsearch.
 
 ### 🔐 Authentication (Remote/Live Capture)
 

@@ -22,6 +22,7 @@ export interface AnalysisResults {
     totalBytes: number;
   };
   packets: any[]; // Raw packets from server, need adaptation
+  total?: number;
 }
 
 export const api = {
@@ -51,13 +52,46 @@ export const api = {
     return response.json();
   },
 
-  async getResults(sessionId: string): Promise<AnalysisResults> {
+  async getResults(
+    sessionId: string,
+    from: number = 0,
+    size: number = 1000,
+  ): Promise<AnalysisResults> {
     const response = await fetch(
-      `${API_BASE_URL}/analysis/${sessionId}/results`,
+      `${API_BASE_URL}/analysis/${sessionId}/results?from=${from}&size=${size}`,
     );
     if (!response.ok) {
       throw new Error(`Failed to get results: ${response.statusText}`);
     }
     return response.json();
   },
+
+  async getDashboardStats(sessionId: string): Promise<DashboardStats> {
+    const response = await fetch(
+      `${API_BASE_URL}/analysis/${sessionId}/stats`,
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to get stats: ${response.statusText}`);
+    }
+    return response.json();
+  },
 };
+
+export interface DashboardStats {
+  totalPackets: number;
+  protocols: { key: string; doc_count: number }[];
+  timeline: { key_as_string: string; doc_count: number }[];
+  topTalkers: {
+    src: { key: string; doc_count: number }[];
+    dest: { key: string; doc_count: number }[];
+  };
+  threats: {
+    bySeverity: { key: string; doc_count: number }[];
+    byType: { key: string; doc_count: number }[];
+    total: number;
+  };
+  files: {
+    total: number;
+  };
+  recentActivity: any[];
+}
