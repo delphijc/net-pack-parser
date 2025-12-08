@@ -84,6 +84,7 @@ const PacketList: React.FC<PacketListProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [packetToDelete, setPacketToDelete] = useState<string | null>(null);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // New State for Smart Views
   const [viewMode, setViewMode] = useState<'packets' | 'flows'>('packets');
@@ -219,10 +220,13 @@ const PacketList: React.FC<PacketListProps> = ({
   };
 
   const handleClearAll = () => {
-    if (window.confirm('Are you sure you want to delete all packets?')) {
-      onClearAllPackets(); // Call parent's clear function
-      onPacketSelect(null);
-    }
+    setShowClearConfirm(true);
+  };
+
+  const confirmClearAll = () => {
+    onClearAllPackets();
+    onPacketSelect(null);
+    setShowClearConfirm(false);
   };
 
   // Format search criteria for display
@@ -545,6 +549,30 @@ const PacketList: React.FC<PacketListProps> = ({
               className="bg-destructive hover:bg-destructive/90"
             >
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={showClearConfirm}
+        onOpenChange={setShowClearConfirm}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear All Packets</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete ALL packets? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmClearAll}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Clear All
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

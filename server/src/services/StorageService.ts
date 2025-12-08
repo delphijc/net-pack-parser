@@ -4,11 +4,19 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class StorageService {
     private static CAPTURE_DIR = path.join(process.cwd(), 'captures');
+    private static UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 
     static init() {
+        // Create captures directory
         if (!fs.existsSync(this.CAPTURE_DIR)) {
             fs.mkdirSync(this.CAPTURE_DIR, { recursive: true });
             console.log(`Created capture directory: ${this.CAPTURE_DIR}`);
+        }
+
+        // Create uploads directory for PCAP file uploads
+        if (!fs.existsSync(this.UPLOADS_DIR)) {
+            fs.mkdirSync(this.UPLOADS_DIR, { recursive: true });
+            console.log(`Created uploads directory: ${this.UPLOADS_DIR}`);
         }
     }
 

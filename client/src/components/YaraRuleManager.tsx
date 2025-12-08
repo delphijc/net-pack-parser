@@ -8,6 +8,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Trash2, Upload, Plus } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const YaraRuleManager: React.FC = () => {
   const {
@@ -21,6 +31,7 @@ const YaraRuleManager: React.FC = () => {
   } = useYaraRuleStore();
   const [newRuleName, setNewRuleName] = useState('');
   const [newRuleContent, setNewRuleContent] = useState('');
+  const [ruleToDelete, setRuleToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     loadRules();
@@ -112,7 +123,7 @@ const YaraRuleManager: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => deleteRule(rule.id)}
+                  onClick={() => setRuleToDelete(rule.id)}
                 >
                   <Trash2 className="w-4 h-4 text-destructive" />
                 </Button>
@@ -126,7 +137,36 @@ const YaraRuleManager: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
+
+      <AlertDialog
+        open={!!ruleToDelete}
+        onOpenChange={(open) => !open && setRuleToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete YARA Rule</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this threat detection rule? This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (ruleToDelete) {
+                  deleteRule(ruleToDelete);
+                  setRuleToDelete(null);
+                }
+              }}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div >
   );
 };
 

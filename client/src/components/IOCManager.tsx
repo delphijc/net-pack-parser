@@ -19,6 +19,17 @@ import {
 } from '@/components/ui/table';
 import { Plus, Trash2, Upload, Download, RefreshCw } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
 
 export const IOCManager: React.FC = () => {
   const [iocs, setIocs] = useState<IOC[]>([]);
@@ -29,6 +40,7 @@ export const IOCManager: React.FC = () => {
     severity: 'high',
     enabled: true,
   });
+  const [iocToDelete, setIocToDelete] = useState<string | null>(null);
 
   const loadIOCs = async () => {
     const data = await iocService.getAllIOCs();
@@ -264,15 +276,14 @@ export const IOCManager: React.FC = () => {
                   <TableCell>{ioc.source}</TableCell>
                   <TableCell>
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        ioc.severity === 'critical'
-                          ? 'bg-red-100 text-red-800'
-                          : ioc.severity === 'high'
-                            ? 'bg-orange-100 text-orange-800'
-                            : ioc.severity === 'medium'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-blue-100 text-blue-800'
-                      }`}
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${ioc.severity === 'critical'
+                        ? 'bg-red-100 text-red-800'
+                        : ioc.severity === 'high'
+                          ? 'bg-orange-100 text-orange-800'
+                          : ioc.severity === 'medium'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-blue-100 text-blue-800'
+                        }`}
                     >
                       {ioc.severity}
                     </span>
@@ -281,7 +292,7 @@ export const IOCManager: React.FC = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDeleteIOC(ioc.id)}
+                      onClick={() => setIocToDelete(ioc.id)}
                       className="text-red-500 hover:text-red-700"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -293,6 +304,35 @@ export const IOCManager: React.FC = () => {
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog
+        open={!!iocToDelete}
+        onOpenChange={(open) => !open && setIocToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete IOC</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this Indicator of Compromise? This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (iocToDelete) {
+                  handleDeleteIOC(iocToDelete);
+                  setIocToDelete(null);
+                }
+              }}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

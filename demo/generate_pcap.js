@@ -192,16 +192,16 @@ writer.writePacket(createTCPPacket(
     "GET /search?q=UNION SELECT * FROM users HTTP/1.1\r\nHost: vulnerable-app.com\r\n\r\n"
 ), timestamp += 1000);
 
-// 4. IOC IP Match (Source IP)
+// 4. IOC IP Match (Source IP -> 192.168.1.100)
 writer.writePacket(createTCPPacket(
-    '192.0.2.1', '192.168.1.50', 443, 55555,
+    '192.168.1.100', '192.168.1.50', 443, 55555,
     "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"cmd\": \"exec\"}"
 ), timestamp += 1000);
 
-// 5. IOC Domain Match (HTTP Host)
+// 5. IOC Domain Match (HTTP Host -> malicious-site.com)
 writer.writePacket(createTCPPacket(
     '192.168.1.60', '93.184.216.34', 60000, 80,
-    "GET /malware.exe HTTP/1.1\r\nHost: malicious-example.com\r\n\r\n"
+    "GET /malware.exe HTTP/1.1\r\nHost: malicious-site.com\r\n\r\n"
 ), timestamp += 1000);
 
 // 6. XSS Attack
@@ -210,16 +210,16 @@ writer.writePacket(createTCPPacket(
     "POST /comment HTTP/1.1\r\nHost: blog.com\r\nContent-Length: 25\r\n\r\n<script>alert(1)</script>"
 ), timestamp += 1000);
 
-// 7. Directory Traversal
+// 7. Base64 Content & Pattern
 writer.writePacket(createTCPPacket(
     '192.168.1.80', '192.168.1.20', 44444, 80,
-    "GET /../../etc/passwd HTTP/1.1\r\nHost: server.com\r\n\r\n"
+    "HTTP/1.1 200 OK\r\n\r\nThis packet contains a base64 string: SGVsbG8gV29ybGQh This is a string extraction test. Also checking for base64_decode pattern."
 ), timestamp += 1000);
 
-// 8. Command Injection
+// 8. Command Injection & Eval
 writer.writePacket(createTCPPacket(
     '192.168.1.90', '192.168.1.20', 55555, 80,
-    "GET /ping?ip=127.0.0.1; ls -la HTTP/1.1\r\nHost: admin-tool.com\r\n\r\n"
+    "GET /ping?ip=127.0.0.1; eval(document.cookie) HTTP/1.1\r\nHost: admin-tool.com\r\n\r\n"
 ), timestamp += 1000);
 
 writer.close();

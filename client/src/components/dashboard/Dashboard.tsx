@@ -43,7 +43,7 @@ import { useForensicStore } from '../../store/forensicStore';
 import { AgentConnectionPanel } from '../AgentConnectionPanel';
 import { ConnectionStatus } from '../ConnectionStatus';
 import LivePacketList from '../LivePacketList';
-import { LiveTimelineView } from '../LiveTimelineView';
+
 
 interface DashboardProps {
   onNavigate?: (tab: string) => void;
@@ -356,132 +356,182 @@ const Dashboard: React.FC<DashboardProps> = () => {
     { id: 'live', label: 'Live Capture' },
   ];
 
-  return (
-    <div
-      className={`flex ${layoutMode === 'left' ? 'flex-row' : 'flex-col'} h-full ${isGlobalParsing ? 'cursor-wait' : ''
-        }`}
+  const LayoutToggle = () => (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleLayout}
+      title="Toggle Layout Mode"
     >
-      {/* Header / Session Selector Area */}
+      {layoutMode === 'top' ? (
+        <Sidebar className="h-4 w-4" />
+      ) : (
+        <LayoutTemplate className="h-4 w-4" />
+      )}
+    </Button>
+  );
+
+  const renderContent = () => (
+    <>
+      {activeTab === 'overview' && renderOverview()}
+      {activeTab === 'parser' && (
+        <PcapUpload onParsingStatusChange={setIsGlobalParsing} />
+      )}
+      {activeTab === 'packets' && (
+        <PcapAnalysisPage initialFilter={initialPacketFilter} />
+      )}
+      {activeTab === 'timeline' && (
+        <div className="p-6">
+          <TimelineView packets={allPackets} />
+        </div>
+      )}
+      {activeTab === 'yara' && (
+        <div className="p-6">
+          <YaraRuleManager />
+        </div>
+      )}
+      {activeTab === 'threat-intel' && (
+        <div className="p-6 space-y-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">
+              MITRE ATT&CK Intelligence
+            </h2>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleGenerateReportClick}>
+                <FileText className="mr-2 h-4 w-4" />
+                Generate Summary
+              </Button>
+              <Button onClick={() => navigate('/')}>
+                <Upload className="mr-2 h-4 w-4" />
+                New Analysis
+              </Button>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <MitreTacticsChart threats={allThreats} />
+            <TopTechniquesTable threats={allThreats} />
+          </div>
+          <KillChainViz threats={allThreats} />
+
+          {/* Threat Panel Integration */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4">
+              Threat Detection Log
+            </h3>
+            <ThreatPanel threats={allThreats} onThreatClick={() => { }} />
+          </div>
+        </div>
+      )}
+      {activeTab === 'ioc-manager' && <IOCManager />}
+      {activeTab === 'false-positives' && (
+        <FalsePositivesTab threats={allThreats} />
+      )}
+      {activeTab === 'settings' && <SettingsPage />}
+      {activeTab === 'agent' && (
+        <div className="p-6">
+          <AgentConnectionPanel />
+        </div>
+      )}
+      {activeTab === 'live' && (
+        <div className="h-full p-4 space-y-4">
+          <LivePacketList />
+        </div>
+      )}
+    </>
+  );
+
+  if (layoutMode === 'left') {
+    return (
+      <div className={`flex flex-row h-full ${isGlobalParsing ? 'cursor-wait' : ''}`}>
+        {/* Sidebar Container */}
+        <div className="w-64 flex flex-col border-r border-white/10 bg-background/50 backdrop-blur-sm">
+          {/* Sidebar Header: Session + Controls */}
+          <div className="p-4 border-b border-white/10 space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-semibold">Sessions</span>
+              <LayoutToggle />
+            </div>
+            <SessionSelector />
+            <div className="flex justify-end">
+              <ConnectionStatus />
+            </div>
+          </div>
+
+          {/* Vertical Tabs */}
+          <div className="flex-1 overflow-y-auto py-2 space-y-1 px-2">
+            {navButtons.map((btn) => (
+              <button
+                key={btn.id}
+                onClick={() => !isGlobalParsing && setActiveTab(btn.id)}
+                disabled={isGlobalParsing}
+                className={`
+                  w-full text-left px-4 py-2 text-sm font-medium transition-colors rounded-md
+                  ${activeTab === btn.id
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                  }
+                  ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
+              >
+                {btn.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto w-full">
+          {renderContent()}
+        </div>
+
+        <ReportBuilderDialog
+          open={reportDialogOpen}
+          onOpenChange={setReportDialogOpen}
+          onGenerate={runReportGeneration}
+          defaultSummary={caseMetadata?.summary}
+        />
+      </div>
+    );
+  }
+
+  // Default: TOP Layout
+  return (
+    <div className={`flex flex-col h-full ${isGlobalParsing ? 'cursor-wait' : ''}`}>
+      {/* Top Header */}
       <div className="bg-background/80 backdrop-blur-sm border-b border-white/10 px-6 py-2 flex justify-between items-center">
         <SessionSelector />
         <ConnectionStatus />
-
       </div>
 
-      {/* Navigation Tabs */}
-      <div
-        className={`flex ${layoutMode === 'left'
-          ? 'flex-col border-r w-64 p-2 space-y-1'
-          : 'flex-row border-b items-center'
-          } border-white/10 ${layoutMode === 'top' ? 'mb-6' : ''} bg-background/50 backdrop-blur-sm`}
-      >
-        <div
-          className={`flex items-center ${layoutMode === 'top' ? 'mr-2 px-2' : 'mb-4 justify-end'}`}
-        >
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleLayout}
-            title="Toggle Layout Mode"
-          >
-            {layoutMode === 'top' ? (
-              <Sidebar className="h-4 w-4" />
-            ) : (
-              <LayoutTemplate className="h-4 w-4" />
-            )}
-          </Button>
+      {/* Horizontal Tabs */}
+      <div className="flex items-center border-b border-white/10 bg-background/50 backdrop-blur-sm px-4">
+        <div className="mr-2">
+          <LayoutToggle />
         </div>
-
-        {navButtons.map((btn) => (
-          <button
-            key={btn.id}
-            onClick={() => !isGlobalParsing && setActiveTab(btn.id)}
-            disabled={isGlobalParsing}
-            className={`
-              px-6 py-3 text-sm font-medium transition-colors
-              ${layoutMode === 'left'
-                ? 'text-left w-full rounded-md border-l-2'
-                : 'border-b-2'
-              }
-              ${activeTab === btn.id
-                ? 'border-primary text-primary bg-primary/5'
-                : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'
-              }
-              ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}
-            `}
-          >
-            {btn.label}
-          </button>
-        ))}
+        <div className="flex overflow-x-auto no-scrollbar">
+          {navButtons.map((btn) => (
+            <button
+              key={btn.id}
+              onClick={() => !isGlobalParsing && setActiveTab(btn.id)}
+              disabled={isGlobalParsing}
+              className={`
+                  px-6 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap
+                  ${activeTab === btn.id
+                  ? 'border-primary text-primary bg-primary/5'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }
+                  ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
+            >
+              {btn.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'overview' && renderOverview()}
-        {activeTab === 'parser' && (
-          <PcapUpload onParsingStatusChange={setIsGlobalParsing} />
-        )}
-        {activeTab === 'packets' && (
-          <PcapAnalysisPage initialFilter={initialPacketFilter} />
-        )}
-        {activeTab === 'timeline' && (
-          <div className="p-6">
-            <TimelineView packets={allPackets} />
-          </div>
-        )}
-        {activeTab === 'yara' && (
-          <div className="p-6">
-            <YaraRuleManager />
-          </div>
-        )}
-        {activeTab === 'threat-intel' && (
-          <div className="p-6 space-y-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">
-                MITRE ATT&CK Intelligence
-              </h2>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={handleGenerateReportClick}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  Generate Summary
-                </Button>
-                <Button onClick={() => navigate('/')}>
-                  <Upload className="mr-2 h-4 w-4" />
-                  New Analysis
-                </Button>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <MitreTacticsChart threats={allThreats} />
-              <TopTechniquesTable threats={allThreats} />
-            </div>
-            <KillChainViz threats={allThreats} />
-
-            {/* Threat Panel Integration */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-4">
-                Threat Detection Log
-              </h3>
-              <ThreatPanel threats={allThreats} onThreatClick={() => { }} />
-            </div>
-          </div>
-        )}
-        {activeTab === 'ioc-manager' && <IOCManager />}
-        {activeTab === 'false-positives' && (
-          <FalsePositivesTab threats={allThreats} />
-        )}
-        {activeTab === 'settings' && <SettingsPage />}
-        {activeTab === 'agent' && (
-          <div className="p-6">
-            <AgentConnectionPanel />
-          </div>
-        )}
-        {activeTab === 'live' && (
-          <div className="h-full p-4 space-y-6">
-            <LivePacketList />
-            <LiveTimelineView />
-          </div>
-        )}
+        {renderContent()}
       </div>
 
       <ReportBuilderDialog

@@ -135,4 +135,56 @@ export class AgentClient {
 
         return Math.round(end - start);
     }
+
+    // Capture control methods
+    static async getInterfaces(): Promise<any[]> {
+        return this.get('/api/capture/interfaces');
+    }
+
+    static async startCapture(interfaceName: string, filter?: string): Promise<any> {
+        const config = this.getConfig();
+        if (!config) throw new Error('Not connected');
+
+        const response = await fetch(`${config.url}/api/capture/start`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${config.token}`
+            },
+            body: JSON.stringify({ interface: interfaceName, filter })
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+            throw new Error(error.error || `Failed to start capture`);
+        }
+
+        return response.json();
+    }
+
+    static async stopCapture(interfaceName: string): Promise<any> {
+        const config = this.getConfig();
+        if (!config) throw new Error('Not connected');
+
+        const response = await fetch(`${config.url}/api/capture/stop`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${config.token}`
+            },
+            body: JSON.stringify({ interface: interfaceName })
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+            throw new Error(error.error || `Failed to stop capture`);
+        }
+
+        return response.json();
+    }
+
+    static async getCaptureStats(interfaceName: string): Promise<any> {
+        return this.get(`/api/capture/stats?interface=${encodeURIComponent(interfaceName)}`);
+    }
 }
+

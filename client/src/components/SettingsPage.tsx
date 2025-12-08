@@ -26,6 +26,7 @@ import { useToast } from '@/components/ui/use-toast';
 import database from '@/services/database';
 import chainOfCustodyDb from '@/services/chainOfCustodyDb';
 import { usePerformanceStore } from '@/store/performanceStore';
+import { useSessionStore } from '@/store/sessionStore';
 
 type ImportMode = 'merge' | 'replace';
 
@@ -61,6 +62,7 @@ const SettingsPage: React.FC = () => {
     try {
       setIsClearing(true);
       await Promise.all([database.clearAllData(), chainOfCustodyDb.clearAll()]);
+      useSessionStore.getState().clearSessions();
 
       // Update usage stats
       setUsage(localStorageService.getUsagePercentage());

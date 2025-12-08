@@ -50,6 +50,9 @@ analysisRouter.post('/upload', upload.single('pcap'), async (req, res) => {
             console.log(`Parsing complete for session ${sessionId}. Packets: ${packets.length}`);
             activeSessions[sessionId].status = 'complete';
             activeSessions[sessionId].packets = packets;
+            // Update summary with final counts
+            activeSessions[sessionId].summary.packetCount = packets.length;
+            activeSessions[sessionId].summary.totalBytes = packets.reduce((sum, p) => sum + (p.length || 0), 0);
         })
         .catch((err) => {
             console.error(`Parsing error for session ${sessionId}:`, err);

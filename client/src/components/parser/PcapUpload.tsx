@@ -147,7 +147,15 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                 info: p.info,
                 originalLength: p.length,
                 rawData: p.raw
-                  ? new TextEncoder().encode(p.raw).buffer
+                  ? (() => {
+                    const hex = p.raw;
+                    const len = hex.length;
+                    const bytes = new Uint8Array(len / 2);
+                    for (let i = 0; i < len; i += 2) {
+                      bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+                    }
+                    return bytes.buffer;
+                  })()
                   : new ArrayBuffer(0),
                 detectedProtocols: [p.protocol],
                 tokens: [],
@@ -408,11 +416,10 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                 <ReportGeneratorControl disabled={!currentFile || parsing} />
                 <button
                   onClick={handleCaptureToggle}
-                  className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${
-                    capturing
+                  className={`px-4 py-2 rounded-md text-sm flex items-center transition-colors font-medium ${capturing
                       ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
                       : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                  }`}
+                    }`}
                 >
                   {capturing ? (
                     <>
@@ -551,11 +558,10 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
                 <button
                   type="submit"
                   disabled={parsing}
-                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center transition-colors ${
-                    parsing
+                  className={`px-4 py-2 rounded-md text-white font-medium flex items-center transition-colors ${parsing
                       ? 'bg-primary/50 cursor-not-allowed'
                       : 'bg-primary hover:bg-primary/90'
-                  }`}
+                    }`}
                 >
                   {parsing ? (
                     <>

@@ -58,9 +58,9 @@ export const LiveTimelineView: React.FC = () => {
     }, [packets]);
 
     return (
-        <div className="space-y-4">
-            <h3 className="text-lg font-medium">Live Timeline</h3>
-            <div className="rounded-xl border bg-card text-card-foreground shadow p-6">
+        <div className="flex-shrink-0">
+            <h3 className="text-sm font-medium mb-2">Live Timeline</h3>
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-3 h-[120px]">
                 <TimelineChart
                     data={timelineData}
                 />

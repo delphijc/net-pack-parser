@@ -95,7 +95,7 @@ export const parsePcapFile = (filePath: string, sessionId: string): Promise<Pack
                 info: `${protocol} Packet`,
                 // Send a limited amount of raw data to save bandwidth? Or full?
                 // Let's send hex string for searchability
-                // raw: data.toString('hex') 
+                raw: data.toString('hex')
             };
 
             packets.push(meta);
