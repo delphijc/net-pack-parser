@@ -1,3 +1,5 @@
+import type { ParsedPacket, ThreatAlert } from '../types';
+
 const API_BASE_URL = 'http://localhost:3000/api';
 
 export interface UploadResponse {
@@ -75,12 +77,39 @@ export const api = {
     }
     return response.json();
   },
+
+  async getIocs(): Promise<any[]> {
+    const response = await fetch(`${API_BASE_URL}/iocs`);
+    if (!response.ok) throw new Error('Failed to fetch IOCs');
+    return response.json();
+  },
+
+  async addIoc(ioc: any): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/iocs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(ioc),
+    });
+    if (!response.ok) throw new Error('Failed to add IOC');
+    return response.json();
+  },
+
+  async removeIoc(id: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/iocs/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to remove IOC');
+  },
 };
 
 export interface DashboardStats {
   totalPackets: number;
   protocols: { key: string; doc_count: number }[];
-  timeline: { key_as_string: string; doc_count: number }[];
+  timeline: {
+    key_as_string: string;
+    doc_count: number;
+    threat_packets?: { doc_count: number };
+  }[];
   topTalkers: {
     src: { key: string; doc_count: number }[];
     dest: { key: string; doc_count: number }[];
@@ -89,9 +118,11 @@ export interface DashboardStats {
     bySeverity: { key: string; doc_count: number }[];
     byType: { key: string; doc_count: number }[];
     total: number;
+    list?: ThreatAlert[];
   };
   files: {
     total: number;
   };
-  recentActivity: any[];
+  geoDistribution: { key: string; doc_count: number }[];
+  recentActivity: ParsedPacket[];
 }

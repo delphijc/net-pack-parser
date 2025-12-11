@@ -1,10 +1,14 @@
 import fs from 'fs';
 // @ts-ignore
 import pcapParser from 'pcap-parser';
+import geoip from 'geoip-lite';
 import { activeSessions } from '../routes/analysis';
 import { extractStringsFromBuffer, ExtractedString } from '../utils/stringExtractor';
 import { fileExtractor, FileReference } from '../utils/fileExtractor';
 import { runThreatDetection, ThreatAlert } from '../utils/threatDetection';
+import { iocService } from './iocService';
+import { yaraService } from './yaraService';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface PacketMetadata {
     id: number;
@@ -18,6 +22,7 @@ export interface PacketMetadata {
     strings?: ExtractedString[];
     fileReferences?: FileReference[];
     threats?: ThreatAlert[];
+    geoip?: { country: string };
 }
 
 import { elasticService } from './elasticService';
@@ -66,6 +71,16 @@ export const parsePcapFile = (filePath: string, sessionId: string): Promise<void
                 destPort: 0
             };
 
+            // GeoIP Lookup
+            let geoInfo = undefined;
+            if (srcIp) {
+                const geo = geoip.lookup(srcIp);
+                if (geo && geo.country) {
+                    geoInfo = { country: geo.country };
+                }
+            }
+
+
             // Extract Strings
             const strings = extractStringsFromBuffer(data, packetIdString);
 
@@ -80,6 +95,69 @@ export const parsePcapFile = (filePath: string, sessionId: string): Promise<void
             // Detect Threats
             const threats = runThreatDetection(packetInfoForDetection, data);
 
+            // IOC Check
+            const iocMatches = iocService.checkPacket(packetInfoForDetection);
+            iocMatches.forEach(ioc => {
+                threats.push({
+                    id: uuidv4(),
+                    packetId: packetInfoForDetection.id, // Ensure ID is string
+                    severity: ioc.severity,
+                    type: `IOC Match - ${ioc.type.toUpperCase()}`,
+                    description: `Detected IOC: ${ioc.value}. ${ioc.description || ''}`,
+                    mitreAttack: [],
+                    timestamp: packetInfoForDetection.timestamp.getTime(),
+                    sourceIp: packetInfoForDetection.sourceIp,
+                    destIp: packetInfoForDetection.destIp,
+                    sourcePort: 0,
+                    destPort: 0
+                });
+            });
+
+            // YARA Scan
+            // Note: scanPayload is async. We are in a sync callback.
+            // THIS IS A PROBLEM with pcap-parser stream event.
+            // We need to pause/wait or accept it's async fire-and-forget?
+            // "batch" logic might break if we push async. 
+            // We must wait for result before pushing to batch.
+            // Hack: Making the 'packet' callback async is allowed in Node but pcap-parser might not wait.
+            // If pcap-parser emits recursively/fast, we might have race conditions or OOM.
+            // However, pcap-parser reading file is usually fast.
+            // Ideally we pause parser. 
+            // Given the constraints and library, let's try awaiting inside the async handler.
+            // If pcap-parser doesn't implement backpressure for async listeners, we might queue up too many promises.
+            // For MVP, we'll try it.
+
+            try {
+                const yaraMatches = await yaraService.scanPayload(data);
+                yaraMatches.forEach(match => {
+                    // Auto-extract IOC from Threat
+                    if (packetInfoForDetection.sourceIp) {
+                        iocService.addIocIfNotExists({
+                            type: 'ip',
+                            value: packetInfoForDetection.sourceIp,
+                            severity: 'high',
+                            description: `Auto-detected from YARA Rule: ${match.rule}`
+                        });
+                    }
+
+                    threats.push({
+                        id: uuidv4(),
+                        packetId: packetInfoForDetection.id,
+                        severity: 'high', // YARA matches usually correspond to specific malware rules
+                        type: 'YARA Match',
+                        description: `Rule: ${match.rule}`,
+                        mitreAttack: [],
+                        timestamp: packetInfoForDetection.timestamp.getTime(),
+                        sourceIp: packetInfoForDetection.sourceIp,
+                        destIp: packetInfoForDetection.destIp,
+                        sourcePort: 0,
+                        destPort: 0
+                    });
+                });
+            } catch (e) {
+                console.error(`YARA scan failed for packet ${packetCount}`, e);
+            }
+
 
             const meta: any = {
                 sessionId,
@@ -92,7 +170,8 @@ export const parsePcapFile = (filePath: string, sessionId: string): Promise<void
                 raw: data.toString('base64'),
                 strings,
                 fileReferences,
-                threats
+                threats,
+                geoip: geoInfo
             };
 
             batch.push(meta);

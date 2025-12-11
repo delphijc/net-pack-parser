@@ -649,28 +649,18 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
               </h3>
               <div className="bg-black/40 border border-white/5 p-3 rounded">
                 <p className="text-sm text-foreground">
-                  <span className="text-muted-foreground">Tokens:</span>{' '}
-                  {
-                    lastParsedPacket.tokens.filter((t) => t.type === 'token')
-                      .length
-                  }
-                </p>
-                <p className="text-sm text-foreground">
                   <span className="text-muted-foreground">Strings:</span>{' '}
-                  {
-                    lastParsedPacket.tokens.filter((t) => t.type === 'string')
-                      .length
-                  }
+                  {lastParsedPacket.extractedStrings?.length || 0}
                 </p>
                 <p className="text-sm text-foreground">
-                  <span className="text-muted-foreground">Sections:</span>{' '}
-                  {lastParsedPacket.sections.length}
+                  <span className="text-muted-foreground">Threats:</span>{' '}
+                  {lastParsedPacket.threats?.length || 0}
                 </p>
                 <p className="text-sm text-foreground">
                   <span className="text-muted-foreground">
                     File References:
                   </span>{' '}
-                  {lastParsedPacket.fileReferences.length}
+                  {lastParsedPacket.fileReferences?.length || 0}
                 </p>
               </div>
             </div>

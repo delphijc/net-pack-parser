@@ -12,9 +12,10 @@ import { TimelineControls } from './TimelineControls';
 
 interface TimelineViewProps {
   packets: ParsedPacket[];
+  aggregatedTimeline?: { key_as_string: string; doc_count: number; threat_packets?: { doc_count: number } }[];
 }
 
-export const TimelineView: React.FC<TimelineViewProps> = ({ packets }) => {
+export const TimelineView: React.FC<TimelineViewProps> = ({ packets, aggregatedTimeline }) => {
   const {
     startTime,
     endTime,
@@ -151,6 +152,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({ packets }) => {
           <div className="p-6 h-full">
             <TimelineChart
               data={timelineData}
+              aggregatedData={aggregatedTimeline}
               startIndex={startIndex}
               endIndex={endIndex}
               onRangeChange={handleRangeChange}

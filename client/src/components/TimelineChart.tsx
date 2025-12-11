@@ -14,7 +14,8 @@ import type { TimelineDataPoint } from '../types/timeline';
 import type { Bookmark } from '../types/forensics';
 
 interface TimelineChartProps {
-  data: TimelineDataPoint[];
+  data?: TimelineDataPoint[]; // Original raw data structure
+  aggregatedData?: { key_as_string: string; doc_count: number; threat_packets?: { doc_count: number } }[]; // Server aggregated
   startIndex?: number;
   endIndex?: number;
   onRangeChange?: (start: number | null, end: number | null) => void;
@@ -24,13 +25,27 @@ interface TimelineChartProps {
 
 export const TimelineChart: React.FC<TimelineChartProps> = ({
   data,
+  aggregatedData,
   startIndex,
   endIndex,
   onRangeChange,
   bookmarks = [],
   onPlotClick,
 }) => {
-  if (!data || data.length === 0) {
+  // Use aggregated data if available, otherwise fall back to raw data logic
+  const chartData = React.useMemo(() => {
+    if (aggregatedData) {
+      return aggregatedData.map(item => ({
+        timestamp: new Date(item.key_as_string).getTime(),
+        normalCount: (item.doc_count || 0) - (item.threat_packets?.doc_count || 0),
+        threatCount: item.threat_packets?.doc_count || 0,
+        totalCount: item.doc_count
+      })).sort((a, b) => a.timestamp - b.timestamp);
+    }
+    return data || [];
+  }, [aggregatedData, data]);
+
+  if (!chartData || chartData.length === 0) {
     return (
       <div className="flex h-[300px] w-full items-center justify-center rounded-md border border-dashed text-muted-foreground">
         No timeline data available
@@ -48,8 +63,8 @@ export const TimelineChart: React.FC<TimelineChartProps> = ({
       range.startIndex !== undefined &&
       range.endIndex !== undefined
     ) {
-      const start = data[range.startIndex]?.timestamp || null;
-      const end = data[range.endIndex]?.timestamp || null;
+      const start = chartData[range.startIndex]?.timestamp || null;
+      const end = chartData[range.endIndex]?.timestamp || null;
       onRangeChange(start, end);
     }
   };
@@ -57,7 +72,7 @@ export const TimelineChart: React.FC<TimelineChartProps> = ({
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data}>
+        <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
           <XAxis
             dataKey="timestamp"

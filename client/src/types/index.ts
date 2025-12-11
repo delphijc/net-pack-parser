@@ -27,6 +27,7 @@ import type { FileReference } from './fileReference';
 export * from './fileReference';
 import type { ExtractedString } from './extractedStrings';
 import type { ThreatAlert } from './threat';
+export type { ThreatAlert };
 
 export interface ParsedPacket extends Packet {
   tokens: Token[];

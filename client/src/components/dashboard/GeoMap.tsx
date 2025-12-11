@@ -1,4 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+// @ts-ignore
+import countries from 'i18n-iso-countries';
+// @ts-ignore
+import enLocale from 'i18n-iso-countries/langs/en.json';
+import React, { useMemo } from 'react';
 import {
   ComposableMap,
   Geographies,
@@ -7,77 +11,47 @@ import {
 } from 'react-simple-maps';
 import { scaleLinear } from 'd3-scale';
 import { ChartWrapper } from './ChartWrapper';
-import { Globe, RefreshCw } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { Tooltip } from 'react-tooltip';
 import type { ParsedPacket } from '../../types';
-import { geoIpService } from '../../services/GeoIpService';
+
+countries.registerLocale(enLocale);
 
 const GEO_URL = '/world-110m.json';
 
 interface GeoMapProps {
-  packets: ParsedPacket[];
+  packets?: ParsedPacket[];
   onFilterClick?: (ip: string, type: 'src' | 'dst') => void;
+  geoDistribution?: { key: string; doc_count: number }[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const GeoMap: React.FC<GeoMapProps> = ({ packets, onFilterClick: _onFilterClick }) => {
-  const [countryData, setCountryData] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(false);
+export const GeoMap: React.FC<GeoMapProps> = ({ packets: _packets, onFilterClick: _onFilterClick, geoDistribution }) => {
 
-  useEffect(() => {
-    let mounted = true;
-    const processGeoData = async () => {
-      setLoading(true);
-      const counts: Record<string, number> = {};
-
-      // Aggregate counts per IP first to avoid re-resolving same IP
-      // Actually we want connection counts or data volume?
-      // "Map IP addresses... visualize physical origin and destination"
-      // Let's map Source IPs for now, or both?
-      // AC says "IP activity".
-
-      const ipActivity: Record<string, number> = {};
-      packets.forEach((p) => {
-        ipActivity[p.sourceIP] = (ipActivity[p.sourceIP] || 0) + 1;
-        // ipActivity[p.destIP] = (ipActivity[p.destIP] || 0) + 1; // Double counting?
-        // Let's stick to Source IP for "Origin" visualization mostly, or maybe distinct IPs.
-      });
-
-      const uniqueIps = Object.keys(ipActivity);
-
-      for (const ip of uniqueIps) {
-        if (!mounted) break;
-        const location = await geoIpService.resolve(ip);
-        if (
-          location &&
-          location.countryCode !== 'LOCAL' &&
-          location.countryCode
-        ) {
-          // react-simple-maps usually uses ISO-3 alpha codes in the standard topology
-          // But our mock service returns ISO-2.
-          // We might need a mapping or just map by Name if topology supports it.
-          // The world-atlas 110m usually has valid ISO numeric IDs or properties.
-          // We'll rely on property matching (NAME or ISO_A2/A3).
-          // Let's assume we map by ISO-2 if available or convert.
-          // For MVP, simplistic mapping by ISO-2 alias if the map has it.
-
-          // Actually, standard world-110m topology properties usually include "name" and "iso_a2".
-          const k = location.countryCode;
-          counts[k] = (counts[k] || 0) + ipActivity[ip];
+  const countryData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    if (geoDistribution) {
+      geoDistribution.forEach(item => {
+        // item.key is ISO 2-letter (e.g. US, CN) from geoip-lite
+        // Map requires ISO Numeric (e.g. 840, 156) usually
+        // Try mapping to Numeric string
+        const numericCode = countries.alpha2ToNumeric(item.key);
+        if (numericCode) {
+          // Remove leading zeros to match some topojson formats if needed, or keep standard
+          // usually generic topojson uses integers or strings.
+          // i18n returns "840".
+          counts[numericCode] = item.doc_count;
+          // Also map 2-letter just in case map uses it
+          counts[item.key] = item.doc_count;
+          // Also map 3-letter
+          const alpha3 = countries.alpha2ToAlpha3(item.key);
+          if (alpha3) counts[alpha3] = item.doc_count;
+        } else {
+          counts[item.key] = item.doc_count;
         }
-      }
-
-      if (mounted) {
-        setCountryData(counts);
-        setLoading(false);
-      }
-    };
-
-    processGeoData();
-    return () => {
-      mounted = false;
-    };
-  }, [packets]);
+      });
+    }
+    return counts;
+  }, [geoDistribution]);
 
   const maxCount = useMemo(() => {
     return Math.max(...Object.values(countryData), 0);
@@ -85,9 +59,7 @@ export const GeoMap: React.FC<GeoMapProps> = ({ packets, onFilterClick: _onFilte
 
   const colorScale = scaleLinear<string>()
     .domain([0, maxCount || 1])
-    .range(['#F5F4F6', '#FF5533']); // Light to Intense Red? Or Theme colors.
-  // Dark mode:
-  // range: ['#2D3748', '#FC8181']
+    .range(['#F5F4F6', '#FF5533']);
 
   return (
     <ChartWrapper
@@ -97,39 +69,50 @@ export const GeoMap: React.FC<GeoMapProps> = ({ packets, onFilterClick: _onFilte
           Geographic Distribution
         </>
       }
-      actionElement={
-        loading ? (
-          <RefreshCw size={14} className="animate-spin text-muted-foreground" />
-        ) : undefined
-      }
+      actionElement={undefined}
       className="h-full"
       contentClassName="flex-1 min-h-0 relative p-0 overflow-hidden rounded-b-lg"
     >
       <ComposableMap
         projectionConfig={{
-          rotate: [0, 0, 0],
+          rotate: [-10, 0, 0],
           scale: 147,
         }}
-        className="w-full h-full bg-blue-900/10" // Ocean color hint
+        className="w-full h-full bg-blue-900/10"
       >
         <ZoomableGroup>
           <Geographies geography={GEO_URL}>
             {({ geographies }) =>
               geographies.map((geo) => {
-                // geo.properties.ISO_A2 might exist
-                const countryCode =
-                  geo.properties.ISO_A2 || geo.properties.iso_a2;
-                const count = countryData[countryCode] || 0;
+                // Try multiple properties to find a match
+                // Standard world-110m has 'id' (numeric or string) and 'properties.name'
+                const id = geo.id;
+                const iso2 = geo.properties.ISO_A2 || geo.properties.iso_a2;
+                const iso3 = geo.properties.ISO_A3 || geo.properties.iso_a3;
+                const name = geo.properties.name || geo.properties.NAME;
+
+                // Create lookups
+                // Pad ID to 3 chars if it's a number/short string? "4" -> "004"
+                const paddedId = String(id).padStart(3, '0');
+
+                const count =
+                  countryData[String(id)] ||
+                  countryData[paddedId] ||
+                  (iso2 && countryData[iso2]) ||
+                  (iso3 && countryData[iso3]) ||
+                  0;
+
+                const countryName = name || countries.getName(String(id), "en") || "Unknown";
 
                 return (
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
                     data-tooltip-id="geo-tooltip"
-                    data-tooltip-content={`${geo.properties.name}: ${count} packets`}
+                    data-tooltip-content={`${countryName}: ${count} packets`}
                     style={{
                       default: {
-                        fill: count > 0 ? colorScale(count) : '#374151', // Gray-700
+                        fill: count > 0 ? colorScale(count) : '#374151',
                         outline: 'none',
                         stroke: '#4B5563',
                         strokeWidth: 0.5,

@@ -69,6 +69,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
       src: { key: string; doc_count: number }[];
       dest: { key: string; doc_count: number }[];
     } | undefined,
+    geoDistribution: undefined as { key: string; doc_count: number }[] | undefined,
   });
 
   // Persist active tab
@@ -106,6 +107,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
         protocols: {},
         timeline: undefined,
         topTalkers: undefined,
+        geoDistribution: undefined,
       });
       setAllPackets([]);
       setRecentActivity([]);
@@ -144,17 +146,16 @@ const Dashboard: React.FC<DashboardProps> = () => {
         suspiciousActivities: 0, // Not explicitly returning distinct suspicious count yet, threats covers it
         protocols,
         timeline: statsData.timeline,
-        topTalkers: statsData.topTalkers
+        topTalkers: statsData.topTalkers,
+        geoDistribution: statsData.geoDistribution
       });
 
       setRecentActivity(statsData.recentActivity);
 
-      // We still need 'allThreats' for the threat panel etc if they are accessed there.
-      // We can fetch them or just show nothing/empty there for now until that tab is clicked.
-      // But Dashboard passes 'allThreats' to reporting/charts.
-      // Getting full threat list might be needed.
-      // For MVP dashboard view, we might not need active full list unless user drills down.
-      // Leaving allThreats empty or minimal for now to unblock 'Overview'.
+      // Populate threats for the Threat Intel tab
+      if (statsData.threats.list) {
+        setAllThreats(statsData.threats.list);
+      }
 
     } catch (err) {
       console.error("Failed to load dashboard stats", err);
@@ -316,7 +317,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
           />
         </div>
         <div className="lg:col-span-2 grid grid-cols-1 gap-4 h-[350px]" id="chart-geomap">
-          <GeoMap packets={allPackets} onFilterClick={handleTopTalkerClick} />
+          <GeoMap
+            packets={allPackets} // Only needed if fallback or other usage exists
+            geoDistribution={stats.geoDistribution}
+            onFilterClick={handleTopTalkerClick}
+          />
         </div>
 
         {/* Recent Activity */}
@@ -400,7 +405,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
       )}
       {activeTab === 'timeline' && (
         <div className="p-6">
-          <TimelineView packets={allPackets} />
+          <TimelineView packets={allPackets} aggregatedTimeline={stats.timeline} />
         </div>
       )}
       {activeTab === 'yara' && (

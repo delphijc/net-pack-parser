@@ -1,7 +1,7 @@
 import type { PacketData } from '../types/WebSocketMessages';
 import { useLiveStore } from '../store/liveStore';
-import type { ParsedPacket } from '../types';
-import { detectIOCs } from '../utils/iocDetector';
+// import type { ParsedPacket } from '../types';
+// import { detectIOCs } from '../utils/iocDetector';
 import type { ThreatAlert } from '../types/threat';
 import { alertManager } from './AlertManager';
 
@@ -32,12 +32,13 @@ class LiveProcessor {
 
         // 2. Run IOC Detection (Sync / Main Thread)
         // We need a mock packet for IOCs too
-        const mockPacket = this.toParsedPacket(packet);
-        detectIOCs(mockPacket).then(iocThreats => {
-            if (iocThreats.length > 0) {
-                this.handleThreats(packet.id, iocThreats);
-            }
-        }).catch(err => console.error(err));
+        // const mockPacket = this.toParsedPacket(packet);
+        // detectIOCs(mockPacket).then(iocThreats => {
+        //     if (iocThreats.length > 0) {
+        //         this.handleThreats(packet.id, iocThreats);
+        //     }
+        // }).catch(err => console.error(err));
+        console.log('Client-side IOC detection disabled in favor of server-side. Live capture needs update.');
     }
 
     private handleThreats(packetId: string, newThreats: ThreatAlert[]) {
@@ -59,28 +60,30 @@ class LiveProcessor {
         });
     }
 
-    private toParsedPacket(packet: PacketData): ParsedPacket {
-        // Minimal conversion for IOC check
-        return {
-            id: packet.id,
-            timestamp: packet.timestamp,
-            protocol: packet.protocol,
-            sourceIP: packet.sourceIP,
-            destIP: packet.destinationIP || '',
-            sourcePort: packet.sourcePort,
-            destPort: packet.destinationPort,
-            length: packet.length,
-            info: packet.summary,
-            rawData: new ArrayBuffer(0), // IOC mainly checks IPs/Domains not payload usually
-            detectedProtocols: [packet.protocol],
-            suspiciousIndicators: [],
-            tokens: [],
-            sections: [],
-            fileReferences: [],
-            // Add IOC relevant fields if possible (dnsQuery etc need parsing which we don't do fully here yet)
-            // But IP check works.
-        };
-    }
+    /*
+        private toParsedPacket(packet: PacketData): ParsedPacket {
+            // Minimal conversion for IOC check
+            return {
+                id: packet.id,
+                timestamp: packet.timestamp,
+                protocol: packet.protocol,
+                sourceIP: packet.sourceIP,
+                destIP: packet.destinationIP || '',
+                sourcePort: packet.sourcePort,
+                destPort: packet.destinationPort,
+                length: packet.length,
+                info: packet.summary,
+                rawData: new ArrayBuffer(0), // IOC mainly checks IPs/Domains not payload usually
+                detectedProtocols: [packet.protocol],
+                suspiciousIndicators: [],
+                tokens: [],
+                sections: [],
+                fileReferences: [],
+                // Add IOC relevant fields if possible (dnsQuery etc need parsing which we don't do fully here yet)
+                // But IP check works.
+            } as ParsedPacket; // Cast to satisfy type if incomplete
+        }
+    */
 }
 
 export const liveProcessor = new LiveProcessor();

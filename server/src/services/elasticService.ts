@@ -77,6 +77,11 @@ export class ElasticService {
                                 severity: { type: 'keyword' },
                                 description: { type: 'text' }
                             }
+                        },
+                        geoip: {
+                            properties: {
+                                country: { type: 'keyword' } // Store 2-letter country code
+                            }
                         }
                     }
                 }
@@ -92,6 +97,18 @@ export class ElasticService {
                     }
                 } as any
             });
+            // Try to update mapping if new fields are missing (optional for MVP, might need close/open)
+            await this.client.indices.putMapping({
+                index: this.PACKET_INDEX,
+                properties: {
+                    geoip: {
+                        properties: {
+                            country: { type: 'keyword' }
+                        }
+                    }
+                }
+            }).catch(e => console.warn("Mapping update warning:", e.message));
+
             console.log(`Updated settings for index: ${this.PACKET_INDEX}`);
         }
     }
@@ -177,8 +194,14 @@ export class ElasticService {
                         date_histogram: {
                             field: 'timestamp',
                             fixed_interval: '1m', // Use fixed_interval for clearer buckets
-                            min_doc_count: 0,
-                            extended_bounds: { min: "now-1h", max: "now" } // Optional: ensure range
+                            min_doc_count: 0
+                        },
+                        aggs: {
+                            threat_packets: {
+                                nested: {
+                                    path: 'threats'
+                                }
+                            }
                         }
                     },
                     src_ips: {
@@ -195,6 +218,11 @@ export class ElasticService {
                             },
                             type_counts: {
                                 terms: { field: 'threats.type' }
+                            },
+                            details: {
+                                top_hits: {
+                                    size: 100 // Fetch up to 100 threat details
+                                }
                             }
                         }
                     },
@@ -203,6 +231,9 @@ export class ElasticService {
                         aggs: {
                             count: { value_count: { field: 'fileReferences.filename' } } // Approximate count of files
                         }
+                    },
+                    geo_stats: {
+                        terms: { field: 'geoip.country', size: 50 } // Aggregate by country code
                     }
                 }
             });
@@ -227,11 +258,13 @@ export class ElasticService {
                 threats: {
                     bySeverity: (result.aggregations?.threat_stats as any).severity_counts.buckets,
                     byType: (result.aggregations?.threat_stats as any).type_counts.buckets,
-                    total: (result.aggregations?.threat_stats as any).doc_count
+                    total: (result.aggregations?.threat_stats as any).doc_count,
+                    list: (result.aggregations?.threat_stats as any).details.hits.hits.map((h: any) => h._source)
                 },
                 files: {
                     total: (result.aggregations?.file_stats as any).count.value || (result.aggregations?.file_stats as any).doc_count
                 },
+                geoDistribution: (result.aggregations?.geo_stats as any).buckets,
                 recentActivity: recent.hits.hits.map((h: any) => h._source)
             };
 

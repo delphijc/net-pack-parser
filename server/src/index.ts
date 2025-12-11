@@ -7,7 +7,6 @@ import http from 'http';
 import { kafkaService } from './services/kafkaService';
 import { elasticService } from './services/elasticService';
 import { apiRouter } from './routes';
-import { sessionRouter } from './routes/sessions';
 import { CleanupService } from './services/CleanupService';
 import { WebSocketService } from './services/WebSocketService';
 import { StorageService } from './services/StorageService';
@@ -25,9 +24,8 @@ StorageService.init();
 
 // Start background services
 CleanupService.start();
-
 app.use('/api', apiRouter);
-app.use('/api/sessions', sessionRouter);
+
 
 // Health check and System Monitor
 app.get('/health', (req, res) => {
@@ -54,11 +52,14 @@ WebSocketService.init(server);
 
 import { startPcapWorker } from './workers/pcapWorker';
 
+import { yaraService } from './services/yaraService';
+
 // Initialize Services
 (async () => {
     try {
         await kafkaService.connect();
         await elasticService.connect();
+        await yaraService.initialize();
         await startPcapWorker();
     } catch (e) {
         console.error('Failed to initialize infrastructure services', e);

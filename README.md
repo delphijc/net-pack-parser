@@ -45,6 +45,11 @@ net-pack-parser/
 -   **Node.js** (version 22.x LTS recommended)
 -   **npm** (comes with Node.js)
 -   **Docker** & **Docker Compose** (Required for Kafka & Elasticsearch)
+    *   *Ensure the Docker daemon is running by executing `docker info` in your terminal.*
+    *   *If it's not running, start **Docker Desktop** (Mac/Windows) or run `sudo systemctl start docker` (Linux).*
+
+    If you are using colima (MacOS), you can start the containers with `colima start` and stop them with `colima stop`.
+    
 -   **Git**
 
 ### Installation
@@ -55,12 +60,20 @@ net-pack-parser/
     cd network-traffic-parser
     ```
 
-2.  **Start Infrastructure**
-    Start the required services (Kafka/Redpanda, Elasticsearch, Kibana):
-    ```bash
-    docker-compose up -d
-    ```
-    *Wait a few moments for the containers to initialize.*
+3.  **Start Infrastructure (Docker)**
+    The application relies on Redpanda (Kafka) and Elasticsearch. Use Docker Compose to manage them.
+
+    *   **Start Containers:**
+        ```bash
+        docker-compose up -d
+        ```
+        *Wait a few moments for the containers to initialize (healthy).*
+
+    *   **Stop Containers:**
+        When finished, you can stop the infrastructure to save resources:
+        ```bash
+        docker-compose down
+        ```
 
 3.  **Install Client Dependencies**
     ```bash
@@ -157,24 +170,41 @@ The build artifacts will be generated in the `client/dist` directory, ready for 
 
 ---
 
-## 🚀 Key Features
+## ✨ Feature Showcase
 
-### Network Traffic Analysis
--   **PCAP File Support**: Upload and parse `.pcap` and `.pcapng` files directly in the browser.
--   **Packet Inspection**: Detailed view of packet headers, payloads, and hex dumps.
--   **Protocol Detection**: Automatic classification of common protocols (HTTP, HTTPS, DNS, FTP, SSH, etc.) based on port heuristics, IP header fields, and basic deep packet inspection.
--   **File Extraction**: Detect and extract files referenced in network streams.
--   **Forensic Analysis**: Identify suspicious indicators and threat patterns.
+### 🔍 Deep Packet Inspection (DPI) & Analysis
+*   **PCAP/PCAPNG Support**: Drag-and-drop upload for analyzing standard capture files.
+*   **Protocol Detection**: Automatic classification of HTTP, DNS, SSH, FTP, SMTP, and more.
+*   **Hex & ASCII Dump**: Traditional packet inspector view with side-by-side hex and ASCII representation.
+*   **String Extraction**: Automatically extracts emails, URLs, IPs, and potential credentials (API keys, passwords) from payloads.
+*   **File Carving**: Reassembles and extracts files (Images, PDFs, ZIPs) transferred over HTTP/FTP with integrity hash verification.
 
-### Real-Time Performance Monitoring
--   **Core Web Vitals**: Track LCP, FCP, and CLS in real-time.
--   **Resource Timing**: Analyze waterfall charts of network requests.
--   **Long Task Detection**: Identify main-thread blocking tasks.
+### 🛡️ Threat Detection & Security
+*   **Signature Matching**: Detects common web attacks like **SQL Injection** (`' OR '1'='1`), **XSS** (`<script>`), and **Command Injection**.
+*   **YARA Integration**: Run custom or built-in YARA rules against packet payloads to identify malware signatures.
+*   **MITRE ATT&CK Mapping**: Alerts are mapped to specific TTPs (Techniques, Tactics, and Procedures) with links to the MITRE framework.
+*   **IOC Database**: Manage Indicators of Compromise (IPs, Domains, Hashes) and automatically flag traffic matching known threats.
+*   **Sensitive Data Redaction**: Automatically detects and masks Credit Card numbers and SSNs in the UI.
 
-### Data Management
--   **Local Storage**: All analysis data is stored securely in your browser's `localStorage` and `IndexedDB`.
--   **Privacy First**: In Browser-Only mode, no data ever leaves your device.
--   **Export**: Export analysis results and extracted files.
+### 🔎 Search & Filtering
+*   **BPF Engine**: fast filtering using standard Berkeley Packet Filter syntax (e.g., `tcp port 80 and host 10.0.0.1`).
+*   **Multi-Criteria Search**: logical search builder (AND/OR) for combining IP ranges, ports, time windows, and payload content.
+*   **Visual Highlighting**: Search terms and extracted artifacts are highlighted directly in the hex dump and packet list.
+
+### 🕵️ Forensic Investigation
+*   **Timeline Analysis**: Zoomable chronological visualization of traffic spikes and event correlations.
+*   **Chain of Custody**: Immutable audit log of all file operations (hashes, uploads, exports) to ensure evidence integrity.
+*   **Case Management**: Add notes, bookmark packets, and generate PDF forensic reports with attached evidence.
+*   **Geo-Location**: Visualize traffic sources and destinations on an interactive world map.
+
+### ⚡ Live Capture & Streaming
+*   **Remote Agent**: Lightweight Node.js agent to capture traffic from remote servers/containers.
+*   **Real-Time Streaming**: WebSocket-based streaming of live packets to the dashboard.
+*   **Live Analysis**: Threats and metrics are calculated in real-time as packets arrive.
+
+### 📊 Performance Monitoring
+*   **Core Web Vitals**: Track specific web performance metrics (LCP, CLS, FID) for HTTP traffic.
+*   **Waterfall View**: Visualize resource loading sequences and timing.
 
 ---
 
