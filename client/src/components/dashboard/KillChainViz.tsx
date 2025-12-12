@@ -31,28 +31,28 @@ export const KillChainViz: React.FC<KillChainVizProps> = ({ threats }) => {
   );
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border">
-      <h3 className="text-sm font-medium text-gray-500 mb-4">
+    <div className="bg-white dark:bg-card p-4 rounded-lg shadow-sm border dark:border-border">
+      <h3 className="text-sm font-medium text-gray-500 dark:text-muted-foreground mb-4">
         Attack Kill Chain Flow
       </h3>
       <div className="flex items-center overflow-x-auto pb-2">
         {activeTactics.length === 0 ? (
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-400 dark:text-muted-foreground/60">
             No kill chain activity detected.
           </p>
         ) : (
           activeTactics.map((tactic, index) => (
             <React.Fragment key={tactic}>
               <div className="flex flex-col items-center min-w-[120px]">
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold mb-2 border-2 border-red-200">
+                <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400 font-bold mb-2 border-2 border-red-200 dark:border-red-800">
                   {distribution[tactic]}
                 </div>
-                <span className="text-xs font-medium text-center px-2">
+                <span className="text-xs font-medium text-center px-2 text-foreground">
                   {tactic}
                 </span>
               </div>
               {index < activeTactics.length - 1 && (
-                <div className="mx-2 text-gray-300">
+                <div className="mx-2 text-gray-300 dark:text-slate-700">
                   <ChevronRight size={24} />
                 </div>
               )}

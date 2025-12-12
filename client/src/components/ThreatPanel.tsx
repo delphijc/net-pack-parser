@@ -139,7 +139,7 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
   };
 
   return (
-    <div className="threat-panel p-4 border rounded-lg shadow-md bg-white">
+    <div className="threat-panel p-4 border rounded-lg shadow-md bg-white dark:bg-card dark:border-border">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Detected Threats</h2>
         <div className="flex items-center gap-3">
@@ -268,7 +268,7 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
             return (
               <li
                 key={threat.id}
-                className={`p-3 border rounded-md ${isConfirmed ? 'bg-red-100 border-red-300' : 'bg-slate-50 hover:bg-slate-100'}`}
+                className={`p-3 border rounded-md ${isConfirmed ? 'bg-red-100 border-red-300 dark:bg-red-900/20 dark:border-red-800' : 'bg-slate-50 hover:bg-slate-100 dark:bg-card dark:hover:bg-accent/50 dark:border-border'}`}
               >
                 <div
                   className="cursor-pointer"
@@ -279,7 +279,7 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
                       <Badge className={getSeverityColor(threat.severity)}>
                         {threat.severity.toUpperCase()}
                       </Badge>
-                      <span className="font-medium text-slate-900">
+                      <span className="font-medium text-slate-900 dark:text-foreground">
                         {threat.type}
                       </span>
                       {isConfirmed && (
@@ -290,7 +290,7 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
                       {new Date(threat.timestamp).toLocaleString()}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-700 mt-1">
+                  <p className="text-sm text-slate-700 dark:text-muted-foreground mt-1">
                     {threat.description}
                   </p>
                   {threat.sourceIp && threat.destIp && (
@@ -324,9 +324,9 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
 
                   {/* Notes Display */}
                   {alertState?.notes && alertState.notes.length > 0 && (
-                    <div className="mt-2 pl-2 border-l-2 border-slate-300">
+                    <div className="mt-2 pl-2 border-l-2 border-slate-300 dark:border-border">
                       {alertState.notes.map((note, idx) => (
-                        <p key={idx} className="text-xs text-slate-600 italic">
+                        <p key={idx} className="text-xs text-slate-600 dark:text-muted-foreground italic">
                           "{note}"
                         </p>
                       ))}
@@ -335,7 +335,7 @@ export const ThreatPanel: React.FC<ThreatPanelProps> = ({
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col gap-2 mt-3 pt-2 border-t border-slate-200">
+                <div className="flex flex-col gap-2 mt-3 pt-2 border-t border-slate-200 dark:border-border">
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
