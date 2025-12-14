@@ -1,6 +1,9 @@
 import type { ParsedPacket, ThreatAlert } from '../types';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+// Use current hostname but keep port 3000 for server
+// This allows accessing the app from other devices on the network
+export const SERVER_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000`;
+export const API_BASE_URL = `${SERVER_URL}/api`;
 
 export interface UploadResponse {
   sessionId: string;

@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AgentClient } from '../services/AgentClient';
+import { SERVER_URL } from '../services/api';
 
 export const AgentConnectionPanel: React.FC = () => {
-    const [url, setUrl] = useState('http://localhost:3000');
+    const [url, setUrl] = useState(SERVER_URL);
     const [username, setUsername] = useState('admin');
     const [password, setPassword] = useState('');
     const [isConnected, setIsConnected] = useState(false);
@@ -70,7 +71,7 @@ export const AgentConnectionPanel: React.FC = () => {
                                 id="url"
                                 value={url}
                                 onChange={(e) => setUrl(e.target.value)}
-                                placeholder="http://localhost:3000"
+                                placeholder={SERVER_URL}
                                 required
                             />
                         </div>

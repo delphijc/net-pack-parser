@@ -66,7 +66,7 @@ import { yaraService } from './services/yaraService';
     }
 })();
 
-server.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-    console.log(`WebSocket server available at ws://localhost:${port}`);
+server.listen(port, '0.0.0.0', () => {
+    console.log(`Server running at http://0.0.0.0:${port}`);
+    console.log(`WebSocket server available at ws://0.0.0.0:${port}`);
 });

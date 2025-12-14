@@ -68,7 +68,7 @@ npm install
 
 # Start development servers
 cd ../client && npm run dev  # Terminal 1
-cd ../server && npm run start  # Terminal 2
+cd ../server && npm run dev  # Terminal 2
 ```
 
 ## Coding Standards

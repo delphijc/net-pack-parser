@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Activity, Server, Clock, Cpu } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { SERVER_URL } from '@/services/api';
 
 interface ServerStats {
   status: 'ok' | 'error' | 'offline';
@@ -22,7 +23,7 @@ export const ServerMonitor = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch('http://localhost:3000/health');
+        const res = await fetch(`${SERVER_URL}/health`);
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         setStats(data);
