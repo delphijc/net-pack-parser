@@ -15,7 +15,7 @@ import { yaraService } from '../services/yaraService';
     await elasticService.connect();
     await yaraService.initialize();
 
-    await parsePcapFile(filePath, sessionId, (count) => {
+    const totalPackets = await parsePcapFile(filePath, sessionId, (count) => {
       parentPort?.postMessage({
         type: 'progress',
         sessionId,
@@ -26,6 +26,7 @@ import { yaraService } from '../services/yaraService';
     parentPort?.postMessage({
       type: 'complete',
       sessionId,
+      count: totalPackets,
     });
   } catch (error) {
     console.error('Worker error:', error);

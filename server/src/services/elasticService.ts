@@ -141,6 +141,55 @@ export class ElasticService {
     }
   }
 
+  public async refreshIndex(index: string = this.PACKET_INDEX): Promise<void> {
+    if (!this.isConnected) return;
+    try {
+      await this.client.indices.refresh({ index });
+    } catch (error) {
+      console.error(`Failed to refresh index ${index}:`, error);
+    }
+  }
+
+  public async waitForPackets(
+    sessionId: string,
+    expectedCount: number,
+    timeoutMs: number = 5000,
+  ): Promise<boolean> {
+    if (!this.isConnected) return false;
+
+    const start = Date.now();
+    console.log(
+      `[ElasticService] Waiting for ${expectedCount} packets for session ${sessionId}...`,
+    );
+
+    while (Date.now() - start < timeoutMs) {
+      try {
+        const { count } = await this.client.count({
+          index: this.PACKET_INDEX,
+          query: {
+            term: { sessionId: sessionId },
+          },
+        });
+
+        if (count >= expectedCount) {
+          console.log(
+            `[ElasticService] Verified ${count}/${expectedCount} packets indexed.`,
+          );
+          return true;
+        }
+      } catch (e) {
+        // Ignore errors during polling
+      }
+      // Wait 500ms
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+
+    console.warn(
+      `[ElasticService] Timeout waiting for packets. Proceeding anyway.`,
+    );
+    return false;
+  }
+
   public async bulkIndexPackets(packets: any[]): Promise<void> {
     if (!this.isConnected || packets.length === 0) return;
 

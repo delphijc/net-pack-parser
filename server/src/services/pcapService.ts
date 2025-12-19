@@ -34,7 +34,7 @@ export const parsePcapFile = (
   filePath: string,
   sessionId: string,
   onProgress?: (count: number) => void,
-): Promise<void> => {
+): Promise<number> => {
   return new Promise((resolve, reject) => {
     let packetCount = 0;
     let batch: any[] = [];
@@ -66,7 +66,7 @@ export const parsePcapFile = (
           else if (proto === 1) protocol = 'ICMP';
           else protocol = `IP(${proto})`;
         }
-      } catch (e) {}
+      } catch (e) { }
 
       // Extended Analysis
       const packetIdString = `${sessionId}-${packetCount}`;
@@ -75,7 +75,7 @@ export const parsePcapFile = (
         id: packetIdString,
         timestamp: new Date(
           packet.header.timestampSeconds * 1000 +
-            packet.header.timestampMicroseconds / 1000,
+          packet.header.timestampMicroseconds / 1000,
         ),
         sourceIp: srcIp,
         destIp: dstIp,
@@ -194,8 +194,14 @@ export const parsePcapFile = (
       if (batch.length > 0) {
         await elasticService.bulkIndexPackets(batch);
       }
+      // Force refresh so packets are search-able immediately (critical for small files)
+      await elasticService.refreshIndex();
+
+      // Verification Semaphore: Wait for ES to acknowledge data availability
+      await elasticService.waitForPackets(sessionId, packetCount);
+
       // Completion handled by caller (resolve)
-      resolve();
+      resolve(packetCount);
     });
 
     parser.on('error', (err: any) => {

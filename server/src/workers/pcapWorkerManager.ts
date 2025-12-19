@@ -41,6 +41,9 @@ export const startPcapWorker = async () => {
         console.log(`Worker finished task: Parse ${msg.sessionId}`);
         if (activeSessions[msg.sessionId]) {
           activeSessions[msg.sessionId].status = 'complete';
+          if (typeof msg.count === 'number') {
+            activeSessions[msg.sessionId].summary.packetCount = msg.count;
+          }
         }
       } else if (msg.type === 'error') {
         console.error(
