@@ -78,6 +78,8 @@ services:
       context: ./client
       dockerfile: Dockerfile
     container_name: net-pack-client
+    environment:
+      - CLIENT_MAX_BODY_SIZE=${CLIENT_MAX_BODY_SIZE}
     ports:
       - "5173:80"
     depends_on:
