@@ -22,7 +22,7 @@ export const TrendGraph = ({ range }: TrendGraphProps) => {
   const filteredData = useMemo(() => {
     if (range === 'all') return metricHistory;
 
-    // eslint-disable-next-line react-compiler/react-compiler
+
     const now = Date.now();
     const duration = range === '5m' ? 5 * 60 * 1000 : 15 * 60 * 1000;
     const startTime = now - duration;

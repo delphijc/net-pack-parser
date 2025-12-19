@@ -89,27 +89,44 @@ net-pack-parser/
 
 ### 💻 Running the Application
 
-This application requires **Infrastructure** (Docker), **Server**, and **Client** to be running.
+You can run the full stack (Client, Server, Database, Kafka) using Docker Compose, or run components individually for development.
 
-**1. Start the Server**
-Open a terminal:
+#### Option 1: Full Stack (Docker) - Recommended for Usage
+Pass the `--build` flag the first time to build the images.
+
+```bash
+docker-compose up -d --build
+```
+
+-   **Client**: [http://localhost:5173](http://localhost:5173)
+-   **Server**: [http://localhost:3000](http://localhost:3000)
+
+> [!NOTE]
+> **Rebuilding after changes:**
+> If you modify the source code, you must rebuild the containers to see the changes:
+> ```bash
+> docker-compose up -d --build
+> ```
+
+#### Option 2: Development Mode (Local Node.js)
+Use this mode if you want to modify code and see changes instantly.
+
+**1. Start Infrastructure Only**:
+```bash
+docker-compose up -d redpanda elasticsearch
+```
+
+**2. Start Server**:
 ```bash
 cd server
-npm run build
-npm run start
+npm run dev
 ```
-*Server runs on http://localhost:3000*
 
-**2. Start the Client**
-Open a second terminal:
+**3. Start Client**:
 ```bash
 cd client
 npm run dev
 ```
-*Client runs on http://localhost:5173*
-
-**3. Use the App**
-Open your browser and navigate to `http://localhost:5173`. Uploading a PCAP file will now stream it to the local server, queue it in Kafka, and index it in Elasticsearch.
 
 ### 🔐 Authentication (Remote/Live Capture)
 

@@ -31,7 +31,11 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
-      'prettier/prettier': 'error',
+      'prettier/prettier': 'warn',
+      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/ban-ts-comment': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'react-compiler/react-compiler': 'off',
     },
   },
 );

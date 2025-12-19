@@ -5,32 +5,32 @@ const router = express.Router();
 
 // GET /api/yara
 router.get('/', (req, res) => {
-    try {
-        const rules = yaraService.getRules().map((r, index) => ({
-            id: String(index), // simple index ID for now
-            name: r.name,
-            content: r.source,
-            enabled: true
-        }));
-        res.json(rules);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch rules' });
-    }
+  try {
+    const rules = yaraService.getRules().map((r, index) => ({
+      id: String(index), // simple index ID for now
+      name: r.name,
+      content: r.source,
+      enabled: true,
+    }));
+    res.json(rules);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch rules' });
+  }
 });
 
 // POST /api/yara
 router.post('/', async (req, res) => {
-    try {
-        const { name, content } = req.body;
-        if (!name || !content) {
-            return res.status(400).json({ error: 'Missing name or content' });
-        }
-        await yaraService.addRule(name, content);
-        res.status(201).json({ message: 'Rule added' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to add rule' });
+  try {
+    const { name, content } = req.body;
+    if (!name || !content) {
+      return res.status(400).json({ error: 'Missing name or content' });
     }
+    await yaraService.addRule(name, content);
+    res.status(201).json({ message: 'Rule added' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to add rule' });
+  }
 });
 
 // DELETE /api/yara/:id
@@ -42,7 +42,7 @@ router.post('/', async (req, res) => {
 // We should probably update YaraService to use IDs.
 // But for now, returning 501.
 router.delete('/:id', (req, res) => {
-    res.status(501).json({ error: 'Delete not implemented on server yet' });
+  res.status(501).json({ error: 'Delete not implemented on server yet' });
 });
 
 export default router;

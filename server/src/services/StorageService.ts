@@ -3,35 +3,35 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 export class StorageService {
-    private static CAPTURE_DIR = path.join(process.cwd(), 'captures');
-    private static UPLOADS_DIR = path.join(process.cwd(), 'uploads');
+  private static CAPTURE_DIR = path.join(process.cwd(), 'captures');
+  private static UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 
-    static init() {
-        // Create captures directory
-        if (!fs.existsSync(this.CAPTURE_DIR)) {
-            fs.mkdirSync(this.CAPTURE_DIR, { recursive: true });
-            console.log(`Created capture directory: ${this.CAPTURE_DIR}`);
-        }
-
-        // Create uploads directory for PCAP file uploads
-        if (!fs.existsSync(this.UPLOADS_DIR)) {
-            fs.mkdirSync(this.UPLOADS_DIR, { recursive: true });
-            console.log(`Created uploads directory: ${this.UPLOADS_DIR}`);
-        }
+  static init() {
+    // Create captures directory
+    if (!fs.existsSync(this.CAPTURE_DIR)) {
+      fs.mkdirSync(this.CAPTURE_DIR, { recursive: true });
+      console.log(`Created capture directory: ${this.CAPTURE_DIR}`);
     }
 
-    static generatePath(interfaceName: string): string {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `capture-${timestamp}-${interfaceName}-${uuidv4()}.pcap`;
-        return path.join(this.CAPTURE_DIR, filename);
+    // Create uploads directory for PCAP file uploads
+    if (!fs.existsSync(this.UPLOADS_DIR)) {
+      fs.mkdirSync(this.UPLOADS_DIR, { recursive: true });
+      console.log(`Created uploads directory: ${this.UPLOADS_DIR}`);
     }
+  }
 
-    static listFiles(): string[] {
-        if (!fs.existsSync(this.CAPTURE_DIR)) return [];
-        return fs.readdirSync(this.CAPTURE_DIR).filter(f => f.endsWith('.pcap'));
-    }
+  static generatePath(interfaceName: string): string {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `capture-${timestamp}-${interfaceName}-${uuidv4()}.pcap`;
+    return path.join(this.CAPTURE_DIR, filename);
+  }
 
-    static getCaptureDir(): string {
-        return this.CAPTURE_DIR;
-    }
+  static listFiles(): string[] {
+    if (!fs.existsSync(this.CAPTURE_DIR)) return [];
+    return fs.readdirSync(this.CAPTURE_DIR).filter((f) => f.endsWith('.pcap'));
+  }
+
+  static getCaptureDir(): string {
+    return this.CAPTURE_DIR;
+  }
 }

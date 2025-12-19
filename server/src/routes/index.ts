@@ -29,4 +29,3 @@ apiRouter.use('/capture', authMiddleware, captureRouter);
 const interfaceRouter = Router();
 interfaceRouter.get('/', InterfaceController.listInterfaces);
 apiRouter.use('/interfaces', authMiddleware, interfaceRouter);
-
