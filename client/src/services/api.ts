@@ -1,8 +1,7 @@
 import type { ParsedPacket, ThreatAlert } from '../types';
 
-// Use current hostname but keep port 3000 for server
-// This allows accessing the app from other devices on the network
-export const SERVER_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:3000`;
+// Use relative path by default to leverage Vite/Nginx proxies
+export const SERVER_URL = import.meta.env.VITE_API_URL || '';
 export const API_BASE_URL = `${SERVER_URL}/api`;
 
 export interface UploadResponse {
