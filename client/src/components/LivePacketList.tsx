@@ -3,192 +3,311 @@ import { useLiveStore } from '@/store/liveStore';
 import { useWebSocketContext } from '@/context/WebSocketContext';
 import PacketList from './PacketList';
 import { liveProcessor } from '@/services/LiveProcessor';
+import { AgentClient } from '@/services/AgentClient';
 import { WSMessageType } from '@/types/WebSocketMessages';
 import type { PacketMessage } from '@/types/WebSocketMessages';
 import { Button } from './ui/button';
-import { Pause, Play, Trash2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
+import { Pause, Play, Trash2, ListFilter } from 'lucide-react';
 import type { ParsedPacket } from '@/types';
 import { LiveFilterPanel } from './LiveFilterPanel';
 import { ConnectionBanner } from './ConnectionBanner';
 import { CaptureControls } from './CaptureControls';
 import { LiveTimelineView } from './LiveTimelineView';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
 const LivePacketList: React.FC = () => {
-    const { lastMessage, sendMessage, isConnected } = useWebSocketContext();
-    const { packets, addPacket, isPaused, togglePause, clear, latencyMs } = useLiveStore();
-    const [autoScroll, setAutoScroll] = useState(true);
-    const [showClearConfirm, setShowClearConfirm] = useState(false);
-    const scrollEndRef = useRef<HTMLDivElement>(null);
-    const prevConnectedRef = useRef(isConnected);
+  const { lastMessage, sendMessage, isConnected } = useWebSocketContext();
+  const { packets, addPacket, isPaused, togglePause, clear, latencyMs } =
+    useLiveStore();
+  const [autoScroll, setAutoScroll] = useState(true);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [packetLimit, setPacketLimit] = useState<number>(10);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const scrollEndRef = useRef<HTMLDivElement>(null);
+  const prevConnectedRef = useRef(isConnected);
 
-    // Clear buffer when reconnected (state sync)
-    useEffect(() => {
-        if (isConnected && !prevConnectedRef.current) {
-            // Just reconnected, clear stale data
-            clear();
+  // Clear buffer when reconnected (state sync)
+  useEffect(() => {
+    if (isConnected && !prevConnectedRef.current) {
+      // Just reconnected, clear stale data
+      clear();
+    }
+    prevConnectedRef.current = isConnected;
+  }, [isConnected, clear]);
+
+  // WebSocket Message Handling
+  useEffect(() => {
+    if (lastMessage && lastMessage.data) {
+      try {
+        const msg = JSON.parse(lastMessage.data);
+        if (msg.type === WSMessageType.PACKET) {
+          const pkt = (msg as PacketMessage).data;
+          addPacket(pkt);
+          liveProcessor.process(pkt);
         }
-        prevConnectedRef.current = isConnected;
-    }, [isConnected, clear]);
+      } catch (e) {
+        console.error('Failed to parse WS message', e);
+      }
+    }
+  }, [lastMessage, addPacket]);
 
-    // WebSocket Message Handling
-    useEffect(() => {
-        if (lastMessage && lastMessage.data) {
-            try {
-                const msg = JSON.parse(lastMessage.data);
-                if (msg.type === WSMessageType.PACKET) {
-                    const pkt = (msg as PacketMessage).data;
-                    addPacket(pkt);
-                    liveProcessor.process(pkt);
-                }
-            } catch (e) {
-                console.error('Failed to parse WS message', e);
-            }
-        }
-    }, [lastMessage, addPacket]);
+  // Auto-scroll
+  useEffect(() => {
+    if (autoScroll && scrollEndRef.current) {
+      scrollEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [packets.length, autoScroll]); // Depend on length change
 
-    // Auto-scroll
-    useEffect(() => {
-        if (autoScroll && scrollEndRef.current) {
-            scrollEndRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, [packets, autoScroll]);
-
-    // Map WebSocket PacketData to UI ParsedPacket for PacketList component
-    const uiPackets: ParsedPacket[] = packets.map(p => ({
-        id: p.id,
-        timestamp: p.timestamp,
-        sourceIP: p.sourceIP,
-        destIP: p.destinationIP,
-        protocol: p.protocol,
-        length: p.length,
-        info: p.summary,
-        detectedProtocols: [p.protocol],
-        suspiciousIndicators: p.severity ? [{
+  // Map WebSocket PacketData to UI ParsedPacket for PacketList component
+  const uiPackets: ParsedPacket[] = packets.map((p) => ({
+    id: p.id,
+    timestamp: p.timestamp,
+    sourceIP: p.sourceIP,
+    destIP: p.destinationIP,
+    protocol: p.protocol,
+    length: p.length,
+    info: p.summary,
+    detectedProtocols: [p.protocol],
+    suspiciousIndicators: p.severity
+      ? [
+          {
             id: `${p.id}-simp`,
             type: 'live_threat',
             severity: p.severity,
             description: 'Threat detected in live stream',
             evidence: 'Real-time analysis',
-            confidence: 80
-        }] : [],
-        rawData: new ArrayBuffer(0),
-        tokens: [],
-        sections: [],
-        fileReferences: [],
-        sourcePort: p.sourcePort,
-        destPort: p.destinationPort
-    }));
+            confidence: 80,
+          },
+        ]
+      : [],
+    rawData: new ArrayBuffer(0),
+    tokens: [],
+    sections: [],
+    fileReferences: [],
+    sourcePort: p.sourcePort,
+    destPort: p.destinationPort,
+  }));
 
-    return (
-        <div className="flex flex-col h-[calc(100vh-140px)] w-full overflow-hidden bg-background">
-            {/* 
+  // Slice packets based on limit
+  const visiblePackets = uiPackets.slice(-packetLimit);
+
+  const handleExportPcap = async () => {
+    if (currentSessionId) {
+      try {
+        // Retrieve token from AgentClient configuration
+        const token = AgentClient.getToken();
+        const headers: HeadersInit = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        // Use fetch to include the auth header
+        const response = await fetch(
+          `/api/capture/download/${currentSessionId}`,
+          {
+            method: 'GET',
+            headers,
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error('Download failed');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        // Determine filename from header or fallback
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = `${currentSessionId}.pcap`;
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="?([^"]+)"?/);
+          if (match && match[1]) {
+            filename = match[1];
+          }
+        }
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Failed to download PCAP:', error);
+        // Fallback or alert user
+        alert('Failed to download PCAP. Authentication may be required.');
+      }
+    } else {
+      console.warn('No active session ID for export');
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full w-full overflow-hidden bg-background">
+      {/* 
                Header Block: Contains all controls and visualization.
-               This block does NOT scroll with the packets.
+               Sticky to ensure it's always visible.
             */}
-            <div className="flex-shrink-0 flex flex-col gap-4 p-4 border-b border-border bg-background">
-                {/* 1. Connection Status */}
-                <ConnectionBanner />
+      <div className="flex-shrink-0 flex flex-col gap-4 p-4 border-b border-border bg-background sticky top-0 z-50">
+        {/* 1. Connection Status */}
+        <ConnectionBanner />
 
-                {/* 2. Main Capture Controls (Interface, BPF, Start/Stop) */}
-                <CaptureControls />
+        {/* 3. Filters and Playback Controls (Moved Timeline below Packet List in visual hierarchy, or at bottom of this fixed block? User asked: "move the "Live Timeline" panel below the "Captured Packets" panel")
+                   WAIT: The "Captured Packets" panel is the SCROLLABLE area.
+                   The user likely wants the Timeline BENEATH the scrollable list, effectively at the bottom of the screen?
+                   OR just below the top controls but above the list?
+                   "move the "Live Timeline" panel below the "Captured Packets" panel"
+                   The PacketList fills the rest of the screen. Putting Timeline below it means pushing it to the very bottom footer.
+                */}
+        <div className="flex flex-col gap-2">
+          <LiveFilterPanel
+            sendMessage={(msg) => sendMessage(JSON.stringify(msg))}
+          />
 
-                {/* 3. Timeline Visualization */}
-                <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-                    <LiveTimelineView />
-                </div>
+          {/* 2. Main Capture Controls (Interface, BPF, Start/Stop) */}
+          <CaptureControls
+            onCaptureStarted={(id) => setCurrentSessionId(id)}
+            onCaptureStopped={() => {
+              /* Optional: Keep session ID until cleared or new one starts? */
+            }}
+          />
 
-                {/* 4. Filters and Playback Controls */}
-                <div className="flex flex-col gap-2">
-                    <LiveFilterPanel sendMessage={(msg) => sendMessage(JSON.stringify(msg))} />
+          {/* Playback & Stats Bar */}
+          <div className="flex justify-between items-center rounded-md border bg-muted/40 p-2">
+            <div className="flex gap-2 items-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={togglePause}
+                className={
+                  isPaused
+                    ? 'text-yellow-500 hover:text-yellow-600'
+                    : 'text-green-500 hover:text-green-600'
+                }
+              >
+                {isPaused ? (
+                  <Play size={16} className="mr-2" />
+                ) : (
+                  <Pause size={16} className="mr-2" />
+                )}
+                {isPaused ? 'Resume' : 'Pause Live'}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowClearConfirm(true)}
+                className="text-muted-foreground hover:text-destructive"
+              >
+                <Trash2 size={16} className="mr-2" /> Clear
+              </Button>
 
-                    {/* Playback & Stats Bar */}
-                    <div className="flex justify-between items-center rounded-md border bg-muted/40 p-2">
-                        <div className="flex gap-2">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={togglePause}
-                                className={isPaused ? "text-yellow-500 hover:text-yellow-600" : "text-green-500 hover:text-green-600"}
-                            >
-                                {isPaused ? <Play size={16} className="mr-2" /> : <Pause size={16} className="mr-2" />}
-                                {isPaused ? "Resume" : "Pause Live"}
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setShowClearConfirm(true)}
-                                className="text-muted-foreground hover:text-destructive"
-                            >
-                                <Trash2 size={16} className="mr-2" /> Clear
-                            </Button>
-                        </div>
+              <div className="h-4 w-px bg-border mx-2" />
 
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground font-mono">
-                            <label className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors">
-                                <input
-                                    type="checkbox"
-                                    checked={autoScroll}
-                                    onChange={(e) => setAutoScroll(e.target.checked)}
-                                    className="rounded border-gray-300 text-primary focus:ring-primary"
-                                />
-                                Auto-Scroll
-                            </label>
-                            <span>Buffer: {packets.length}/10000</span>
-                            <span>Latency: {latencyMs}ms</span>
-                        </div>
-                    </div>
-                </div>
+              <div className="flex items-center gap-2">
+                <ListFilter size={16} className="text-muted-foreground" />
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  Show last:
+                </span>
+                <Select
+                  value={packetLimit.toString()}
+                  onValueChange={(v) => setPacketLimit(Number(v))}
+                >
+                  <SelectTrigger className="h-7 w-[70px] text-xs">
+                    <SelectValue placeholder="10" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="75">75</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* 
+            <div className="flex items-center gap-4 text-xs text-muted-foreground font-mono">
+              <label className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors">
+                <input
+                  type="checkbox"
+                  checked={autoScroll}
+                  onChange={(e) => setAutoScroll(e.target.checked)}
+                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                Auto-Scroll
+              </label>
+              <span>Buffer: {packets.length}/10000</span>
+              <span>Latency: {latencyMs}ms</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 
                Content Block: Scrollable Packet List
                Takes remaining height.
             */}
-            <div className="flex-1 overflow-auto min-h-0 relative">
-                <PacketList
-                    packets={uiPackets}
-                    onPacketSelect={() => { }}
-                    selectedPacketId={null}
-                    onClearAllPackets={clear}
-                />
-                {autoScroll && <div ref={scrollEndRef} className="h-1 w-full" />}
-            </div>
+      <div className="flex-1 overflow-auto min-h-[100px] relative">
+        <PacketList
+          packets={visiblePackets}
+          onPacketSelect={() => {}}
+          selectedPacketId={null}
+          onClearAllPackets={clear}
+          onExportPcap={currentSessionId ? handleExportPcap : undefined}
+        />
+        {autoScroll && <div ref={scrollEndRef} className="h-1 w-full" />}
 
-            {/* Confirmation Dialog for Clear Action */}
-            <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Clear Live Buffer?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Are you sure you want to clear all captured packets from the live view? This action cannot be undone.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={() => {
-                                clear();
-                                setShowClearConfirm(false);
-                            }}
-                            className="bg-destructive hover:bg-destructive/90"
-                        >
-                            Clear Buffer
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+        {/* Timeline Visualization - Now part of scrollable content */}
+        <div className="p-4 border-t border-border bg-background mt-4">
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <LiveTimelineView />
+          </div>
         </div>
-    );
+      </div>
+
+      {/* Confirmation Dialog for Clear Action */}
+      <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear Live Buffer?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to clear all captured packets from the live
+              view? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                clear();
+                setShowClearConfirm(false);
+              }}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Clear Buffer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
 };
 
 export default LivePacketList;

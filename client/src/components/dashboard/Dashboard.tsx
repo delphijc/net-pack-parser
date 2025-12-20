@@ -32,7 +32,6 @@ import { ThreatPanel } from '../ThreatPanel';
 import SettingsPage from '../SettingsPage';
 import { TimelineView } from '../TimelineView';
 
-
 import type { ThreatAlert } from '../../types/threat';
 import {
   ReportGenerator,
@@ -45,7 +44,6 @@ import { AgentConnectionPanel } from '../AgentConnectionPanel';
 import { ConnectionStatus } from '../ConnectionStatus';
 import LivePacketList from '../LivePacketList';
 
-
 interface DashboardProps {
   onNavigate?: (tab: string) => void;
 }
@@ -56,7 +54,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
     return localStorage.getItem('dashboardActiveTab') || 'overview';
   });
   const [isGlobalParsing, setIsGlobalParsing] = useState(false);
-  const [layoutMode, setLayoutMode] = useState<'top' | 'left'>('top');
+  const [layoutMode, setLayoutMode] = useState<'top' | 'left'>(() => {
+    return (
+      (localStorage.getItem('dashboardLayoutMode') as 'top' | 'left') || 'top'
+    );
+  });
 
   const [stats, setStats] = useState({
     totalPackets: 0,
@@ -64,12 +66,18 @@ const Dashboard: React.FC<DashboardProps> = () => {
     threatsDetected: 0,
     suspiciousActivities: 0,
     protocols: {} as Record<string, number>,
-    timeline: undefined as { key_as_string: string; doc_count: number }[] | undefined,
-    topTalkers: undefined as {
-      src: { key: string; doc_count: number }[];
-      dest: { key: string; doc_count: number }[];
-    } | undefined,
-    geoDistribution: undefined as { key: string; doc_count: number }[] | undefined,
+    timeline: undefined as
+      | { key_as_string: string; doc_count: number }[]
+      | undefined,
+    topTalkers: undefined as
+      | {
+          src: { key: string; doc_count: number }[];
+          dest: { key: string; doc_count: number }[];
+        }
+      | undefined,
+    geoDistribution: undefined as
+      | { key: string; doc_count: number }[]
+      | undefined,
   });
 
   // Persist active tab
@@ -79,14 +87,6 @@ const Dashboard: React.FC<DashboardProps> = () => {
   const [recentActivity, setRecentActivity] = useState<ParsedPacket[]>([]);
   const [allPackets, setAllPackets] = useState<ParsedPacket[]>([]);
   const [allThreats, setAllThreats] = useState<ThreatAlert[]>([]);
-
-  // Load layout preference
-  useEffect(() => {
-    const savedLayout = localStorage.getItem('dashboardLayoutMode');
-    if (savedLayout === 'left') {
-      setLayoutMode('left');
-    }
-  }, []);
 
   const toggleLayout = () => {
     const newMode = layoutMode === 'top' ? 'left' : 'top';
@@ -147,7 +147,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
         protocols,
         timeline: statsData.timeline,
         topTalkers: statsData.topTalkers,
-        geoDistribution: statsData.geoDistribution
+        geoDistribution: statsData.geoDistribution,
       });
 
       setRecentActivity(statsData.recentActivity);
@@ -156,14 +156,14 @@ const Dashboard: React.FC<DashboardProps> = () => {
       if (statsData.threats.list) {
         setAllThreats(statsData.threats.list);
       }
-
     } catch (err) {
-      console.error("Failed to load dashboard stats", err);
+      console.error('Failed to load dashboard stats', err);
     }
   }, [activeSessionId]);
 
   useEffect(() => {
-    updateStats();
+    // Avoid synchronous setState in effect
+    Promise.resolve().then(() => updateStats());
     const intervalId = setInterval(updateStats, 2000);
     return () => clearInterval(intervalId);
   }, [updateStats]);
@@ -298,25 +298,39 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Protocol Distribution & Traffic Volume */}
-        <div className="lg:col-span-1 grid grid-cols-1 gap-4 h-[350px]" id="chart-protocol">
+        <div
+          className="lg:col-span-1 grid grid-cols-1 gap-4 h-[350px]"
+          id="chart-protocol"
+        >
           <ProtocolDistribution
             packets={allPackets}
-            distribution={Object.entries(stats.protocols || {}).map(([k, v]) => ({ key: k, doc_count: v }))}
+            distribution={Object.entries(stats.protocols || {}).map(
+              ([k, v]) => ({ key: k, doc_count: v }),
+            )}
           />
         </div>
-        <div className="lg:col-span-2 grid grid-cols-1 gap-4 h-[350px]" id="chart-timeline">
+        <div
+          className="lg:col-span-2 grid grid-cols-1 gap-4 h-[350px]"
+          id="chart-timeline"
+        >
           <TrafficVolume packets={allPackets} timeline={stats.timeline} />
         </div>
 
         {/* Top Talkers & Geo Map */}
-        <div className="lg:col-span-1 grid grid-cols-1 gap-4 h-[350px]" id="chart-toptalkers">
+        <div
+          className="lg:col-span-1 grid grid-cols-1 gap-4 h-[350px]"
+          id="chart-toptalkers"
+        >
           <TopTalkers
             packets={allPackets}
             topTalkers={stats.topTalkers}
             onFilterClick={handleTopTalkerClick}
           />
         </div>
-        <div className="lg:col-span-2 grid grid-cols-1 gap-4 h-[350px]" id="chart-geomap">
+        <div
+          className="lg:col-span-2 grid grid-cols-1 gap-4 h-[350px]"
+          id="chart-geomap"
+        >
           <GeoMap
             packets={allPackets} // Only needed if fallback or other usage exists
             geoDistribution={stats.geoDistribution}
@@ -338,11 +352,12 @@ const Dashboard: React.FC<DashboardProps> = () => {
                   className="flex items-start pb-3 border-b border-white/5 last:border-0 last:pb-0"
                 >
                   <div
-                    className={`mt-1 w-2 h-2 rounded-full mr-3 ${packet.suspiciousIndicators &&
+                    className={`mt-1 w-2 h-2 rounded-full mr-3 ${
+                      packet.suspiciousIndicators &&
                       packet.suspiciousIndicators.length > 0
-                      ? 'bg-destructive'
-                      : 'bg-emerald-500'
-                      }`}
+                        ? 'bg-destructive'
+                        : 'bg-emerald-500'
+                    }`}
                   ></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate text-foreground">
@@ -379,7 +394,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
     { id: 'live', label: 'Live Capture' },
   ];
 
-  const LayoutToggle = () => (
+  const renderLayoutToggle = () => (
     <Button
       variant="ghost"
       size="icon"
@@ -405,7 +420,10 @@ const Dashboard: React.FC<DashboardProps> = () => {
       )}
       {activeTab === 'timeline' && (
         <div className="p-6">
-          <TimelineView packets={allPackets} aggregatedTimeline={stats.timeline} />
+          <TimelineView
+            packets={allPackets}
+            aggregatedTimeline={stats.timeline}
+          />
         </div>
       )}
       {activeTab === 'yara' && (
@@ -416,9 +434,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
       {activeTab === 'threat-intel' && (
         <div className="p-6 space-y-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">
-              MITRE ATT&CK Intelligence
-            </h2>
+            <h2 className="text-xl font-semibold">MITRE ATT&CK Intelligence</h2>
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleGenerateReportClick}>
                 <FileText className="mr-2 h-4 w-4" />
@@ -438,10 +454,8 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
           {/* Threat Panel Integration */}
           <div className="mt-8">
-            <h3 className="text-lg font-semibold mb-4">
-              Threat Detection Log
-            </h3>
-            <ThreatPanel threats={allThreats} onThreatClick={() => { }} />
+            <h3 className="text-lg font-semibold mb-4">Threat Detection Log</h3>
+            <ThreatPanel threats={allThreats} onThreatClick={() => {}} />
           </div>
         </div>
       )}
@@ -465,14 +479,16 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
   if (layoutMode === 'left') {
     return (
-      <div className={`flex flex-row h-full ${isGlobalParsing ? 'cursor-wait' : ''}`}>
+      <div
+        className={`flex flex-row h-screen w-screen overflow-hidden ${isGlobalParsing ? 'cursor-wait' : ''}`}
+      >
         {/* Sidebar Container */}
         <div className="w-64 flex flex-col border-r border-white/10 bg-background/50 backdrop-blur-sm">
           {/* Sidebar Header: Session + Controls */}
           <div className="p-4 border-b border-white/10 space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-sm font-semibold">Sessions</span>
-              <LayoutToggle />
+              {renderLayoutToggle()}
             </div>
             <SessionSelector />
             <div className="flex justify-end">
@@ -489,9 +505,10 @@ const Dashboard: React.FC<DashboardProps> = () => {
                 disabled={isGlobalParsing}
                 className={`
                   w-full text-left px-4 py-2 text-sm font-medium transition-colors rounded-md
-                  ${activeTab === btn.id
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                  ${
+                    activeTab === btn.id
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                   }
                   ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
@@ -503,9 +520,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto w-full">
-          {renderContent()}
-        </div>
+        <div className="flex-1 overflow-y-auto w-full">{renderContent()}</div>
 
         <ReportBuilderDialog
           open={reportDialogOpen}
@@ -519,7 +534,9 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
   // Default: TOP Layout
   return (
-    <div className={`flex flex-col h-full ${isGlobalParsing ? 'cursor-wait' : ''}`}>
+    <div
+      className={`flex flex-col h-screen w-screen overflow-hidden ${isGlobalParsing ? 'cursor-wait' : ''}`}
+    >
       {/* Top Header */}
       <div className="bg-background/80 backdrop-blur-sm border-b border-white/10 px-6 py-2 flex justify-between items-center">
         <SessionSelector />
@@ -528,9 +545,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
       {/* Horizontal Tabs */}
       <div className="flex items-center border-b border-white/10 bg-background/50 backdrop-blur-sm px-4">
-        <div className="mr-2">
-          <LayoutToggle />
-        </div>
+        <div className="mr-2">{renderLayoutToggle()}</div>
         <div className="flex overflow-x-auto no-scrollbar">
           {navButtons.map((btn) => (
             <button
@@ -539,10 +554,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
               disabled={isGlobalParsing}
               className={`
                   px-6 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap
-                  ${activeTab === btn.id
-                  ? 'border-primary text-primary bg-primary/5'
-                  : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                }
+                  ${
+                    activeTab === btn.id
+                      ? 'border-primary text-primary bg-primary/5'
+                      : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  }
                   ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
             >
@@ -553,9 +569,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto">
-        {renderContent()}
-      </div>
+      <div className="flex-1 overflow-y-auto">{renderContent()}</div>
 
       <ReportBuilderDialog
         open={reportDialogOpen}

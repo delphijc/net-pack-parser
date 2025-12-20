@@ -13,7 +13,7 @@ import {
   Activity,
   Layers,
   FileText,
-  Download
+  Download,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -68,6 +68,7 @@ interface PacketListProps {
   onPacketDeleted?: () => void; // Optional callback when a packet is deleted
   searchCriteria?: MultiSearchCriteria | null; // Add searchCriteria prop
   onClearSearchCriteria?: () => void; // Add callback to clear search criteria
+  onExportPcap?: () => void;
 }
 
 const PacketList: React.FC<PacketListProps> = ({
@@ -80,6 +81,7 @@ const PacketList: React.FC<PacketListProps> = ({
   onPacketDeleted,
   searchCriteria,
   onClearSearchCriteria,
+  onExportPcap,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -197,7 +199,6 @@ const PacketList: React.FC<PacketListProps> = ({
     searchCriteria,
     sortOrder,
     showThreatsOnly,
-    showThreatsOnly,
   ]);
 
   const selectedFlowId = useMemo(() => {
@@ -290,7 +291,11 @@ const PacketList: React.FC<PacketListProps> = ({
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground mr-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-xs text-muted-foreground mr-2"
+                >
                   <Download size={14} className="mr-1" />
                   Export
                 </Button>
@@ -298,26 +303,78 @@ const PacketList: React.FC<PacketListProps> = ({
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Export Options</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => CsvExporter.exportPackets(filteredPackets, 'packets_filtered.csv')}>
+                <DropdownMenuItem
+                  onClick={() =>
+                    CsvExporter.exportPackets(
+                      filteredPackets,
+                      'packets_filtered.csv',
+                    )
+                  }
+                >
                   CSV (Visible)
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => JsonExporter.exportPackets(filteredPackets, 'packets_filtered.json')}>
+                <DropdownMenuItem
+                  onClick={() =>
+                    JsonExporter.exportPackets(
+                      filteredPackets,
+                      'packets_filtered.json',
+                    )
+                  }
+                >
                   JSON (Visible)
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => EvidenceExporter.exportPacketsWithIntegrity(filteredPackets, 'csv', 'packets_evidence')}>
+                <DropdownMenuItem
+                  onClick={() =>
+                    EvidenceExporter.exportPacketsWithIntegrity(
+                      filteredPackets,
+                      'csv',
+                      'packets_evidence',
+                    )
+                  }
+                >
                   Evidence Zip (CSV + Hash)
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => EvidenceExporter.exportPacketsWithIntegrity(filteredPackets, 'json', 'packets_evidence')}>
+                <DropdownMenuItem
+                  onClick={() =>
+                    EvidenceExporter.exportPacketsWithIntegrity(
+                      filteredPackets,
+                      'json',
+                      'packets_evidence',
+                    )
+                  }
+                >
                   Evidence Zip (JSON + Hash)
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => CsvExporter.exportPackets(allPackets || packets, 'packets_all.csv')}>
+                <DropdownMenuItem
+                  onClick={() =>
+                    CsvExporter.exportPackets(
+                      allPackets || packets,
+                      'packets_all.csv',
+                    )
+                  }
+                >
                   CSV (All)
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => JsonExporter.exportPackets(allPackets || packets, 'packets_all.json')}>
+                <DropdownMenuItem
+                  onClick={() =>
+                    JsonExporter.exportPackets(
+                      allPackets || packets,
+                      'packets_all.json',
+                    )
+                  }
+                >
                   JSON (All)
                 </DropdownMenuItem>
+                {onExportPcap && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={onExportPcap}>
+                      Export PCAP (Original)
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -446,10 +503,10 @@ const PacketList: React.FC<PacketListProps> = ({
                   data-testid={`packet-item-${packet.id}`}
                   onClick={() => onPacketSelect(packet)}
                   className={`group p-2 rounded-md cursor-pointer border transition-all duration-200 ${selectedPacketId === packet.id
-                    ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
-                    : selectedFlowId && packet.flowId === selectedFlowId
-                      ? 'bg-blue-500/5 border-l-2 border-l-blue-400 border-t-transparent border-r-transparent border-b-transparent hover:bg-blue-500/10'
-                      : 'bg-card/30 border-transparent hover:bg-secondary/50 hover:border-white/5'
+                      ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
+                      : selectedFlowId && packet.flowId === selectedFlowId
+                        ? 'bg-blue-500/5 border-l-2 border-l-blue-400 border-t-transparent border-r-transparent border-b-transparent hover:bg-blue-500/10'
+                        : 'bg-card/30 border-transparent hover:bg-secondary/50 hover:border-white/5'
                     } ${packet.matchesSearch ? 'bg-yellow-200/20 border-yellow-300' : ''}`}
                 >
                   <div className="flex justify-between items-center mb-1">
@@ -459,14 +516,14 @@ const PacketList: React.FC<PacketListProps> = ({
                           key={proto}
                           variant="outline"
                           className={`text-[10px] font-bold px-1.5 py-0.5 ${proto === 'HTTP' || proto === 'HTTPS'
-                            ? 'bg-emerald-500/10 text-emerald-500'
-                            : proto === 'TCP'
-                              ? 'bg-blue-500/10 text-blue-500'
-                              : proto === 'UDP'
-                                ? 'bg-orange-500/10 text-orange-500'
-                                : proto === 'DNS'
-                                  ? 'bg-purple-500/10 text-purple-500'
-                                  : 'bg-gray-500/10 text-gray-400'
+                              ? 'bg-emerald-500/10 text-emerald-500'
+                              : proto === 'TCP'
+                                ? 'bg-blue-500/10 text-blue-500'
+                                : proto === 'UDP'
+                                  ? 'bg-orange-500/10 text-orange-500'
+                                  : proto === 'DNS'
+                                    ? 'bg-purple-500/10 text-purple-500'
+                                    : 'bg-gray-500/10 text-gray-400'
                             }`}
                         >
                           {proto}
@@ -554,10 +611,7 @@ const PacketList: React.FC<PacketListProps> = ({
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog
-        open={showClearConfirm}
-        onOpenChange={setShowClearConfirm}
-      >
+      <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Clear All Packets</AlertDialogTitle>
