@@ -86,15 +86,15 @@ const LivePacketList: React.FC = () => {
     detectedProtocols: [p.protocol],
     suspiciousIndicators: p.severity
       ? [
-          {
-            id: `${p.id}-simp`,
-            type: 'live_threat',
-            severity: p.severity,
-            description: 'Threat detected in live stream',
-            evidence: 'Real-time analysis',
-            confidence: 80,
-          },
-        ]
+        {
+          id: `${p.id}-simp`,
+          type: 'live_threat',
+          severity: p.severity,
+          description: 'Threat detected in live stream',
+          evidence: 'Real-time analysis',
+          confidence: 80,
+        },
+      ]
       : [],
     rawData: new ArrayBuffer(0),
     tokens: [],
@@ -107,51 +107,17 @@ const LivePacketList: React.FC = () => {
   // Slice packets based on limit
   const visiblePackets = uiPackets.slice(-packetLimit);
 
-  const handleExportPcap = async () => {
+  const handleExportPcap = () => {
     if (currentSessionId) {
-      try {
-        // Retrieve token from AgentClient configuration
-        const token = AgentClient.getToken();
-        const headers: HeadersInit = {};
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-
-        // Use fetch to include the auth header
-        const response = await fetch(
-          `/api/capture/download/${currentSessionId}`,
-          {
-            method: 'GET',
-            headers,
-          },
+      const token = AgentClient.getToken();
+      if (token) {
+        window.open(
+          `/api/capture/download/${currentSessionId}?token=${token}`,
+          '_blank',
         );
-
-        if (!response.ok) {
-          throw new Error('Download failed');
-        }
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        // Determine filename from header or fallback
-        const contentDisposition = response.headers.get('Content-Disposition');
-        let filename = `${currentSessionId}.pcap`;
-        if (contentDisposition) {
-          const match = contentDisposition.match(/filename="?([^"]+)"?/);
-          if (match && match[1]) {
-            filename = match[1];
-          }
-        }
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error('Failed to download PCAP:', error);
-        // Fallback or alert user
-        alert('Failed to download PCAP. Authentication may be required.');
+      } else {
+        console.warn('No auth token available for export');
+        alert('Authentication required to download PCAP.');
       }
     } else {
       console.warn('No active session ID for export');
@@ -267,7 +233,7 @@ const LivePacketList: React.FC = () => {
       <div className="flex-1 overflow-auto min-h-[100px] relative">
         <PacketList
           packets={visiblePackets}
-          onPacketSelect={() => {}}
+          onPacketSelect={() => { }}
           selectedPacketId={null}
           onClearAllPackets={clear}
           onExportPcap={currentSessionId ? handleExportPcap : undefined}

@@ -16,15 +16,12 @@ export const authMiddleware = (
   res: Response,
   next: NextFunction,
 ) => {
-  // Check for Authorization header
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
-    res.status(401).json({ error: 'Authentication required' });
-    return;
+  // Check for Authorization header or query param (for downloads)
+  let token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token && req.query.token && typeof req.query.token === 'string') {
+    token = req.query.token;
   }
-
-  const token = authHeader.split(' ')[1]; // Bearer <token>
 
   if (!token) {
     res.status(401).json({ error: 'Authentication required' });
