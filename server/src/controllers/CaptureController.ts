@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import { CaptureService } from '../services/CaptureService';
 import { StorageService } from '../services/StorageService';
+import { sessionRepository } from '../repositories/SessionRepository';
+import path from 'path';
+import fs from 'fs';
+import { DownloadTokenService } from '../services/DownloadTokenService';
 
 export class CaptureController {
   public static async startCapture(req: Request, res: Response): Promise<void> {
@@ -147,16 +151,23 @@ export class CaptureController {
       return;
     }
 
-    const fs = require('fs');
-    const path = require('path');
-
     // Allow ID to be just UUID or filename
-    let filename = id;
-    if (!filename.endsWith('.pcap')) {
-      filename += '.pcap';
-    }
+    // Try to look up session by ID first
+    const session = sessionRepository.getById(id);
+    let filePath: string;
+    let filename: string;
 
-    const filePath = path.join(StorageService.getCaptureDir(), filename);
+    if (session) {
+      filePath = session.outputFilePath;
+      filename = path.basename(filePath);
+    } else {
+      // Fallback: assume ID is the filename
+      filename = id;
+      if (!filename.endsWith('.pcap')) {
+        filename += '.pcap';
+      }
+      filePath = path.join(StorageService.getCaptureDir(), filename);
+    }
 
     if (!fs.existsSync(filePath)) {
       res.status(404).json({ error: 'Capture file not found' });
@@ -175,6 +186,23 @@ export class CaptureController {
         res.status(500).json({ error: 'Failed to download file' });
       }
     });
+  }
+
+  public static generateDownloadToken(req: Request, res: Response): void {
+    const { id } = req.params;
+
+    // Validate session exists first
+    const session = sessionRepository.getById(id);
+    if (!session) {
+      res.status(404).json({ error: 'Session not found' });
+      return;
+    }
+
+    // Generate OTP tied to the user (req.user from authMiddleware)
+    // Here we assume req.user is set by the upstream authMiddleware for this POST request
+    const token = DownloadTokenService.generateToken(req.user);
+
+    res.json({ token });
   }
 
   public static listSessions(req: Request, res: Response): void {

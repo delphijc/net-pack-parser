@@ -11,4 +11,5 @@ captureRouter.post('/pause', CaptureController.pauseCapture);
 captureRouter.post('/resume', CaptureController.resumeCapture);
 captureRouter.get('/sessions', CaptureController.listSessions);
 captureRouter.get('/stats', CaptureController.getStats);
+captureRouter.post('/token/:id', CaptureController.generateDownloadToken);
 captureRouter.get('/download/:id', CaptureController.downloadCapture);

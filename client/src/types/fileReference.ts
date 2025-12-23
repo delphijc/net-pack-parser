@@ -14,8 +14,10 @@ export interface FileReference {
   mimeType: string;
   /** ID of the packet from which this file reference was initially detected. */
   sourcePacketId: string;
-  /** The actual binary data of the reconstructed file. */
-  data: Blob;
+  /** The actual binary data of the reconstructed file. Optional if using offset extraction. */
+  data?: Blob;
+  /** Offset in the packet payload where file data starts. */
+  dataOffset?: number;
   /** SHA-256 hash of the file data for integrity verification. */
   sha256Hash: string;
   /** Optional: MD5 hash of the file data. */
@@ -24,4 +26,6 @@ export interface FileReference {
   ftpDataPort?: number;
   /** Optional: Type of FTP transfer. */
   ftpTransferType?: 'STOR' | 'RETR';
+  /** Optional: Magic number/signature detected. */
+  magicNumber?: string;
 }

@@ -107,17 +107,40 @@ const LivePacketList: React.FC = () => {
   // Slice packets based on limit
   const visiblePackets = uiPackets.slice(-packetLimit);
 
-  const handleExportPcap = () => {
+  const handleExportPcap = async () => {
     if (currentSessionId) {
-      const token = AgentClient.getToken();
-      if (token) {
-        window.open(
-          `/api/capture/download/${currentSessionId}?token=${token}`,
-          '_blank',
-        );
-      } else {
-        console.warn('No auth token available for export');
-        alert('Authentication required to download PCAP.');
+      try {
+        // Step 1: Request a one-time download token (OTP/Nonce)
+        const token = AgentClient.getToken();
+        if (!token) {
+          throw new Error('No active session token');
+        }
+
+        const response = await fetch(`/api/capture/token/${currentSessionId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to generate download token');
+        }
+
+        const data = await response.json();
+        const downloadToken = data.token;
+
+        // Step 2: Use the OTP in the URL for the browser download
+        if (downloadToken) {
+          window.open(
+            `/api/capture/download/${currentSessionId}?download_token=${downloadToken}`,
+            '_blank',
+          );
+        }
+      } catch (error) {
+        console.error('Failed to initiate secure download:', error);
+        alert('Authentication failed for download.');
       }
     } else {
       console.warn('No active session ID for export');

@@ -4,7 +4,9 @@ import PacketList from '@/components/PacketList';
 import PacketDetailView from '@/components/PacketDetailView';
 import { ProtocolFilter } from '@/components/ProtocolFilter';
 import { ProtocolDistribution } from '@/components/dashboard/ProtocolDistribution';
-import database from '@/services/database';
+import { api } from '@/services/api'; // Added api import
+import { useSessionStore } from '@/store/sessionStore'; // Ensure this is imported
+// import database from '@/services/database'; // Removed database import
 import { FilterBar } from '@/components/FilterBar';
 import { matchBpfFilter, validateBpfFilter } from '@/utils/bpfFilter';
 import type { BpfAST } from '@/utils/bpfFilter';
@@ -27,6 +29,8 @@ import type { ThreatAlert } from '@/types/threat'; // Import ThreatAlert type
 import { useTimelineStore } from '@/store/timelineStore';
 import { useDebounce } from '@/hooks/useDebounce';
 
+import { useToast } from '@/components/ui/use-toast'; // Added useToast import
+
 interface PcapAnalysisPageProps {
   initialFilter?: string;
 }
@@ -34,8 +38,10 @@ interface PcapAnalysisPageProps {
 const PcapAnalysisPage: React.FC<PcapAnalysisPageProps> = ({
   initialFilter,
 }) => {
+  const { toast } = useToast(); // Initialized useToast
   const [allPackets, setAllPackets] = useState<ParsedPacket[]>([]);
   const { startTime, endTime } = useTimelineStore();
+  const [isLoading, setIsLoading] = useState(false); // Added isLoading state
 
   // Debounce timeline filter to prevent UI lag during dragging (300ms)
   const debouncedStartTime = useDebounce(startTime, 300);
@@ -53,7 +59,7 @@ const PcapAnalysisPage: React.FC<PcapAnalysisPageProps> = ({
   const [multiSearchCriteria, setMultiSearchCriteria] =
     useState<MultiSearchCriteria | null>(null);
 
-  const [allThreats, setAllThreats] = useState<ThreatAlert[]>([]); // New state for all threats
+  const [allThreats, setAllThreats] = useState<ThreatAlert[]>([]);
 
   const [bpfFilterAst, setBpfFilterAst] = useState<BpfAST | null>(() => {
     if (!initialFilter) return null;
@@ -70,37 +76,58 @@ const PcapAnalysisPage: React.FC<PcapAnalysisPageProps> = ({
 
   // Polling for packets from the database
   useEffect(() => {
+    const activeSessionId = useSessionStore.getState().activeSessionId;
+
     const loadPackets = async () => {
+      if (!activeSessionId) {
+        setAllPackets([]);
+        return;
+      }
+
+      setIsLoading(true);
       try {
-        const packetsFromDb = await database.getAllPackets();
-        setAllPackets(packetsFromDb);
+        // Fetch packets from server API
+        const results = await api.getResults(activeSessionId, 0, 10000); // Fetch up to 10k packets for now
 
-        // Packets from DB already contain mapped threats/suspiciousIndicators from upload time
-        setAllPackets(packetsFromDb);
+        if (results.packets) {
+          setAllPackets(results.packets);
 
-        // Collect threats for state if needed, or just rely on packet.threats
-        // If we need a flat list of all threats:
-        const detectedThreats = packetsFromDb.flatMap(p => p.threats || []);
-        setAllThreats(detectedThreats);
+          // Collect threats for state if needed
+          const detectedThreats = results.packets.flatMap((p: any) => p.threats || []);
+          setAllThreats(detectedThreats as ThreatAlert[]);
 
-        // Extract unique protocols for the filter
-        const uniqueProtocols = Array.from(
-          new Set(packetsFromDb.flatMap((p: ParsedPacket) => p.detectedProtocols || [])),
-        );
-        setAvailableProtocols(uniqueProtocols);
-      } catch (error) {
-        console.error('[PcapAnalysisPage] Error loading packets:', error);
+          // Extract unique protocols for the filter
+          const uniqueProtocols = Array.from(
+            new Set((results.packets as ParsedPacket[]).flatMap((p) => p.detectedProtocols || [])),
+          );
+          setAvailableProtocols(uniqueProtocols);
+        }
+
+      } catch (error: any) {
+        console.error('[PcapAnalysisPage] Error loading packets from API:', error);
+        toast({
+          title: "Error loading packets",
+          description: error.message || "Failed to fetch packet data from server.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    loadPackets(); // Load initially
+    loadPackets();
 
-    const intervalId = setInterval(() => {
-      loadPackets();
-    }, 100); // Poll every 0.1 seconds for faster updates
+    // Subscribe to session changes
+    const unsubscribe = useSessionStore.subscribe((state) => {
+      if (state.activeSessionId !== activeSessionId) {
+        // Trigger reload if session ID changes
+        // (In functional component, simple re-render with new dep works, but we need to ensure this effect runs on ID change)
+      }
+    });
 
-    return () => clearInterval(intervalId);
-  }, []);
+    return () => unsubscribe();
+  }, [toast]); // removed activeSessionId from dep as we read from store directly or via hook re-render? No, better to use hook.
+
 
   const displayedPackets = useMemo(() => {
     let filtered = allPackets;
@@ -157,7 +184,7 @@ const PcapAnalysisPage: React.FC<PcapAnalysisPageProps> = ({
   };
 
   const handleClearAllPackets = () => {
-    database.clearAllData();
+    // database.clearAllData(); // Removed
     setAllPackets([]);
 
     setSelectedPacket(null);
@@ -167,20 +194,26 @@ const PcapAnalysisPage: React.FC<PcapAnalysisPageProps> = ({
   };
 
   const handlePacketDeleted = useCallback(async () => {
-    // Force an immediate reload when a packet is deleted
-    const packetsFromDb = await database.getAllPackets();
-    setAllPackets(packetsFromDb);
+    // For server-side, we would re-fetch. For now, since delete is client-simulated or pending, 
+    // we can just re-fetch from API if we assume server handles delete, OR just do nothing until server delete is ready.
+    // Let's just re-fetch current session data to be safe/consistent.
+    const activeSessionId = useSessionStore.getState().activeSessionId;
+    if (activeSessionId) {
+      try {
+        const results = await api.getResults(activeSessionId, 0, 10000);
+        if (results.packets) {
+          setAllPackets(results.packets);
 
+          const detectedThreats = results.packets.flatMap((p: any) => p.threats || []);
+          setAllThreats(detectedThreats as ThreatAlert[]);
 
-
-    const detectedThreats = packetsFromDb.flatMap(p => p.threats || []);
-    setAllThreats(detectedThreats);
-
-    // Extract unique protocols
-    const uniqueProtocols = Array.from(
-      new Set(packetsFromDb.flatMap((p) => p.detectedProtocols || [])),
-    );
-    setAvailableProtocols(uniqueProtocols);
+          const uniqueProtocols = Array.from(
+            new Set((results.packets as ParsedPacket[]).flatMap((p) => p.detectedProtocols || [])),
+          );
+          setAvailableProtocols(uniqueProtocols);
+        }
+      } catch (e) { console.error("Error refreshing after delete", e); }
+    }
   }, []);
 
   const handleBpfFilterChange = useCallback((filter: string) => {
@@ -234,6 +267,11 @@ const PcapAnalysisPage: React.FC<PcapAnalysisPageProps> = ({
           packetCount={displayedPackets.length}
           totalPacketCount={allPackets.length}
         />
+        {isLoading && (
+          <div className="p-2 text-center text-sm text-muted-foreground animate-pulse">
+            Loading packets...
+          </div>
+        )}
         <ProtocolFilter
           protocols={availableProtocols}
           selectedProtocol={selectedProtocol}

@@ -1,8 +1,7 @@
 // client/src/components/FilesTab.tsx
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { FileReference, ParsedPacket } from '../types';
-import DatabaseService from '../services/database';
 import {
   Table,
   TableBody,
@@ -21,51 +20,57 @@ interface FilesTabProps {
 
 const FilesTab: React.FC<FilesTabProps> = ({ packet }) => {
   const [fileReferences, setFileReferences] = useState<FileReference[]>([]);
-  const databaseService = DatabaseService;
   const { logAction } = useAuditLogger();
 
   useEffect(() => {
-    const fetchFiles = async () => {
-      if (packet && packet.fileReferences) {
-        const files = await Promise.all(
-          packet.fileReferences.map(async (fileRef) => {
-            // Fetch full file data from IndexedDB
-            const fullFile = await databaseService.getFileById(fileRef.id);
-            return fullFile || fileRef; // Return full file or existing reference if not found
-          }),
-        );
-        setFileReferences(
-          files.filter((file) => file.data && file.data.size > 0),
-        ); // Only show files with actual data
-      }
-    };
-
-    fetchFiles();
-  }, [packet, databaseService]);
+    if (packet && packet.fileReferences) {
+      setFileReferences(packet.fileReferences);
+    }
+  }, [packet]);
 
   const handleDownload = async (file: FileReference) => {
-    if (file.data) {
-      const url = URL.createObjectURL(file.data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+    // Reconstruct file blob from packet raw data
+    if (packet.rawData && file.dataOffset !== undefined && file.size > 0) {
+      try {
+        const start = file.dataOffset;
+        const end = start + file.size;
 
-      // Integrate Chain of Custody logging (AC 5)
-      logAction('DOWNLOAD', `File Downloaded: ${file.filename}`, {
-        filename: file.filename,
-        fileSize: file.size,
-        mimeType: file.mimeType,
-        sha256Hash: file.sha256Hash,
-        userAgent: navigator.userAgent,
-      });
+        // Check bounds
+        if (start < 0 || end > packet.rawData.byteLength) {
+          console.error("File offset out of bounds", file, packet.rawData.byteLength);
+          return;
+        }
 
-      console.log(
-        `Downloaded file: ${file.filename}, Hash: ${file.sha256Hash}`,
-      );
+        const fileData = packet.rawData.slice(start, end);
+        const blob = new Blob([fileData], { type: file.mimeType || 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.filename || `extracted_file_${file.id.slice(0, 8)}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Integrate Chain of Custody logging (AC 5)
+        logAction('DOWNLOAD', `File Downloaded: ${file.filename}`, {
+          filename: file.filename,
+          fileSize: file.size,
+          mimeType: file.mimeType,
+          sha256Hash: file.sha256Hash,
+          userAgent: navigator.userAgent,
+        });
+
+        console.log(
+          `Downloaded file: ${file.filename}, Hash: ${file.sha256Hash}`,
+        );
+
+      } catch (e) {
+        console.error("Error extracting file:", e);
+      }
+    } else {
+      console.warn("Cannot download: missing raw data or offsets");
     }
   };
 
@@ -120,7 +125,7 @@ const FilesTab: React.FC<FilesTabProps> = ({ packet }) => {
                 <Button
                   size="sm"
                   onClick={() => handleDownload(file)}
-                  disabled={!file.data}
+                  disabled={!packet.rawData}
                 >
                   Download
                 </Button>

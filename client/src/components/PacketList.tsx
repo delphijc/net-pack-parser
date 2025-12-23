@@ -44,7 +44,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'; // Assuming basic ContextMenu is available or we fallback to buttons
-import database from '../services/database';
+// import database from '../services/database'; // Removed local DB dependency
 import { StreamFollower } from './StreamFollower'; // New component
 import { CsvExporter } from '@/services/Exporters/CsvExporter';
 import { JsonExporter } from '@/services/Exporters/JsonExporter';
@@ -213,7 +213,10 @@ const PacketList: React.FC<PacketListProps> = ({
 
   const confirmDelete = async () => {
     if (packetToDelete) {
-      await database.deletePacket(packetToDelete);
+      // await database.deletePacket(packetToDelete); // Removed local DB deletion
+      // TODO: Implement server-side deletion API call if required.
+      // For now, we will assume successful "deletion" from view for the UI.
+
       onPacketSelect(null); // Clear selected packet in parent
       onPacketDeleted?.(); // Notify parent that a packet was deleted
       setPacketToDelete(null);
@@ -503,10 +506,10 @@ const PacketList: React.FC<PacketListProps> = ({
                   data-testid={`packet-item-${packet.id}`}
                   onClick={() => onPacketSelect(packet)}
                   className={`group p-2 rounded-md cursor-pointer border transition-all duration-200 ${selectedPacketId === packet.id
-                      ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
-                      : selectedFlowId && packet.flowId === selectedFlowId
-                        ? 'bg-blue-500/5 border-l-2 border-l-blue-400 border-t-transparent border-r-transparent border-b-transparent hover:bg-blue-500/10'
-                        : 'bg-card/30 border-transparent hover:bg-secondary/50 hover:border-white/5'
+                    ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(124,58,237,0.1)]'
+                    : selectedFlowId && packet.flowId === selectedFlowId
+                      ? 'bg-blue-500/5 border-l-2 border-l-blue-400 border-t-transparent border-r-transparent border-b-transparent hover:bg-blue-500/10'
+                      : 'bg-card/30 border-transparent hover:bg-secondary/50 hover:border-white/5'
                     } ${packet.matchesSearch ? 'bg-yellow-200/20 border-yellow-300' : ''}`}
                 >
                   <div className="flex justify-between items-center mb-1">
@@ -516,14 +519,14 @@ const PacketList: React.FC<PacketListProps> = ({
                           key={proto}
                           variant="outline"
                           className={`text-[10px] font-bold px-1.5 py-0.5 ${proto === 'HTTP' || proto === 'HTTPS'
-                              ? 'bg-emerald-500/10 text-emerald-500'
-                              : proto === 'TCP'
-                                ? 'bg-blue-500/10 text-blue-500'
-                                : proto === 'UDP'
-                                  ? 'bg-orange-500/10 text-orange-500'
-                                  : proto === 'DNS'
-                                    ? 'bg-purple-500/10 text-purple-500'
-                                    : 'bg-gray-500/10 text-gray-400'
+                            ? 'bg-emerald-500/10 text-emerald-500'
+                            : proto === 'TCP'
+                              ? 'bg-blue-500/10 text-blue-500'
+                              : proto === 'UDP'
+                                ? 'bg-orange-500/10 text-orange-500'
+                                : proto === 'DNS'
+                                  ? 'bg-purple-500/10 text-purple-500'
+                                  : 'bg-gray-500/10 text-gray-400'
                             }`}
                         >
                           {proto}

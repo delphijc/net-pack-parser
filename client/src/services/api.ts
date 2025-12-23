@@ -67,7 +67,55 @@ export const api = {
     if (!response.ok) {
       throw new Error(`Failed to get results: ${response.statusText}`);
     }
-    return response.json();
+    const data = await response.json();
+
+    // Transform server packets to client ParsedPacket format
+    if (data.packets) {
+      data.packets = data.packets.map((p: any) => {
+        // Convert base64 raw data back to ArrayBuffer
+        let rawDataBuffer = new ArrayBuffer(0);
+        if (p.raw && typeof p.raw === 'string') {
+          try {
+            const binaryString = atob(p.raw);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            rawDataBuffer = bytes.buffer;
+          } catch (e) {
+            console.error('Failed to decode raw packet data', e);
+          }
+        }
+
+        return {
+          id: p.id || `${sessionId}-${Math.random()}`,
+          timestamp: new Date(p.timestamp).getTime(),
+          sourceIP: p.sourceIp || '0.0.0.0',
+          destIP: p.destIp || '0.0.0.0',
+          sourcePort: p.sourcePort || 0,
+          destPort: p.destPort || 0,
+          protocol: p.protocol || 'Unknown',
+          length: p.length || 0,
+          rawData: rawDataBuffer,
+          detectedProtocols: [p.protocol], // Basic init
+          tokens: [],
+          sections: [],
+          fileReferences: p.fileReferences || [],
+          extractedStrings: p.strings || [],
+          threats: p.threats || [],
+          suspiciousIndicators: (p.threats || []).map((t: any) => ({
+            id: t.id,
+            type: t.type,
+            severity: t.severity,
+            description: t.description,
+          })),
+          threatIntelligence: [],
+        };
+      });
+    }
+
+    return data;
   },
 
   async getDashboardStats(sessionId: string): Promise<DashboardStats> {

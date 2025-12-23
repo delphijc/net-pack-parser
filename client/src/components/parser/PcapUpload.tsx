@@ -6,7 +6,7 @@ import {
   startNetworkCapture,
   stopNetworkCapture,
 } from '../../services/networkCapture';
-import database from '../../services/database';
+// import database from '../../services/database'; // Removed for server-side focus
 import type { ParsedPacket } from '../../types';
 import ChainOfCustodyLog from '../ChainOfCustodyLog';
 import {
@@ -88,13 +88,13 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
       }
 
       // Store the parsed packets in the database
-      database.storePackets(parsedPackets);
+      // database.storePackets(parsedPackets);
 
       // Process file downloads for all packets
       const filePromises = parsedPackets.flatMap((packet) =>
         packet.fileReferences.map(async (fileRef) => {
           const updatedFile = await downloadFile(fileRef);
-          database.updateFileReference(updatedFile);
+          // database.updateFileReference(updatedFile);
           return updatedFile;
         }),
       );
@@ -102,7 +102,7 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
       // Wait for all file downloads to complete
       await Promise.all(filePromises);
 
-      await database.storePackets(parsedPackets);
+      // await database.storePackets(parsedPackets);
       // Ensure DB transaction completes before proceeding
 
       // Set the last parsed packet (use the last one for display)
@@ -129,89 +129,24 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
         if (statusData.status === 'complete') {
           clearInterval(pollInterval);
 
-          let allPackets: ParsedPacket[] = [];
-          let fetchedCount = 0;
-          const totalToFetch = statusData.packetCount;
-          const BATCH_SIZE = 1000;
+          // Register session in store
+          useSessionStore.getState().addSession({
+            id: sessionId,
+            name: fileName || 'Unknown Session',
+            timestamp: Date.now(),
+            packetCount: statusData.packetCount || 0,
+          });
 
-          while (fetchedCount < totalToFetch) {
-            try {
-              const resultsData = await api.getResults(sessionId, fetchedCount, BATCH_SIZE);
+          // Set as active session to trigger view change/load
+          useSessionStore.getState().setActiveSession(sessionId);
 
-              if (resultsData.packets && resultsData.packets.length > 0) {
-                const adaptedPackets: ParsedPacket[] = resultsData.packets.map(
-                  (p: any) => ({
-                    id: p.sessionId + '-' + fetchedCount++,
-                    timestamp: p.timestamp,
-                    protocol: p.protocol,
-                    sourceIP: p.sourceIp,
-                    destIP: p.destIp,
-                    sourcePort: 0,
-                    destPort: 0,
-                    length: p.length,
-                    info: p.info,
-                    originalLength: p.length,
-                    rawData: p.raw
-                      ? (() => {
-                        const binaryString = atob(p.raw);
-                        const len = binaryString.length;
-                        const bytes = new Uint8Array(len);
-                        for (let i = 0; i < len; i++) {
-                          bytes[i] = binaryString.charCodeAt(i);
-                        }
-                        return bytes.buffer;
-                      })()
-                      : new ArrayBuffer(0),
-                    detectedProtocols: [p.protocol],
-                    tokens: [], // Legacy field, usage replaced by extractedStrings
-                    sections: [],
-                    fileReferences: p.fileReferences || [],
-                    extractedStrings: p.strings || [],
-                    threats: p.threats || [],
-                    suspiciousIndicators: (p.threats || []).map((t: any) => ({
-                      id: t.id,
-                      type: t.type,
-                      severity: t.severity,
-                      description: t.description,
-                      evidence: '', // Optional or derive
-                      confidence: 100
-                    })),
-                    sessionId: sessionId,
-                  }),
-                );
-                allPackets = allPackets.concat(adaptedPackets);
-              } else {
-                break;
-              }
-            } catch (e) {
-              console.error('Error fetching batch, stopping download', e);
-              break;
-            }
-          }
-
-          if (allPackets.length > 0) {
-            // Fix IDs to be unique index based if needed
-            allPackets = allPackets.map((p, idx) => ({ ...p, id: `${sessionId}-${idx}` }));
-
-            await database.storePackets(allPackets);
-
-            // Register session in store
-            useSessionStore.getState().addSession({
-              id: sessionId,
-              name: fileName || 'Unknown Session',
-              timestamp: Date.now(),
-              packetCount: allPackets.length,
-            });
-
-            setLastParsedPacket(allPackets[allPackets.length - 1]);
-            setCapturedData([]);
-            setErrorMessage('');
-          } else {
-            setErrorMessage('No packets found in file.');
-          }
-
+          setErrorMessage('');
           setParsing(false);
           onParsingStatusChange?.(false);
+
+          // Optional: Fetch a summary or single packet if we want to show success state in this component? 
+          // For now, simpler is better. The user likely switches tabs or the UI responds to activeSessionId.
+
         } else if (statusData.status === 'error') {
           clearInterval(pollInterval);
           setErrorMessage(`Server Parsing Error: ${statusData.error}`);
@@ -329,7 +264,7 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
     }
 
     // Store all captured packets in the database
-    database.storePackets(capturedData);
+    // database.storePackets(capturedData); // Disabled
 
     // Set the last packet as the most recently parsed
     setLastParsedPacket(capturedData[capturedData.length - 1]);

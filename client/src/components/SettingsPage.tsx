@@ -23,8 +23,8 @@ import { Progress } from '@/components/ui/progress';
 import { localStorageService } from '@/services/localStorage';
 import { exportDataAsJson, importDataFromJson } from '@/utils/dataImportExport';
 import { useToast } from '@/components/ui/use-toast';
-import database from '@/services/database';
-import chainOfCustodyDb from '@/services/chainOfCustodyDb';
+// import database from '@/services/database'; // Removed
+// import chainOfCustodyDb from '@/services/chainOfCustodyDb'; // Removed
 import { usePerformanceStore } from '@/store/performanceStore';
 import { useSessionStore } from '@/store/sessionStore';
 
@@ -61,7 +61,7 @@ const SettingsPage: React.FC = () => {
   const handleClearAnalysisData = async () => {
     try {
       setIsClearing(true);
-      await Promise.all([database.clearAllData(), chainOfCustodyDb.clearAll()]);
+      // await Promise.all([database.clearAllData(), chainOfCustodyDb.clearAll()]); // Removed local DB clearing
       useSessionStore.getState().clearSessions();
 
       // Update usage stats
@@ -70,7 +70,7 @@ const SettingsPage: React.FC = () => {
       toast({
         title: 'Success',
         description:
-          'Analysis data (Packets, Files, Logs) cleared successfully.',
+          'Local session data cleared. Server data remains intact.',
       });
     } catch (error: any) {
       console.error('Failed to clear data:', error);
@@ -87,7 +87,7 @@ const SettingsPage: React.FC = () => {
   const handleClearPerformanceData = async () => {
     try {
       usePerformanceStore.getState().resetMetrics();
-      database.clearPerformanceEntries();
+      // database.clearPerformanceEntries(); // Removed local DB usage
       toast({ title: 'Success', description: 'Performance metrics reset.' });
       setUsage(localStorageService.getUsagePercentage());
       setShowPerformanceConfirm(false);
