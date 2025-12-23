@@ -14,11 +14,13 @@ interface NetworkInterface {
 interface CaptureControlsProps {
     onCaptureStarted?: (sessionId: string) => void;
     onCaptureStopped?: () => void;
+    children?: React.ReactNode;
 }
 
 export const CaptureControls: React.FC<CaptureControlsProps> = ({
     onCaptureStarted,
-    onCaptureStopped
+    onCaptureStopped,
+    children
 }) => {
     const [interfaces, setInterfaces] = useState<NetworkInterface[]>([]);
     const [selectedInterface, setSelectedInterface] = useState<string>('');
@@ -150,7 +152,6 @@ export const CaptureControls: React.FC<CaptureControlsProps> = ({
                     />
                 </div>
 
-                {/* Control Buttons */}
                 <div className="flex gap-2">
                     {!isCapturing ? (
                         <Button
@@ -179,6 +180,7 @@ export const CaptureControls: React.FC<CaptureControlsProps> = ({
                             Stop Capture
                         </Button>
                     )}
+                    {children}
                 </div>
             </div>
 

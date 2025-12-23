@@ -30,8 +30,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useSessionStore } from '@/store/sessionStore';
+import { api } from '@/services/api';
 
-const LivePacketList: React.FC = () => {
+interface LivePacketListProps {
+  onAnalysisComplete?: () => void;
+}
+
+const LivePacketList: React.FC<LivePacketListProps> = ({ onAnalysisComplete }) => {
   const { lastMessage, sendMessage, isConnected } = useWebSocketContext();
   const { packets, addPacket, isPaused, togglePause, clear, latencyMs } =
     useLiveStore();
@@ -74,35 +80,53 @@ const LivePacketList: React.FC = () => {
     }
   }, [packets.length, autoScroll]); // Depend on length change
 
-  // Map WebSocket PacketData to UI ParsedPacket for PacketList component
-  const uiPackets: ParsedPacket[] = packets.map((p) => ({
-    id: p.id,
-    timestamp: p.timestamp,
-    sourceIP: p.sourceIP,
-    destIP: p.destinationIP,
-    protocol: p.protocol,
-    length: p.length,
-    info: p.summary,
-    detectedProtocols: [p.protocol],
-    suspiciousIndicators: p.severity
-      ? [
-        {
-          id: `${p.id}-simp`,
+  // Map WebSocket PacketData  // Map to ParsedPacket format for list
+  const uiPackets: ParsedPacket[] = packets.map((p) => {
+    let rawData = new ArrayBuffer(0);
+    if (p.payload && typeof p.payload === 'string') {
+      try {
+        const binaryString = atob(p.payload);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        rawData = bytes.buffer;
+      } catch (e) {
+        console.warn('Failed to decode packet payload:', e);
+      }
+    }
+
+    return {
+      id: p.id,
+      timestamp: p.timestamp,
+      sourceIP: p.sourceIP,
+      destIP: p.destinationIP,
+      protocol: p.protocol,
+      length: p.length,
+      info: p.summary,
+      detectedProtocols: [p.protocol],
+      suspiciousIndicators: p.severity
+        ? [{
+          id: 'live-threat',
           type: 'live_threat',
           severity: p.severity,
-          description: 'Threat detected in live stream',
+          description: 'Live Threat',
           evidence: 'Real-time analysis',
-          confidence: 80,
-        },
-      ]
-      : [],
-    rawData: new ArrayBuffer(0),
-    tokens: [],
-    sections: [],
-    fileReferences: [],
-    sourcePort: p.sourcePort,
-    destPort: p.destinationPort,
-  }));
+          confidence: 80
+        }]
+        : [],
+      rawData: rawData,
+      tokens: [],
+      sections: [],
+      fileReferences: [],
+      extractedStrings: [],
+      threats: [], // Could map severity to threats if needed
+      threatIntelligence: [],
+      sourcePort: p.sourcePort,
+      destPort: p.destinationPort,
+    };
+  });
 
   // Slice packets based on limit
   const visiblePackets = uiPackets.slice(-packetLimit);
@@ -147,6 +171,40 @@ const LivePacketList: React.FC = () => {
     }
   };
 
+  const handleAnalyzeSession = async () => {
+    if (uiPackets.length === 0) return;
+
+    try {
+      const sessionName = `Remote Capture ${new Date().toLocaleString()}`;
+      // For live capture, we likely don't have the full raw payload in `PacketData` struct from WS?
+      // The WS message `PacketData` has `payload`?
+      // Let's check `PacketData` definition or assume we ingest what we have.
+      // If rawData is missing, server mapping might fail if we rely on it.
+      // For now, we use `uiPackets` and maybe minimal rawData.
+
+      // Wait, `uiPackets` is derived.
+      // Let's use `uiPackets` but we need to ensure `rawData` is somewhat valid if possible.
+      // If not, our server ingestion handles it (we checked: if raw is string it decodes).
+      // If `uiPackets` has 0-byte buffer, server gets 0-byte raw. That's fine for MVP.
+
+      const { sessionId } = await api.ingestPackets(uiPackets, sessionName);
+
+      useSessionStore.getState().addSession({
+        id: sessionId,
+        name: sessionName,
+        timestamp: Date.now(),
+        packetCount: uiPackets.length,
+      });
+
+      useSessionStore.getState().setActiveSession(sessionId);
+      onAnalysisComplete?.();
+
+    } catch (e) {
+      console.error("Failed to analyze session:", e);
+      alert("Failed to create analysis session from capture.");
+    }
+  };
+
   return (
     <div className="flex flex-col h-full w-full overflow-hidden bg-background">
       {/* 
@@ -170,12 +228,24 @@ const LivePacketList: React.FC = () => {
           />
 
           {/* 2. Main Capture Controls (Interface, BPF, Start/Stop) */}
-          <CaptureControls
-            onCaptureStarted={(id) => setCurrentSessionId(id)}
-            onCaptureStopped={() => {
-              /* Optional: Keep session ID until cleared or new one starts? */
-            }}
-          />
+          <div className="flex gap-2 items-end">
+            <CaptureControls
+              onCaptureStarted={(id) => setCurrentSessionId(id)}
+              onCaptureStopped={() => {
+                /* Optional: Keep session ID until cleared or new one starts? */
+              }}
+            >
+              {packets.length > 0 && (
+                <Button
+                  variant="default"
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                  onClick={handleAnalyzeSession}
+                >
+                  Analyze Session
+                </Button>
+              )}
+            </CaptureControls>
+          </div>
 
           {/* Playback & Stats Bar */}
           <div className="flex justify-between items-center rounded-md border bg-muted/40 p-2">

@@ -46,6 +46,43 @@ export const api = {
     return response.json();
   },
 
+  async ingestPackets(packets: ParsedPacket[], name: string): Promise<{ sessionId: string }> {
+    // Prepare packets: convert ArrayBuffer rawData to Base64 string
+    const preparedPackets = await Promise.all(packets.map(async (p) => {
+      let rawBase64 = '';
+      if (p.rawData instanceof ArrayBuffer) {
+        // Convert ArrayBuffer to Base64
+        const bytes = new Uint8Array(p.rawData);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        rawBase64 = btoa(binary);
+      }
+
+      return {
+        ...p,
+        rawData: rawBase64, // Send as encoded string
+      };
+    }));
+
+    const response = await fetch(`${API_BASE_URL}/ingest`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        packets: preparedPackets,
+        name
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ingestion failed: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
   async getStatus(sessionId: string): Promise<AnalysisStatus> {
     const response = await fetch(
       `${API_BASE_URL}/analysis/${sessionId}/status`,

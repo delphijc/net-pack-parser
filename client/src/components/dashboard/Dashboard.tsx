@@ -71,9 +71,9 @@ const Dashboard: React.FC<DashboardProps> = () => {
       | undefined,
     topTalkers: undefined as
       | {
-          src: { key: string; doc_count: number }[];
-          dest: { key: string; doc_count: number }[];
-        }
+        src: { key: string; doc_count: number }[];
+        dest: { key: string; doc_count: number }[];
+      }
       | undefined,
     geoDistribution: undefined as
       | { key: string; doc_count: number }[]
@@ -173,6 +173,10 @@ const Dashboard: React.FC<DashboardProps> = () => {
 
   const handleGenerateReportClick = () => {
     setReportDialogOpen(true);
+  };
+
+  const handleAnalysisComplete = () => {
+    setActiveTab('packets');
   };
 
   const runReportGeneration = async (config: ReportConfig) => {
@@ -352,12 +356,11 @@ const Dashboard: React.FC<DashboardProps> = () => {
                   className="flex items-start pb-3 border-b border-white/5 last:border-0 last:pb-0"
                 >
                   <div
-                    className={`mt-1 w-2 h-2 rounded-full mr-3 ${
-                      packet.suspiciousIndicators &&
+                    className={`mt-1 w-2 h-2 rounded-full mr-3 ${packet.suspiciousIndicators &&
                       packet.suspiciousIndicators.length > 0
-                        ? 'bg-destructive'
-                        : 'bg-emerald-500'
-                    }`}
+                      ? 'bg-destructive'
+                      : 'bg-emerald-500'
+                      }`}
                   ></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate text-foreground">
@@ -413,7 +416,10 @@ const Dashboard: React.FC<DashboardProps> = () => {
     <>
       {activeTab === 'overview' && renderOverview()}
       {activeTab === 'parser' && (
-        <PcapUpload onParsingStatusChange={setIsGlobalParsing} />
+        <PcapUpload
+          onParsingStatusChange={setIsGlobalParsing}
+          onAnalysisComplete={handleAnalysisComplete}
+        />
       )}
       {activeTab === 'packets' && (
         <PcapAnalysisPage initialFilter={initialPacketFilter} />
@@ -455,7 +461,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
           {/* Threat Panel Integration */}
           <div className="mt-8">
             <h3 className="text-lg font-semibold mb-4">Threat Detection Log</h3>
-            <ThreatPanel threats={allThreats} onThreatClick={() => {}} />
+            <ThreatPanel threats={allThreats} onThreatClick={() => { }} />
           </div>
         </div>
       )}
@@ -471,7 +477,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
       )}
       {activeTab === 'live' && (
         <div className="h-full p-4 space-y-4">
-          <LivePacketList />
+          <LivePacketList onAnalysisComplete={handleAnalysisComplete} />
         </div>
       )}
     </>
@@ -505,10 +511,9 @@ const Dashboard: React.FC<DashboardProps> = () => {
                 disabled={isGlobalParsing}
                 className={`
                   w-full text-left px-4 py-2 text-sm font-medium transition-colors rounded-md
-                  ${
-                    activeTab === btn.id
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                  ${activeTab === btn.id
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                   }
                   ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
@@ -554,11 +559,10 @@ const Dashboard: React.FC<DashboardProps> = () => {
               disabled={isGlobalParsing}
               className={`
                   px-6 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap
-                  ${
-                    activeTab === btn.id
-                      ? 'border-primary text-primary bg-primary/5'
-                      : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                  }
+                  ${activeTab === btn.id
+                  ? 'border-primary text-primary bg-primary/5'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }
                   ${isGlobalParsing ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
             >

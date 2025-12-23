@@ -45,9 +45,10 @@ import { SummaryEditor } from '../SummaryEditor';
 
 interface PcapUploadProps {
   onParsingStatusChange?: (isParsing: boolean) => void;
+  onAnalysisComplete?: () => void;
 }
 
-const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
+const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange, onAnalysisComplete }) => {
   const [inputData, setInputData] = useState('');
   const [parsing, setParsing] = useState(false);
   const [capturing, setCapturing] = useState(false);
@@ -257,20 +258,42 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onParsingStatusChange }) => {
     }
   };
 
-  const handleParseCapture = () => {
+  const handleParseCapture = async () => {
     if (capturedData.length === 0) {
       setErrorMessage('No captured data to parse');
       return;
     }
 
-    // Store all captured packets in the database
-    // database.storePackets(capturedData); // Disabled
+    try {
+      setParsing(true);
+      // Upload captured packets to server to create a proper session
+      const sessionName = `Live Capture ${new Date().toLocaleString()}`;
+      const { sessionId } = await api.ingestPackets(capturedData, sessionName);
 
-    // Set the last packet as the most recently parsed
-    setLastParsedPacket(capturedData[capturedData.length - 1]);
+      // Register session in store
+      useSessionStore.getState().addSession({
+        id: sessionId,
+        name: sessionName,
+        timestamp: Date.now(),
+        packetCount: capturedData.length,
+      });
 
-    // Clear the captured data
-    setCapturedData([]);
+      // Set as active session to trigger view change/load
+      useSessionStore.getState().setActiveSession(sessionId);
+
+      // Clear local state and notify completion
+      setCapturedData([]);
+      setErrorMessage('');
+      onAnalysisComplete?.();
+
+    } catch (err: any) {
+      console.error("Failed to ingest captured data:", err);
+      // In case of error, we might want to keep the captured data so user can try again?
+      // but showing error message is critical
+      setErrorMessage(`Failed to process capture: ${err.message}`);
+    } finally {
+      setParsing(false);
+    }
   };
 
   const sampleData = [

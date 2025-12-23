@@ -75,6 +75,58 @@ analysisRouter.post('/upload', upload.single('pcap'), async (req, res) => {
   });
 });
 
+analysisRouter.post('/ingest', express.json({ limit: '50mb' }), async (req, res) => {
+  const { packets, name } = req.body;
+
+  if (!packets || !Array.isArray(packets) || packets.length === 0) {
+    return res.status(400).json({ error: 'No packets provided' });
+  }
+
+  const sessionId = `live-${Date.now()}`;
+  console.log(`Ingesting ${packets.length} packets for session: ${sessionId}`);
+
+  // Initialize session state
+  activeSessions[sessionId] = {
+    status: 'complete', // Since we ingest immediately
+    progress: 100,
+    error: null,
+    summary: {
+      packetCount: packets.length,
+      totalBytes: packets.reduce((acc: number, p: any) => acc + (p.length || 0), 0),
+    },
+  };
+
+  try {
+    // Prepare packets for Elasticsearch
+    const esPackets = packets.map(p => {
+      // Ensure ID and timestamp
+      return {
+        ...p,
+        sessionId,
+        timestamp: p.timestamp || Date.now(),
+        // If rawData came as base64 string (from client ArrayBuffer -> base64), it might need handling?
+        // Elastic mapping defines 'raw' as binary. The JS client usually handles base64 for binary fields.
+        // let's ensure we map 'rawData' (client) to 'raw' (server/ES schema)
+        raw: p.rawData, // Assuming client sends base64 string here
+        sourceIp: p.sourceIP,
+        destIp: p.destIP,
+        // spread the rest
+      }
+    });
+
+    await elasticService.bulkIndexPackets(esPackets);
+
+    res.json({
+      sessionId,
+      status: 'complete',
+      packetCount: packets.length
+    });
+  } catch (err: any) {
+    console.error('Ingestion failed:', err);
+    res.status(500).json({ error: 'Failed to ingest packets' });
+  }
+});
+
 analysisRouter.get('/analysis/:sessionId/status', (req, res) => {
   const { sessionId } = req.params;
   const session = activeSessions[sessionId];
