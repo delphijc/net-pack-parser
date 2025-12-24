@@ -232,7 +232,7 @@ const LivePacketList: React.FC<LivePacketListProps> = ({ onAnalysisComplete }) =
             <CaptureControls
               onCaptureStarted={(id) => setCurrentSessionId(id)}
               onCaptureStopped={() => {
-                /* Optional: Keep session ID until cleared or new one starts? */
+                // Keep session ID so both "Analyze Session" and "Export PCAP" remain available
               }}
             >
               {packets.length > 0 && (
