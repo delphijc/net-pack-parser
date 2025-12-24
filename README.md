@@ -6,7 +6,7 @@ A comprehensive web application and CLI toolkit for monitoring network performan
 
 See the Network Traffic Parser in action, from uploading a PCAP file to identifying SQL injection threats and analyzing packet details.
 
-![NetPack Parser Demo](demo/demo_video.webp)
+![NetPack Parser Demo](docs/demo_assets/demo_video.webp)
 
 "You want the truth? NetPackParser **can** handle the truth."
 
@@ -202,6 +202,40 @@ The build artifacts will be generated in the `client/dist` directory, ready for 
 *   **MITRE ATT&CK Mapping**: Alerts are mapped to specific TTPs (Techniques, Tactics, and Procedures) with links to the MITRE framework.
 *   **IOC Database**: Manage Indicators of Compromise (IPs, Domains, Hashes) and automatically flag traffic matching known threats.
 *   **Sensitive Data Redaction**: Automatically detects and masks Credit Card numbers and SSNs in the UI.
+
+#### 🎯 Automatic IOC Extraction
+
+The application automatically extracts and catalogs Indicators of Compromise (IOCs) from detected threats, building an intelligence database without manual intervention.
+
+![IOC Extraction Flow](docs/demo_assets/ioc_extraction_flow.png)
+
+**How It Works:**
+
+When analyzing PCAP files, the system performs multi-layered threat detection:
+1. **Pattern Matching**: SQL injection, XSS, command injection, sensitive data leaks
+2. **YARA Scanning**: Custom malware signatures and known attack patterns
+3. **IOC Extraction**: Automatically captures source/destination IPs from threats
+
+**Extraction Rules:**
+- ✅ **High/Critical Severity Threats** → Source IP extracted as IOC
+- ✅ **Critical Severity Threats** → Destination IP also extracted (potential C2 servers)
+- ✅ **Medium/Low Threats** → Logged but not added to IOC database (prevents false positive bloat)
+
+**IOC Metadata:**
+Each auto-generated IOC includes:
+- **Type**: IP address, domain, hash, or URL
+- **Severity**: Inherited from the triggering threat (critical, high, medium, low, info)
+- **Source**: "Threat Detection" or "YARA Detection"
+- **Description**: Details about the threat that triggered the IOC
+- **MITRE ATT&CK Tags**: Technique IDs for correlation and reporting
+
+**Example**: If a packet contains SQL injection patterns from IP `192.168.1.100`, the system:
+1. Logs a "High" severity threat alert
+2. Automatically creates an IOC entry for `192.168.1.100`
+3. Tags it with MITRE technique `T1190` (Exploit Public-Facing Application)
+4. Makes it immediately searchable in the IOC Manager
+
+This intelligence feeds back into analysis: future packets matching these IOCs are automatically flagged, creating a continuously improving detection system.
 
 ### 🔎 Search & Filtering
 *   **BPF Engine**: fast filtering using standard Berkeley Packet Filter syntax (e.g., `tcp port 80 and host 10.0.0.1`).

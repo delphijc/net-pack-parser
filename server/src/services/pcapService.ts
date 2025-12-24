@@ -109,6 +109,36 @@ export const parsePcapFile = (
       // Detect Threats
       const threats = runThreatDetection(packetInfoForDetection, data);
 
+      // Auto-extract IOCs from detected threats
+      if (threats.length > 0) {
+        threats.forEach((threat) => {
+          // Extract source IP as IOC for high/critical severity threats
+          if (threat.sourceIp && (threat.severity === 'high' || threat.severity === 'critical')) {
+            iocService.addIocIfNotExists({
+              type: 'ip',
+              value: threat.sourceIp,
+              severity: threat.severity,
+              description: `Auto-detected from threat: ${threat.type}`,
+              enabled: true,
+              source: 'Threat Detection',
+              mitreAttack: threat.mitreAttack || [],
+            });
+          }
+          // Also extract destination IP for critical threats (potential C2 servers)
+          if (threat.destIp && threat.severity === 'critical') {
+            iocService.addIocIfNotExists({
+              type: 'ip',
+              value: threat.destIp,
+              severity: threat.severity,
+              description: `Potential C2 server from threat: ${threat.type}`,
+              enabled: true,
+              source: 'Threat Detection',
+              mitreAttack: threat.mitreAttack || [],
+            });
+          }
+        });
+      }
+
       // IOC Check
       const iocMatches = iocService.checkPacket(packetInfoForDetection);
       iocMatches.forEach((ioc) => {
