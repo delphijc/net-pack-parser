@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { API_BASE_URL } from '../services/api';
 
 interface YaraRule {
   id: string;
@@ -28,7 +29,7 @@ export const useYaraRuleStore = create<YaraRuleState>((set, get) => ({
   loadRules: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch('http://localhost:3000/api/yara');
+      const response = await fetch(`${API_BASE_URL}/yara`);
       if (!response.ok) throw new Error('Failed to fetch rules');
       const rules = await response.json();
       set({ rules });
@@ -42,10 +43,10 @@ export const useYaraRuleStore = create<YaraRuleState>((set, get) => ({
 
   addRule: async (name: string, content: string) => {
     try {
-      await fetch('http://localhost:3000/api/yara', {
+      await fetch(`${API_BASE_URL}/yara`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, content })
+        body: JSON.stringify({ name, content }),
       });
       await get().loadRules();
     } catch (e) {
