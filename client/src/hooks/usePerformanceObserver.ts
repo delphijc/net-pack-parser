@@ -17,6 +17,36 @@ export const usePerformanceObserver = () => {
       return;
     }
 
+    // Helper function to process resource entries
+    const processResourceEntry = (resourceEntry: PerformanceResourceTiming) => {
+      const resource: ResourceTiming = {
+        id: crypto.randomUUID(),
+        name: resourceEntry.name,
+        initiatorType: resourceEntry.initiatorType,
+        startTime: resourceEntry.startTime,
+        duration: resourceEntry.duration,
+        transferSize: resourceEntry.transferSize,
+        breakdown: {
+          dns:
+            resourceEntry.domainLookupEnd -
+            resourceEntry.domainLookupStart,
+          tcp: resourceEntry.connectEnd - resourceEntry.connectStart,
+          ttfb: resourceEntry.responseStart - resourceEntry.requestStart,
+          download:
+            resourceEntry.responseEnd - resourceEntry.responseStart,
+        },
+      };
+      addResource(resource);
+    };
+
+    // Capture all resources that were loaded before the observer started
+    try {
+      const existingResources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+      existingResources.forEach(processResourceEntry);
+    } catch (e) {
+      console.warn('Failed to capture existing resources:', e);
+    }
+
     try {
       observerRef.current = new PerformanceObserver((list) => {
         const entries = list.getEntries();
@@ -58,30 +88,7 @@ export const usePerformanceObserver = () => {
           // Handle Resource Timing
           if (entry.entryType === 'resource') {
             const resourceEntry = entry as PerformanceResourceTiming;
-
-            // Basic filtering: ignore own API calls if checking performance of external stuff,
-            // but for a parser tool, we likely want to see everything including chunk loads.
-            // We can filter extremely fast internal things if needed, but for now capture all.
-
-            const resource: ResourceTiming = {
-              id: crypto.randomUUID(),
-              name: resourceEntry.name,
-              initiatorType: resourceEntry.initiatorType,
-              startTime: resourceEntry.startTime,
-              duration: resourceEntry.duration,
-              transferSize: resourceEntry.transferSize,
-              breakdown: {
-                dns:
-                  resourceEntry.domainLookupEnd -
-                  resourceEntry.domainLookupStart,
-                tcp: resourceEntry.connectEnd - resourceEntry.connectStart,
-                ttfb: resourceEntry.responseStart - resourceEntry.requestStart,
-                download:
-                  resourceEntry.responseEnd - resourceEntry.responseStart,
-              },
-            };
-
-            addResource(resource);
+            processResourceEntry(resourceEntry);
           }
         });
       });
