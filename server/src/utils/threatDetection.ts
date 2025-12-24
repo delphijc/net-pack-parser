@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 export interface ThreatAlert {
   id: string;
   packetId: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
   type: string;
   description: string;
   mitreAttack: string[];

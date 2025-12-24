@@ -16,11 +16,19 @@ router.get('/', (req, res) => {
 // POST /api/iocs
 router.post('/', (req, res) => {
   try {
-    const { type, value, severity, description } = req.body;
+    const { type, value, severity, description, enabled, source, mitreAttack } = req.body;
     if (!type || !value || !severity) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-    const newIoc = iocService.addIoc({ type, value, severity, description });
+    const newIoc = iocService.addIoc({
+      type,
+      value,
+      severity,
+      description,
+      enabled,
+      source,
+      mitreAttack
+    });
     res.status(201).json(newIoc);
   } catch (error) {
     console.error(error);

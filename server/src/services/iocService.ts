@@ -3,11 +3,15 @@ import path from 'path';
 
 export interface IOC {
   id: string;
-  type: 'ip' | 'domain' | 'hash';
+  type: 'ip' | 'domain' | 'hash' | 'url';
   value: string;
   description?: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  addedAt: string;
+  source?: string;
+  severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
+  mitreAttack?: string[];
+  enabled: boolean;
+  createdAt: string;
+  lastUpdated: string;
 }
 
 export class IocService {
@@ -56,18 +60,23 @@ export class IocService {
     return this.iocs;
   }
 
-  public addIoc(ioc: Omit<IOC, 'id' | 'addedAt'>): IOC {
+  public addIoc(ioc: Omit<IOC, 'id' | 'createdAt' | 'lastUpdated'>): IOC {
+    const now = new Date().toISOString();
     const newIoc: IOC = {
-      id: crypto.randomUUID(),
-      addedAt: new Date().toISOString(),
       ...ioc,
+      id: crypto.randomUUID(),
+      createdAt: now,
+      lastUpdated: now,
+      enabled: ioc.enabled !== undefined ? ioc.enabled : true,
+      source: ioc.source || 'Manual',
+      mitreAttack: ioc.mitreAttack || [],
     };
     this.iocs.push(newIoc);
     this.saveIocs();
     return newIoc;
   }
 
-  public addIocIfNotExists(ioc: Omit<IOC, 'id' | 'addedAt'>): IOC {
+  public addIocIfNotExists(ioc: Omit<IOC, 'id' | 'createdAt' | 'lastUpdated'>): IOC {
     const existing = this.iocs.find(
       (i) => i.type === ioc.type && i.value === ioc.value,
     );

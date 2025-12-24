@@ -138,6 +138,9 @@ export const parsePcapFile = (
               value: packetInfoForDetection.sourceIp,
               severity: 'high',
               description: `Auto-detected from YARA Rule: ${match.rule}`,
+              enabled: true,
+              source: 'YARA Detection',
+              mitreAttack: [],
             });
           }
 
