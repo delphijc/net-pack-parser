@@ -346,6 +346,35 @@ export class ElasticService {
       throw error;
     }
   }
+
+  public async clearAllIndices(): Promise<void> {
+    if (!this.isConnected) {
+      console.warn('Cannot clear indices: Elasticsearch not connected');
+      return;
+    }
+
+    try {
+      // Delete the packets index
+      const exists = await this.client.indices.exists({
+        index: this.PACKET_INDEX,
+      });
+
+      if (exists) {
+        await this.client.indices.delete({
+          index: this.PACKET_INDEX,
+        });
+        console.log(`Deleted index: ${this.PACKET_INDEX}`);
+
+        // Recreate the index with proper mappings
+        await this.ensureIndices();
+      } else {
+        console.log(`Index ${this.PACKET_INDEX} does not exist, nothing to clear`);
+      }
+    } catch (error) {
+      console.error('Failed to clear indices:', error);
+      throw error;
+    }
+  }
 }
 
 export const elasticService = ElasticService.getInstance();

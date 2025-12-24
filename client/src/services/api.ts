@@ -187,6 +187,14 @@ export const api = {
     });
     if (!response.ok) throw new Error('Failed to remove IOC');
   },
+
+  async clearAllAnalysisData(): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/admin/clear-all`, {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Failed to clear analysis data');
+    return response.json();
+  },
 };
 
 export interface DashboardStats {

@@ -91,6 +91,11 @@ export class IocService {
     this.saveIocs();
   }
 
+  public clearAll(): void {
+    this.iocs = [];
+    this.saveIocs();
+  }
+
   // Check a packet against all IOCs
   public checkPacket(packet: any): IOC[] {
     const matches: IOC[] = [];

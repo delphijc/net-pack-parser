@@ -23,6 +23,7 @@ import { Progress } from '@/components/ui/progress';
 import { localStorageService } from '@/services/localStorage';
 import { exportDataAsJson, importDataFromJson } from '@/utils/dataImportExport';
 import { useToast } from '@/components/ui/use-toast';
+import { api } from '@/services/api';
 // import database from '@/services/database'; // Removed
 // import chainOfCustodyDb from '@/services/chainOfCustodyDb'; // Removed
 import { usePerformanceStore } from '@/store/performanceStore';
@@ -61,7 +62,11 @@ const SettingsPage: React.FC = () => {
   const handleClearAnalysisData = async () => {
     try {
       setIsClearing(true);
-      // await Promise.all([database.clearAllData(), chainOfCustodyDb.clearAll()]); // Removed local DB clearing
+
+      // Clear server-side data (Elasticsearch, PCAP files, IOC database)
+      await api.clearAllAnalysisData();
+
+      // Clear client-side session data
       useSessionStore.getState().clearSessions();
 
       // Update usage stats
@@ -70,7 +75,7 @@ const SettingsPage: React.FC = () => {
       toast({
         title: 'Success',
         description:
-          'Local session data cleared. Server data remains intact.',
+          'All analysis data cleared successfully. System reset to fresh state.',
       });
     } catch (error: any) {
       console.error('Failed to clear data:', error);
@@ -209,9 +214,14 @@ const SettingsPage: React.FC = () => {
               <AlertDialogHeader>
                 <AlertDialogTitle>Clear Analysis Data?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently delete all parsed PACKETS, imported
-                  FILES, and forensic CASES. Settings and Performance metrics
-                  will be kept.
+                  This will permanently delete ALL analysis data from the system:
+                  <ul className="list-disc list-inside mt-2">
+                    <li>Elasticsearch indices (all parsed packets)</li>
+                    <li>Uploaded PCAP files</li>
+                    <li>IOC database</li>
+                    <li>Local session data</li>
+                  </ul>
+                  <strong className="block mt-2">The system will be reset to a fresh state.</strong>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

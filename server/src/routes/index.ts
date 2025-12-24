@@ -11,6 +11,7 @@ import { MetaController } from '../controllers/MetaController';
 import yaraRouter from './yara';
 import { sessionRouter } from './sessions';
 import iocRouter from './iocs';
+import adminRouter from './admin';
 
 // Public routes
 apiRouter.get('/version', MetaController.getVersion);
@@ -20,6 +21,7 @@ apiRouter.post('/auth/login', AuthController.login);
 apiRouter.use('/yara', yaraRouter);
 apiRouter.use('/sessions', sessionRouter);
 apiRouter.use('/iocs', iocRouter);
+apiRouter.use('/admin', adminRouter);
 apiRouter.use('/', analysisRouter);
 
 // Protected routes
